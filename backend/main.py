@@ -33,6 +33,7 @@ from mailer import (
     send_password_reset,
     send_shipping_notification,
     send_verification_code,
+    smtp_configured,
 )
 from seed import PROMO_CODES, SEED_PRODUCTS, SEED_REVIEWS
 
@@ -794,21 +795,14 @@ def _auth_payload(user_row_or_id, name=None, email=None) -> dict:
                      "is_admin": is_admin_email(umail)}}
 
 
-def _send_code_sync(send_fn, email: str, name: str, code: str) -> bool:
-    """Envoie un code (vérification / réinitialisation) de façon SYNCHRONE et
-    renvoie True si l'email est bien parti.
+def _send_code_bg(send_fn, email: str, name: str, code: str) -> None:
+    """Envoie un code (vérification / réinitialisation) en ARRIÈRE-PLAN.
 
-    On envoie en synchrone — et non en tâche de fond — précisément pour SAVOIR si
-    la livraison a réussi : en cas d'échec (SMTP absent, identifiants invalides,
-    serveur injoignable…), l'appelant peut alors fournir le code autrement plutôt
-    que de laisser l'utilisateur attendre un email qui n'arrivera jamais.
-    L'envoi est borné à 15 s (timeout SMTP) et ne lève jamais.
+    L'envoi SMTP peut prendre plusieurs secondes (connexion + STARTTLS + login) :
+    il ne doit JAMAIS bloquer la réponse HTTP, sous peine de connexions/inscriptions
+    très lentes. On le délègue donc à un thread daemon — la réponse est immédiate.
     """
-    try:
-        return bool(send_fn(email, name, code))
-    except Exception:
-        log.exception("Envoi du code à %s : exception", email)
-        return False
+    threading.Thread(target=send_fn, args=(email, name, code), daemon=True).start()
 
 
 def _dev_show_codes() -> bool:
@@ -821,14 +815,13 @@ def _dev_show_codes() -> bool:
     return os.environ.get("DEV_SHOW_CODES", "").strip().lower() in ("1", "true", "yes", "on")
 
 
-def _with_dev_code(resp: dict, code: str, sent: bool) -> dict:
-    """Renvoie le code dans la réponse quand l'email n'a pas pu être livré (SMTP
-    absent ou en échec), OU quand DEV_SHOW_CODES est activé. Avec un SMTP
-    fonctionnel et DEV_SHOW_CODES désactivé, le code n'est JAMAIS exposé.
+def _with_dev_code(resp: dict, code: str) -> dict:
+    """Renvoie le code dans la réponse UNIQUEMENT si l'email ne peut pas être
+    délivré (SMTP non configuré) ou si le mode dev est explicitement activé
+    (DEV_SHOW_CODES=1). Avec un SMTP configuré et DEV_SHOW_CODES désactivé, le
+    code n'est JAMAIS exposé : il ne part que par email.
     """
-    if not sent:
-        log.warning("Email non délivré — code %s fourni dans la réponse (repli)", code)
-    if not sent or _dev_show_codes():
+    if not smtp_configured() or _dev_show_codes():
         resp["dev_code"] = code
     return resp
 
@@ -853,10 +846,10 @@ def register(body: RegisterIn, _rl: None = Depends(rl_register)):
             raise HTTPException(409, "Un compte existe déjà avec cet e-mail")
         user_id = cur.lastrowid
         code = issue_verification_code(conn, user_id)
-    sent = _send_code_sync(send_verification_code, email, name, code)
-    log.info("Inscription %s — code de vérification %s", email, "envoyé" if sent else "NON délivré")
+    _send_code_bg(send_verification_code, email, name, code)
+    log.info("Inscription %s — code de vérification (envoi en arrière-plan)", email)
     # Pas de token : le front doit demander la saisie du code.
-    return _with_dev_code({"verification_required": True, "email": email}, code, sent)
+    return _with_dev_code({"verification_required": True, "email": email}, code)
 
 
 @app.post("/api/auth/login")
@@ -900,9 +893,9 @@ def login(body: LoginIn, _rl: None = Depends(rl_login)):
             code = issue_verification_code(conn, user["id"])
 
     if not user["email_verified"]:
-        sent = _send_code_sync(send_verification_code, email, user["name"], code)
-        log.info("Connexion d'un compte non vérifié %s — code %s", email, "envoyé" if sent else "NON délivré")
-        return _with_dev_code({"verification_required": True, "email": email}, code, sent)
+        _send_code_bg(send_verification_code, email, user["name"], code)
+        log.info("Connexion d'un compte non vérifié %s — code en arrière-plan", email)
+        return _with_dev_code({"verification_required": True, "email": email}, code)
     return _auth_payload(user)
 
 
@@ -956,9 +949,9 @@ def resend_code(body: ResendIn, _rl: None = Depends(rl_code)):
         user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         if user and not user["email_verified"]:
             code = issue_verification_code(conn, user["id"])
-            sent = _send_code_sync(send_verification_code, email, user["name"], code)
-            log.info("Renvoi du code de vérification à %s — %s", email, "envoyé" if sent else "NON délivré")
-            return _with_dev_code({"ok": True}, code, sent)
+            _send_code_bg(send_verification_code, email, user["name"], code)
+            log.info("Renvoi du code de vérification à %s (arrière-plan)", email)
+            return _with_dev_code({"ok": True}, code)
     return {"ok": True}
 
 
@@ -990,9 +983,9 @@ def forgot_password(body: ForgotPasswordIn, _rl: None = Depends(rl_code)):
         user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         if user:
             code = issue_reset_code(conn, user["id"])
-            sent = _send_code_sync(send_password_reset, email, user["name"], code)
-            log.info("Code de réinitialisation pour %s — %s", email, "envoyé" if sent else "NON délivré")
-            return _with_dev_code({"ok": True}, code, sent)
+            _send_code_bg(send_password_reset, email, user["name"], code)
+            log.info("Code de réinitialisation pour %s (arrière-plan)", email)
+            return _with_dev_code({"ok": True}, code)
     return {"ok": True}
 
 

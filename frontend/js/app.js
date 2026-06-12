@@ -449,7 +449,7 @@ function showDevCode(code, inputName) {
   const input = document.querySelector(`input[name="${inputName}"]:not([hidden])`)
     || [...document.querySelectorAll(`input[name="${inputName}"]`)].find((i) => i.offsetParent !== null);
   if (input) input.value = code;
-  toast(`Mode démo (sans email) — votre code : ${code}`, "info");
+  toast(`Mode test — votre code : ${code}`, "info");
 }
 
 // Affiche l'étape « saisie du code » pour l'email donné.
