@@ -1,0 +1,15 @@
+# ⚠️ SECRETS & ÉTAT LOCAL — NE JAMAIS PUBLIER
+.env                    # variables de déploiement (racine)
+backend/.env            # clés Stripe, mot de passe SMTP…
+backend/.secret         # clé de signature des jetons
+backend/voltpc.db       # base SQLite (recréée automatiquement)
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Outils / éditeur
+.claude/
+*.log
+.DS_Store

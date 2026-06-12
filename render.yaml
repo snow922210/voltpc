@@ -1,0 +1,29 @@
+# ─── Blueprint Render — déploiement gratuit de VOLT PC ───────────────
+# Sur render.com : New ▸ Blueprint ▸ connecter ce dépôt → tout est auto-configuré.
+#
+# Plan « free » : pas de disque persistant → la base SQLite est recréée (et
+# re-remplie : 280 produits + compte démo) à chaque démarrage/redéploiement.
+# Parfait pour une démo. Pour conserver commandes/comptes, passer en plan payant
+# et ajouter un bloc « disk: { mountPath: /data, sizeGB: 1 } » + VOLTPC_DATA_DIR=/data.
+
+services:
+  - type: web
+    name: voltpc
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/categories
+    envVars:
+      # Démo : le code de vérification s'affiche à l'écran (pas besoin d'email).
+      # ⚠️ Mettre à vide pour une vraie boutique avec de vrais clients.
+      - key: DEV_SHOW_CODES
+        value: "1"
+      - key: CORS_ORIGINS
+        value: "*"
+      # Clé de signature stable (sessions conservées entre redémarrages).
+      - key: VOLTPC_SECRET
+        generateValue: true
+      # À renseigner après le 1er déploiement avec l'URL Render
+      # (https://voltpc-xxxx.onrender.com) si tu veux tester le paiement Stripe.
+      - key: PUBLIC_BASE_URL
+        sync: false

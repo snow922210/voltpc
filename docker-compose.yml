@@ -1,0 +1,44 @@
+# ─── VOLT PC — déploiement HTTPS en une commande ─────────────────────
+#
+#   1. cp deploy.env.example .env        # puis renseigner DOMAIN + ACME_EMAIL
+#   2. éditer backend/.env pour la PROD  # (voir DEPLOYMENT.md)
+#   3. docker compose up -d --build
+#
+# Caddy obtient et renouvelle automatiquement le certificat TLS Let's Encrypt
+# pour DOMAIN, et relaie le trafic vers l'app. Les données (base SQLite + secret
+# de signature) vivent dans un volume nommé et survivent aux redéploiements.
+
+services:
+  app:
+    build: .
+    env_file:
+      - ./backend/.env          # Stripe, SMTP, CORS_ORIGINS, PUBLIC_BASE_URL…
+    environment:
+      - VOLTPC_DATA_DIR=/data   # base + secret écrits dans le volume (ci-dessous)
+    volumes:
+      - voltpc-data:/data
+    expose:
+      - "8000"                  # accessible uniquement à Caddy (pas exposé à l'hôte)
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"           # HTTP/3
+    environment:
+      - DOMAIN=${DOMAIN:?Définir DOMAIN dans le fichier .env}
+      - ACME_EMAIL=${ACME_EMAIL:?Définir ACME_EMAIL dans le fichier .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data        # certificats TLS (à conserver entre redémarrages)
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  voltpc-data:
+  caddy-data:
+  caddy-config:

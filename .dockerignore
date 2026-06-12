@@ -1,0 +1,15 @@
+# Ne pas embarquer l'état local ni les artefacts dans l'image.
+**/__pycache__/
+**/*.pyc
+backend/.env
+backend/.secret
+backend/voltpc.db
+backend/scripts/
+.git/
+*.md
+# Fichiers de déploiement (inutiles dans l'image, et .env racine = secrets).
+.env
+docker-compose.yml
+Caddyfile
+deploy.env.example
+.claude/
