@@ -22,7 +22,7 @@ from typing import Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from invoice import generate_invoice_pdf
@@ -1715,7 +1715,56 @@ from payments import router as payment_router  # noqa: E402
 app.include_router(payment_router)
 
 
-# ─── Frontend statique ───────────────────────────────────────────────
-# Monté en DERNIER : ce "catch-all" sur "/" ne doit jamais masquer les routes
-# d'API explicites (/api/…) déclarées plus haut.
-app.mount("/", StaticFiles(directory=FRONTEND, html=True), name="frontend")
+# ─── SEO : robots.txt + sitemap.xml ──────────────────────────────────
+# Déclarés AVANT le mount catch-all pour ne pas être masqués par le static.
+SITE_URL = os.environ.get("SITE_URL", "https://voltpc.onrender.com").rstrip("/")
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots_txt():
+    body = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /api/\n"
+        f"Sitemap: {SITE_URL}/sitemap.xml\n"
+    )
+    return Response(content=body, media_type="text/plain")
+
+
+@app.get("/sitemap.xml", include_in_schema=False)
+def sitemap_xml():
+    """Sitemap minimal. Le frontend étant une SPA à routage par hash (#/…),
+    seules les URL réelles sont indexables — ici la page d'accueil. Quand de
+    vraies URL produits (/produit/{id}) existeront, les ajouter ici."""
+    today = time.strftime("%Y-%m-%d")
+    urls = [(f"{SITE_URL}/", today, "daily", "1.0")]
+    body = ['<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for loc, lastmod, freq, prio in urls:
+        body.append(
+            f"  <url><loc>{loc}</loc><lastmod>{lastmod}</lastmod>"
+            f"<changefreq>{freq}</changefreq><priority>{prio}</priority></url>"
+        )
+    body.append("</urlset>")
+    return Response(content="\n".join(body), media_type="application/xml")
+
+
+# ─── Frontend (SPA) ──────────────────────────────────────────────────
+# Déclaré en DERNIER. Sert les vrais fichiers (css/js/images) s'ils existent,
+# sinon renvoie index.html pour que le routage par URL réelles côté client
+# fonctionne (deep-link / refresh sur /produit/5, /catalogue, …). Les routes
+# /api/… et /robots.txt /sitemap.xml déclarées plus haut ont la priorité.
+FRONTEND_DIR = FRONTEND.resolve()
+INDEX_FILE = FRONTEND_DIR / "index.html"
+
+
+@app.get("/{full_path:path}", include_in_schema=False)
+def spa_fallback(full_path: str):
+    candidate = (FRONTEND_DIR / full_path).resolve()
+    if (
+        full_path
+        and candidate.is_file()
+        and candidate.is_relative_to(FRONTEND_DIR)  # anti path-traversal
+    ):
+        return FileResponse(candidate)
+    return FileResponse(INDEX_FILE)

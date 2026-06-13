@@ -5,11 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VOLT PC — Composants PC haute performance</title>
   <meta name="description" content="VOLT PC : cartes graphiques, processeurs, mémoire et composants PC au meilleur prix. Configurateur intelligent et livraison rapide.">
+  <link rel="canonical" href="https://voltpc.onrender.com/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#2563eb">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="VOLT PC">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="VOLT PC — Composants PC haute performance">
+  <meta property="og:description" content="Cartes graphiques, processeurs, mémoire et composants PC au meilleur prix. Configurateur intelligent et livraison rapide.">
+  <meta property="og:url" content="https://voltpc.onrender.com/">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="VOLT PC — Composants PC haute performance">
+  <meta name="twitter:description" content="Cartes graphiques, processeurs, mémoire et composants PC au meilleur prix. Livraison 24 h.">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=13">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 2 6 18h8l-2 12L24 14h-8l2-12z' fill='%23c89263'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/css/style.css?v=13">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 2 6 18h8l-2 12L24 14h-8l2-12z' fill='%232563eb'/%3E%3C/svg%3E">
+
+  <!-- Données structurées : marque + recherche interne -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://voltpc.onrender.com/#organization",
+        "name": "VOLT PC",
+        "url": "https://voltpc.onrender.com/",
+        "description": "Le spécialiste français du composant PC haute performance.",
+        "areaServed": "FR"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://voltpc.onrender.com/#website",
+        "url": "https://voltpc.onrender.com/",
+        "name": "VOLT PC",
+        "inLanguage": "fr-FR",
+        "publisher": { "@id": "https://voltpc.onrender.com/#organization" },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://voltpc.onrender.com/catalogue?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
@@ -18,7 +64,7 @@
   </div>
 
   <header class="header" id="header">
-    <a class="logo" href="#/">
+    <a class="logo" href="/">
       <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
         <defs><linearGradient id="boltg" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#d9b08c"/><stop offset="1" stop-color="#8a5a36"/>
@@ -29,17 +75,17 @@
     </a>
 
     <nav class="nav">
-      <a href="#/" data-nav="">Accueil</a>
+      <a href="/" data-nav="">Accueil</a>
       <div class="nav-item">
-        <a href="#/catalogue" data-nav="catalogue">Composants <span class="chev">▾</span></a>
+        <a href="/catalogue" data-nav="catalogue">Composants <span class="chev">▾</span></a>
         <div class="nav-menu nav-menu-grid" id="menuComponents"></div>
       </div>
       <div class="nav-item">
-        <a href="#/catalogue?cat=monitor">Périphériques <span class="chev">▾</span></a>
+        <a href="/catalogue?cat=monitor">Périphériques <span class="chev">▾</span></a>
         <div class="nav-menu" id="menuPeriph"></div>
       </div>
-      <a href="#/configurateur" data-nav="configurateur">Configurateur</a>
-      <a href="#/catalogue?promo=1" class="nav-sale">Promos</a>
+      <a href="/configurateur" data-nav="configurateur">Configurateur</a>
+      <a href="/catalogue?promo=1" class="nav-sale">Promos</a>
     </nav>
 
     <div class="header-search">
@@ -64,29 +110,29 @@
   <footer class="footer">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a class="logo" href="#/"><span>VOLT<em>PC</em></span></a>
+        <a class="logo" href="/"><span>VOLT<em>PC</em></span></a>
         <p>Le spécialiste français du composant PC haute performance depuis 2026. Conseil d'experts, prix justes, livraison éclair.</p>
       </div>
       <div>
         <h4>Composants</h4>
-        <a href="#/catalogue?cat=gpu">Cartes graphiques</a>
-        <a href="#/catalogue?cat=cpu">Processeurs</a>
-        <a href="#/catalogue?cat=ram">Mémoire</a>
-        <a href="#/catalogue?cat=storage">Stockage</a>
-        <a href="#/catalogue?cat=motherboard">Cartes mères</a>
+        <a href="/catalogue?cat=gpu">Cartes graphiques</a>
+        <a href="/catalogue?cat=cpu">Processeurs</a>
+        <a href="/catalogue?cat=ram">Mémoire</a>
+        <a href="/catalogue?cat=storage">Stockage</a>
+        <a href="/catalogue?cat=motherboard">Cartes mères</a>
       </div>
       <div>
         <h4>Périphériques</h4>
-        <a href="#/catalogue?cat=monitor">Écrans</a>
-        <a href="#/catalogue?cat=keyboard">Claviers</a>
-        <a href="#/catalogue?cat=mouse">Souris</a>
-        <a href="#/catalogue?cat=headset">Casques audio</a>
+        <a href="/catalogue?cat=monitor">Écrans</a>
+        <a href="/catalogue?cat=keyboard">Claviers</a>
+        <a href="/catalogue?cat=mouse">Souris</a>
+        <a href="/catalogue?cat=headset">Casques audio</a>
       </div>
       <div>
         <h4>Services</h4>
-        <a href="#/configurateur">Configurateur PC</a>
-        <a href="#/compte">Mon compte</a>
-        <a href="#/compte">Mes commandes</a>
+        <a href="/configurateur">Configurateur PC</a>
+        <a href="/compte">Mon compte</a>
+        <a href="/compte">Mes commandes</a>
       </div>
       <div>
         <h4>Garanties</h4>
@@ -96,7 +142,7 @@
         <span class="footer-line">✓ Support 7j/7</span>
       </div>
     </div>
-    <div class="footer-bottom">© 2026 VOLT PC. Tous droits réservés. Photos produits : <a href="images/credits.json" style="text-decoration:underline">Wikimedia Commons</a> (licences libres).</div>
+    <div class="footer-bottom">© 2026 VOLT PC. Tous droits réservés. Photos produits : <a href="/images/credits.json" style="text-decoration:underline">Wikimedia Commons</a> (licences libres).</div>
   </footer>
 
   <!-- Panier latéral -->
@@ -157,7 +203,7 @@
   <!-- Barre de comparaison flottante -->
   <div class="compare-bar" id="compareBar" hidden></div>
 
-  <script src="js/bg.js?v=16"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="/js/bg.js?v=16"></script>
+  <script src="/js/app.js?v=21"></script>
 </body>
 </html>

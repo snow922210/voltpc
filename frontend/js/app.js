@@ -170,7 +170,7 @@ async function renderCompareBar() {
   bar.innerHTML = `
     <span class="compare-bar-label">Comparer (${state.compare.length}/${COMPARE_MAX})</span>
     <div class="compare-bar-items">${state.compare.map((id) => `<span class="compare-chip" data-cmp-rm="${id}">#${id} ✕</span>`).join("")}</div>
-    <a class="btn btn-primary btn-sm" href="#/comparer" ${state.compare.length < 2 ? 'style="opacity:.5;pointer-events:none"' : ""}>Comparer →</a>
+    <a class="btn btn-primary btn-sm" href="/comparer" ${state.compare.length < 2 ? 'style="opacity:.5;pointer-events:none"' : ""}>Comparer →</a>
     <button class="btn btn-ghost btn-sm" id="compareClear">Vider</button>`;
   $("#compareClear").onclick = () => { state.compare = []; saveCompare(); renderCompareBar(); $$("[data-cmp]").forEach((b) => b.classList.remove("on")); };
   $$("[data-cmp-rm]", bar).forEach((c) => c.onclick = () => toggleCompare(Number(c.dataset.cmpRm)));
@@ -277,7 +277,7 @@ const tintOf = (p) => `hsla(${hueOf(p) + 205}, 60%, 60%, 0.12)`;
 // local images/{id}.jpg. Si rien ne charge, l'img se retire et le visuel SVG
 // situé dessous reste affiché.
 const imgTag = (p) =>
-  `<img class="pimg" src="${esc(p.image_url || `images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()">`;
+  `<img class="pimg" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()">`;
 
 function stars(rating) {
   const full = Math.round(rating);
@@ -300,7 +300,7 @@ function stockHtml(stock) {
 function productCard(p) {
   const discount = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
   return `
-  <article class="product-card" data-goto="#/produit/${p.id}">
+  <article class="product-card" data-goto="/produit/${p.id}">
     <div class="product-visual" style="--tint:${tintOf(p)}">
       ${art(p.category, hueOf(p))}
       ${imgTag(p)}
@@ -362,7 +362,7 @@ function renderCartDrawer() {
   const foot = $("#cartFoot");
   if (state.cart.length === 0) {
     body.innerHTML = `<div class="empty-state"><div class="big">🛒</div><p>Votre panier est vide.</p><br>
-      <a class="btn btn-primary btn-sm" href="#/catalogue" onclick="closeCart()">Voir le catalogue</a></div>`;
+      <a class="btn btn-primary btn-sm" href="/catalogue" onclick="closeCart()">Voir le catalogue</a></div>`;
     foot.innerHTML = "";
     return;
   }
@@ -395,7 +395,7 @@ function renderCartDrawer() {
 
   $("#promoApply").onclick = applyPromo;
   $("#promoInput").onkeydown = (e) => { if (e.key === "Enter") applyPromo(); };
-  $("#checkoutBtn").onclick = () => { closeCart(); requireAuth(() => { location.hash = "#/commande"; }); };
+  $("#checkoutBtn").onclick = () => { closeCart(); requireAuth(() => { go("/commande"); }); };
 }
 
 async function applyPromo() {
@@ -623,14 +623,22 @@ function logout() {
   updateCartCount();
   renderCartDrawer();
   toast("Vous êtes déconnecté");
-  location.hash = "#/";
+  go("/");
 }
 
-/* ─── Routeur ─── */
-function parseHash() {
-  const hash = location.hash.slice(2) || "";
-  const [path, query] = hash.split("?");
-  return { path: path.replace(/\/$/, ""), params: new URLSearchParams(query || "") };
+/* ─── Routeur (URLs réelles via History API) ─── */
+function parsePath() {
+  // "/produit/5" → path "produit/5" ; query depuis location.search
+  const path = location.pathname.replace(/^\/+/, "").replace(/\/+$/, "");
+  return { path, params: new URLSearchParams(location.search) };
+}
+
+// Navigation interne sans rechargement. Tolère un ancien lien "#/x".
+function go(to) {
+  if (to.startsWith("#/")) to = to.slice(1);
+  if (to === location.pathname + location.search) { window.scrollTo({ top: 0 }); return; }
+  history.pushState(null, "", to);
+  render();
 }
 
 const skeletons = (n) => `<div class="product-grid">${"<div class='skeleton'></div>".repeat(n)}</div>`;
@@ -656,7 +664,7 @@ function pagerHtml(page, pageCount) {
 }
 
 async function render() {
-  const { path, params } = parseHash();
+  const { path, params } = parsePath();
   const app = $("#app");
   $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === path.split("/")[0]));
   window.scrollTo({ top: 0 });
@@ -674,7 +682,7 @@ async function render() {
     else if (path === "admin/produits") await viewAdminProducts(app);
     else if (path === "admin/stats") await viewAdminStats(app);
     else if (path === "admin") await viewAdmin(app, params);
-    else app.innerHTML = `<div class="empty-state"><div class="big">🧭</div><h2>Page introuvable</h2><br><a class="btn btn-primary" href="#/">Retour à l'accueil</a></div>`;
+    else app.innerHTML = `<div class="empty-state"><div class="big">🧭</div><h2>Page introuvable</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
   } catch (e) {
     app.innerHTML = `<div class="empty-state"><div class="big">⚡</div><h2>Oups, une erreur</h2><p>${esc(e.message)}</p><br>
       <p style="color:var(--text-faint);font-size:.85rem">Le serveur est-il lancé ? <code>uvicorn main:app</code> dans voltpc/backend</p></div>`;
@@ -690,8 +698,8 @@ async function viewHome(app) {
       <h1>Assemblez la machine<br>de <span class="grad">vos rêves</span></h1>
       <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5, écrans OLED 480 Hz et périphériques e-sport : tout le meilleur du hardware, expédié en 24 h avec le conseil d'experts passionnés.</p>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="#/catalogue">Explorer le catalogue</a>
-        <a class="btn btn-ghost" href="#/configurateur">Configurer mon PC</a>
+        <a class="btn btn-primary" href="/catalogue">Explorer le catalogue</a>
+        <a class="btn btn-ghost" href="/configurateur">Configurer mon PC</a>
       </div>
       <div class="hero-stats">
         <div class="hero-stat"><strong id="statCount">280+</strong><span>références premium</span></div>
@@ -703,12 +711,12 @@ async function viewHome(app) {
   </section>
 
   <section class="section">
-    <div class="section-head"><h2>Catégories</h2><a href="#/catalogue">Tout voir →</a></div>
+    <div class="section-head"><h2>Catégories</h2><a href="/catalogue">Tout voir →</a></div>
     <div class="cat-grid" id="catGrid">${"<div class='skeleton' style='min-height:130px'></div>".repeat(12)}</div>
   </section>
 
   <section class="section">
-    <div class="section-head"><h2>La sélection VOLT</h2><a href="#/catalogue">Tout le catalogue →</a></div>
+    <div class="section-head"><h2>La sélection VOLT</h2><a href="/catalogue">Tout le catalogue →</a></div>
     <div id="featuredGrid">${skeletons(4)}</div>
   </section>
 
@@ -718,7 +726,7 @@ async function viewHome(app) {
         <h3><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>Soldes d'été — jusqu'à -20 %</h3>
         <p>Utilisez le code <code>SUMMER20</code> au panier et profitez de -20 % sur l'intégralité du site.</p>
       </div>
-      <a class="btn btn-primary" href="#/catalogue">J'en profite</a>
+      <a class="btn btn-primary" href="/catalogue">J'en profite</a>
     </div>
   </section>
 
@@ -740,7 +748,7 @@ async function viewHome(app) {
   const statEl = $("#statCount");
   if (statEl && total) statEl.textContent = `${Math.floor(total / 10) * 10}+`;
   $("#catGrid").innerHTML = Object.entries(CATS).map(([key, c]) => `
-    <a class="cat-card" href="#/catalogue?cat=${key}">
+    <a class="cat-card" href="/catalogue?cat=${key}">
       <div class="cat-icon" style="width:54px;height:54px">${art(key, 30)}</div>
       <h3>${c.label}</h3>
       <span>${catCount[key]?.count ?? 0} produits · dès ${fmt(catCount[key]?.min_price ?? 0)}</span>
@@ -853,7 +861,7 @@ async function viewCatalog(app, params) {
     if (next.promo) p.set("promo", "1");
     if (next.nouveau) p.set("new", "1");
     if (next.page > 1) p.set("page", next.page);
-    location.hash = "#/catalogue" + (p.toString() ? "?" + p.toString() : "");
+    go("/catalogue" + (p.toString() ? "?" + p.toString() : ""));
   };
 
   $$("input[name=cat]", app).forEach((r) => r.onchange = () => navigate({ cat: r.value, brand: "" }));
@@ -862,7 +870,7 @@ async function viewCatalog(app, params) {
   const priceApply = () => navigate({ min: $("#minPrice").value, max: $("#maxPrice").value });
   $("#minPrice").onchange = priceApply;
   $("#maxPrice").onchange = priceApply;
-  $("#resetFilters").onclick = () => { location.hash = "#/catalogue"; };
+  $("#resetFilters").onclick = () => { go("/catalogue"); };
 }
 
 /* ─── Vue : fiche produit ─── */
@@ -875,20 +883,20 @@ async function viewProduct(app, id) {
 
   app.innerHTML = `
   <nav class="breadcrumb">
-    <a href="#/">Accueil</a> / <a href="#/catalogue">Catalogue</a> /
-    <a href="#/catalogue?cat=${p.category}">${CATS[p.category]?.label ?? p.category}</a> / <span>${esc(p.name)}</span>
+    <a href="/">Accueil</a> / <a href="/catalogue">Catalogue</a> /
+    <a href="/catalogue?cat=${p.category}">${CATS[p.category]?.label ?? p.category}</a> / <span>${esc(p.name)}</span>
   </nav>
   <div class="product-page">
     <div class="product-gallery">
       <div class="product-page-visual" style="--tint:${tintOf(p)}">
         ${art(p.category, hueOf(p))}
-        <img class="pimg" id="ppMain" src="${esc(p.image_url || `images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" onerror="this.remove()">
+        <img class="pimg" id="ppMain" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" onerror="this.remove()">
         ${badgeHtml(p.badge)}
       </div>
       <div class="pp-thumbs" id="ppThumbs">
         ${[1,2,3].map((n) => `
-          <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="images/${p.id}-${n}.jpg">
-            <img src="images/${p.id}-${n}.jpg" alt="" loading="lazy" onerror="this.closest('.pp-thumb').remove()">
+          <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="/images/${p.id}-${n}.jpg">
+            <img src="/images/${p.id}-${n}.jpg" alt="" loading="lazy" onerror="this.closest('.pp-thumb').remove()">
           </button>`).join("")}
       </div>
     </div>
@@ -1042,7 +1050,7 @@ async function viewCompare(app) {
   if (state.compare.length === 0) {
     app.innerHTML = `<div class="empty-state"><div class="big">⇄</div><h2>Comparateur vide</h2>
       <p style="margin-top:10px">Ajoutez des produits via le bouton ⇄ sur les fiches ou les cartes.</p>
-      <br><a class="btn btn-primary" href="#/catalogue">Voir le catalogue</a></div>`;
+      <br><a class="btn btn-primary" href="/catalogue">Voir le catalogue</a></div>`;
     return;
   }
   app.innerHTML = skeletons(4);
@@ -1052,7 +1060,7 @@ async function viewCompare(app) {
   )).filter(Boolean);
   if (products.length === 0) {
     state.compare = []; saveCompare(); renderCompareBar();
-    app.innerHTML = `<div class="empty-state"><div class="big">⇄</div><h2>Comparateur vide</h2><br><a class="btn btn-primary" href="#/catalogue">Voir le catalogue</a></div>`;
+    app.innerHTML = `<div class="empty-state"><div class="big">⇄</div><h2>Comparateur vide</h2><br><a class="btn btn-primary" href="/catalogue">Voir le catalogue</a></div>`;
     return;
   }
 
@@ -1284,9 +1292,9 @@ async function viewBuilder(app) {
 
 /* ─── Vue : checkout ─── */
 async function viewCheckout(app) {
-  if (!state.user) { location.hash = "#/"; openAuth(); return; }
+  if (!state.user) { go("/"); openAuth(); return; }
   if (state.cart.length === 0) {
-    app.innerHTML = `<div class="empty-state"><div class="big">🛒</div><h2>Votre panier est vide</h2><br><a class="btn btn-primary" href="#/catalogue">Voir le catalogue</a></div>`;
+    app.innerHTML = `<div class="empty-state"><div class="big">🛒</div><h2>Votre panier est vide</h2><br><a class="btn btn-primary" href="/catalogue">Voir le catalogue</a></div>`;
     return;
   }
   const t = cartTotals();
@@ -1303,8 +1311,8 @@ async function viewCheckout(app) {
         <h2>Ajoutez une adresse de livraison</h2>
         <p style="margin-top:10px">Pour passer au paiement, enregistrez d'abord une adresse de livraison dans votre compte. Vous pourrez la modifier au moment de la commande.</p>
         <br>
-        <a class="btn btn-primary" href="#/compte?tab=addresses">Ajouter une adresse</a>
-        &nbsp;<a class="btn btn-ghost" href="#/catalogue">Continuer mes achats</a>
+        <a class="btn btn-primary" href="/compte?tab=addresses">Ajouter une adresse</a>
+        &nbsp;<a class="btn btn-ghost" href="/catalogue">Continuer mes achats</a>
       </div>`;
     window.scrollTo({ top: 0 });
     return;
@@ -1420,8 +1428,8 @@ async function viewPaymentSuccess(app, params) {
         <h2>Commande n°${res.order_id} confirmée !</h2>
         <p style="margin-top:10px">Paiement reçu — total réglé : <strong>${fmt(res.amount_total)}</strong>.<br>Expédition sous 24 h, suivi disponible dans votre compte.</p>
         <br>
-        <a class="btn btn-primary" href="#/compte">Voir mes commandes</a>
-        &nbsp;<a class="btn btn-ghost" href="#/catalogue">Continuer mes achats</a>
+        <a class="btn btn-primary" href="/compte">Voir mes commandes</a>
+        &nbsp;<a class="btn btn-ghost" href="/catalogue">Continuer mes achats</a>
       </div>`;
   } catch (err) {
     app.innerHTML = `
@@ -1429,7 +1437,7 @@ async function viewPaymentSuccess(app, params) {
         <div class="big">⚠️</div>
         <h2>Paiement non confirmé</h2>
         <p style="margin-top:10px">${esc(err.message)}. Si vous avez été débité, votre commande sera validée automatiquement sous peu.</p>
-        <br><a class="btn btn-primary" href="#/compte">Voir mes commandes</a>
+        <br><a class="btn btn-primary" href="/compte">Voir mes commandes</a>
       </div>`;
   }
   window.scrollTo({ top: 0 });
@@ -1443,15 +1451,15 @@ function viewPaymentCancelled(app) {
       <h2>Paiement annulé</h2>
       <p style="margin-top:10px">Aucun montant n'a été débité. Votre panier est toujours disponible.</p>
       <br>
-      <a class="btn btn-primary" href="#/commande">Reprendre le paiement</a>
-      &nbsp;<a class="btn btn-ghost" href="#/catalogue">Continuer mes achats</a>
+      <a class="btn btn-primary" href="/commande">Reprendre le paiement</a>
+      &nbsp;<a class="btn btn-ghost" href="/catalogue">Continuer mes achats</a>
     </div>`;
   window.scrollTo({ top: 0 });
 }
 
 /* ─── Vue : compte ─── */
 async function viewAccount(app, params) {
-  if (!state.user) { location.hash = "#/"; openAuth(); return; }
+  if (!state.user) { go("/"); openAuth(); return; }
   // Rafraîchit le profil (notamment le statut admin) pour les sessions déjà
   // ouvertes avant l'ajout de cette fonctionnalité.
   try {
@@ -1461,7 +1469,7 @@ async function viewAccount(app, params) {
   } catch { /* token invalide : géré par api() */ }
 
   const adminLink = state.user.is_admin
-    ? `<a class="btn btn-primary btn-sm" style="color:var(--on-primary)" href="#/admin">🛠️ Espace admin</a>` : "";
+    ? `<a class="btn btn-primary btn-sm" style="color:var(--on-primary)" href="/admin">🛠️ Espace admin</a>` : "";
 
   app.innerHTML = `
   <div class="section-head" style="margin-top:0">
@@ -1519,7 +1527,7 @@ async function renderAccountOrders(panel) {
           ${cancellable.has(o.status) ? `<button class="btn btn-ghost btn-sm order-cancel" data-cancel="${o.id}" style="color:var(--red)">Annuler la commande</button>` : ""}
         </div>
       </div>`).join("")
-    : `<div class="empty-state"><div class="big">📦</div><p>Aucune commande pour le moment.</p><br><a class="btn btn-primary" href="#/catalogue">Découvrir le catalogue</a></div>`;
+    : `<div class="empty-state"><div class="big">📦</div><p>Aucune commande pour le moment.</p><br><a class="btn btn-primary" href="/catalogue">Découvrir le catalogue</a></div>`;
 
   $$("[data-cancel]", panel).forEach((btn) => btn.onclick = async () => {
     if (!confirm("Annuler cette commande ? Le stock sera restitué.")) return;
@@ -1539,7 +1547,7 @@ async function renderAccountFavorites(panel) {
   state.favorites = new Set(favs.map((p) => p.id));
   panel.innerHTML = favs.length
     ? `<div class="product-grid">${favs.map(productCard).join("")}</div>`
-    : `<div class="empty-state"><div class="big">♡</div><p>Aucun favori pour le moment.</p><br><a class="btn btn-primary" href="#/catalogue">Parcourir le catalogue</a></div>`;
+    : `<div class="empty-state"><div class="big">♡</div><p>Aucun favori pour le moment.</p><br><a class="btn btn-primary" href="/catalogue">Parcourir le catalogue</a></div>`;
   bindProductCards(panel, favs);
 }
 
@@ -1645,25 +1653,25 @@ function adminNav(active) {
   const tab = (key, href, label) =>
     `<a class="btn btn-sm ${active === key ? "btn-primary" : "btn-ghost"}" ${active === key ? 'style="color:var(--on-primary)"' : ""} href="${href}">${label}</a>`;
   return `<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-    ${tab("stats", "#/admin/stats", "📊 Tableau de bord")}
-    ${tab("orders", "#/admin", "Commandes")}
-    ${tab("products", "#/admin/produits", "Produits")}
+    ${tab("stats", "/admin/stats", "📊 Tableau de bord")}
+    ${tab("orders", "/admin", "Commandes")}
+    ${tab("products", "/admin/produits", "Produits")}
   </div>`;
 }
 
 /* ─── Vue : espace admin — tableau de bord ─── */
 async function viewAdminStats(app) {
-  if (!state.user) { location.hash = "#/"; openAuth(); return; }
+  if (!state.user) { go("/"); openAuth(); return; }
   app.innerHTML = `
   <div class="section-head" style="margin-top:0"><h1>📊 Tableau de bord — Admin</h1>
-    <a class="btn btn-ghost btn-sm" href="#/compte">← Mon compte</a></div>
+    <a class="btn btn-ghost btn-sm" href="/compte">← Mon compte</a></div>
   ${adminNav("stats")}
   <div id="statsBody"><div class="skeleton" style="min-height:140px"></div></div>`;
 
   let s;
   try { s = await api("/admin/stats"); }
   catch (err) {
-    $("#statsBody").innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="#/">Accueil</a></div>`;
+    $("#statsBody").innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="/">Accueil</a></div>`;
     return;
   }
 
@@ -1702,14 +1710,14 @@ async function viewAdminStats(app) {
       <h2 style="margin-bottom:14px">Commandes par statut</h2>
       <div class="status-pills">
         ${statusOrder.filter((st) => s.by_status[st]).map((st) => `
-          <a class="status-pill" href="#/admin?status=${encodeURIComponent(st)}">${statusBadge(st)} <strong>${s.by_status[st]}</strong></a>`).join("") || `<span style="color:var(--text-dim)">Aucune commande.</span>`}
+          <a class="status-pill" href="/admin?status=${encodeURIComponent(st)}">${statusBadge(st)} <strong>${s.by_status[st]}</strong></a>`).join("") || `<span style="color:var(--text-dim)">Aucune commande.</span>`}
       </div>
     </div>`;
 }
 
 /* ─── Vue : espace admin (toutes les commandes) ─── */
 async function viewAdmin(app, params) {
-  if (!state.user) { location.hash = "#/"; openAuth(); return; }
+  if (!state.user) { go("/"); openAuth(); return; }
 
   const current = params.get("status") || "";
   const query = params.get("q") || "";
@@ -1723,7 +1731,7 @@ async function viewAdmin(app, params) {
     ["annulée", "Annulées"],
   ];
   // Préserve la recherche en cours lorsqu'on change de filtre de statut.
-  const withQ = (qs) => { const p = new URLSearchParams(qs); if (query) p.set("q", query); const s = p.toString(); return "#/admin" + (s ? "?" + s : ""); };
+  const withQ = (qs) => { const p = new URLSearchParams(qs); if (query) p.set("q", query); const s = p.toString(); return "/admin" + (s ? "?" + s : ""); };
   const filterBar = filters.map(([val, label]) =>
     `<a class="btn btn-sm ${val === current ? "btn-primary" : "btn-ghost"}" ${val === current ? 'style="color:var(--on-primary)"' : ""} href="${withQ(val ? { status: val } : {})}">${label}</a>`
   ).join(" ");
@@ -1731,7 +1739,7 @@ async function viewAdmin(app, params) {
   app.innerHTML = `
   <div class="section-head" style="margin-top:0">
     <h1>🛠️ Commandes — Admin</h1>
-    <a class="btn btn-ghost btn-sm" href="#/compte">← Mon compte</a>
+    <a class="btn btn-ghost btn-sm" href="/compte">← Mon compte</a>
   </div>
   ${adminNav("orders")}
   <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
@@ -1751,7 +1759,7 @@ async function viewAdmin(app, params) {
     if (current) p.set("status", current);
     if (q) p.set("q", q);
     const s = p.toString();
-    location.hash = "#/admin" + (s ? "?" + s : "");
+    go("/admin" + (s ? "?" + s : ""));
   };
   $("#orderSearchBtn").onclick = runSearch;
   $("#orderSearch").onkeydown = (e) => { if (e.key === "Enter") runSearch(); };
@@ -1764,7 +1772,7 @@ async function viewAdmin(app, params) {
     orders = await api("/admin/orders" + (qs.toString() ? "?" + qs.toString() : ""));
   } catch (err) {
     // 403 = compte non administrateur
-    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="#/">Retour à l'accueil</a></div>`;
+    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
     return;
   }
 
@@ -1873,11 +1881,11 @@ function orderProgress(o) {
 
 /* ─── Vue : espace admin — gestion des produits ─── */
 async function viewAdminProducts(app) {
-  if (!state.user) { location.hash = "#/"; openAuth(); return; }
+  if (!state.user) { go("/"); openAuth(); return; }
   // Rafraîchit le statut admin puis verrouille l'accès.
   try { const me = await api("/auth/me"); state.user = { ...state.user, ...me }; saveAuth(); } catch { /* géré par api() */ }
   if (!state.user.is_admin) {
-    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="#/">Retour à l'accueil</a></div>`;
+    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
     return;
   }
 
@@ -1885,7 +1893,7 @@ async function viewAdminProducts(app) {
   app.innerHTML = `
   <div class="section-head" style="margin-top:0">
     <h1>🛠️ Produits — Admin</h1>
-    <a class="btn btn-ghost btn-sm" href="#/compte">← Mon compte</a>
+    <a class="btn btn-ghost btn-sm" href="/compte">← Mon compte</a>
   </div>
   ${adminNav("products")}
   <details class="panel" style="margin-bottom:20px">
@@ -1916,7 +1924,7 @@ async function viewAdminProducts(app) {
       products.map((p) => `
       <div class="order-card" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:12px;min-width:220px">
-          <img src="${esc(p.image_url || `images/${p.id}-1.jpg`)}" onerror="this.style.visibility='hidden'" style="width:44px;height:44px;object-fit:contain;border-radius:6px;background:var(--surface);flex-shrink:0">
+          <img src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" onerror="this.style.visibility='hidden'" style="width:44px;height:44px;object-fit:contain;border-radius:6px;background:var(--surface);flex-shrink:0">
           <div>
             <strong>${esc(p.name)}</strong>${p.stock === 0 ? ` <span style="color:#d9544f;font-size:.8rem">• Rupture</span>` : ""}<br>
             <small style="color:var(--text-dim)">#${p.id} · ${esc(CATS[p.category]?.label || p.category)} · ${esc(p.brand)}</small>
@@ -2000,7 +2008,7 @@ function bindProductCards(root, products) {
     card.addEventListener("click", (e) => {
       // Les boutons d'action (panier, favori, comparer) ne déclenchent pas la navigation.
       if (e.target.closest("[data-add],[data-fav],[data-cmp]")) return;
-      location.hash = card.dataset.goto;
+      go(card.dataset.goto);
     });
   });
   $$("[data-add]", root).forEach((btn) => {
@@ -2020,15 +2028,15 @@ function bindProductCards(root, products) {
 /* ─── Sous-menus de navigation ─── */
 function fillNavMenus() {
   const link = (k) => `
-    <a class="nav-menu-link" href="#/catalogue?cat=${k}">
+    <a class="nav-menu-link" href="/catalogue?cat=${k}">
       <span class="nav-menu-ico">${art(k, 30)}</span>${CATS[k].label}
     </a>`;
   const comp = $("#menuComponents");
   const periph = $("#menuPeriph");
   if (comp) comp.innerHTML = COMPONENT_CATS.map(link).join("") +
-    `<a class="nav-menu-all" href="#/catalogue">Tout le catalogue →</a>`;
+    `<a class="nav-menu-all" href="/catalogue">Tout le catalogue →</a>`;
   if (periph) periph.innerHTML = PERIPH_CATS.map(link).join("") +
-    `<a class="nav-menu-all" href="#/catalogue?new=1">Toutes les nouveautés →</a>`;
+    `<a class="nav-menu-all" href="/catalogue?new=1">Toutes les nouveautés →</a>`;
 }
 
 /* ─── Initialisation ─── */
@@ -2042,11 +2050,11 @@ function init() {
   $("#cartBtn").onclick = () => { renderCartDrawer(); openCart(); };
   $("#cartClose").onclick = closeCart;
   $("#drawerOverlay").onclick = closeCart;
-  $("#accountBtn").onclick = () => { if (state.user) location.hash = "#/compte"; else openAuth(); };
+  $("#accountBtn").onclick = () => { if (state.user) go("/compte"); else openAuth(); };
   $("#searchInput").onkeydown = (e) => {
     if (e.key === "Enter") {
       const q = e.target.value.trim();
-      location.hash = q ? `#/catalogue?q=${encodeURIComponent(q)}` : "#/catalogue";
+      go(q ? `/catalogue?q=${encodeURIComponent(q)}` : "/catalogue");
     }
   };
   document.addEventListener("keydown", (e) => {
@@ -2074,7 +2082,25 @@ function init() {
     }
   });
 
-  window.addEventListener("hashchange", render);
+  // Bouton précédent/suivant du navigateur
+  window.addEventListener("popstate", render);
+
+  // Intercepteur global : tout lien interne <a href="/…"> navigue en SPA
+  // sans rechargement. Les fichiers (.jpg, .json, .pdf…), liens externes,
+  // _blank, download et clics modifiés sont laissés au navigateur.
+  document.addEventListener("click", (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest("a");
+    if (!a) return;
+    const href = a.getAttribute("href");
+    if (!href || a.target === "_blank" || a.hasAttribute("download")) return;
+    const url = href.startsWith("#/") ? href.slice(1) : href;
+    if (!url.startsWith("/")) return;                 // externe ou ancre simple
+    if (/\.[a-z0-9]{2,5}(\?|$)/i.test(url)) return;   // fichier statique → navigateur
+    e.preventDefault();
+    go(url);
+  });
+
   renderCompareBar();
   // Si déjà connecté : charge les favoris ET le panier du compte avant le premier
   // rendu (cœurs dans le bon état, panier rattaché à l'utilisateur).
