@@ -69,10 +69,10 @@
   function paintCircuit(c, bright) {
     const g = c.getContext("2d");
     g.clearRect(0, 0, W, H);
-    const trace = bright ? "hsla(30, 65%, 58%, 0.45)" : "hsla(28, 45%, 52%, 0.075)";
-    const pad = bright ? "hsla(33, 70%, 62%, 0.65)" : "hsla(28, 45%, 55%, 0.12)";
-    const hole = "#0d0c0a";
-    if (bright) { g.shadowColor = "hsla(30, 80%, 60%, 0.55)"; g.shadowBlur = 9 * DPR; }
+    const trace = bright ? "hsla(245, 78%, 60%, 0.42)" : "hsla(235, 45%, 50%, 0.06)";
+    const pad = bright ? "hsla(255, 78%, 62%, 0.55)" : "hsla(235, 45%, 52%, 0.10)";
+    const hole = "#f6f7fb";
+    if (bright) { g.shadowColor = "hsla(250, 88%, 62%, 0.5)"; g.shadowBlur = 9 * DPR; }
     g.lineWidth = 1.3 * DPR;
     g.lineJoin = "round";
     g.lineCap = "round";
@@ -188,8 +188,8 @@
       ctx.drawImage(maskLayer, 0, 0);
       // halo ambiant très doux
       const glow = ctx.createRadialGradient(mouse.gx, mouse.gy, 0, mouse.gx, mouse.gy, R * 1.2);
-      glow.addColorStop(0, "rgba(200, 146, 99, 0.05)");
-      glow.addColorStop(1, "rgba(200, 146, 99, 0)");
+      glow.addColorStop(0, "rgba(99, 102, 241, 0.06)");
+      glow.addColorStop(1, "rgba(99, 102, 241, 0)");
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, W, H);
     }
@@ -201,9 +201,9 @@
       p.dist += p.speed;
       if (p.dist >= p.trace.len) { pulses[i] = newPulse(400 + Math.random() * 1800); continue; }
       const pos = pulsePos(p);
-      ctx.shadowColor = "hsla(33, 90%, 62%, 0.9)";
+      ctx.shadowColor = "hsla(250, 90%, 62%, 0.9)";
       ctx.shadowBlur = 14 * DPR;
-      ctx.fillStyle = "hsla(38, 95%, 72%, 0.95)";
+      ctx.fillStyle = "hsla(255, 95%, 68%, 0.95)";
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, 2.1 * DPR, 0, 6.2832);
       ctx.fill();

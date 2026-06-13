@@ -208,9 +208,11 @@ const PERIPH_CATS = ["monitor", "keyboard", "mouse", "headset"];
 let uidCounter = 0;
 function art(category, hue = 30) {
   const uid = "g" + (++uidCounter);
+  // Teinte décalée vers la famille indigo → violet du nouveau thème clair.
+  const h = hue + 205;
   const grad = `<defs><linearGradient id="${uid}" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="hsl(${hue}, 45%, 66%)"/>
-    <stop offset="1" stop-color="hsl(${hue + 12}, 42%, 44%)"/></linearGradient></defs>`;
+    <stop offset="0" stop-color="hsl(${h}, 82%, 65%)"/>
+    <stop offset="1" stop-color="hsl(${h + 16}, 74%, 52%)"/></linearGradient></defs>`;
   const S = `stroke="url(#${uid})" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"`;
   const F = `fill="url(#${uid})"`;
   const shapes = {
@@ -269,7 +271,7 @@ function art(category, hue = 30) {
 }
 
 const hueOf = (p) => 18 + ((p.id * 37) % 24);
-const tintOf = (p) => `hsla(${hueOf(p)}, 48%, 58%, 0.14)`;
+const tintOf = (p) => `hsla(${hueOf(p) + 205}, 60%, 60%, 0.12)`;
 
 // Photo du produit : URL personnalisée (image_url) si définie, sinon le fichier
 // local images/{id}.jpg. Si rien ne charge, l'img se retire et le visuel SVG
@@ -684,7 +686,7 @@ async function viewHome(app) {
   app.innerHTML = `
   <section class="hero">
     <div>
-      <span class="hero-kicker">⚡ Nouvelle génération disponible</span>
+      <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
       <h1>Assemblez la machine<br>de <span class="grad">vos rêves</span></h1>
       <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5, écrans OLED 480 Hz et périphériques e-sport : tout le meilleur du hardware, expédié en 24 h avec le conseil d'experts passionnés.</p>
       <div class="hero-cta">
@@ -713,7 +715,7 @@ async function viewHome(app) {
   <section class="section">
     <div class="promo-banner">
       <div>
-        <h3>☀️ Soldes d'été — jusqu'à -20 %</h3>
+        <h3><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>Soldes d'été — jusqu'à -20 %</h3>
         <p>Utilisez le code <code>SUMMER20</code> au panier et profitez de -20 % sur l'intégralité du site.</p>
       </div>
       <a class="btn btn-primary" href="#/catalogue">J'en profite</a>
@@ -722,10 +724,10 @@ async function viewHome(app) {
 
   <section class="section">
     <div class="perks">
-      <div class="perk"><div class="perk-icon">🚚</div><div><h4>Livraison 24 h</h4><p>Offerte dès 50 € d'achat, partout en France.</p></div></div>
-      <div class="perk"><div class="perk-icon">🛡️</div><div><h4>Garantie sereine</h4><p>Retours 30 jours et garantie constructeur complète.</p></div></div>
-      <div class="perk"><div class="perk-icon">🧠</div><div><h4>Conseil d'experts</h4><p>Notre configurateur vérifie la compatibilité à votre place.</p></div></div>
-      <div class="perk"><div class="perk-icon">🔒</div><div><h4>Paiement sécurisé</h4><p>Transactions chiffrées et données protégées.</p></div></div>
+      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></div><div><h4>Livraison 24 h</h4><p>Offerte dès 50 € d'achat, partout en France.</p></div></div>
+      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garantie sereine</h4><p>Retours 30 jours et garantie constructeur complète.</p></div></div>
+      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></div><div><h4>Conseil d'experts</h4><p>Notre configurateur vérifie la compatibilité à votre place.</p></div></div>
+      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><h4>Paiement sécurisé</h4><p>Transactions chiffrées et données protégées.</p></div></div>
     </div>
   </section>`;
 
@@ -1459,7 +1461,7 @@ async function viewAccount(app, params) {
   } catch { /* token invalide : géré par api() */ }
 
   const adminLink = state.user.is_admin
-    ? `<a class="btn btn-primary btn-sm" style="color:#2a190c" href="#/admin">🛠️ Espace admin</a>` : "";
+    ? `<a class="btn btn-primary btn-sm" style="color:var(--on-primary)" href="#/admin">🛠️ Espace admin</a>` : "";
 
   app.innerHTML = `
   <div class="section-head" style="margin-top:0">
@@ -1563,7 +1565,7 @@ async function renderAccountAddresses(panel) {
         <label>Ville<input name="ship_city" required minlength="2"></label>
         <label>Code postal<input name="ship_zip" required minlength="4"></label>
         <label class="full" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="is_default" style="width:auto"> Définir comme adresse par défaut</label>
-        <button class="btn btn-primary full" type="submit" style="color:#2a190c">Enregistrer</button>
+        <button class="btn btn-primary full" type="submit" style="color:var(--on-primary)">Enregistrer</button>
       </form>
     </details>`;
 
@@ -1597,7 +1599,7 @@ function renderAccountProfile(panel) {
       <form id="profileForm" class="form-grid">
         <label class="full">Nom affiché<input name="name" required minlength="2" value="${esc(state.user.name)}"></label>
         <label class="full">E-mail<input value="${esc(state.user.email)}" disabled style="opacity:.6"></label>
-        <button class="btn btn-primary" type="submit" style="color:#2a190c;align-self:flex-start">Enregistrer</button>
+        <button class="btn btn-primary" type="submit" style="color:var(--on-primary);align-self:flex-start">Enregistrer</button>
       </form>
     </div>
     <div class="panel">
@@ -1605,7 +1607,7 @@ function renderAccountProfile(panel) {
       <form id="passwordForm" class="form-grid">
         <label class="full">Mot de passe actuel<input name="current_password" type="password" required></label>
         <label class="full">Nouveau mot de passe<input name="new_password" type="password" required minlength="8" placeholder="8 caractères minimum"></label>
-        <button class="btn btn-primary" type="submit" style="color:#2a190c;align-self:flex-start">Mettre à jour</button>
+        <button class="btn btn-primary" type="submit" style="color:var(--on-primary);align-self:flex-start">Mettre à jour</button>
       </form>
     </div>`;
 
@@ -1641,7 +1643,7 @@ function renderAccountProfile(panel) {
 // Barre de navigation commune aux pages admin.
 function adminNav(active) {
   const tab = (key, href, label) =>
-    `<a class="btn btn-sm ${active === key ? "btn-primary" : "btn-ghost"}" ${active === key ? 'style="color:#2a190c"' : ""} href="${href}">${label}</a>`;
+    `<a class="btn btn-sm ${active === key ? "btn-primary" : "btn-ghost"}" ${active === key ? 'style="color:var(--on-primary)"' : ""} href="${href}">${label}</a>`;
   return `<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
     ${tab("stats", "#/admin/stats", "📊 Tableau de bord")}
     ${tab("orders", "#/admin", "Commandes")}
@@ -1723,7 +1725,7 @@ async function viewAdmin(app, params) {
   // Préserve la recherche en cours lorsqu'on change de filtre de statut.
   const withQ = (qs) => { const p = new URLSearchParams(qs); if (query) p.set("q", query); const s = p.toString(); return "#/admin" + (s ? "?" + s : ""); };
   const filterBar = filters.map(([val, label]) =>
-    `<a class="btn btn-sm ${val === current ? "btn-primary" : "btn-ghost"}" ${val === current ? 'style="color:#2a190c"' : ""} href="${withQ(val ? { status: val } : {})}">${label}</a>`
+    `<a class="btn btn-sm ${val === current ? "btn-primary" : "btn-ghost"}" ${val === current ? 'style="color:var(--on-primary)"' : ""} href="${withQ(val ? { status: val } : {})}">${label}</a>`
   ).join(" ");
 
   app.innerHTML = `
@@ -1779,7 +1781,7 @@ async function viewAdmin(app, params) {
         <select class="ad-status" data-order="${o.id}" style="padding:8px 10px;border-radius:8px;background:var(--bg);color:var(--text);border:1px solid var(--border-strong)">${opts}</select>
         <input class="ad-carrier" data-order="${o.id}" value="${esc(o.carrier || "")}" placeholder="Transporteur" style="padding:8px 10px;border-radius:8px;background:var(--bg);color:var(--text);border:1px solid var(--border-strong);width:130px">
         <input class="ad-tracking" data-order="${o.id}" value="${esc(o.tracking_number || "")}" placeholder="N° de suivi" style="padding:8px 10px;border-radius:8px;background:var(--bg);color:var(--text);border:1px solid var(--border-strong);width:160px">
-        <button class="btn btn-primary btn-sm ad-save" data-order="${o.id}" style="color:#2a190c">Enregistrer</button>
+        <button class="btn btn-primary btn-sm ad-save" data-order="${o.id}" style="color:var(--on-primary)">Enregistrer</button>
       </div>`;
   };
 
@@ -1900,7 +1902,7 @@ async function viewAdminProducts(app) {
       <label class="full">Specs — JSON (optionnel)<textarea name="specs" rows="2" placeholder='{"Socket":"AM5","TDP":"120 W"}'></textarea></label>
       <label class="full">URL d'image<input name="image_url" placeholder="https://… (optionnel — sinon visuel généré)"></label>
       <label class="full" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="featured" style="width:auto"> Mettre en vedette</label>
-      <button class="btn btn-primary full" type="submit" style="color:#2a190c">Créer le produit</button>
+      <button class="btn btn-primary full" type="submit" style="color:var(--on-primary)">Créer le produit</button>
     </form>
   </details>
   <div id="adminProducts"><div class="skeleton" style="min-height:160px"></div></div>`;
@@ -1924,7 +1926,7 @@ async function viewAdminProducts(app) {
           <label style="font-size:.75rem;color:var(--text-dim)">Prix €<br><input class="pp-price" data-pid="${p.id}" type="number" step="0.01" min="0" value="${p.price}" style="${inp};width:90px"></label>
           <label style="font-size:.75rem;color:var(--text-dim)">Stock<br><input class="pp-stock" data-pid="${p.id}" type="number" min="0" value="${p.stock}" style="${inp};width:70px"></label>
           <label style="font-size:.75rem;color:var(--text-dim)">URL d'image<br><input class="pp-img" data-pid="${p.id}" value="${esc(p.image_url || "")}" placeholder="https://…" style="${inp};width:220px"></label>
-          <button class="btn btn-primary btn-sm pp-save" data-pid="${p.id}" style="color:#2a190c">💾 Enregistrer</button>
+          <button class="btn btn-primary btn-sm pp-save" data-pid="${p.id}" style="color:var(--on-primary)">💾 Enregistrer</button>
           <button class="btn btn-ghost btn-sm pp-del" data-pid="${p.id}">🗑</button>
         </div>
       </div>`).join("");

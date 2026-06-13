@@ -183,17 +183,30 @@ def fetch_for_product(pid: int, query: str, per: int, brand: str = "") -> int:
     return saved
 
 
+# Mot-clé catégorie EN injecté dans la requête : SANS lui, un nom de modèle seul
+# (ex. un écran) peut matcher n'importe quoi (ex. un AIO). C'est la clé d'un bon
+# rendu : on force le type de produit.
+EN_CAT = {
+    "gpu": "graphics card", "cpu": "CPU processor", "ram": "RAM memory module",
+    "storage": "SSD drive", "motherboard": "motherboard", "psu": "PC power supply unit",
+    "case": "PC case tower", "cooling": "CPU cooler", "monitor": "computer monitor",
+    "keyboard": "keyboard", "mouse": "gaming mouse", "headset": "gaming headset",
+}
+
+
 def build_query(name: str, brand: str, category: str) -> str:
-    """Construit une requête propre (retire le préfixe catégorie FR redondant)."""
+    """Construit une requête désambiguïsée : <type EN> <modèle> <marque>."""
     q = name
-    # Les noms commencent souvent par le libellé FR de catégorie : on l'enlève.
+    # Les noms commencent par le libellé FR de catégorie : on l'enlève…
     for prefix in ("Carte graphique ", "Processeur ", "Carte mère ", "Mémoire ",
                    "Stockage ", "Alimentation ", "Boîtier ", "Refroidissement ",
                    "Écran ", "Clavier ", "Souris ", "Casque "):
         if q.startswith(prefix):
             q = q[len(prefix):]
             break
-    return q.strip()
+    # …et on le remplace par le type de produit EN (plus fiable pour la recherche).
+    kw = EN_CAT.get(category, "")
+    return (kw + " " + q).strip()
 
 
 def main() -> None:
@@ -201,7 +214,13 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=0, help="nb de produits (0 = tous)")
     ap.add_argument("--per", type=int, default=4, help="images par produit")
     ap.add_argument("--only-missing", action="store_true", help="ignore les produits déjà traités")
+    ap.add_argument("--categories", default="", help="catégories à traiter (séparées par virgule)")
+    ap.add_argument("--ids", default="", help="ids précis à traiter (séparés par virgule)")
+    ap.add_argument("--force", action="store_true", help="re-télécharge même si déjà présent (écrase)")
     args = ap.parse_args()
+
+    cats = {c.strip() for c in args.categories.split(",") if c.strip()}
+    id_filter = {int(x) for x in args.ids.split(",") if x.strip()}
 
     conn = sqlite3.connect(DB_PATH)
     rows = conn.execute("SELECT id, name, brand, category FROM products ORDER BY id").fetchall()
@@ -210,8 +229,15 @@ def main() -> None:
 
     total_ok = 0
     for i, (pid, name, brand, category) in enumerate(rows, 1):
-        if args.only_missing and (OUT / f"{pid}-1.jpg").exists():
+        if id_filter and pid not in id_filter:
             continue
+        if cats and category not in cats:
+            continue
+        if args.only_missing and not args.force and (OUT / f"{pid}-1.jpg").exists():
+            continue
+        if args.force:                                 # on repart propre pour ce produit
+            for old in OUT.glob(f"{pid}-*.jpg"):
+                old.unlink()
         query = build_query(name, brand, category)
         n = fetch_for_product(pid, query, args.per, brand)
         total_ok += n
