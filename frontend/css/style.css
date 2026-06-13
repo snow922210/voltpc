@@ -115,9 +115,12 @@ img { max-width: 100%; }
 .nav-menu {
   position: absolute;
   top: calc(100% + 10px);
-  left: 50%;
-  translate: -50% 6px;
+  /* Ancré au bord gauche du bouton (et non centré) : un menu large ne peut
+     plus déborder hors de l'écran. Largeur bornée au viewport par sécurité. */
+  left: 0;
+  translate: 0 6px;
   min-width: 250px;
+  max-width: min(560px, calc(100vw - 24px));
   display: grid;
   gap: 2px;
   padding: 10px;
@@ -142,7 +145,7 @@ img { max-width: 100%; }
 .nav-item:focus-within .nav-menu {
   opacity: 1;
   visibility: visible;
-  translate: -50% 0;
+  translate: 0 0;
 }
 .nav-menu-grid { grid-template-columns: 1fr 1fr; min-width: 460px; }
 .nav-menu-link {
@@ -623,11 +626,25 @@ img { max-width: 100%; }
 
 .auth-form { display: flex; flex-direction: column; gap: 14px; }
 .auth-form label { display: flex; flex-direction: column; gap: 6px; font-size: 0.84rem; font-weight: 600; color: var(--text-dim); }
-.auth-form input, .form-grid input {
+.auth-form input, .auth-form select, .auth-form textarea,
+.form-grid input, .form-grid select, .form-grid textarea {
+  width: 100%;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
   color: var(--text); padding: 12px 14px; font-size: 0.94rem; outline: none; transition: border-color 0.2s;
 }
-.auth-form input:focus, .form-grid input:focus { border-color: var(--accent); }
+.auth-form input:focus, .auth-form select:focus, .auth-form textarea:focus,
+.form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus { border-color: var(--accent); }
+/* Select : on retire l'apparence native (fond clair hors thème) et on dessine
+   une flèche cohérente avec le design sombre. */
+.auth-form select, .form-grid select {
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a59d90' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+/* La liste déroulée est rendue par l'OS : on force des couleurs lisibles. */
+.auth-form select option, .form-grid select option { background: var(--surface-2); color: var(--text); }
+.auth-form textarea, .form-grid textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
 .auth-hint { font-size: 0.8rem; color: var(--text-faint); text-align: center; }
 .auth-hint code { color: var(--accent); }
 
