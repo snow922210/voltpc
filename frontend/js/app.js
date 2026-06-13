@@ -886,7 +886,7 @@ async function viewProduct(app, id) {
         ${badgeHtml(p.badge)}
       </div>
       <div class="pp-thumbs" id="ppThumbs">
-        ${[1,2,3,4,5,6].map((n) => `
+        ${[1,2,3].map((n) => `
           <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="images/${p.id}-${n}.jpg">
             <img src="images/${p.id}-${n}.jpg" alt="" loading="lazy" onerror="this.closest('.pp-thumb').remove()">
           </button>`).join("")}
