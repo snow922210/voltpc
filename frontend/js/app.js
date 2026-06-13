@@ -275,7 +275,7 @@ const tintOf = (p) => `hsla(${hueOf(p)}, 48%, 58%, 0.14)`;
 // local images/{id}.jpg. Si rien ne charge, l'img se retire et le visuel SVG
 // situé dessous reste affiché.
 const imgTag = (p) =>
-  `<img class="pimg" src="${esc(p.image_url || `images/${p.id}.jpg`)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()">`;
+  `<img class="pimg" src="${esc(p.image_url || `images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()">`;
 
 function stars(rating) {
   const full = Math.round(rating);
@@ -366,7 +366,7 @@ function renderCartDrawer() {
   }
   body.innerHTML = state.cart.map((i) => `
     <div class="cart-item">
-      <div class="cart-item-visual">${art(i.category, 18 + ((i.id * 37) % 24))}${imgTag(i.id, i.name)}</div>
+      <div class="cart-item-visual">${art(i.category, 18 + ((i.id * 37) % 24))}${imgTag(i)}</div>
       <div class="cart-item-info">
         <h4>${esc(i.name)}</h4>
         <span class="price">${fmt(i.price)}</span>
@@ -877,7 +877,19 @@ async function viewProduct(app, id) {
     <a href="#/catalogue?cat=${p.category}">${CATS[p.category]?.label ?? p.category}</a> / <span>${esc(p.name)}</span>
   </nav>
   <div class="product-page">
-    <div class="product-page-visual" style="--tint:${tintOf(p)}">${art(p.category, hueOf(p))}${imgTag(p)}${badgeHtml(p.badge)}</div>
+    <div class="product-gallery">
+      <div class="product-page-visual" style="--tint:${tintOf(p)}">
+        ${art(p.category, hueOf(p))}
+        <img class="pimg" id="ppMain" src="${esc(p.image_url || `images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" onerror="this.remove()">
+        ${badgeHtml(p.badge)}
+      </div>
+      <div class="pp-thumbs" id="ppThumbs">
+        ${[1,2,3,4,5,6].map((n) => `
+          <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="images/${p.id}-${n}.jpg">
+            <img src="images/${p.id}-${n}.jpg" alt="" loading="lazy" onerror="this.closest('.pp-thumb').remove()">
+          </button>`).join("")}
+      </div>
+    </div>
     <div class="product-page-info">
       <span class="product-brand">${esc(p.brand)} · ${CATS[p.category]?.label ?? ""}</span>
       <h1>${esc(p.name)}</h1>
@@ -925,6 +937,18 @@ async function viewProduct(app, id) {
   $("#qtyPlus").onclick = () => { if (qty < p.stock) { qty++; $("#qtyVal").textContent = qty; } };
   $("#qtyMinus").onclick = () => { if (qty > 1) { qty--; $("#qtyVal").textContent = qty; } };
   $("#buyBtn").onclick = () => addToCart(p, qty);
+
+  // Galerie : clic sur une miniature → change l'image principale.
+  $$("#ppThumbs .pp-thumb").forEach((btn) => btn.onclick = () => {
+    const main = $("#ppMain");
+    if (main) main.src = btn.dataset.src;
+    $$("#ppThumbs .pp-thumb").forEach((b) => b.classList.toggle("active", b === btn));
+  });
+  // Masque la rangée de miniatures s'il n'en reste qu'une (ou zéro) après chargement.
+  setTimeout(() => {
+    const thumbs = $("#ppThumbs");
+    if (thumbs && thumbs.querySelectorAll(".pp-thumb").length <= 1) thumbs.style.display = "none";
+  }, 1200);
   $("#ppFav").onclick = async () => {
     await toggleFavorite(p.id);
     const on = state.favorites.has(p.id);
@@ -1890,7 +1914,7 @@ async function viewAdminProducts(app) {
       products.map((p) => `
       <div class="order-card" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:12px;min-width:220px">
-          <img src="${esc(p.image_url || `images/${p.id}.jpg`)}" onerror="this.style.visibility='hidden'" style="width:44px;height:44px;object-fit:contain;border-radius:6px;background:var(--surface);flex-shrink:0">
+          <img src="${esc(p.image_url || `images/${p.id}-1.jpg`)}" onerror="this.style.visibility='hidden'" style="width:44px;height:44px;object-fit:contain;border-radius:6px;background:var(--surface);flex-shrink:0">
           <div>
             <strong>${esc(p.name)}</strong>${p.stock === 0 ? ` <span style="color:#d9544f;font-size:.8rem">• Rupture</span>` : ""}<br>
             <small style="color:var(--text-dim)">#${p.id} · ${esc(CATS[p.category]?.label || p.category)} · ${esc(p.brand)}</small>
