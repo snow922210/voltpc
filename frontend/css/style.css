@@ -588,6 +588,7 @@ img { max-width: 100%; }
 .pp-thumb:hover { border-color: var(--accent); transform: translateY(-2px); }
 .pp-thumb.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22); }
 .product-page-visual {
+  position: relative;   /* ancre l'image absolue .pimg DANS le carré (sinon elle déborde sur la galerie et masque les miniatures) */
   aspect-ratio: 1;
   display: grid;
   place-items: center;
