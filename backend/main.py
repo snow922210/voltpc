@@ -9,6 +9,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import html
 import json
 import logging
 import os
@@ -1716,8 +1717,15 @@ app.include_router(payment_router)
 
 
 # ─── SEO : robots.txt + sitemap.xml ──────────────────────────────────
-# Déclarés AVANT le mount catch-all pour ne pas être masqués par le static.
 SITE_URL = os.environ.get("SITE_URL", "https://voltpc.onrender.com").rstrip("/")
+
+# Libellés FR des catégories (miroir de CATS côté frontend).
+CAT_LABELS = {
+    "gpu": "Cartes graphiques", "cpu": "Processeurs", "ram": "Mémoire RAM",
+    "storage": "Stockage SSD", "motherboard": "Cartes mères", "psu": "Alimentations",
+    "case": "Boîtiers", "cooling": "Refroidissement", "monitor": "Écrans",
+    "keyboard": "Claviers", "mouse": "Souris", "headset": "Casques audio",
+}
 
 
 @app.get("/robots.txt", include_in_schema=False)
@@ -1733,33 +1741,228 @@ def robots_txt():
 
 @app.get("/sitemap.xml", include_in_schema=False)
 def sitemap_xml():
-    """Sitemap minimal. Le frontend étant une SPA à routage par hash (#/…),
-    seules les URL réelles sont indexables — ici la page d'accueil. Quand de
-    vraies URL produits (/produit/{id}) existeront, les ajouter ici."""
+    """Sitemap complet : accueil, catalogue, catégories et toutes les fiches
+    produit (URL réelles depuis le Lot 1)."""
+    urls = [(f"{SITE_URL}/", "1.0"), (f"{SITE_URL}/catalogue", "0.9"),
+            (f"{SITE_URL}/configurateur", "0.5")]
+    urls += [(f"{SITE_URL}/catalogue?cat={c}", "0.7") for c in CAT_LABELS]
+    with db() as conn:
+        for r in conn.execute("SELECT id FROM products ORDER BY id").fetchall():
+            urls.append((f"{SITE_URL}/produit/{r['id']}", "0.8"))
     today = time.strftime("%Y-%m-%d")
-    urls = [(f"{SITE_URL}/", today, "daily", "1.0")]
-    body = ['<?xml version="1.0" encoding="UTF-8"?>',
-            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    for loc, lastmod, freq, prio in urls:
-        body.append(
-            f"  <url><loc>{loc}</loc><lastmod>{lastmod}</lastmod>"
-            f"<changefreq>{freq}</changefreq><priority>{prio}</priority></url>"
+    out = ['<?xml version="1.0" encoding="UTF-8"?>',
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for loc, prio in urls:
+        out.append(
+            f"  <url><loc>{html.escape(loc)}</loc><lastmod>{today}</lastmod>"
+            f"<priority>{prio}</priority></url>"
         )
-    body.append("</urlset>")
-    return Response(content="\n".join(body), media_type="application/xml")
+    out.append("</urlset>")
+    return Response(content="\n".join(out), media_type="application/xml")
 
 
-# ─── Frontend (SPA) ──────────────────────────────────────────────────
-# Déclaré en DERNIER. Sert les vrais fichiers (css/js/images) s'ils existent,
-# sinon renvoie index.html pour que le routage par URL réelles côté client
-# fonctionne (deep-link / refresh sur /produit/5, /catalogue, …). Les routes
-# /api/… et /robots.txt /sitemap.xml déclarées plus haut ont la priorité.
+# ─── Frontend (SPA) avec rendu serveur SEO ───────────────────────────
+# Sert les vrais fichiers (css/js/images) s'ils existent ; sinon renvoie
+# index.html. Pour les pages indexables (produit, catégorie, accueil), le
+# contenu + les balises <title>/meta/JSON-LD sont injectés côté serveur afin
+# que crawlers et moteurs IA voient une vraie page (le JS hydrate ensuite).
 FRONTEND_DIR = FRONTEND.resolve()
 INDEX_FILE = FRONTEND_DIR / "index.html"
 
+_E = html.escape
+
+
+def _money(v) -> str:
+    return f"{v:,.0f} €".replace(",", " ")  # 1 899 € (espace fine)
+
+
+def _clip(text: str, n: int = 155) -> str:
+    text = " ".join((text or "").split())
+    return text if len(text) <= n else text[: n - 1].rstrip() + "…"
+
+
+def _jsonld(obj: dict) -> str:
+    raw = json.dumps(obj, ensure_ascii=False).replace("</", "<\\/")
+    return f'<script type="application/ld+json">{raw}</script>\n  '
+
+
+def _seo_block(title, desc, canonical, og_title, og_desc, image=None) -> str:
+    img = (f'  <meta property="og:image" content="{_E(image)}">\n'
+           f'  <meta name="twitter:image" content="{_E(image)}">\n') if image else ""
+    return (
+        f"<title>{_E(title)}</title>\n"
+        f'  <meta name="description" content="{_E(desc)}">\n'
+        f'  <link rel="canonical" href="{_E(canonical)}">\n'
+        f'  <meta property="og:title" content="{_E(og_title)}">\n'
+        f'  <meta property="og:description" content="{_E(og_desc)}">\n'
+        f'  <meta property="og:url" content="{_E(canonical)}">\n'
+        f"{img}"
+        f'  <meta name="twitter:title" content="{_E(og_title)}">\n'
+        f'  <meta name="twitter:description" content="{_E(og_desc)}">'
+    )
+
+
+def _render(tpl, *, title=None, desc=None, canonical=None, og_title=None,
+            og_desc=None, image=None, jsonld="", main="", robots=None) -> str:
+    out = tpl
+    if title is not None:
+        block = _seo_block(title, desc, canonical, og_title or title,
+                           og_desc or desc, image)
+        i = out.find("<!-- PAGE-SEO:START")
+        j = out.find("PAGE-SEO:END -->")
+        if i != -1 and j != -1:
+            out = out[:i] + block + out[j + len("PAGE-SEO:END -->"):]
+    out = out.replace("<!-- PAGE-JSONLD -->", jsonld or "")
+    out = out.replace("<!--SSR-->", main or "")
+    if robots:
+        out = out.replace('content="index, follow"', f'content="{robots}"')
+    return out
+
+
+def _html(content: str, status: int = 200) -> Response:
+    return Response(content=content, media_type="text/html; charset=utf-8",
+                    status_code=status)
+
+
+def _abs_img(p) -> str:
+    img = p["image_url"] or f"/images/{p['id']}-1.jpg"
+    return img if img.startswith("http") else SITE_URL + img
+
+
+def _product_ssr(p) -> str:
+    cat = p["category"]
+    label = CAT_LABELS.get(cat, cat)
+    try:
+        specs = json.loads(p["specs"])
+    except Exception:
+        specs = {}
+    rows = "".join(
+        f"<tr><td>{_E(str(k))}</td><td>{_E(str(v))}</td></tr>"
+        for k, v in list(specs.items())[:14]
+    )
+    old = f' <span class="price-old">{_money(p["old_price"])}</span>' if p["old_price"] else ""
+    rating = (f' · {p["rating"]:.1f}/5 ({p["rating_count"]} avis)'
+              if p["rating_count"] else "")
+    stock = "En stock" if p["stock"] > 0 else "Rupture de stock"
+    return (
+        '<article class="product-page">'
+        f'<nav class="breadcrumb"><a href="/">Accueil</a> / '
+        f'<a href="/catalogue?cat={cat}">{_E(label)}</a> / {_E(p["name"])}</nav>'
+        f'<img class="pimg" src="{_E(_abs_img(p))}" alt="{_E(p["name"])}" width="600" height="600">'
+        '<div class="product-page-info">'
+        f'<span class="product-brand">{_E(p["brand"])}</span>'
+        f'<h1>{_E(p["name"])}</h1>'
+        f'<p class="price">{_money(p["price"])}{old} — {stock}{rating}</p>'
+        f'<p class="desc">{_E(p["description"])}</p>'
+        f'<table class="specs-table"><tbody>{rows}</tbody></table>'
+        '</div></article>'
+    )
+
+
+def _product_jsonld(p) -> str:
+    cat_label = CAT_LABELS.get(p["category"], p["category"])
+    product = {
+        "@context": "https://schema.org", "@type": "Product",
+        "name": p["name"], "image": _abs_img(p), "description": _clip(p["description"], 300),
+        "sku": str(p["id"]), "category": cat_label,
+        "brand": {"@type": "Brand", "name": p["brand"]},
+        "offers": {
+            "@type": "Offer", "url": f"{SITE_URL}/produit/{p['id']}",
+            "priceCurrency": "EUR", "price": f'{p["price"]:.2f}',
+            "availability": "https://schema.org/InStock" if p["stock"] > 0
+            else "https://schema.org/OutOfStock",
+        },
+    }
+    if p["rating_count"]:
+        product["aggregateRating"] = {
+            "@type": "AggregateRating", "ratingValue": f'{p["rating"]:.1f}',
+            "reviewCount": p["rating_count"],
+        }
+    crumbs = {
+        "@context": "https://schema.org", "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Accueil", "item": f"{SITE_URL}/"},
+            {"@type": "ListItem", "position": 2, "name": cat_label,
+             "item": f"{SITE_URL}/catalogue?cat={p['category']}"},
+            {"@type": "ListItem", "position": 3, "name": p["name"],
+             "item": f"{SITE_URL}/produit/{p['id']}"},
+        ],
+    }
+    return _jsonld(product) + _jsonld(crumbs)
+
+
+def _catalog_render(tpl, params) -> Response:
+    cat = params.get("cat")
+    q = params.get("q")
+    promo = params.get("promo") == "1"
+    new = params.get("new") == "1"
+    sql = ("SELECT id, name, brand, price, old_price FROM products WHERE 1=1")
+    args = []
+    if cat:
+        sql += " AND category = ?"
+        args.append(cat)
+    if q:
+        sql += " AND (name LIKE ? OR brand LIKE ?)"
+        args += [f"%{q}%", f"%{q}%"]
+    if promo:
+        sql += " AND old_price IS NOT NULL"
+    sql += " ORDER BY featured DESC, rating DESC LIMIT 60"
+    with db() as conn:
+        rows = conn.execute(sql, args).fetchall()
+
+    if cat:
+        heading = CAT_LABELS.get(cat, "Catalogue")
+        canonical = f"{SITE_URL}/catalogue?cat={cat}"
+    elif promo:
+        heading, canonical = "Promotions", f"{SITE_URL}/catalogue?promo=1"
+    elif new:
+        heading, canonical = "Nouveautés", f"{SITE_URL}/catalogue?new=1"
+    elif q:
+        heading, canonical = f"Recherche « {q} »", f"{SITE_URL}/catalogue"
+    else:
+        heading, canonical = "Catalogue", f"{SITE_URL}/catalogue"
+
+    title = f"{heading} — VOLT PC"
+    desc = _clip(f"{heading} : {len(rows)} produits PC haute performance au meilleur "
+                 "prix chez VOLT PC. Livraison 24 h, paiement sécurisé.")
+    items = "".join(
+        f'<li><a href="/produit/{r["id"]}">{_E(r["name"])}</a> — '
+        f'{_E(r["brand"])} — {_money(r["price"])}</li>' for r in rows
+    )
+    main = (
+        '<section><nav class="breadcrumb"><a href="/">Accueil</a> / '
+        f'{_E(heading)}</nav><h1>{_E(heading)}</h1>'
+        f'<p>{len(rows)} produits disponibles.</p>'
+        f'<ul class="ssr-list">{items}</ul></section>'
+    )
+    item_list = {
+        "@context": "https://schema.org", "@type": "ItemList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": i + 1, "name": r["name"],
+             "url": f"{SITE_URL}/produit/{r['id']}"} for i, r in enumerate(rows)
+        ],
+    }
+    return _html(_render(tpl, title=title, desc=desc, canonical=canonical,
+                         jsonld=_jsonld(item_list), main=main))
+
+
+def _home_ssr() -> str:
+    links = "".join(
+        f'<li><a href="/catalogue?cat={c}">{_E(lbl)}</a></li>'
+        for c, lbl in CAT_LABELS.items()
+    )
+    return (
+        '<section><h1>VOLT PC — Composants PC haute performance</h1>'
+        '<p>Cartes graphiques, processeurs, mémoire, stockage et périphériques '
+        'gaming au meilleur prix. Configurateur intelligent, compatibilité vérifiée '
+        'et livraison en 24 h.</p>'
+        f'<nav aria-label="Catégories"><ul class="ssr-list">{links}</ul></nav>'
+        '</section>'
+    )
+
 
 @app.get("/{full_path:path}", include_in_schema=False)
-def spa_fallback(full_path: str):
+def spa_fallback(full_path: str, request: Request):
     candidate = (FRONTEND_DIR / full_path).resolve()
     if (
         full_path
@@ -1767,4 +1970,45 @@ def spa_fallback(full_path: str):
         and candidate.is_relative_to(FRONTEND_DIR)  # anti path-traversal
     ):
         return FileResponse(candidate)
-    return FileResponse(INDEX_FILE)
+
+    tpl = INDEX_FILE.read_text(encoding="utf-8")
+    seg = full_path.strip("/")
+
+    # Fiche produit ------------------------------------------------------
+    if seg.startswith("produit/"):
+        try:
+            pid = int(seg.split("/")[1])
+        except (ValueError, IndexError):
+            pid = None
+        if pid is not None:
+            with db() as conn:
+                p = conn.execute("SELECT * FROM products WHERE id = ?", (pid,)).fetchone()
+            if p:
+                return _html(_render(
+                    tpl, title=f'{p["name"]} — VOLT PC',
+                    desc=_clip(p["description"]),
+                    canonical=f"{SITE_URL}/produit/{pid}",
+                    og_title=p["name"], og_desc=_clip(p["description"]),
+                    image=_abs_img(p),
+                    jsonld=_product_jsonld(p), main=_product_ssr(p),
+                ))
+        return _html(_render(
+            tpl, title="Produit introuvable — VOLT PC",
+            desc="Ce produit n'existe pas ou n'est plus disponible.",
+            canonical=f"{SITE_URL}/catalogue", og_title="Produit introuvable",
+            og_desc="", robots="noindex, follow",
+            main='<section class="empty-state"><h1>Produit introuvable</h1>'
+                 '<p><a href="/catalogue">Retour au catalogue</a></p></section>',
+        ), status=404)
+
+    # Catalogue / catégorie ---------------------------------------------
+    if seg == "catalogue":
+        return _catalog_render(tpl, request.query_params)
+
+    # Accueil ------------------------------------------------------------
+    if seg == "":
+        return _html(_render(tpl, main=_home_ssr()))
+
+    # Autres routes applicatives (configurateur, compte, admin…) :
+    # pas d'enjeu SEO → on sert l'app sans contenu pré-rendu.
+    return _html(_render(tpl))
