@@ -11,5 +11,10 @@ __pycache__/
 
 # Outils / éditeur
 .claude/
+.graphifyignore
+graphify-out/
 *.log
 .DS_Store
+
+# Sauvegardes locales
+*.localbak

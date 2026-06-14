@@ -147,9 +147,50 @@ def _optimize(raw: bytes) -> bytes | None:
     return out.getvalue()
 
 
-def fetch_for_product(pid: int, query: str, per: int, brand: str = "") -> int:
-    """Télécharge jusqu'à `per` images pour le produit. Renvoie le nb réussi."""
-    results = search_images(query, want=per * 6)
+STRIP_PREFIXES = (
+    "Carte graphique ", "Processeur ", "Carte mère ", "Mémoire ", "Stockage ",
+    "Alimentation ", "Boîtier ", "Refroidissement ", "Écran ", "Clavier ",
+    "Souris ", "Casque ",
+)
+
+
+def _strip_prefix(name: str) -> str:
+    for p in STRIP_PREFIXES:
+        if name.startswith(p):
+            return name[len(p):]
+    return name
+
+
+def _norm(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+
+
+def model_tokens(name: str) -> list[str]:
+    """Mots significatifs du modèle (sans le préfixe catégorie FR)."""
+    return [t for t in _norm(_strip_prefix(name)).split() if len(t) >= 2]
+
+
+def _relevant(r: dict, tokens: list[str], brand_l: str) -> bool:
+    """Vrai si l'image correspond bien AU modèle vendu (pas un voisin).
+    Exige : marque présente + TOUS les numéros de modèle + ≥60 % des mots."""
+    hay = _norm(f"{r.get('title','')} {r.get('url','')} {r.get('image','')}")
+    words = set(hay.split())
+    if brand_l and brand_l not in hay.replace(" ", ""):
+        return False
+    for t in tokens:                      # numéros de modèle (4090, 980, ddr5…) obligatoires
+        if any(c.isdigit() for c in t) and t not in words:
+            return False
+    if tokens:
+        hit = sum(1 for t in tokens if t in words)
+        if hit / len(tokens) < 0.6:
+            return False
+    return True
+
+
+def fetch_for_product(pid: int, query: str, per: int, brand: str = "",
+                      name: str = "") -> int:
+    """Télécharge jusqu'à `per` images du MÊME modèle. Renvoie le nb réussi."""
+    results = search_images(query, want=per * 8)
     # Filtre : domaine autorisé + taille minimale, en gardant l'ordre de pertinence.
     candidates = [
         r for r in results
@@ -157,6 +198,13 @@ def fetch_for_product(pid: int, query: str, per: int, brand: str = "") -> int:
         and (r.get("width") or 0) >= MIN_W and (r.get("height") or 0) >= MIN_H
         and 0.5 <= (r.get("width", 1) / max(r.get("height", 1), 1)) <= 1.9
     ]
+    # Contrôle de pertinence STRICT : on ne garde que les images du modèle exact.
+    brand_l = re.sub(r"[^a-z0-9]", "", brand.lower())
+    tokens = model_tokens(name) if name else []
+    strict = [r for r in candidates if _relevant(r, tokens, brand_l)]
+    # Garde-fou : si rien ne passe le filtre strict, on conserve au moins la
+    # meilleure image (résultat n°1, presque toujours le bon modèle) plutôt que zéro.
+    candidates = strict if strict else candidates[:1]
     # On privilégie les images hébergées par le FABRICANT (rendu propre, risque
     # juridique le plus faible) : on les place en tête sans casser l'ordre du reste.
     brand_l = re.sub(r"[^a-z0-9]", "", brand.lower())
@@ -165,6 +213,7 @@ def fetch_for_product(pid: int, query: str, per: int, brand: str = "") -> int:
         others = [r for r in candidates if r not in official]
         candidates = official + others
     saved = 0
+    ref_sig = None        # signature couleur de la 1re image = variante de référence
     for r in candidates:
         if saved >= per:
             break
@@ -175,12 +224,34 @@ def fetch_for_product(pid: int, query: str, per: int, brand: str = "") -> int:
             opt = _optimize(img)
             if not opt or len(opt) < 3_000:
                 continue
+            sig = _signature(opt)
+            if ref_sig is None:
+                ref_sig = sig
+            elif sig and ref_sig and not _close(ref_sig, sig):
+                continue   # coloris/variante différent (ex. édition blanche) → on saute
             (OUT / f"{pid}-{saved + 1}.jpg").write_bytes(opt)
             saved += 1
             time.sleep(0.3)
         except Exception:
             continue
     return saved
+
+
+def _signature(jpeg: bytes):
+    """Couleur dominante moyenne (24×24) → empreinte simple de la variante."""
+    if Image is None:
+        return None
+    try:
+        im = Image.open(BytesIO(jpeg)).convert("RGB").resize((24, 24))
+    except Exception:
+        return None
+    px = list(im.getdata())
+    n = len(px) or 1
+    return (sum(p[0] for p in px) / n, sum(p[1] for p in px) / n, sum(p[2] for p in px) / n)
+
+
+def _close(a, b, tol: float = 45.0) -> bool:
+    return sum((x - y) ** 2 for x, y in zip(a, b)) ** 0.5 <= tol
 
 
 # Mot-clé catégorie EN injecté dans la requête : SANS lui, un nom de modèle seul
@@ -206,7 +277,11 @@ def build_query(name: str, brand: str, category: str) -> str:
             break
     # …et on le remplace par le type de produit EN (plus fiable pour la recherche).
     kw = EN_CAT.get(category, "")
-    return (kw + " " + q).strip()
+    parts = [kw, q]
+    # La marque aide beaucoup quand le nom est générique (ex. « 80HE analogique »).
+    if brand and brand.lower() not in q.lower():
+        parts.append(brand)
+    return " ".join(p for p in parts if p).strip()
 
 
 def main() -> None:
@@ -239,7 +314,7 @@ def main() -> None:
             for old in OUT.glob(f"{pid}-*.jpg"):
                 old.unlink()
         query = build_query(name, brand, category)
-        n = fetch_for_product(pid, query, args.per, brand)
+        n = fetch_for_product(pid, query, args.per, brand, name)
         total_ok += n
         print(f"[{i}/{len(rows)}] #{pid} « {query[:45]} » → {n} image(s)")
         time.sleep(1.2)  # politesse (évite le blocage)

@@ -279,6 +279,13 @@ const tintOf = (p) => `hsla(${hueOf(p) + 205}, 60%, 60%, 0.12)`;
 const imgTag = (p) =>
   `<img class="pimg" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()">`;
 
+function cleanupProductThumbs() {
+  const thumbs = $("#ppThumbs");
+  if (!thumbs) return;
+  const items = $$(".pp-thumb", thumbs);
+  if (items.length <= 1) thumbs.style.display = "none";
+}
+
 function stars(rating) {
   const full = Math.round(rating);
   return `<span class="stars">${"★".repeat(full)}${"☆".repeat(5 - full)}</span>`;
@@ -1044,13 +1051,13 @@ async function viewProduct(app, id) {
     <div class="product-gallery">
       <div class="product-page-visual" style="--tint:${tintOf(p)}">
         ${art(p.category, hueOf(p))}
-        <img class="pimg" id="ppMain" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" onerror="this.remove()">
+        <img class="pimg" id="ppMain" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" onerror="this.remove(); cleanupProductThumbs()">
         ${badgeHtml(p.badge)}
       </div>
       <div class="pp-thumbs" id="ppThumbs">
         ${[1,2,3].map((n) => `
           <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="/images/${p.id}-${n}.jpg">
-            <img src="/images/${p.id}-${n}.jpg" alt="" loading="lazy" onerror="this.closest('.pp-thumb').remove()">
+            <img src="/images/${p.id}-${n}.jpg" alt="" loading="lazy" onerror="this.closest('.pp-thumb').remove(); cleanupProductThumbs()">
           </button>`).join("")}
       </div>
     </div>
@@ -1109,10 +1116,7 @@ async function viewProduct(app, id) {
     $$("#ppThumbs .pp-thumb").forEach((b) => b.classList.toggle("active", b === btn));
   });
   // Masque la rangée de miniatures s'il n'en reste qu'une (ou zéro) après chargement.
-  setTimeout(() => {
-    const thumbs = $("#ppThumbs");
-    if (thumbs && thumbs.querySelectorAll(".pp-thumb").length <= 1) thumbs.style.display = "none";
-  }, 1200);
+  setTimeout(cleanupProductThumbs, 1200);
   $("#ppFav").onclick = async () => {
     await toggleFavorite(p.id);
     const on = state.favorites.has(p.id);
