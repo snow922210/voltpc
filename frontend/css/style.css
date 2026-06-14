@@ -989,3 +989,175 @@ img { max-width: 100%; }
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .admin-search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
+
+/* ════════════════════════════════════════════════════════════════
+   Home v3 : scène 3D, PC prémontés, mini-3D services
+   ════════════════════════════════════════════════════════════════ */
+
+/* ─── Scène 3D principale (PC qui tourne au scroll) ─── */
+.scene-3d {
+  position: relative;
+  margin: 80px 0;
+  min-height: 78vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 40px;
+  perspective: 1400px;
+}
+.scene-3d-copy h2 { font-size: clamp(1.8rem, 3.4vw, 2.8rem); line-height: 1.08; margin-bottom: 16px; }
+.scene-3d-copy h2 .grad { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.scene-3d-copy p { color: var(--text-dim); font-size: 1.05rem; line-height: 1.7; max-width: 460px; margin-bottom: 26px; }
+.scene-stage { display: grid; place-items: center; perspective: 1200px; }
+
+/* Tour PC en CSS 3D (W=200 H=420 D=420) */
+.pc3d { width: 200px; height: 420px; position: relative; transform-style: preserve-3d;
+  transform: rotateX(-12deg) rotateY(var(--rot, -28deg));
+  filter: drop-shadow(0 50px 60px rgba(15,23,42,.35)); will-change: transform; }
+.pc3d.spin { animation: pcspin 22s linear infinite; }
+@keyframes pcspin { to { transform: rotateX(-12deg) rotateY(332deg); } }
+.pcf { position: absolute; left: 50%; top: 50%; }
+.pcf.front, .pcf.back { width: 200px; height: 420px; margin: -210px 0 0 -100px;
+  background: linear-gradient(160deg,#1f2937,#0f172a); border: 1px solid #334155; border-radius: 10px; }
+.pcf.front { transform: translateZ(210px); overflow: hidden;
+  background:
+    radial-gradient(circle 72px at 100px 96px,  #11192a 15px, #60a5fa 17px, #a78bfa 38px, #22d3ee 60px, #0b1220 70px, #0b1220 72px),
+    radial-gradient(circle 72px at 100px 224px, #11192a 15px, #60a5fa 17px, #a78bfa 38px, #22d3ee 60px, #0b1220 70px, #0b1220 72px),
+    radial-gradient(circle 72px at 100px 352px, #11192a 15px, #60a5fa 17px, #a78bfa 38px, #22d3ee 60px, #0b1220 70px, #0b1220 72px),
+    linear-gradient(160deg, #1f2937, #0f172a); }
+.pcf.back  { transform: rotateY(180deg) translateZ(210px); background: linear-gradient(160deg,#111827,#0b1220); }
+.pcf.left, .pcf.right { width: 420px; height: 420px; margin: -210px 0 0 -210px; }
+.pcf.right { transform: rotateY(90deg) translateZ(100px);
+  background: linear-gradient(120deg, rgba(59,130,246,.18), rgba(15,23,42,.55)); border: 1px solid rgba(59,130,246,.4); }
+.pcf.left  { transform: rotateY(-90deg) translateZ(100px); background: linear-gradient(120deg,#0f172a,#1e293b); border: 1px solid #334155; }
+.pcf.top, .pcf.bottom { width: 200px; height: 420px; margin: -210px 0 0 -100px; }
+.pcf.top    { transform: rotateX(90deg) translateZ(210px); background: linear-gradient(160deg,#1e293b,#0f172a); border: 1px solid #334155; }
+.pcf.bottom { transform: rotateX(-90deg) translateZ(210px); background: #0b1220; }
+/* Façade vitrée : ventilateurs RGB */
+.pc-fan { position: absolute; left: 26px; width: 148px; height: 148px; border-radius: 50%;
+  border: 5px solid #060a12;
+  background:
+    radial-gradient(circle at 50% 50%, #1b2536 17%, transparent 18%),
+    conic-gradient(from 0deg, #60a5fa, #a78bfa, #22d3ee, #60a5fa);
+  box-shadow: 0 0 22px rgba(96,165,250,.55), inset 0 0 16px rgba(0,0,0,.65); }
+.pc-fan::before { content:""; position:absolute; inset:50%; width:18px; height:18px; margin:-9px;
+  border-radius:50%; background:#0b1220; box-shadow:0 0 0 4px rgba(96,165,250,.5); z-index:2; }
+.pc-fan::after { content:""; position:absolute; inset:8px; border-radius:50%;
+  background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.20) 0deg 12deg, transparent 12deg 36deg);
+  animation: fanspin 2.6s linear infinite; }
+.pc-fan.f1 { top: 22px; } .pc-fan.f2 { top: 150px; } .pc-fan.f3 { top: 278px; }
+@keyframes fanspin { to { transform: rotate(360deg); } }
+.pc-strip { position: absolute; right: 12px; top: 18px; bottom: 18px; width: 7px; border-radius: 6px;
+  background: linear-gradient(180deg,#60a5fa,#a78bfa,#22d3ee); box-shadow: 0 0 16px rgba(96,165,250,.9); }
+.pcf.front { box-shadow: inset 0 0 40px rgba(96,165,250,.12); }
+
+/* ─── PC prémontés ─── */
+.prebuilts .pb-sub { color: var(--text-dim); margin: -10px 0 24px; max-width: 640px; }
+.pb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.pb-card { position: relative; display: flex; flex-direction: column; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-xs);
+  transition: transform .22s, box-shadow .28s, border-color .22s; }
+.pb-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: rgba(37,99,235,.4); }
+.pb-card.featured { border-color: rgba(37,99,235,.6); box-shadow: var(--shadow-accent); }
+.pb-head { padding: 22px 22px 16px; background: linear-gradient(160deg, rgba(59,130,246,.10), transparent); }
+.pb-tier { font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.pb-name { font-family: var(--font-display); font-size: 1.5rem; margin: 4px 0 2px; }
+.pb-tag { color: var(--text-dim); font-size: .9rem; }
+.pb-compat { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: .78rem; font-weight: 600;
+  color: var(--green); background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); padding: 5px 11px; border-radius: 999px; }
+.pb-specs { list-style: none; padding: 6px 22px 4px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.pb-specs li { display: flex; gap: 10px; font-size: .86rem; padding: 7px 0; border-bottom: 1px solid var(--border); color: var(--text-dim); }
+.pb-specs li:last-child { border-bottom: none; }
+.pb-specs .k { color: var(--text-faint); width: 78px; flex: none; text-transform: uppercase; font-size: .68rem; font-weight: 700; letter-spacing: .04em; padding-top: 2px; }
+.pb-specs .v { color: var(--text); font-weight: 500; }
+.pb-foot { padding: 18px 22px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pb-price { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; }
+.pb-price small { display: block; font-size: .72rem; color: var(--text-faint); font-weight: 400; letter-spacing: .02em; }
+
+/* ─── Mini-3D + services / garanties / légal ─── */
+.services-3d { position: relative; margin: 80px 0 20px; padding: 44px; border-radius: 28px;
+  background: linear-gradient(180deg,#ffffff,#f1f4fb); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  display: grid; grid-template-columns: 220px 1fr; gap: 40px; align-items: center; perspective: 900px; }
+.mini3d-stage { display: grid; place-items: center; perspective: 700px; }
+.cube3d { width: 110px; height: 110px; position: relative; transform-style: preserve-3d; animation: cubespin 16s linear infinite;
+  filter: drop-shadow(0 24px 30px rgba(37,99,235,.3)); }
+.cf { position: absolute; width: 110px; height: 110px; display: grid; place-items: center;
+  background: linear-gradient(160deg, rgba(59,130,246,.16), rgba(139,92,246,.10)); border: 1px solid rgba(59,130,246,.45);
+  border-radius: 14px; color: var(--accent-ink); }
+.cf svg { width: 42px; height: 42px; }
+.cf.f1 { transform: translateZ(55px); } .cf.f2 { transform: rotateY(90deg) translateZ(55px); }
+.cf.f3 { transform: rotateY(180deg) translateZ(55px); } .cf.f4 { transform: rotateY(-90deg) translateZ(55px); }
+.cf.f5 { transform: rotateX(90deg) translateZ(55px); } .cf.f6 { transform: rotateX(-90deg) translateZ(55px); }
+@keyframes cubespin { to { transform: rotateX(-20deg) rotateY(360deg); } }
+.svc-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.svc-cols h4 { font-size: .95rem; margin-bottom: 10px; }
+.svc-cols a, .svc-cols span { display: block; color: var(--text-dim); font-size: .86rem; padding: 4px 0; }
+.svc-cols a:hover { color: var(--accent); }
+
+@media (max-width: 920px) {
+  .scene-3d, .services-3d { grid-template-columns: 1fr; text-align: center; }
+  .scene-3d-copy p { margin-inline: auto; }
+  .pb-grid { grid-template-columns: 1fr; }
+  .svc-cols { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc3d.spin, .cube3d, .pc-fan::after { animation: none; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Home v3.1 : entrée plein écran immersive + séparateurs 3D variés
+   (profondeur / dépliage — au-delà de la simple rotation)
+   ════════════════════════════════════════════════════════════════ */
+.home-hero { position: relative; min-height: 100svh; display: grid;
+  grid-template-columns: 1.05fr .95fr; align-items: center; gap: 40px;
+  padding: 24px 0 64px; perspective: 1400px; }
+.hh-copy h1 { font-size: clamp(2.6rem, 6vw, 4.4rem); line-height: 1.02; margin-bottom: 20px; }
+.hh-copy p { color: var(--text-dim); font-size: 1.1rem; line-height: 1.7; max-width: 480px; margin-bottom: 30px; }
+.hh-stage { display: grid; place-items: center; perspective: 1200px; animation: hhfloat 7s ease-in-out infinite; }
+@keyframes hhfloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+.home-hero .pc3d {
+  transform: rotateX(calc(-12deg + var(--tiltx,0deg))) rotateY(calc(var(--rot,-26deg) + var(--tilty,0deg)));
+  transition: transform .18s ease-out; }
+.scroll-cue { position: absolute; left: 50%; bottom: 16px; translate: -50% 0; width: 26px; height: 42px;
+  border: 2px solid var(--border-strong); border-radius: 16px; display: grid; place-items: start center; padding-top: 7px; }
+.scroll-cue span { width: 4px; height: 8px; border-radius: 4px; background: var(--accent); animation: cue 1.5s ease-in-out infinite; }
+@keyframes cue { 0% { opacity: 0; transform: translateY(-4px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
+
+/* Séparateur #1 — fly-through en profondeur (translateZ + zoom, sans rotation) */
+.sep3d { position: relative; margin: 8px 0; pointer-events: none; }
+.sep-depth { height: 56vh; display: grid; place-items: center; perspective: 900px; overflow: hidden; }
+.sep-depth .depth { position: relative; width: 320px; height: 200px; transform-style: preserve-3d; }
+.sep-depth i { position: absolute; inset: 0; border: 2px solid rgba(37,99,235,.55); border-radius: 20px;
+  box-shadow: 0 0 34px rgba(37,99,235,.22), inset 0 0 22px rgba(139,92,246,.12);
+  transform: translateZ(calc(-900px + var(--p,0) * 1100px - var(--i) * 150px)) scale(calc(.45 + var(--p,0) * .85));
+  opacity: clamp(0, calc(var(--p,0) * 1.3 - var(--i) * .06), .92); }
+.sep-label { position: absolute; font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(1.1rem, 2.6vw, 1.9rem); letter-spacing: .2em; text-transform: uppercase; color: var(--accent-ink);
+  opacity: var(--p,0); transform: scale(calc(.8 + var(--p,0) * .35)); }
+
+/* Séparateur #2 — dépliage (rotateX 90→0 avec stagger), effet distinct du #1 */
+.sep-fold { height: 32vh; display: flex; gap: 18px; align-items: center; justify-content: center; perspective: 800px; }
+.sep-fold i { width: 84px; height: 84px; display: grid; place-items: center; border-radius: 20px;
+  background: linear-gradient(160deg, rgba(59,130,246,.16), rgba(139,92,246,.10));
+  border: 1px solid rgba(59,130,246,.4); color: var(--accent-ink); transform-origin: bottom center;
+  transform: rotateX(calc((1 - var(--p,0)) * 92deg)) translateY(calc((1 - var(--p,0)) * 26px));
+  opacity: clamp(0, calc(var(--p,0) * 1.5 - var(--i) * .14), 1);
+  box-shadow: 0 14px 26px -14px rgba(37,99,235,.4); }
+.sep-fold i svg { width: 38px; height: 38px; }
+
+.svc-block .svc-cols { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 30px 32px; box-shadow: var(--shadow-xs); display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+
+@media (max-width: 920px) {
+  .home-hero { grid-template-columns: 1fr; text-align: center; min-height: auto; padding-top: 12px; }
+  .hh-copy p { margin-inline: auto; }
+  .hh-stage { margin-top: 24px; }
+  .scroll-cue { display: none; }
+  .svc-block .svc-cols { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hh-stage { animation: none; }
+  .scroll-cue span { animation: none; }
+  .sep-fold i { transform: none; opacity: 1; }
+  .sep-depth i { opacity: .5; }
+}

@@ -336,18 +336,17 @@ function updateCartCount() {
   el.hidden = n === 0;
 }
 
-function addToCart(p, qty = 1) {
+function addToCart(p, qty = 1, quiet = false) {
   const line = state.cart.find((i) => i.id === p.id);
   if (line) {
-    if (line.qty + qty > p.stock) { toast("Stock maximum atteint pour ce produit", "error"); return; }
+    if (line.qty + qty > p.stock) { if (!quiet) toast("Stock maximum atteint pour ce produit", "error"); return; }
     line.qty += qty;
   } else {
     state.cart.push({ id: p.id, name: p.name, brand: p.brand, category: p.category, price: p.price, stock: p.stock, qty });
   }
   saveCart();
-  toast(`${p.name} ajouté au panier`);
   renderCartDrawer();
-  openCart();
+  if (!quiet) { toast(`${p.name} ajouté au panier`); openCart(); }
 }
 
 function cartTotals() {
@@ -692,14 +691,14 @@ async function render() {
 /* ─── Vue : accueil ─── */
 async function viewHome(app) {
   app.innerHTML = `
-  <section class="hero">
-    <div>
+  <section class="home-hero" id="homeHero">
+    <div class="hh-copy">
       <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
       <h1>Assemblez la machine<br>de <span class="grad">vos rêves</span></h1>
-      <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5, écrans OLED 480 Hz et périphériques e-sport : tout le meilleur du hardware, expédié en 24 h avec le conseil d'experts passionnés.</p>
+      <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5 et refroidissement maîtrisé : chaque VOLT PC est monté à la main, stress-testé 24 h et expédié sous 24 h.</p>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="/catalogue">Explorer le catalogue</a>
-        <a class="btn btn-ghost" href="/configurateur">Configurer mon PC</a>
+        <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
+        <a class="btn btn-ghost" href="/configurateur">Configurer le mien</a>
       </div>
       <div class="hero-stats">
         <div class="hero-stat"><strong id="statCount">280+</strong><span>références premium</span></div>
@@ -707,7 +706,32 @@ async function viewHome(app) {
         <div class="hero-stat"><strong>4.8/5</strong><span>avis clients</span></div>
       </div>
     </div>
-    <div class="hero-art">${art("gpu", 32)}</div>
+    <div class="hh-stage" id="hhStage">
+      <div class="pc3d" id="pc3d">
+        <div class="pcf front">
+          <div class="pc-fan f1"></div><div class="pc-fan f2"></div><div class="pc-fan f3"></div>
+          <div class="pc-strip"></div>
+        </div>
+        <div class="pcf back"></div>
+        <div class="pcf right"></div>
+        <div class="pcf left"></div>
+        <div class="pcf top"></div>
+        <div class="pcf bottom"></div>
+      </div>
+    </div>
+    <a class="scroll-cue" href="#prebuilts" aria-label="Défiler vers le bas"><span></span></a>
+  </section>
+
+  <!-- Séparateur 3D #1 : traversée en profondeur (zoom / fly-through, sans rotation) -->
+  <div class="sep3d sep-depth" data-sep aria-hidden="true">
+    <div class="depth"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i></div>
+    <div class="sep-label">Assemblé · Testé · Garanti</div>
+  </div>
+
+  <section class="section prebuilts" id="prebuilts">
+    <div class="section-head"><h2>PC prémontés</h2><a href="/configurateur">Composer le mien →</a></div>
+    <p class="pb-sub">Des configurations équilibrées, assemblées et testées par nos soins. Compatibilité vérifiée par notre moteur — il ne reste qu'à brancher.</p>
+    <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton' style='min-height:420px'></div>".repeat(3)}</div>
   </section>
 
   <section class="section">
@@ -737,6 +761,39 @@ async function viewHome(app) {
       <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></div><div><h4>Conseil d'experts</h4><p>Notre configurateur vérifie la compatibilité à votre place.</p></div></div>
       <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><h4>Paiement sécurisé</h4><p>Transactions chiffrées et données protégées.</p></div></div>
     </div>
+  </section>
+
+  <!-- Séparateur 3D #2 : dépliage des garanties (rotateX, effet différent du #1) -->
+  <div class="sep3d sep-fold" data-sep aria-hidden="true">
+    <i style="--i:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></i>
+    <i style="--i:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></i>
+    <i style="--i:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>
+    <i style="--i:3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></i>
+    <i style="--i:4"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></i>
+  </div>
+
+  <section class="section svc-block">
+    <div class="svc-cols">
+      <div>
+        <h4>Services</h4>
+        <a href="/configurateur">Configurateur PC</a>
+        <a href="/catalogue">Catalogue complet</a>
+        <a href="/compte">Mon compte & commandes</a>
+      </div>
+      <div>
+        <h4>Garanties</h4>
+        <span>✓ Montage & test 24 h</span>
+        <span>✓ Garantie 2 ans pièces</span>
+        <span>✓ Retours 30 jours</span>
+        <span>✓ Support 7j/7</span>
+      </div>
+      <div>
+        <h4>Mentions légales</h4>
+        <a href="/catalogue">Conditions générales de vente</a>
+        <a href="/catalogue">Politique de confidentialité</a>
+        <a href="/catalogue">Paiement sécurisé & cookies</a>
+      </div>
+    </div>
   </section>`;
 
   const [cats, featured] = await Promise.all([
@@ -755,6 +812,113 @@ async function viewHome(app) {
     </a>`).join("");
   $("#featuredGrid").innerHTML = `<div class="product-grid">${featured.filter((p) => p.featured).slice(0, 8).map(productCard).join("")}</div>`;
   bindProductCards(app, featured);
+
+  renderPrebuilts();
+  initHome3D();
+}
+
+/* ─── PC prémontés (configs curées, compatibilité vérifiée) ─── */
+const PREBUILTS = [
+  { key: "spark", tier: "Entrée gaming", name: "VOLT Spark", tag: "Gaming 1080p haute fréquence", featured: false,
+    ids: { "Processeur": 141, "Carte graphique": 166, "Mémoire": 80, "Carte mère": 75, "Stockage": 89, "Refroidissement": 102, "Alimentation": 93, "Boîtier": 230 } },
+  { key: "surge", tier: "Performance", name: "VOLT Surge", tag: "1440p haut niveau & création", featured: true,
+    ids: { "Processeur": 138, "Carte graphique": 169, "Mémoire": 81, "Carte mère": 214, "Stockage": 64, "Refroidissement": 105, "Alimentation": 223, "Boîtier": 100 } },
+  { key: "apex", tier: "Ultra haut de gamme", name: "VOLT Apex", tag: "4K ultra & IA", featured: false,
+    ids: { "Processeur": 136, "Carte graphique": 17, "Mémoire": 20, "Carte mère": 28, "Stockage": 204, "Refroidissement": 243, "Alimentation": 225, "Boîtier": 38 } },
+];
+
+async function renderPrebuilts() {
+  const grid = $("#prebuiltGrid");
+  if (!grid) return;
+  let byId;
+  try {
+    const all = await api("/products");
+    byId = new Map(all.map((p) => [p.id, p]));
+  } catch {
+    grid.innerHTML = `<p style="color:var(--text-faint)">Configurations momentanément indisponibles.</p>`;
+    return;
+  }
+  const SHOW = ["Processeur", "Carte graphique", "Mémoire", "Stockage"];
+  grid.innerHTML = PREBUILTS.map((b) => {
+    const parts = Object.values(b.ids).map((id) => byId.get(id)).filter(Boolean);
+    const total = parts.reduce((s, p) => s + p.price, 0);
+    const specs = SHOW.map((role) => {
+      const p = byId.get(b.ids[role]);
+      return p ? `<li><span class="k">${role === "Carte graphique" ? "GPU" : role === "Processeur" ? "CPU" : role}</span><span class="v">${esc(p.brand)} ${esc(p.name)}</span></li>` : "";
+    }).join("");
+    return `<article class="pb-card${b.featured ? " featured" : ""}">
+      <div class="pb-head">
+        <span class="pb-tier">${b.tier}</span>
+        <div class="pb-name">${b.name}</div>
+        <div class="pb-tag">${b.tag}</div>
+        <span class="pb-compat"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Compatibilité confirmée</span>
+      </div>
+      <ul class="pb-specs">${specs}</ul>
+      <div class="pb-foot">
+        <div class="pb-price">${fmt(total)}<small>${parts.length} composants montés & testés</small></div>
+        <button class="btn btn-primary btn-sm" data-pb="${b.key}">Ajouter au panier</button>
+      </div>
+    </article>`;
+  }).join("");
+  grid.querySelectorAll("[data-pb]").forEach((btn) => btn.onclick = () => {
+    const b = PREBUILTS.find((x) => x.key === btn.dataset.pb);
+    let n = 0;
+    Object.values(b.ids).forEach((id) => { const p = byId.get(id); if (p && p.stock > 0) { addToCart(p, 1, true); n++; } });
+    toast(`${b.name} ajouté : ${n} composants 🛒`, "success");
+    openCart();
+  });
+}
+
+/* ─── Animations home : tour PC (hero) + séparateurs 3D pilotés au scroll ───
+   Chaque séparateur reçoit une progression --p (0→1) selon sa traversée du
+   viewport ; le CSS la transforme en effets VARIÉS (profondeur, dépliage),
+   pas seulement en rotation. La tour du hero réagit au scroll + à la souris. */
+function initHome3D() {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const pc = $("#pc3d");
+  const stage = $("#hhStage");
+  const seps = $$("[data-sep]");
+  if (reduce) {                              // accessibilité : état final figé, zéro mouvement
+    seps.forEach((s) => s.style.setProperty("--p", "1"));
+    return;
+  }
+
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const vh = window.innerHeight;
+    // Tour du hero : légère rotation + recul selon le scroll d'entrée
+    if (pc) {
+      const r = pc.getBoundingClientRect();
+      const prog = 1 - (r.top + r.height / 2) / vh;     // ~0 en haut → 1 en bas de l'écran
+      pc.style.setProperty("--rot", `${-26 + prog * 60}deg`);
+    }
+    // Séparateurs : 0 quand le bloc entre par le bas, 1 quand il atteint le centre/haut
+    for (const s of seps) {
+      const r = s.getBoundingClientRect();
+      const p = (vh - r.top) / (vh + r.height);          // 0 → 1 pendant la traversée
+      s.style.setProperty("--p", Math.max(0, Math.min(1, p)).toFixed(3));
+    }
+  };
+  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
+
+  // Tilt souris de la tour (parallaxe douce dans le hero)
+  if (stage && pc) {
+    stage.addEventListener("pointermove", (e) => {
+      const r = stage.getBoundingClientRect();
+      const dx = (e.clientX - r.left) / r.width - 0.5;
+      const dy = (e.clientY - r.top) / r.height - 0.5;
+      pc.style.setProperty("--tiltx", `${(-dy * 10).toFixed(1)}deg`);
+      pc.style.setProperty("--tilty", `${(dx * 16).toFixed(1)}deg`);
+    });
+    stage.addEventListener("pointerleave", () => {
+      pc.style.setProperty("--tiltx", "0deg");
+      pc.style.setProperty("--tilty", "0deg");
+    });
+  }
+  update();
 }
 
 /* ─── Vue : catalogue ─── */
