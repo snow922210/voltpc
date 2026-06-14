@@ -707,17 +707,8 @@ async function viewHome(app) {
       </div>
     </div>
     <div class="hh-stage" id="hhStage">
-      <div class="pc3d" id="pc3d">
-        <div class="pcf front">
-          <div class="pc-fan f1"></div><div class="pc-fan f2"></div><div class="pc-fan f3"></div>
-          <div class="pc-strip"></div>
-        </div>
-        <div class="pcf back"></div>
-        <div class="pcf right"></div>
-        <div class="pcf left"></div>
-        <div class="pcf top"></div>
-        <div class="pcf bottom"></div>
-      </div>
+      <canvas id="heroGL" class="hero-gl" aria-label="Tour PC 3D — glissez pour pivoter, défilez pour assembler"></canvas>
+      <span class="gl-hint">Glissez pour pivoter · défilez pour assembler</span>
     </div>
     <a class="scroll-cue" href="#prebuilts" aria-label="Défiler vers le bas"><span></span></a>
   </section>
@@ -815,6 +806,7 @@ async function viewHome(app) {
 
   renderPrebuilts();
   initHome3D();
+  if (window.initHeroGL) window.initHeroGL($("#heroGL"));   // scène WebGL Three.js
 }
 
 /* ─── PC prémontés (configs curées, compatibilité vérifiée) ─── */

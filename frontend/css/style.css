@@ -1161,3 +1161,11 @@ img { max-width: 100%; }
   .sep-fold i { transform: none; opacity: 1; }
   .sep-depth i { opacity: .5; }
 }
+
+/* ─── Scène WebGL du hero (Three.js) ─── */
+.hh-stage { animation: none; }          /* la scène 3D gère son propre mouvement */
+.hero-gl { width: 100%; height: min(62vh, 580px); display: block; cursor: grab; touch-action: pan-y; }
+.hero-gl:active { cursor: grabbing; }
+.gl-hint { display: block; text-align: center; margin-top: 6px; font-size: .74rem;
+  color: var(--text-faint); letter-spacing: .03em; }
+@media (max-width: 920px) { .hero-gl { height: 44vh; } .gl-hint { display: none; } }
