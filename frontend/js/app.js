@@ -328,6 +328,18 @@ function badgeHtml(badge) {
   return `<span class="badge ${cls}">${esc(badge)}</span>`;
 }
 
+function usefulBadge(p) {
+  if (p.stock > 0 && p.stock <= 5) return "Stock faible";
+  const text = `${p.name} ${p.brand} ${JSON.stringify(p.specs || {})}`.toLowerCase();
+  if (p.category === "gpu" && /(rtx 4070|rtx 5070|rx 7800|rx 8800|rx 9070)/.test(text)) return "Idéal gaming 1440p";
+  if (p.category === "cpu" && /(x3d|ryzen 7|core ultra 7|i7)/.test(text)) return "Très bon en jeu";
+  if (p.category === "ram" && /ddr5/.test(text)) return "Compatible DDR5";
+  if (p.category === "motherboard" && /am5/.test(text)) return "Compatible AM5";
+  if (p.category === "case" && /(silent|silence|quiet|define)/.test(text)) return "Silencieux";
+  if (p.price < 120 && ["ram", "storage", "psu", "cooling"].includes(p.category)) return "Bon rapport perf/prix";
+  return "";
+}
+
 function stockHtml(stock) {
   if (stock <= 0) return `<span class="stock-dot out">● Rupture</span>`;
   if (stock <= 10) return `<span class="stock-dot low">● Plus que ${stock}</span>`;
@@ -342,7 +354,7 @@ function productCard(p) {
     <div class="product-visual" style="--tint:${tintOf(p)}">
       ${art(p.category, hueOf(p))}
       ${imgTag(p)}
-      ${badgeHtml(p.badge)}
+      ${badgeHtml(usefulBadge(p) || p.badge)}
       <div class="card-actions">
         ${heartBtn(p)}
         <button class="cmp-btn ${inCompare(p.id) ? "on" : ""}" data-cmp="${p.id}" title="Comparer" aria-label="Comparer">⇄</button>
@@ -428,6 +440,14 @@ function renderCartDrawer() {
       <div class="row"><span>Livraison</span><span>${t.shipping ? fmt(t.shipping) : '<span class="green">Offerte</span>'}</span></div>
       <div class="row total"><span>Total</span><span>${fmt(t.total)}</span></div>
     </div>
+    <div class="cart-trust">
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 2.9 7.6 7 9 4.1-1.4 7-4.6 7-9V6l-7-3z"/><path d="m9 12 2 2 4-4"/></svg>Paiement sécurisé Stripe</span>
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="17.5" cy="17.5" r="1.5"/></svg>Livraison suivie</span>
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7z"/><path d="M9 3h6M9 21h6M3 9v6M21 9v6"/></svg>Support client</span>
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5"/><path d="M10 13h7M10 17h5"/></svg>Facture PDF</span>
+    </div>
+    ${t.shipping ? `<div class="shipping-meter"><span>${fmt(Math.max(0, 50 - (t.subtotal - t.discount)))} avant livraison offerte</span><b style="width:${Math.min(100, ((t.subtotal - t.discount) / 50) * 100)}%"></b></div>` : ""}
+    <a class="btn btn-ghost btn-block" href="/catalogue" onclick="closeCart()">Continuer mes achats</a>
     <button class="btn btn-primary btn-block" id="checkoutBtn">Passer commande →</button>`;
 
   $("#promoApply").onclick = applyPromo;
@@ -712,6 +732,11 @@ async function render() {
     else if (path.startsWith("produit/")) await viewProduct(app, Number(path.split("/")[1]));
     else if (path === "configurateur") await viewBuilder(app);
     else if (path === "comparer") await viewCompare(app);
+    else if (path === "qui-sommes-nous") viewAbout(app);
+    else if (path === "mentions-legales") viewLegal(app, "mentions");
+    else if (path === "cgv") viewLegal(app, "cgv");
+    else if (path === "confidentialite") viewLegal(app, "privacy");
+    else if (path === "retours-remboursements") viewLegal(app, "returns");
     else if (path === "commande/succes") await viewPaymentSuccess(app, params);
     else if (path === "commande/annulee") viewPaymentCancelled(app);
     else if (path === "commande") await viewCheckout(app);
@@ -817,9 +842,10 @@ async function viewHome(app) {
       </div>
       <div>
         <h4>Mentions légales</h4>
-        <a href="/catalogue">Conditions générales de vente</a>
-        <a href="/catalogue">Politique de confidentialité</a>
-        <a href="/catalogue">Paiement sécurisé & cookies</a>
+        <a href="/mentions-legales">Mentions légales</a>
+        <a href="/cgv">Conditions générales de vente</a>
+        <a href="/confidentialite">Politique de confidentialité</a>
+        <a href="/retours-remboursements">Retours & remboursement</a>
       </div>
     </div>
   </section>`;
@@ -895,6 +921,103 @@ async function renderPrebuilts() {
     toast(`${b.name} ajouté : ${n} composants 🛒`, "success");
     openCart();
   });
+}
+
+/* ─── Pages de confiance ─── */
+const trustIcon = (path) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
+
+function trustStrip() {
+  const items = [
+    ["Paiement sécurisé Stripe", "M12 3 5 6v5c0 4.4 2.9 7.6 7 9 4.1-1.4 7-4.6 7-9V6l-7-3z"],
+    ["Retours 30 jours", "M4 7h10a5 5 0 1 1-4 8M4 7l4-4M4 7l4 4"],
+    ["Support client", "M5 18v-5a7 7 0 0 1 14 0v5M5 18h4v-6H5v6zm10 0h4v-6h-4v6z"],
+    ["Facture PDF", "M7 3h8l4 4v14H7z"],
+    ["Livraison suivie", "M3 7h11v8H3zM14 10h4l3 3v2h-7z"],
+  ];
+  return `<div class="trust-strip">${items.map(([label, path]) =>
+    `<span>${trustIcon(path)}${label}</span>`).join("")}</div>`;
+}
+
+function viewAbout(app) {
+  app.innerHTML = `
+  <section class="content-page about-page">
+    <nav class="breadcrumb"><a href="/">Accueil</a> / Qui sommes-nous</nav>
+    <div class="content-hero">
+      <span class="eyebrow">Boutique française</span>
+      <h1>VOLT PC aide à choisir les bons composants, sans jargon inutile.</h1>
+      <p>Nous sélectionnons des cartes graphiques, processeurs, alimentations, boîtiers et périphériques pensés pour des configurations fiables, équilibrées et faciles à faire évoluer.</p>
+    </div>
+    ${trustStrip()}
+    <div class="story-grid">
+      <article><h2>Notre rôle</h2><p>Rendre l'achat PC plus clair : des fiches lisibles, des conseils de compatibilité, un configurateur guidé et un panier qui garde les informations importantes sous les yeux.</p></article>
+      <article><h2>Notre méthode</h2><p>Chaque recommandation met en avant l'usage réel : gaming 1080p, 1440p, création vidéo, silence, évolutivité ou budget maîtrisé.</p></article>
+      <article><h2>Expédition</h2><p>Les commandes sont préparées en France, avec livraison suivie, facture PDF et support client pour les questions de choix ou d'après-vente.</p></article>
+    </div>
+    <div class="content-actions">
+      <a class="btn btn-primary" href="/configurateur">Configurer un PC</a>
+      <a class="btn btn-ghost" href="/catalogue">Voir le catalogue</a>
+    </div>
+  </section>`;
+}
+
+const LEGAL_PAGES = {
+  mentions: {
+    title: "Mentions légales",
+    intro: "Informations d'identification et de contact de la boutique VOLT PC.",
+    sections: [
+      ["Éditeur du site", "VOLT PC, boutique française de composants PC. Les informations société définitives peuvent être renseignées depuis la configuration de production."],
+      ["Contact", "Pour toute question : support@voltpc.fr. Les demandes liées aux commandes doivent préciser le numéro de commande."],
+      ["Hébergement", "Site hébergé sur Render en démonstration, avec service applicatif FastAPI et base de données de développement."],
+      ["Propriété intellectuelle", "Les textes, interfaces et éléments de marque VOLT PC sont protégés. Les photos produits référencées indiquent leurs crédits dans le fichier dédié."],
+    ],
+  },
+  cgv: {
+    title: "Conditions générales de vente",
+    intro: "Résumé clair des conditions d'achat, de paiement, de livraison et de garantie.",
+    sections: [
+      ["Commande", "La commande est confirmée après validation du paiement. Les prix sont recalculés côté serveur pour éviter toute modification côté navigateur."],
+      ["Paiement", "Le paiement est traité par Stripe Checkout. Les coordonnées bancaires ne transitent jamais par les serveurs VOLT PC."],
+      ["Livraison", "La livraison est suivie et offerte dès 50 € d'achat après remise. Les délais exacts sont indiqués lors de la commande."],
+      ["Garantie", "Les produits bénéficient de la garantie constructeur applicable et d'un support client pour le diagnostic initial."],
+    ],
+  },
+  privacy: {
+    title: "Politique de confidentialité",
+    intro: "Les données collectées servent uniquement au fonctionnement de la boutique et au suivi des commandes.",
+    sections: [
+      ["Données collectées", "Compte client, adresse de livraison, panier, commandes, avis et préférences nécessaires au service."],
+      ["Utilisation", "Préparation des commandes, facturation, support client, sécurité du compte et amélioration de l'expérience d'achat."],
+      ["Paiement", "Les données de paiement sont gérées par Stripe. VOLT PC ne stocke pas les numéros de carte bancaire."],
+      ["Vos droits", "Vous pouvez demander l'accès, la correction ou la suppression de vos données via support@voltpc.fr."],
+    ],
+  },
+  returns: {
+    title: "Retours et remboursement",
+    intro: "Un cadre simple pour retourner un produit et suivre le remboursement.",
+    sections: [
+      ["Délai", "Vous disposez de 30 jours après réception pour demander un retour, sous réserve d'un produit complet et en bon état."],
+      ["Procédure", "Contactez le support avec le numéro de commande, le produit concerné et le motif du retour."],
+      ["Remboursement", "Après réception et contrôle, le remboursement est effectué sur le moyen de paiement initial."],
+      ["Exceptions", "Les produits endommagés, incomplets ou personnalisés peuvent nécessiter une vérification complémentaire."],
+    ],
+  },
+};
+
+function viewLegal(app, key) {
+  const page = LEGAL_PAGES[key] || LEGAL_PAGES.mentions;
+  app.innerHTML = `
+  <section class="content-page legal-page">
+    <nav class="breadcrumb"><a href="/">Accueil</a> / ${page.title}</nav>
+    <div class="content-hero compact">
+      <span class="eyebrow">Confiance</span>
+      <h1>${page.title}</h1>
+      <p>${page.intro}</p>
+    </div>
+    <div class="legal-grid">
+      ${page.sections.map(([title, text]) => `<article><h2>${title}</h2><p>${text}</p></article>`).join("")}
+    </div>
+    ${trustStrip()}
+  </section>`;
 }
 
 /* ─── Animations home : tour PC (hero) + séparateurs 3D pilotés au scroll ───
@@ -1083,7 +1206,7 @@ async function viewProduct(app, id) {
       <div class="product-page-visual" style="--tint:${tintOf(p)}">
         ${art(p.category, hueOf(p))}
         <img class="pimg" id="ppMain" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" onerror="this.remove(); cleanupProductThumbs()">
-        ${badgeHtml(p.badge)}
+        ${badgeHtml(usefulBadge(p) || p.badge)}
       </div>
       <div class="pp-thumbs" id="ppThumbs">
         ${[1,2,3].map((n) => `
@@ -1545,6 +1668,7 @@ async function viewCheckout(app) {
       ${t.discount ? `<div class="summary-line"><span>Code ${esc(state.promo.code)}</span><span style="color:var(--green)">−${fmt(t.discount)}</span></div>` : ""}
       <div class="summary-line"><span>Livraison</span><span>${t.shipping ? fmt(t.shipping) : "Offerte"}</span></div>
       <div class="summary-line"><span>Total</span><span>${fmt(t.total)}</span></div>
+      ${trustStrip()}
     </div>
   </div>`;
 

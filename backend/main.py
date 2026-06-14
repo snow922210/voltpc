@@ -1961,6 +1961,50 @@ def _home_ssr() -> str:
     )
 
 
+STATIC_PAGES = {
+    "qui-sommes-nous": (
+        "Qui sommes-nous — VOLT PC",
+        "VOLT PC, boutique française de composants PC : conseil configuration, composants PC, expédition suivie et support client.",
+        "Qui sommes-nous",
+        "VOLT PC est une boutique française de composants PC pensée pour rendre le choix d'une configuration plus clair : catalogue lisible, conseil compatibilité, configurateur PC, paiement sécurisé et livraison suivie.",
+    ),
+    "mentions-legales": (
+        "Mentions légales — VOLT PC",
+        "Mentions légales de VOLT PC : éditeur, contact, hébergement et propriété intellectuelle.",
+        "Mentions légales",
+        "Informations d'identification, contact, hébergement et propriété intellectuelle de la boutique VOLT PC.",
+    ),
+    "cgv": (
+        "Conditions générales de vente — VOLT PC",
+        "Conditions générales de vente VOLT PC : commande, paiement Stripe, livraison, garantie et support.",
+        "Conditions générales de vente",
+        "Résumé des conditions d'achat, de paiement sécurisé Stripe, de livraison suivie, de garantie et de support client.",
+    ),
+    "confidentialite": (
+        "Politique de confidentialité — VOLT PC",
+        "Politique de confidentialité VOLT PC : données de compte, commandes, paiement et droits client.",
+        "Politique de confidentialité",
+        "Les données collectées servent au fonctionnement de la boutique, au suivi des commandes, à la facturation, au support et à la sécurité du compte.",
+    ),
+    "retours-remboursements": (
+        "Retours et remboursement — VOLT PC",
+        "Retours VOLT PC : délai de 30 jours, procédure de retour et remboursement après contrôle.",
+        "Retours et remboursement",
+        "Les retours peuvent être demandés sous 30 jours après réception pour les produits complets et en bon état.",
+    ),
+}
+
+
+def _static_page_ssr(heading: str, text: str) -> str:
+    return (
+        '<section class="content-page">'
+        f'<nav class="breadcrumb"><a href="/">Accueil</a> / {_E(heading)}</nav>'
+        f'<h1>{_E(heading)}</h1>'
+        f'<p>{_E(text)}</p>'
+        '</section>'
+    )
+
+
 @app.get("/{full_path:path}", include_in_schema=False)
 def spa_fallback(full_path: str, request: Request):
     candidate = (FRONTEND_DIR / full_path).resolve()
@@ -1973,6 +2017,13 @@ def spa_fallback(full_path: str, request: Request):
 
     tpl = INDEX_FILE.read_text(encoding="utf-8")
     seg = full_path.strip("/")
+
+    if seg in STATIC_PAGES:
+        title, desc, heading, text = STATIC_PAGES[seg]
+        return _html(_render(
+            tpl, title=title, desc=desc, canonical=f"{SITE_URL}/{seg}",
+            og_title=title, og_desc=desc, main=_static_page_ssr(heading, text),
+        ))
 
     # Fiche produit ------------------------------------------------------
     if seg.startswith("produit/"):
