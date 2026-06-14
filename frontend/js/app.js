@@ -795,6 +795,14 @@ function logout() {
 
 /* ─── Routeur (URLs réelles via History API) ─── */
 function parsePath() {
+  // Retour Stripe : l'URL revient sous la forme "/#/commande/succes?session_id=…".
+  // On lit alors la route ET la query depuis le hash ; sinon depuis le chemin.
+  const hash = location.hash;
+  if (hash.startsWith("#/")) {
+    const [rawPath, query] = hash.slice(2).split("?");
+    const path = rawPath.replace(/^\/+/, "").replace(/\/+$/, "");
+    return { path, params: new URLSearchParams(query || "") };
+  }
   // "/produit/5" → path "produit/5" ; query depuis location.search
   const path = location.pathname.replace(/^\/+/, "").replace(/\/+$/, "");
   return { path, params: new URLSearchParams(location.search) };
@@ -2714,7 +2722,7 @@ function setupTheme() {
     if (!reduce) {
       const root = document.documentElement;
       root.classList.add("theme-anim");
-      setTimeout(() => root.classList.remove("theme-anim"), 450);
+      setTimeout(() => root.classList.remove("theme-anim"), 320);
     }
     apply(next);
   };

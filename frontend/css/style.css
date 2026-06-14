@@ -1427,9 +1427,9 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
 /* Transition douce lors du basculement de thème (classe ajoutée ~0,45 s par JS).
    Limitée à ce court instant → aucun coût sur les survols/animations habituels.
    Respecte « prefers-reduced-motion » (la classe n'est alors jamais ajoutée). */
-.theme-anim, .theme-anim * {
-  transition: background-color 0.4s ease, color 0.4s ease,
-              border-color 0.4s ease, fill 0.4s ease, stroke 0.4s ease !important;
+.theme-anim, .theme-anim *:not(canvas) {
+  transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease !important;
+  transition-timing-function: ease !important;
 }
 /* Petit clin d'œil : l'icône soleil/lune pivote au changement. */
 #themeBtn svg { transition: transform 0.45s ease; }
