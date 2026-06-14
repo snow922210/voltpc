@@ -308,7 +308,9 @@ async function validateProductGallery() {
   }
 
   const first = $("#ppThumbs .pp-thumb");
-  if (main && first && !first.classList.contains("active")) {
+  if (!first) {
+    if (main) main.remove();
+  } else if (main && !first.classList.contains("active")) {
     main.src = first.dataset.src;
     $$("#ppThumbs .pp-thumb").forEach((b) => b.classList.toggle("active", b === first));
   }

@@ -15,7 +15,7 @@ de fichier.
     À remplacer par des images sous licence avant une exploitation commerciale.
 
 Usage :
-    python fetch_product_images.py                 # tous les produits, 4 images
+    python fetch_product_images.py                 # tous les produits, 3 images
     python fetch_product_images.py --limit 5       # 5 premiers produits (test)
     python fetch_product_images.py --per 3         # 3 images par produit
     python fetch_product_images.py --only-missing  # ignore les produits déjà faits
@@ -287,7 +287,7 @@ def build_query(name: str, brand: str, category: str) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0, help="nb de produits (0 = tous)")
-    ap.add_argument("--per", type=int, default=4, help="images par produit")
+    ap.add_argument("--per", type=int, default=3, help="images par produit")
     ap.add_argument("--only-missing", action="store_true", help="ignore les produits déjà traités")
     ap.add_argument("--categories", default="", help="catégories à traiter (séparées par virgule)")
     ap.add_argument("--ids", default="", help="ids précis à traiter (séparés par virgule)")
