@@ -12,8 +12,10 @@ window.initHeroGL = function initHeroGL(canvas) {
 
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   } catch (e) { return; }                         // pas de WebGL → on laisse le fond
+  // Évite un écran figé si le navigateur récupère le contexte GPU.
+  canvas.addEventListener("webglcontextlost", (e) => e.preventDefault(), false);
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.setClearColor(0x000000, 0);
 
@@ -42,13 +44,14 @@ window.initHeroGL = function initHeroGL(canvas) {
   scene.add(group);
 
   const parts = [];   // { mesh, asm:Vector3, exp:Vector3, expRot:Vector3 }
+  const EXPLODE = 0.6;     // amplitude de l'éclatement (pour rester dans le cadre)
   function add(mesh, asm, expOffset, expRot) {
     mesh.position.copy(asm);
     group.add(mesh);
     parts.push({
       mesh,
       asm: asm.clone(),
-      exp: asm.clone().add(expOffset),
+      exp: asm.clone().add(expOffset.clone().multiplyScalar(EXPLODE)),
       expRot: expRot || new THREE.Vector3(0, 0, 0),
     });
     return mesh;
@@ -126,18 +129,24 @@ window.initHeroGL = function initHeroGL(canvas) {
   window.addEventListener("pointerup", up);
 
   // ─── Progression d'assemblage pilotée par le scroll ───
+  // La scène est épinglée (sticky) dans une section haute .home-hero : on lit
+  // l'avancée DANS cette section → la transition se déroule à l'écran, visible.
+  const root = canvas.closest(".home-hero") || canvas;
   let prog = 0;
   const readProgress = () => {
-    const top = -(canvas.getBoundingClientRect().top);          // px scrollés depuis le hero
-    prog = Math.max(0, Math.min(1, top / (innerHeight * 0.85)));
+    const r = root.getBoundingClientRect();
+    const total = r.height - innerHeight;
+    prog = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 0;
   };
   addEventListener("scroll", readProgress, { passive: true });
 
   const ease = (t) => 1 - Math.pow(1 - t, 3);                   // easeOutCubic
 
+  let lastW = 0, lastH = 0;
   function resize() {
     const w = canvas.clientWidth || canvas.parentElement.clientWidth || 1;
     const h = canvas.clientHeight || w;
+    lastW = canvas.clientWidth; lastH = canvas.clientHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
   }
@@ -157,6 +166,8 @@ window.initHeroGL = function initHeroGL(canvas) {
       return;
     }
     requestAnimationFrame(frame);
+    if (canvas.clientWidth !== lastW || canvas.clientHeight !== lastH) resize();   // corrige l'aspect
+    readProgress();             // progression calculée chaque frame (fiable, fluide)
     const dt = clock.getDelta();
     const t = clock.elapsedTime;
     const e = ease(prog);
@@ -184,8 +195,9 @@ window.initHeroGL = function initHeroGL(canvas) {
     group.rotation.y = rotY;
     group.rotation.x = rotX;
 
-    // léger recul caméra quand assemblé (on “range” la machine)
-    camera.position.z = 20 - e * 2.5;
+    // caméra : large quand c'est éclaté (on voit tout), se rapproche à l'assemblage
+    camera.position.z = 23 - e * 7;
+    camera.position.y = 1.5 - e * 1.0;
     camera.lookAt(0, 0, 0);
 
     renderer.render(scene, camera);

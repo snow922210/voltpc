@@ -692,25 +692,27 @@ async function render() {
 async function viewHome(app) {
   app.innerHTML = `
   <section class="home-hero" id="homeHero">
-    <div class="hh-copy">
-      <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
-      <h1>Assemblez la machine<br>de <span class="grad">vos rêves</span></h1>
-      <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5 et refroidissement maîtrisé : chaque VOLT PC est monté à la main, stress-testé 24 h et expédié sous 24 h.</p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
-        <a class="btn btn-ghost" href="/configurateur">Configurer le mien</a>
+    <div class="hero-pin">
+      <div class="hh-copy">
+        <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
+        <h1>Assemblez la machine<br>de <span class="grad">vos rêves</span></h1>
+        <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5 et refroidissement maîtrisé : chaque VOLT PC est monté à la main, stress-testé 24 h et expédié sous 24 h.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
+          <a class="btn btn-ghost" href="/configurateur">Configurer le mien</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong id="statCount">280+</strong><span>références premium</span></div>
+          <div class="hero-stat"><strong>24 h</strong><span>expédition éclair</span></div>
+          <div class="hero-stat"><strong>4.8/5</strong><span>avis clients</span></div>
+        </div>
       </div>
-      <div class="hero-stats">
-        <div class="hero-stat"><strong id="statCount">280+</strong><span>références premium</span></div>
-        <div class="hero-stat"><strong>24 h</strong><span>expédition éclair</span></div>
-        <div class="hero-stat"><strong>4.8/5</strong><span>avis clients</span></div>
+      <div class="hh-stage" id="hhStage">
+        <canvas id="heroGL" class="hero-gl" aria-label="Tour PC 3D — glissez pour pivoter, défilez pour assembler"></canvas>
+        <span class="gl-hint">Glissez pour pivoter · défilez pour assembler</span>
       </div>
+      <a class="scroll-cue" aria-hidden="true"><span></span></a>
     </div>
-    <div class="hh-stage" id="hhStage">
-      <canvas id="heroGL" class="hero-gl" aria-label="Tour PC 3D — glissez pour pivoter, défilez pour assembler"></canvas>
-      <span class="gl-hint">Glissez pour pivoter · défilez pour assembler</span>
-    </div>
-    <a class="scroll-cue" href="#prebuilts" aria-label="Défiler vers le bas"><span></span></a>
   </section>
 
   <!-- Séparateur 3D #1 : traversée en profondeur (zoom / fly-through, sans rotation) -->
