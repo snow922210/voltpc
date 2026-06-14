@@ -202,9 +202,9 @@ def fetch_for_product(pid: int, query: str, per: int, brand: str = "",
     brand_l = re.sub(r"[^a-z0-9]", "", brand.lower())
     tokens = model_tokens(name) if name else []
     strict = [r for r in candidates if _relevant(r, tokens, brand_l)]
-    # Garde-fou : si rien ne passe le filtre strict, on conserve au moins la
-    # meilleure image (résultat n°1, presque toujours le bon modèle) plutôt que zéro.
-    candidates = strict if strict else candidates[:1]
+    # Si rien ne passe le filtre strict, on ne télécharge rien. Une image absente
+    # vaut mieux qu'une image fausse (ex. écran à la place d'un processeur).
+    candidates = strict
     # On privilégie les images hébergées par le FABRICANT (rendu propre, risque
     # juridique le plus faible) : on les place en tête sans casser l'ordre du reste.
     brand_l = re.sub(r"[^a-z0-9]", "", brand.lower())

@@ -286,6 +286,35 @@ function cleanupProductThumbs() {
   if (items.length <= 1) thumbs.style.display = "none";
 }
 
+async function validateProductGallery() {
+  const thumbs = $("#ppThumbs");
+  const main = $("#ppMain");
+  if (!thumbs) return;
+  const seen = new Set();
+
+  for (const btn of $$(".pp-thumb", thumbs)) {
+    try {
+      const res = await fetch(btn.dataset.src, { cache: "force-cache" });
+      if (!res.ok) throw new Error("missing");
+      const blob = await res.blob();
+      if (blob.size < 10000) throw new Error("too-small");
+      const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await blob.arrayBuffer())))
+        .map((b) => b.toString(16).padStart(2, "0")).join("");
+      if (seen.has(hash)) throw new Error("duplicate");
+      seen.add(hash);
+    } catch {
+      btn.remove();
+    }
+  }
+
+  const first = $("#ppThumbs .pp-thumb");
+  if (main && first && !first.classList.contains("active")) {
+    main.src = first.dataset.src;
+    $$("#ppThumbs .pp-thumb").forEach((b) => b.classList.toggle("active", b === first));
+  }
+  cleanupProductThumbs();
+}
+
 function stars(rating) {
   const full = Math.round(rating);
   return `<span class="stars">${"★".repeat(full)}${"☆".repeat(5 - full)}</span>`;
@@ -1117,6 +1146,7 @@ async function viewProduct(app, id) {
   });
   // Masque la rangée de miniatures s'il n'en reste qu'une (ou zéro) après chargement.
   setTimeout(cleanupProductThumbs, 1200);
+  validateProductGallery();
   $("#ppFav").onclick = async () => {
     await toggleFavorite(p.id);
     const on = state.favorites.has(p.id);
