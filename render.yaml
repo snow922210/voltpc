@@ -5,6 +5,14 @@
 # re-remplie : 280 produits + compte démo) à chaque démarrage/redéploiement.
 # Parfait pour une démo. Pour conserver commandes/comptes, passer en plan payant
 # et ajouter un bloc « disk: { mountPath: /data, sizeGB: 1 } » + VOLTPC_DATA_DIR=/data.
+#
+# ─── Base persistante PostgreSQL (recommandé pour une vraie boutique) ───
+# Pour des données qui SURVIVENT aux redéploiements, sans disque payant :
+#   1. Dé-commenter le bloc « databases: » en bas de ce fichier.
+#   2. Dé-commenter la variable DATABASE_URL ci-dessous (fromDatabase).
+#   3. Pousser : Render crée la base et l'app bascule automatiquement sur Postgres
+#      (le code détecte DATABASE_URL ; sans elle, il reste sur SQLite).
+# La base est seedée au 1er démarrage (280 produits + compte démo).
 
 services:
   - type: web
@@ -27,3 +35,15 @@ services:
       # (https://voltpc-xxxx.onrender.com) si tu veux tester le paiement Stripe.
       - key: PUBLIC_BASE_URL
         sync: false
+      # ─ Persistance Postgres : dé-commenter pour activer (voir en-tête) ─
+      # - key: DATABASE_URL
+      #   fromDatabase:
+      #     name: voltpc-db
+      #     property: connectionString
+
+# ─── Base de données managée (dé-commenter avec DATABASE_URL ci-dessus) ───
+# databases:
+#   - name: voltpc-db
+#     plan: free
+#     databaseName: voltpc
+#     user: voltpc

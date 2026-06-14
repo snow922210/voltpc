@@ -26,6 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from database import IS_PG, PG_SCHEMA, connect as db_connect
 from invoice import generate_invoice_pdf
 from perf import perf_score
 from mailer import (
@@ -86,9 +87,13 @@ def load_env() -> None:
 
 @contextmanager
 def db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
+    # PostgreSQL si DATABASE_URL est défini (production), sinon SQLite (local).
+    if IS_PG:
+        conn = db_connect()
+    else:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
     try:
         yield conn
         conn.commit()
@@ -97,6 +102,10 @@ def db():
 
 
 def init_db() -> None:
+    # PostgreSQL : schéma complet créé en une fois, puis seeding partagé.
+    if IS_PG:
+        _init_db_pg()
+        return
     with db() as conn:
         conn.executescript(
             """
@@ -235,42 +244,55 @@ def init_db() -> None:
             conn.execute("ALTER TABLE reviews ADD COLUMN verified INTEGER NOT NULL DEFAULT 0")
         if "updated_at" not in review_cols:
             conn.execute("ALTER TABLE reviews ADD COLUMN updated_at REAL")
-        if conn.execute("SELECT COUNT(*) FROM products").fetchone()[0] == 0:
-            for p in SEED_PRODUCTS:
+        _seed_db(conn)
+
+
+def _init_db_pg() -> None:
+    """Création du schéma PostgreSQL (toutes colonnes) puis seeding partagé."""
+    with db() as conn:
+        for stmt in PG_SCHEMA:
+            conn.execute(stmt)
+        _seed_db(conn)
+
+
+def _seed_db(conn) -> None:
+    """Insertion initiale (produits, avis, compte démo). Portable SQLite / PostgreSQL."""
+    if conn.execute("SELECT COUNT(*) FROM products").fetchone()[0] == 0:
+        for p in SEED_PRODUCTS:
+            conn.execute(
+                """INSERT INTO products
+                   (name, brand, category, price, old_price, stock, rating,
+                    rating_count, featured, badge, description, specs)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    p["name"], p["brand"], p["category"], p["price"],
+                    p["old_price"], p["stock"], p["rating"], 0,
+                    1 if p["featured"] else 0, p["badge"],
+                    p["description"], json.dumps(p["specs"], ensure_ascii=False),
+                ),
+            )
+        for product_name, author, rating, comment in SEED_REVIEWS:
+            row = conn.execute(
+                "SELECT id FROM products WHERE name = ?", (product_name,)
+            ).fetchone()
+            if row:
                 conn.execute(
-                    """INSERT INTO products
-                       (name, brand, category, price, old_price, stock, rating,
-                        rating_count, featured, badge, description, specs)
-                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
-                    (
-                        p["name"], p["brand"], p["category"], p["price"],
-                        p["old_price"], p["stock"], p["rating"], 0,
-                        1 if p["featured"] else 0, p["badge"],
-                        p["description"], json.dumps(p["specs"], ensure_ascii=False),
-                    ),
+                    "INSERT INTO reviews (product_id, author, rating, comment, created_at)"
+                    " VALUES (?,?,?,?,?)",
+                    (row["id"], author, rating, comment, time.time()),
                 )
-            for product_name, author, rating, comment in SEED_REVIEWS:
-                row = conn.execute(
-                    "SELECT id FROM products WHERE name = ?", (product_name,)
-                ).fetchone()
-                if row:
-                    conn.execute(
-                        "INSERT INTO reviews (product_id, author, rating, comment, created_at)"
-                        " VALUES (?,?,?,?,?)",
-                        (row["id"], author, rating, comment, time.time()),
-                    )
-            conn.execute(
-                "UPDATE products SET rating_count ="
-                " (SELECT COUNT(*) FROM reviews WHERE reviews.product_id = products.id)"
-            )
-        if conn.execute("SELECT 1 FROM users WHERE email = 'demo@voltpc.fr'").fetchone() is None:
-            salt = secrets.token_bytes(16)
-            conn.execute(
-                "INSERT INTO users (email, name, password_hash, salt, created_at, email_verified)"
-                " VALUES (?,?,?,?,?,1)",
-                ("demo@voltpc.fr", "Client Démo",
-                 hash_password("demo1234", salt), salt.hex(), time.time()),
-            )
+        conn.execute(
+            "UPDATE products SET rating_count ="
+            " (SELECT COUNT(*) FROM reviews WHERE reviews.product_id = products.id)"
+        )
+    if conn.execute("SELECT 1 FROM users WHERE email = 'demo@voltpc.fr'").fetchone() is None:
+        salt = secrets.token_bytes(16)
+        conn.execute(
+            "INSERT INTO users (email, name, password_hash, salt, created_at, email_verified)"
+            " VALUES (?,?,?,?,?,1)",
+            ("demo@voltpc.fr", "Client Démo",
+             hash_password("demo1234", salt), salt.hex(), time.time()),
+        )
 
 
 # ─── Sécurité ────────────────────────────────────────────────────────
