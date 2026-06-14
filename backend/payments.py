@@ -107,13 +107,6 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
 
         params = dict(
             mode="payment",
-            # Moyens de paiement proposés sur la page Stripe.
-            #   • "card"   → carte bancaire. Apple Pay / Google Pay s'affichent
-            #     AUTOMATIQUEMENT avec ce type, sur appareil compatible et domaine
-            #     HTTPS vérifié (rien à coder en plus pour les ajouter plus tard).
-            #   • "paypal" → nécessite l'activation de PayPal dans le Dashboard
-            #     Stripe (Réglages › Moyens de paiement) ; compatible EUR.
-            payment_method_types=["card", "paypal"],
             line_items=line_items,
             customer_email=user["email"],
             client_reference_id=str(order_id),
@@ -122,6 +115,15 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
             success_url=f"{_base_url()}/#/commande/succes?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{_base_url()}/#/commande/annulee?order_id={order_id}",
         )
+
+        # Moyens de paiement : par défaut, on laisse Stripe afficher ceux ACTIVÉS
+        # dans le Dashboard (carte + Apple/Google Pay automatiques ; PayPal s'il
+        # est activé). Imposer une liste en dur faisait échouer la session quand
+        # un moyen (ex. PayPal) n'était pas activé en mode live. Pour forcer une
+        # liste précise : variable STRIPE_PAYMENT_METHODS="card,paypal".
+        methods = os.environ.get("STRIPE_PAYMENT_METHODS", "").strip()
+        if methods:
+            params["payment_method_types"] = [m.strip() for m in methods.split(",") if m.strip()]
 
         # Frais de port (montant fixe) côté Stripe.
         if computed["shipping"] > 0:
