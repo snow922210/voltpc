@@ -5,9 +5,6 @@ PROMO_CODES = {
     "VOLT10": {"percent": 10, "label": "-10% sur tout le site"},
     "GAMER15": {"percent": 15, "label": "-15% offre gamer"},
     "SUMMER20": {"percent": 20, "label": "-20% soldes d'été"},
-    # ⚠️ TEMPORAIRE — code de test paiement live (-95%). À RETIRER après le test :
-    # tant qu'il est en place, n'importe quel visiteur peut l'utiliser.
-    "TESTLIVE95": {"percent": 95, "label": "Test paiement live -95% (temporaire)"},
 }
 
 SEED_PRODUCTS = [
