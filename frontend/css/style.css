@@ -1108,19 +1108,15 @@ img { max-width: 100%; }
    Home v3.1 : entrée plein écran immersive + séparateurs 3D variés
    (profondeur / dépliage — au-delà de la simple rotation)
    ════════════════════════════════════════════════════════════════ */
-/* Zone de scroll haute : la scène reste épinglée pendant qu'on la traverse,
-   ce qui rend la transition d'assemblage RÉELLEMENT visible. */
-.home-hero { position: relative; height: 280vh; }
-.hero-pin { position: sticky; top: 0; height: 100vh; display: grid;
-  grid-template-columns: 1.05fr .95fr; align-items: center; gap: 40px;
-  padding: 8px 0; perspective: 1400px; overflow: hidden; }
-.hh-copy h1 { font-size: clamp(2.6rem, 6vw, 4.4rem); line-height: 1.02; margin-bottom: 20px; }
-.hh-copy p { color: var(--text-dim); font-size: 1.1rem; line-height: 1.7; max-width: 480px; margin-bottom: 26px; }
-.hh-stage { position: relative; display: grid; place-items: center; height: 100%; }
-.scroll-cue { position: absolute; left: 50%; bottom: 16px; translate: -50% 0; width: 26px; height: 42px;
-  border: 2px solid var(--border-strong); border-radius: 16px; display: grid; place-items: start center; padding-top: 7px; }
-.scroll-cue span { width: 4px; height: 8px; border-radius: 4px; background: var(--accent); animation: cue 1.5s ease-in-out infinite; }
-@keyframes cue { 0% { opacity: 0; transform: translateY(-4px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
+/* Section « build » : zone de scroll haute, la scène 3D reste épinglée pendant
+   qu'on la traverse → l'assemblage se déroule réellement à l'écran. */
+.build-scroll { position: relative; margin: 56px 0; }
+.build-pin { display: grid; grid-template-columns: 0.82fr 1.18fr; align-items: center; gap: 32px;
+  min-height: 84vh; }
+.build-copy h2 { font-size: clamp(1.9rem, 3.6vw, 3rem); line-height: 1.05; margin: 10px 0 16px; }
+.build-copy h2 .grad { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.build-copy p { color: var(--text-dim); font-size: 1.05rem; line-height: 1.7; max-width: 420px; margin-bottom: 18px; }
+.build-stage { position: relative; height: 100%; display: grid; place-items: center; }
 
 /* Séparateur #1 — fly-through en profondeur (translateZ + zoom, sans rotation) */
 .sep3d { position: relative; margin: 8px 0; pointer-events: none; }
@@ -1148,23 +1144,45 @@ img { max-width: 100%; }
   padding: 30px 32px; box-shadow: var(--shadow-xs); display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
 
 @media (max-width: 920px) {
-  .home-hero { grid-template-columns: 1fr; text-align: center; min-height: auto; padding-top: 12px; }
-  .hh-copy p { margin-inline: auto; }
-  .hh-stage { margin-top: 24px; }
-  .scroll-cue { display: none; }
+  .build-pin { grid-template-columns: 1fr; gap: 8px; min-height: auto; }
+  .build-copy { text-align: center; }
+  .build-copy p { margin-inline: auto; }
   .svc-block .svc-cols { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hh-stage { animation: none; }
-  .scroll-cue span { animation: none; }
   .sep-fold i { transform: none; opacity: 1; }
   .sep-depth i { opacity: .5; }
 }
 
-/* ─── Scène WebGL du hero (Three.js) ─── */
-.hh-stage { animation: none; }          /* la scène 3D gère son propre mouvement */
-.hero-gl { width: 100%; height: min(78vh, 680px); display: block; cursor: grab; touch-action: pan-y; }
+/* ─── Canvas WebGL (Three.js) ─── */
+.hero-gl { width: 100%; height: min(82vh, 720px); display: block; cursor: grab; touch-action: pan-y; }
 .hero-gl:active { cursor: grabbing; }
-.gl-hint { display: block; text-align: center; margin-top: 6px; font-size: .74rem;
+.gl-hint { display: inline-block; margin-top: 6px; font-size: .74rem;
   color: var(--text-faint); letter-spacing: .03em; }
-@media (max-width: 920px) { .hero-gl { height: 44vh; } .gl-hint { display: none; } }
+@media (max-width: 920px) { .hero-gl { height: 52vh; } }
+
+/* ════════════════════════════════════════════════════════════════
+   Animations 3D « zoom » entre sections (pilotées par --p au scroll)
+   ════════════════════════════════════════════════════════════════ */
+.sep-zoom { position: relative; height: 82vh; display: grid; place-items: center;
+  perspective: 700px; overflow: hidden; margin: 6px 0; pointer-events: none; }
+.zoom-rings { position: absolute; inset: 0; display: grid; place-items: center; transform-style: preserve-3d; }
+.zoom-rings i { position: absolute; width: 190px; height: 190px; border-radius: 50%;
+  border: 2px solid rgba(37,99,235,.42); box-shadow: 0 0 44px rgba(37,99,235,.22);
+  transform: translateZ(calc(-740px + var(--p,0) * 1040px - var(--i) * 120px)) scale(calc(.4 + var(--p,0) * 2));
+  opacity: clamp(0, calc(var(--p,0) * 1.4 - var(--i) * .1), .7); }
+.zoom-core { position: relative; display: grid; place-items: center; gap: 14px; text-align: center;
+  transform: translateZ(calc(var(--p,0) * 120px)) scale(calc(.34 + var(--p,0) * 1.05));
+  opacity: clamp(0, calc(var(--p,0) * 1.7 - .25), 1); }
+.zoom-core svg { width: clamp(60px, 8.5vw, 116px); height: auto; color: var(--accent);
+  filter: drop-shadow(0 10px 34px rgba(37,99,235,.5)); }
+.zoom-core span { font-family: var(--font-display); font-weight: 700; letter-spacing: -.01em;
+  font-size: clamp(1.4rem, 3.6vw, 2.7rem);
+  background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sep-zoom-alt .zoom-rings i { border-color: rgba(168,85,247,.42); box-shadow: 0 0 44px rgba(168,85,247,.22); }
+.sep-zoom-alt .zoom-core svg { color: var(--accent-2); filter: drop-shadow(0 10px 34px rgba(168,85,247,.5)); }
+@media (max-width: 920px) { .sep-zoom { height: 60vh; } }
+@media (prefers-reduced-motion: reduce) {
+  .zoom-core { transform: none; opacity: 1; }
+  .zoom-rings i { opacity: .25; transform: scale(1); }
+}

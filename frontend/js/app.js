@@ -691,34 +691,31 @@ async function render() {
 /* ─── Vue : accueil ─── */
 async function viewHome(app) {
   app.innerHTML = `
-  <section class="home-hero" id="homeHero">
-    <div class="hero-pin">
-      <div class="hh-copy">
-        <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
-        <h1>Assemblez la machine<br>de <span class="grad">vos rêves</span></h1>
-        <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5 et refroidissement maîtrisé : chaque VOLT PC est monté à la main, stress-testé 24 h et expédié sous 24 h.</p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
-          <a class="btn btn-ghost" href="/configurateur">Configurer le mien</a>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat"><strong id="statCount">280+</strong><span>références premium</span></div>
-          <div class="hero-stat"><strong>24 h</strong><span>expédition éclair</span></div>
-          <div class="hero-stat"><strong>4.8/5</strong><span>avis clients</span></div>
-        </div>
+  <section class="hero">
+    <div>
+      <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
+      <h1>Assemblez la machine<br>de <span class="grad">vos rêves</span></h1>
+      <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5 et refroidissement maîtrisé : chaque VOLT PC est monté à la main, stress-testé 24 h et expédié sous 24 h.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
+        <a class="btn btn-ghost" href="/configurateur">Configurer le mien</a>
       </div>
-      <div class="hh-stage" id="hhStage">
-        <canvas id="heroGL" class="hero-gl" aria-label="Tour PC 3D — glissez pour pivoter, défilez pour assembler"></canvas>
-        <span class="gl-hint">Glissez pour pivoter · défilez pour assembler</span>
+      <div class="hero-stats">
+        <div class="hero-stat"><strong id="statCount">280+</strong><span>références premium</span></div>
+        <div class="hero-stat"><strong>24 h</strong><span>expédition éclair</span></div>
+        <div class="hero-stat"><strong>4.8/5</strong><span>avis clients</span></div>
       </div>
-      <a class="scroll-cue" aria-hidden="true"><span></span></a>
     </div>
+    <div class="hero-art">${art("gpu", 32)}</div>
   </section>
 
-  <!-- Séparateur 3D #1 : traversée en profondeur (zoom / fly-through, sans rotation) -->
-  <div class="sep3d sep-depth" data-sep aria-hidden="true">
-    <div class="depth"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i></div>
-    <div class="sep-label">Assemblé · Testé · Garanti</div>
+  <!-- Animation 3D #1 : zoom à travers un anneau → révèle les PC prémontés -->
+  <div class="sep-zoom" data-sep aria-hidden="true">
+    <div class="zoom-rings"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
+    <div class="zoom-core">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="11" height="18" rx="2"/><circle cx="9.5" cy="8" r="2"/><circle cx="9.5" cy="14" r="2"/><path d="M19 7v10"/></svg>
+      <span>Prêts à dominer</span>
+    </div>
   </div>
 
   <section class="section prebuilts" id="prebuilts">
@@ -756,13 +753,13 @@ async function viewHome(app) {
     </div>
   </section>
 
-  <!-- Séparateur 3D #2 : dépliage des garanties (rotateX, effet différent du #1) -->
-  <div class="sep3d sep-fold" data-sep aria-hidden="true">
-    <i style="--i:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></i>
-    <i style="--i:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></i>
-    <i style="--i:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>
-    <i style="--i:3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></i>
-    <i style="--i:4"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></i>
+  <!-- Animation 3D #2 : zoom sur le bouclier → révèle garanties & mentions légales -->
+  <div class="sep-zoom sep-zoom-alt" data-sep aria-hidden="true">
+    <div class="zoom-rings"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
+    <div class="zoom-core">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6z"/><path d="m8.5 12 2.3 2.3L16 9"/></svg>
+      <span>Sérénité garantie</span>
+    </div>
   </div>
 
   <section class="section svc-block">
@@ -808,7 +805,6 @@ async function viewHome(app) {
 
   renderPrebuilts();
   initHome3D();
-  if (window.initHeroGL) window.initHeroGL($("#heroGL"));   // scène WebGL Three.js
 }
 
 /* ─── PC prémontés (configs curées, compatibilité vérifiée) ─── */
