@@ -1423,6 +1423,17 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
   --shadow-product: rgba(0, 0, 0, 0.6) 0 5px 30px 3px;
 }
 :root[data-theme="dark"] body { background: var(--bg); color: var(--text); }
+
+/* Transition douce lors du basculement de thème (classe ajoutée ~0,45 s par JS).
+   Limitée à ce court instant → aucun coût sur les survols/animations habituels.
+   Respecte « prefers-reduced-motion » (la classe n'est alors jamais ajoutée). */
+.theme-anim, .theme-anim * {
+  transition: background-color 0.4s ease, color 0.4s ease,
+              border-color 0.4s ease, fill 0.4s ease, stroke 0.4s ease !important;
+}
+/* Petit clin d'œil : l'icône soleil/lune pivote au changement. */
+#themeBtn svg { transition: transform 0.45s ease; }
+#themeBtn:active svg { transform: rotate(40deg); }
 :root[data-theme="dark"] .badge.promo { color: #ff7a90; }
 :root[data-theme="dark"] .badge.top { color: #f0b35e; }
 :root[data-theme="dark"] .badge.new { color: #5fd98a; }

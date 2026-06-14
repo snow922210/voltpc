@@ -166,8 +166,17 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
 
     except HTTPException:
         raise  # erreurs métier déjà formatées (stock, promo, config…)
-    except Exception:  # erreurs réseau / API Stripe inattendues
-        log.exception("Échec de la création de la session Checkout")
+    except Exception as exc:  # erreurs réseau / API Stripe inattendues
+        # Cas fréquent et actionnable : clé Stripe invalide ou expirée. On le
+        # signale clairement dans les logs (sans noyer le gérant sous une trace).
+        if exc.__class__.__name__ == "AuthenticationError":
+            log.error(
+                "Stripe : clé API invalide ou expirée — mettez à jour"
+                " STRIPE_SECRET_KEY (Dashboard Stripe ▸ Développeurs ▸ Clés API). %s",
+                exc,
+            )
+        else:
+            log.exception("Échec de la création de la session Checkout")
         raise HTTPException(502, "Impossible d'initialiser le paiement, réessayez plus tard.")
 
 

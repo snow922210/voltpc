@@ -2708,7 +2708,16 @@ function setupTheme() {
   };
   // Le script du <head> a déjà posé l'attribut ; on s'aligne dessus.
   apply(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
-  btn.onclick = () => apply(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  btn.onclick = () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    if (!reduce) {
+      const root = document.documentElement;
+      root.classList.add("theme-anim");
+      setTimeout(() => root.classList.remove("theme-anim"), 450);
+    }
+    apply(next);
+  };
 }
 
 /* ─── Initialisation ─── */
