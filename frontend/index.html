@@ -24,7 +24,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=25">
+  <link rel="stylesheet" href="/css/style.css?v=26">
+  <script>
+    /* Thème appliqué avant le rendu (évite tout flash). Préférence enregistrée,
+       sinon réglage système. */
+    (function () {
+      var t = localStorage.getItem("volt_theme");
+      if (t !== "dark" && t !== "light")
+        t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 2 6 18h8l-2 12L24 14h-8l2-12z' fill='%232563eb'/%3E%3C/svg%3E">
 
   <!-- Données structurées : marque + recherche interne -->
@@ -94,6 +104,10 @@
     </div>
 
     <div class="header-actions">
+      <button class="icon-btn" id="themeBtn" title="Changer de thème" aria-label="Changer de thème">
+        <svg class="theme-ico-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
+        <svg class="theme-ico-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8z"/></svg>
+      </button>
       <button class="icon-btn" id="accountBtn" title="Mon compte">
         <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span class="icon-btn-label" id="accountLabel">Compte</span>
@@ -211,6 +225,6 @@
   <!-- Barre de comparaison flottante -->
   <div class="compare-bar" id="compareBar" hidden></div>
 
-  <script src="/js/app.js?v=29"></script>
+  <script src="/js/app.js?v=30"></script>
 </body>
 </html>

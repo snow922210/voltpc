@@ -346,6 +346,116 @@ function stockHtml(stock) {
   return `<span class="stock-dot">● En stock</span>`;
 }
 
+/* ─── Specs : lecture machine + scoring perf / usage ─────────────────
+   Sert au comparateur (« performance estimée », surbrillance), aux filtres
+   par specs et au configurateur (score d'usage, détection de déséquilibre). */
+
+// Premier nombre d'une spec texte : "12 Go GDDR6" → 12 ; "2560 × 1440" → 2560.
+function specNum(v) {
+  const m = String(v ?? "").replace(",", ".").match(/\d[\d\s.]*/);
+  return m ? parseFloat(m[0].replace(/\s/g, "").replace(/\.$/, "")) : 0;
+}
+
+// Niveau de performance d'un GPU (0–100), par modèle puis repli sur le prix.
+const GPU_TIERS = [
+  [/rtx\s*5090/, 100], [/rtx\s*5080/, 92], [/rtx\s*5070\s*ti/, 86], [/rtx\s*5070/, 80],
+  [/rtx\s*5060\s*ti/, 66], [/rtx\s*5060/, 58],
+  [/rtx\s*4090/, 96], [/rtx\s*4080/, 88], [/rtx\s*4070\s*ti/, 82], [/rtx\s*4070/, 76],
+  [/rtx\s*4060\s*ti/, 64], [/rtx\s*4060/, 56],
+  [/rtx\s*3090/, 78], [/rtx\s*3080/, 72], [/rtx\s*3070/, 62], [/rtx\s*3060\s*ti/, 56], [/rtx\s*3060/, 48],
+  [/rx\s*9070\s*xt/, 88], [/rx\s*9070/, 80], [/rx\s*8800/, 74],
+  [/rx\s*7900/, 84], [/rx\s*7800\s*xt/, 74], [/rx\s*7700/, 64], [/rx\s*7600/, 50],
+  [/arc\s*b5/, 54], [/arc\s*a7/, 46],
+];
+function gpuTier(p) {
+  const t = `${p.name} ${p.brand}`.toLowerCase();
+  for (const [re, v] of GPU_TIERS) if (re.test(t)) return v;
+  return Math.max(20, Math.min(95, 25 + (p.price || 0) / 28));
+}
+// Niveau d'un CPU (0–100) : threads + boost + bonus jeu (X3D).
+function cpuTier(p) {
+  const s = p.specs || {};
+  const threads = specNum(String(s["Cœurs / Threads"] || "").split("/").pop());
+  const boost = specNum(s["Boost"]);
+  const x3d = /x3d/i.test(p.name) ? 12 : 0;
+  return Math.max(15, Math.min(100, threads * 2.3 + boost * 5 + x3d));
+}
+function cpuGameTier(p) { return Math.min(100, cpuTier(p) + (/x3d/i.test(p.name) ? 18 : 0)); }
+
+// Score de performance générique (pour le comparateur, toutes catégories).
+function perfScore(p) {
+  const s = p.specs || {}, c = p.category;
+  if (c === "gpu") return Math.round(gpuTier(p));
+  if (c === "cpu") return Math.round(cpuTier(p));
+  if (c === "ram") return Math.round(specNum(s["Capacité"]) * 0.8 + specNum(s["Fréquence"]) / 120);
+  if (c === "storage") {
+    const gen = /5\.0/.test(s["Interface"]) ? 50 : /4\.0/.test(s["Interface"]) ? 35 : 20;
+    return Math.round(gen + specNum(s["Lecture"]) / 300);
+  }
+  if (c === "psu") return Math.round(specNum(s["Puissance"]) / 12);
+  if (c === "monitor") {
+    const hz = specNum(s["Fréquence"]);
+    const oled = /oled/i.test(s["Dalle"]) ? 25 : 0;
+    return Math.round(hz / 6 + oled);
+  }
+  if (c === "cooling") return Math.round(specNum(s["TDP supporté"]) / 6);
+  return Math.round((p.price || 0) / 25); // boîtier, périphériques : prix = proxy
+}
+
+function ratingWord(score) {
+  if (score >= 85) return { word: "Excellent", cls: "exc" };
+  if (score >= 70) return { word: "Très bon", cls: "good" };
+  if (score >= 50) return { word: "Bon", cls: "ok" };
+  if (score >= 30) return { word: "Moyen", cls: "mid" };
+  return { word: "Limité", cls: "low" };
+}
+
+// Scores d'usage d'une configuration (configurateur). Renvoie [] si pas de pièce maîtresse.
+function usageScores(b) {
+  const gpu = b.gpu ? gpuTier(b.gpu) : 0;
+  const cpu = b.cpu ? cpuTier(b.cpu) : 0;
+  const cpuGame = b.cpu ? cpuGameTier(b.cpu) : 0;
+  const ramCap = b.ram ? specNum(b.ram.specs["Capacité"]) : 0;
+  const threads = b.cpu ? specNum(String(b.cpu.specs["Cœurs / Threads"] || "").split("/").pop()) : 0;
+  if (!gpu && !cpu) return [];
+
+  // Goulot CPU en jeu : un GPU bien au-dessus du CPU plafonne les FPS.
+  const gameLimit = (g) => (cpuGame && g - cpuGame > 22) ? cpuGame + 22 : g;
+  const clamp = (n) => Math.max(0, Math.min(100, Math.round(n)));
+
+  return [
+    { label: "Gaming 1080p", score: clamp(gameLimit(gpu) * 1.35) },
+    { label: "Gaming 1440p", score: clamp(gameLimit(gpu) * 1.05) },
+    { label: "Gaming 4K", score: clamp(gameLimit(gpu) * 0.82) },
+    { label: "Création vidéo", score: clamp(threads * 2.2 + ramCap * 0.5 + gpu * 0.25) },
+    { label: "Évolutivité", score: clamp(
+        (b.psu ? Math.min(30, (specNum(b.psu.specs["Puissance"]) - estimateWatts()) / 12) : 6) +
+        (ramCap >= 32 ? 28 : ramCap >= 16 ? 18 : 8) +
+        (b.motherboard ? 24 : 8) +
+        (b.case ? 16 : 6)) },
+  ];
+}
+
+// Déséquilibres notables (avertissements « intelligents » du configurateur).
+function buildImbalances(b) {
+  const out = [];
+  if (b.gpu && b.cpu) {
+    const g = gpuTier(b.gpu), c = cpuGameTier(b.cpu);
+    if (g - c > 22) out.push(`GPU très puissant mais CPU un peu juste — léger goulot d'étranglement possible en jeu (1080p surtout).`);
+    else if (c - g > 28) out.push(`CPU costaud pour un GPU plus modeste — marge pour une carte graphique plus performante.`);
+  }
+  if (b.psu) {
+    const cap = specNum(b.psu.specs["Puissance"]), need = estimateWatts();
+    if (cap > need * 1.8 && cap - need > 350) out.push(`Alimentation surdimensionnée (${cap} W pour ≈ ${need} W) — vous payez de la marge inutile.`);
+  }
+  if (b.gpu && b.case) {
+    const len = specNum(b.gpu.specs["Longueur"]) || b.gpu.specs.length_mm || 0;
+    const max = b.case.specs.max_gpu_mm || specNum(b.case.specs["GPU max"]) || 999;
+    if (len && max && len <= max && max - len < 20) out.push(`Boîtier compact : le GPU (${len} mm) passe de justesse (max ${max} mm) — attention au montage.`);
+  }
+  return out;
+}
+
 /* ─── Carte produit ─── */
 function productCard(p) {
   const discount = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
@@ -1072,6 +1182,35 @@ function initHome3D() {
   update();
 }
 
+/* ─── Filtres par caractéristiques (selon la catégorie) ─── */
+const SPEC_FILTERS = {
+  gpu: [
+    { key: "vram", label: "Mémoire vidéo", fn: (p) => { const g = specNum(p.specs["Mémoire"]); return g ? (g >= 24 ? "24 Go +" : g + " Go") : null; } },
+    { key: "gen", label: "Génération", fn: (p) => { const t = p.name.toLowerCase(); if (/rtx\s*50/.test(t)) return "RTX 50"; if (/rtx\s*40/.test(t)) return "RTX 40"; if (/rtx\s*30/.test(t)) return "RTX 30"; if (/rx\s*90/.test(t)) return "RX 9000"; if (/rx\s*8/.test(t)) return "RX 8000"; if (/rx\s*7/.test(t)) return "RX 7000"; if (/arc/.test(t)) return "Intel Arc"; return null; } },
+    { key: "conso", label: "Consommation", fn: (p) => { const w = p.specs.tdp_w || specNum(p.specs["TDP"]); return !w ? null : w <= 200 ? "≤ 200 W" : w <= 300 ? "200–300 W" : "300 W +"; } },
+  ],
+  cpu: [
+    { key: "socket", label: "Socket", fn: (p) => p.specs.socket || p.specs["Socket"] || null },
+    { key: "cores", label: "Cœurs", fn: (p) => { const c = specNum(p.specs["Cœurs / Threads"]); return !c ? null : c <= 6 ? "6 ou moins" : c <= 8 ? "8 cœurs" : c <= 12 ? "12 cœurs" : "16 cœurs +"; } },
+    { key: "tdp", label: "Enveloppe (TDP)", fn: (p) => { const w = p.specs.tdp_w || specNum(p.specs["TDP"]); return !w ? null : w <= 65 ? "≤ 65 W" : w <= 105 ? "65–105 W" : "105 W +"; } },
+  ],
+  ram: [
+    { key: "type", label: "Type", fn: (p) => p.specs.ram_type || p.specs["Type"] || null },
+    { key: "cap", label: "Capacité", fn: (p) => { const c = specNum(p.specs["Capacité"]); return !c ? null : c <= 16 ? "16 Go" : c <= 32 ? "32 Go" : c <= 64 ? "64 Go" : "96 Go +"; } },
+    { key: "freq", label: "Fréquence", fn: (p) => { const f = specNum(p.specs["Fréquence"]); return !f ? null : f < 6000 ? "< 6000 MT/s" : f < 6400 ? "6000–6400" : "6400 +"; } },
+  ],
+  monitor: [
+    { key: "size", label: "Taille", fn: (p) => { const s = specNum(p.specs["Dalle"]); return !s ? null : s < 25 ? '24"' : s < 28 ? '27"' : s < 33 ? '32"' : '34" +'; } },
+    { key: "res", label: "Résolution", fn: (p) => { const n = String(p.specs["Définition"] || "").replace(/\s/g, "").match(/\d+/g) || []; const w = +n[0] || 0; return w >= 3840 ? "4K UHD" : w >= 2560 ? "1440p QHD" : w >= 1920 ? "1080p FHD" : null; } },
+    { key: "hz", label: "Fréquence", fn: (p) => { const h = specNum(p.specs["Fréquence"]); return !h ? null : h <= 144 ? "≤ 144 Hz" : h <= 240 ? "165–240 Hz" : "360 Hz +"; } },
+  ],
+  psu: [
+    { key: "watts", label: "Puissance", fn: (p) => { const w = p.specs.watts || specNum(p.specs["Puissance"]); return !w ? null : w < 650 ? "< 650 W" : w < 850 ? "650–850 W" : w < 1000 ? "850–1000 W" : "1000 W +"; } },
+    { key: "cert", label: "Certification", fn: (p) => { const m = String(p.specs["Certification"] || "").match(/bronze|silver|gold|platinum|titanium/i); return m ? "80+ " + m[0][0].toUpperCase() + m[0].slice(1).toLowerCase() : null; } },
+  ],
+};
+const specOptSort = (a, b) => (specNum(a) - specNum(b)) || String(a).localeCompare(String(b), "fr");
+
 /* ─── Vue : catalogue ─── */
 async function viewCatalog(app, params) {
   const filters = {
@@ -1083,6 +1222,7 @@ async function viewCatalog(app, params) {
     sort: params.get("sort") || "featured",
     promo: params.get("promo") === "1",
     nouveau: params.get("new") === "1",
+    spec: Object.fromEntries([...params.entries()].filter(([k]) => k.startsWith("s_")).map(([k, v]) => [k.slice(2), v])),
     page: Math.max(1, parseInt(params.get("page") || "1", 10) || 1),
   };
   const PER_PAGE = 24;
@@ -1102,6 +1242,7 @@ async function viewCatalog(app, params) {
           <label class="filter-option"><input type="radio" name="cat" value="${k}" ${filters.cat === k ? "checked" : ""}> ${c.label}</label>`).join("")}
       </div>
       <div class="filter-group" id="brandGroup"><span>Marque</span></div>
+      <div id="specGroup"></div>
       <div class="filter-group">
         <span>Prix (€)</span>
         <div class="price-inputs">
@@ -1139,6 +1280,15 @@ async function viewCatalog(app, params) {
   let products = await api("/products?" + qs.toString());
   if (filters.promo) products = products.filter((p) => p.old_price);
   if (filters.nouveau) products = products.filter((p) => p.badge === "Nouveau");
+
+  // Filtres par caractéristiques (client) : on garde une base non filtrée par
+  // specs pour proposer les options encore pertinentes.
+  const specFields = (filters.cat && SPEC_FILTERS[filters.cat]) || [];
+  const baseForSpecs = products.slice();
+  for (const f of specFields) {
+    const sel = filters.spec[f.key];
+    if (sel) products = products.filter((p) => f.fn(p) === sel);
+  }
   $("#resultCount").textContent = `${products.length} produit${products.length > 1 ? "s" : ""}`;
 
   // Pagination côté client : l'API renvoie tout, on affiche par tranches.
@@ -1175,11 +1325,27 @@ async function viewCatalog(app, params) {
     if (next.sort !== "featured") p.set("sort", next.sort);
     if (next.promo) p.set("promo", "1");
     if (next.nouveau) p.set("new", "1");
+    for (const [k, v] of Object.entries(next.spec || {})) if (v) p.set("s_" + k, v);
     if (next.page > 1) p.set("page", next.page);
     go("/catalogue" + (p.toString() ? "?" + p.toString() : ""));
   };
 
-  $$("input[name=cat]", app).forEach((r) => r.onchange = () => navigate({ cat: r.value, brand: "" }));
+  // Options de filtres par specs : dérivées des produits de la catégorie courante.
+  if (specFields.length) {
+    $("#specGroup").innerHTML = specFields.map((f) => {
+      const opts = [...new Set(baseForSpecs.map(f.fn).filter(Boolean))].sort(specOptSort);
+      if (opts.length < 2) return "";
+      const sel = filters.spec[f.key] || "";
+      return `<div class="filter-group"><span>${esc(f.label)}</span>
+        <label class="filter-option"><input type="radio" name="s_${f.key}" value="" ${!sel ? "checked" : ""}> Toutes</label>
+        ${opts.map((o) => `<label class="filter-option"><input type="radio" name="s_${f.key}" value="${esc(o)}" ${sel === o ? "checked" : ""}> ${esc(o)}</label>`).join("")}
+      </div>`;
+    }).join("");
+    $$("#specGroup input[type=radio]", app).forEach((r) => r.onchange = () =>
+      navigate({ spec: { ...filters.spec, [r.name.slice(2)]: r.value } }));
+  }
+
+  $$("input[name=cat]", app).forEach((r) => r.onchange = () => navigate({ cat: r.value, brand: "", spec: {} }));
   $$("input[name=brand]", app).forEach((r) => r.onchange = () => navigate({ brand: r.value }));
   $("#sortSelect").onchange = (e) => navigate({ sort: e.target.value });
   const priceApply = () => navigate({ min: $("#minPrice").value, max: $("#maxPrice").value });
@@ -1248,6 +1414,7 @@ async function viewProduct(app, id) {
       </div>
     </div>
   </div>
+  <div id="recoZone"></div>
   <section class="reviews">
     <div class="section-head"><h2>Avis clients</h2></div>
     <div id="reviewList"><div class="skeleton" style="min-height:90px"></div></div>
@@ -1272,6 +1439,7 @@ async function viewProduct(app, id) {
   // Masque la rangée de miniatures s'il n'en reste qu'une (ou zéro) après chargement.
   setTimeout(cleanupProductThumbs, 1200);
   validateProductGallery();
+  renderRecos(p);
   $("#ppFav").onclick = async () => {
     await toggleFavorite(p.id);
     const on = state.favorites.has(p.id);
@@ -1359,6 +1527,54 @@ async function viewProduct(app, id) {
 }
 
 /* ─── Vue : comparateur ─── */
+/* ─── Recommandations de la fiche produit ─── */
+async function renderRecos(p) {
+  const zone = $("#recoZone");
+  if (!zone) return;
+  let all;
+  try { all = await api("/products"); } catch { return; }
+
+  const same = all.filter((x) => x.category === p.category && x.id !== p.id);
+  const cheaper = same.filter((x) => x.stock > 0 && x.price < p.price).sort((a, b) => b.price - a.price)[0];
+  const stronger = same.filter((x) => x.stock > 0 && perfScore(x) > perfScore(p)).sort((a, b) => perfScore(a) - perfScore(b))[0];
+
+  // Compatibles avec ce produit — mêmes règles que le configurateur.
+  const sock = p.specs.socket, ramType = p.specs.ram_type;
+  const gpuLen = specNum(p.specs["Longueur"]) || p.specs.length_mm || 0;
+  const compat = all.filter((x) => {
+    if (x.id === p.id || x.stock <= 0) return false;
+    if (p.category === "cpu") return (x.category === "motherboard" && x.specs.socket === sock) || (x.category === "cooling" && (x.specs.sockets || []).includes(sock));
+    if (p.category === "motherboard") return (x.category === "cpu" && x.specs.socket === sock) || (x.category === "ram" && x.specs.ram_type === ramType);
+    if (p.category === "ram") return x.category === "motherboard" && x.specs.ram_type === ramType;
+    if (p.category === "gpu") return (x.category === "psu" && (x.specs.watts || 0) >= 650) || (x.category === "case" && (x.specs.max_gpu_mm || 999) >= gpuLen && gpuLen > 0);
+    if (p.category === "cooling") return x.category === "cpu" && (p.specs.sockets || []).includes(x.specs.socket);
+    return false;
+  }).sort((a, b) => b.rating - a.rating).slice(0, 4);
+
+  // Souvent acheté avec — meilleures notes dans des catégories complémentaires.
+  const COMPL = {
+    cpu: ["motherboard", "ram", "cooling", "gpu"], gpu: ["psu", "cpu", "case", "monitor"],
+    motherboard: ["cpu", "ram", "gpu"], ram: ["motherboard", "cpu", "gpu"],
+    storage: ["motherboard", "gpu", "case"], psu: ["gpu", "cpu", "case"],
+    case: ["psu", "cooling", "gpu"], cooling: ["cpu", "case", "gpu"],
+    monitor: ["gpu", "keyboard", "mouse"], keyboard: ["mouse", "headset", "monitor"],
+    mouse: ["keyboard", "headset", "monitor"], headset: ["keyboard", "mouse", "monitor"],
+  };
+  const often = (COMPL[p.category] || [])
+    .map((c) => all.filter((x) => x.category === c && x.stock > 0).sort((a, b) => b.rating - a.rating)[0])
+    .filter(Boolean).slice(0, 4);
+
+  const block = (title, items) => items.length
+    ? `<section class="section"><div class="section-head"><h2>${title}</h2></div><div class="product-grid reco-grid">${items.map(productCard).join("")}</div></section>` : "";
+
+  zone.innerHTML =
+    block("Compatible avec ce produit", compat) +
+    block("Alternative moins chère", cheaper ? [cheaper] : []) +
+    block("Alternative plus puissante", stronger ? [stronger] : []) +
+    block("Souvent acheté avec", often);
+  bindProductCards(zone, [...compat, ...(cheaper ? [cheaper] : []), ...(stronger ? [stronger] : []), ...often]);
+}
+
 async function viewCompare(app) {
   if (state.compare.length === 0) {
     app.innerHTML = `<div class="empty-state"><div class="big">⇄</div><h2>Comparateur vide</h2>
@@ -1392,18 +1608,35 @@ async function viewCompare(app) {
   const row = (label, fn) =>
     `<tr><td class="cmp-label">${esc(label)}</td>${products.map((p) => `<td>${fn(p)}</td>`).join("")}</tr>`;
 
+  // Rangée avec surbrillance de la (des) meilleure(s) valeur(s).
+  // `metric(p)` → nombre comparable ; `dir` = "max" (plus grand = mieux) ou "min".
+  const bestRow = (label, fn, metric, dir = "max") => {
+    const vals = products.map(metric);
+    const finite = vals.filter((v) => Number.isFinite(v) && v > 0);
+    const best = finite.length ? (dir === "max" ? Math.max(...finite) : Math.min(...finite)) : null;
+    return `<tr><td class="cmp-label">${esc(label)}</td>${products.map((p, i) => {
+      const win = best !== null && vals[i] === best && finite.length > 1;
+      return `<td class="${win ? "cmp-best" : ""}">${fn(p)}${win ? ` <span class="cmp-tag">★</span>` : ""}</td>`;
+    }).join("")}</tr>`;
+  };
+
+  const allCompatible = products.length > 1 && products.every((p) => p.category === products[0].category);
+
   app.innerHTML = `
   <div class="section-head" style="margin-top:0"><h1>Comparateur</h1>
     <button class="btn btn-ghost btn-sm" id="cmpClearAll">Tout vider</button></div>
+  <p style="color:var(--text-dim);margin:-8px 0 18px">Les <span class="cmp-best" style="padding:1px 7px;border-radius:6px">meilleures valeurs</span> de chaque ligne sont mises en avant.</p>
   <div class="cmp-wrap">
     <table class="cmp-table">
       <thead><tr><th class="cmp-label"></th>${products.map(cell).join("")}</tr></thead>
       <tbody>
-        ${row("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`)}
+        ${bestRow("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`, (p) => p.price, "min")}
+        ${bestRow("Performance estimée", (p) => `<span class="perf-pill ${ratingWord(perfScore(p)).cls}">${ratingWord(perfScore(p)).word}</span>`, (p) => perfScore(p), "max")}
         ${row("Catégorie", (p) => esc(CATS[p.category]?.label || p.category))}
         ${row("Marque", (p) => esc(p.brand))}
-        ${row("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`)}
-        ${row("Disponibilité", (p) => p.stock > 0 ? `<span class="green">En stock</span>` : `<span style="color:var(--red)">Rupture</span>`)}
+        ${bestRow("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`, (p) => p.rating, "max")}
+        ${bestRow("Disponibilité", (p) => p.stock > 0 ? `<span class="green">En stock</span>` : `<span style="color:var(--red)">Rupture</span>`, (p) => p.stock, "max")}
+        ${allCompatible ? `<tr><td class="cmp-label">Compatibilité</td><td colspan="${products.length}" style="color:var(--text-dim)">Même catégorie (${esc(CATS[products[0].category]?.label || products[0].category)}) — interchangeables dans une configuration.</td></tr>` : ""}
         ${specKeys.map((k) => row(k, (p) => esc(p.specs[k] ?? "—"))).join("")}
         ${row("", (p) => `<button class="btn btn-primary btn-sm" data-add="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>Ajouter au panier</button>`)}
       </tbody>
@@ -1430,6 +1663,16 @@ const BUILD_SLOTS = [
   { cat: "keyboard", label: "Clavier", hint: "Optionnel" },
   { cat: "mouse", label: "Souris", hint: "Optionnel" },
   { cat: "headset", label: "Casque", hint: "Optionnel" },
+];
+
+// Profils rapides : remplissent automatiquement une config compatible et équilibrée.
+const PRESETS = [
+  { id: "g800", label: "Gaming 800 €", gpu: 52, cpu: "game", ram: 16, budget: "low" },
+  { id: "g1500", label: "Gaming 1500 €", gpu: 80, cpu: "game", ram: 32, budget: "mid" },
+  { id: "uhd", label: "PC 4K", gpu: 100, cpu: "game", ram: 32, budget: "high" },
+  { id: "stream", label: "Streaming", gpu: 76, cpu: "threads", ram: 64, budget: "high" },
+  { id: "silent", label: "Silence", gpu: 72, cpu: "game", ram: 32, budget: "mid", quiet: true },
+  { id: "white", label: "Blanc RGB", gpu: 80, cpu: "game", ram: 32, budget: "mid", white: true },
 ];
 
 function buildChecks() {
@@ -1487,7 +1730,12 @@ async function viewBuilder(app) {
   <div class="section-head" style="margin-top:0">
     <h1>Configurateur PC</h1>
   </div>
-  <p style="color:var(--text-dim);margin-bottom:26px">Composez votre machine pièce par pièce — la compatibilité est vérifiée automatiquement à chaque étape.</p>
+  <p style="color:var(--text-dim);margin-bottom:18px">Composez votre machine pièce par pièce — la compatibilité est vérifiée automatiquement à chaque étape.</p>
+  <div class="presets" id="presetBar">
+    <span class="presets-label">Profils rapides</span>
+    ${PRESETS.map((p) => `<button class="preset-btn" data-preset="${p.id}">${esc(p.label)}</button>`).join("")}
+    <button class="preset-btn preset-reset" data-preset="reset">Vider</button>
+  </div>
   <div class="builder-layout">
     <div id="slots"></div>
     <div class="builder-summary panel" id="buildSummary"></div>
@@ -1496,6 +1744,78 @@ async function viewBuilder(app) {
   const products = await api("/products");
   const byCat = {};
   for (const p of products) (byCat[p.category] ??= []).push(p);
+
+  // Remplissage automatique d'une configuration compatible selon un profil.
+  const applyPreset = (preset) => {
+    const inStock = (cat) => (byCat[cat] || []).filter((p) => p.stock > 0);
+    const closest = (list, val, key) => list.length
+      ? list.reduce((best, p) => Math.abs(key(p) - val) < Math.abs(key(best) - val) ? p : best) : null;
+    const b = {};
+
+    // CPU : jeu (le X3D prime, cœurs plafonnés à 8) ou multicœur (streaming/création),
+    // borné par le budget du profil.
+    const gameValue = (p) => specNum(p.specs["Boost"]) * 6
+      + Math.min(specNum(p.specs["Cœurs / Threads"]), 8) * 4
+      + (/x3d/i.test(p.name) ? 40 : 0);
+    const cpuRanked = inStock("cpu").sort((a, c) => preset.cpu === "threads"
+      ? specNum(c.specs["Cœurs / Threads"]) - specNum(a.specs["Cœurs / Threads"])
+      : gameValue(c) - gameValue(a));
+    const cpuCeil = preset.budget === "low" ? 300 : preset.budget === "mid" ? 480 : Infinity;
+    b.cpu = cpuRanked.find((p) => p.price <= cpuCeil) || cpuRanked[0];
+
+    if (b.cpu) {
+      let mobos = inStock("motherboard").filter((p) => p.specs.socket === b.cpu.specs.socket);
+      if (!mobos.length) mobos = inStock("motherboard");
+      mobos.sort((a, c) => a.price - c.price);
+      b.motherboard = preset.budget === "high" ? mobos[mobos.length - 1] : mobos[Math.floor(mobos.length / 2)] || mobos[0];
+    }
+    if (b.motherboard) {
+      let rams = inStock("ram").filter((p) => p.specs.ram_type === b.motherboard.specs.ram_type);
+      if (!rams.length) rams = inStock("ram");
+      b.ram = closest(rams, preset.ram, (p) => specNum(p.specs["Capacité"]));
+    }
+
+    let gpus = inStock("gpu");
+    if (preset.white) { const w = gpus.filter((p) => /white|blanc|snow/i.test(p.name)); if (w.length) gpus = w; }
+    b.gpu = closest(gpus, preset.gpu, gpuTier);
+
+    if (b.cpu) {
+      let cool = inStock("cooling").filter((p) => (p.specs.sockets || []).includes(b.cpu.specs.socket));
+      if (!cool.length) cool = inStock("cooling");
+      if (preset.quiet) { const aio = cool.filter((p) => /aio|360|liquid|freezer/i.test(`${p.name} ${JSON.stringify(p.specs)}`)); if (aio.length) cool = aio; }
+      cool.sort((a, c) => c.price - a.price);
+      b.cooling = preset.budget === "low" ? cool[cool.length - 1] : cool[0];
+    }
+
+    const len = b.gpu ? (specNum(b.gpu.specs["Longueur"]) || b.gpu.specs.length_mm || 0) : 0;
+    let cases = inStock("case").filter((p) => (p.specs.max_gpu_mm || specNum(p.specs["GPU max"]) || 999) >= len);
+    if (!cases.length) cases = inStock("case");
+    if (preset.white) { const w = cases.filter((p) => /white|blanc|snow/i.test(p.name)); if (w.length) cases = w; }
+    if (preset.quiet) { const q = cases.filter((p) => /silent|silence|define|quiet/i.test(p.name)); if (q.length) cases = q; }
+    b.case = cases[0];
+
+    state.build = b; // estimateWatts() lit state.build
+    const need = estimateWatts();
+    let psus = inStock("psu").filter((p) => (p.specs.watts || specNum(p.specs["Puissance"])) >= need);
+    if (!psus.length) psus = inStock("psu");
+    psus.sort((a, c) => (a.specs.watts || 0) - (c.specs.watts || 0));
+    // Plus petite alim offrant une marge confortable (≥ 1,25×) → ni juste, ni surdimensionnée.
+    const comfy = psus.filter((p) => (p.specs.watts || specNum(p.specs["Puissance"])) >= need * 1.25);
+    const pool = comfy.length ? comfy : psus;
+    b.psu = preset.quiet
+      ? (pool.find((p) => /platinum|titanium/i.test(p.specs["Certification"] || "")) || pool[0])
+      : pool[0];
+
+    let st = inStock("storage").sort((a, c) => a.price - c.price);
+    b.storage = preset.budget === "high" ? st[st.length - 1] : st[Math.floor(st.length / 2)] || st[0];
+
+    // Retire les emplacements non pourvus.
+    for (const k of Object.keys(b)) if (!b[k]) delete b[k];
+    state.build = b;
+    renderSlots();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    toast(`Profil « ${preset.label} » chargé — ajustez à votre guise ⚡`);
+  };
 
   const renderSlots = () => {
     $("#slots").innerHTML = BUILD_SLOTS.map((slot) => {
@@ -1519,6 +1839,8 @@ async function viewBuilder(app) {
     const watts = estimateWatts();
     const psuW = state.build.psu?.specs?.watts || 0;
     const hasError = checks.some((c) => c.level === "err");
+    const scores = usageScores(state.build);
+    const imbalances = buildImbalances(state.build);
 
     $("#buildSummary").innerHTML = `
       <h2>Ma configuration</h2>
@@ -1526,6 +1848,11 @@ async function viewBuilder(app) {
         <div class="row"><span>${count} / ${BUILD_SLOTS.length} composants</span><span></span></div>
         <div class="row total"><span>Total</span><span>${fmt(total)}</span></div>
       </div>
+      ${scores.length ? `<div class="usage-scores">
+        <h3>Score par usage</h3>
+        ${scores.map((s) => { const r = ratingWord(s.score); return `<div class="usage-row"><span class="usage-name">${s.label}</span><span class="score-track"><b class="${r.cls}" style="width:${s.score}%"></b></span><span class="usage-word ${r.cls}">${r.word}</span></div>`; }).join("")}
+      </div>` : ""}
+      ${imbalances.length ? `<div class="compat">${imbalances.map((t) => `<div class="compat-item warn"><span>⚠</span><span>${t}</span></div>`).join("")}</div>` : ""}
       <div class="compat">
         ${checks.length ? checks.map((c) => `<div class="compat-item ${c.level}"><span>${c.level === "ok" ? "✓" : c.level === "warn" ? "⚠" : "✕"}</span><span>${c.text}</span></div>`).join("")
           : `<div class="compat-item" style="color:var(--text-faint)">Sélectionnez des composants pour lancer les vérifications.</div>`}
@@ -1599,6 +1926,11 @@ async function viewBuilder(app) {
       renderSlots();
     });
   };
+
+  $$("[data-preset]").forEach((btn) => btn.onclick = () => {
+    if (btn.dataset.preset === "reset") { state.build = {}; renderSlots(); return; }
+    applyPreset(PRESETS.find((p) => p.id === btn.dataset.preset));
+  });
 
   renderSlots();
 }
@@ -1997,6 +2329,7 @@ async function viewAdminStats(app) {
     <div class="kpi-grid">
       ${kpi("Chiffre d'affaires", fmt(s.revenue), "commandes réglées")}
       ${kpi("CA aujourd'hui", fmt(s.revenue_today), `${s.orders_today} commande${s.orders_today > 1 ? "s" : ""}`)}
+      ${kpi("À expédier", s.to_ship ?? 0, "commandes à préparer")}
       ${kpi("Commandes payées", s.orders_paid)}
       ${kpi("Panier moyen", fmt(s.avg_basket))}
       ${kpi("Clients", s.customers)}
@@ -2020,11 +2353,20 @@ async function viewAdminStats(app) {
       </div>
     </div>
 
-    <div class="panel" style="margin-top:18px">
-      <h2 style="margin-bottom:14px">Commandes par statut</h2>
-      <div class="status-pills">
-        ${statusOrder.filter((st) => s.by_status[st]).map((st) => `
-          <a class="status-pill" href="/admin?status=${encodeURIComponent(st)}">${statusBadge(st)} <strong>${s.by_status[st]}</strong></a>`).join("") || `<span style="color:var(--text-dim)">Aucune commande.</span>`}
+    <div class="admin-cols" style="margin-top:18px">
+      <div class="panel">
+        <h2 style="margin-bottom:14px">Commandes par statut</h2>
+        <div class="status-pills">
+          ${statusOrder.filter((st) => s.by_status[st]).map((st) => `
+            <a class="status-pill" href="/admin?status=${encodeURIComponent(st)}">${statusBadge(st)} <strong>${s.by_status[st]}</strong></a>`).join("") || `<span style="color:var(--text-dim)">Aucune commande.</span>`}
+        </div>
+      </div>
+      <div class="panel">
+        <h2 style="margin-bottom:14px">Clients récents</h2>
+        ${(s.recent_customers || []).length ? `<table class="mini-table">
+          <thead><tr><th>Nom</th><th>E-mail</th><th>Inscrit</th></tr></thead>
+          <tbody>${s.recent_customers.map((c) => `<tr><td>${esc(c.name)}</td><td>${esc(c.email)}</td><td>${c.created_at ? new Date(c.created_at * 1000).toLocaleDateString("fr-FR") : "—"}</td></tr>`).join("")}</tbody>
+        </table>` : `<p style="color:var(--text-dim)">Aucun client pour le moment.</p>`}
       </div>
     </div>`;
 }
@@ -2353,6 +2695,22 @@ function fillNavMenus() {
     `<a class="nav-menu-all" href="/catalogue?new=1">Toutes les nouveautés →</a>`;
 }
 
+/* ─── Thème clair / sombre ─── */
+function setupTheme() {
+  const btn = $("#themeBtn");
+  if (!btn) return;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const apply = (t) => {
+    document.documentElement.dataset.theme = t;
+    localStorage.setItem("volt_theme", t);
+    btn.title = t === "dark" ? "Passer en thème clair" : "Passer en thème sombre";
+    if (meta) meta.content = t === "dark" ? "#0b0b0d" : "#ffffff";
+  };
+  // Le script du <head> a déjà posé l'attribut ; on s'aligne dessus.
+  apply(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  btn.onclick = () => apply(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+}
+
 /* ─── Initialisation ─── */
 function init() {
   saveAuth();
@@ -2361,6 +2719,7 @@ function init() {
   setupAuth();
   fillNavMenus();
 
+  setupTheme();
   $("#cartBtn").onclick = () => { renderCartDrawer(); openCart(); };
   $("#cartClose").onclick = closeCart;
   $("#drawerOverlay").onclick = closeCart;

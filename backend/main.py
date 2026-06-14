@@ -1509,14 +1509,26 @@ def admin_stats(_: sqlite3.Row = Depends(current_admin)):
             )
         ]
         customers = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        # Commandes réglées mais pas encore expédiées (à préparer / expédier).
+        to_ship = conn.execute(
+            "SELECT COUNT(*) FROM orders WHERE status IN ('payée', 'préparée')"
+        ).fetchone()[0]
+        recent_customers = [
+            dict(r) for r in conn.execute(
+                "SELECT name, email, created_at FROM users"
+                " ORDER BY created_at DESC LIMIT 8"
+            )
+        ]
     avg_basket = round(revenue / orders_paid, 2) if orders_paid else 0
     return {
         "revenue": round(revenue, 2),
         "revenue_today": round(revenue_today, 2),
         "orders_paid": orders_paid,
         "orders_today": orders_today,
+        "to_ship": to_ship,
         "avg_basket": avg_basket,
         "customers": customers,
+        "recent_customers": recent_customers,
         "by_status": by_status,
         "top_products": top_products,
         "low_stock": low_stock,

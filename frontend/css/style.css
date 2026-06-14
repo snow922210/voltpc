@@ -1392,3 +1392,126 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
 
 /* Headlines hero/section en poids 600 (Apple) */
 .hero h1, .build-copy h2, .scene-3d-copy h2 { font-weight: 600; }
+
+/* ════════════════════════════════════════════════════════════════
+   Thème sombre — surcharge des variables (activé via data-theme="dark")
+   ════════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"] {
+  --bg: #0b0b0d;
+  --bg-soft: #141416;
+  --surface: #161618;
+  --surface-2: #202023;
+  --tile-dark: #000000;
+  --border: rgba(255, 255, 255, 0.10);
+  --border-strong: #3a3a40;
+  --text: #f5f5f7;
+  --text-dim: #a1a1a6;
+  --text-faint: #86868b;
+  --accent: #2997ff;
+  --accent-soft: #2997ff;
+  --accent-ink: #2997ff;
+  --accent-2: #2997ff;
+  --gradient: #2997ff;
+  --accent-wash: rgba(41, 151, 255, 0.16);
+  --accent-wash-strong: rgba(41, 151, 255, 0.24);
+  --on-primary: #ffffff;
+  --green: #2dbd6e;
+  --green-soft: #34d27c;
+  --red: #ff453a;
+  --amber: #ff9f0a;
+  --shadow-lg: 0 1px 2px rgba(0, 0, 0, 0.55);
+  --shadow-product: rgba(0, 0, 0, 0.6) 0 5px 30px 3px;
+}
+:root[data-theme="dark"] body { background: var(--bg); color: var(--text); }
+:root[data-theme="dark"] .badge.promo { color: #ff7a90; }
+:root[data-theme="dark"] .badge.top { color: #f0b35e; }
+:root[data-theme="dark"] .badge.new { color: #5fd98a; }
+
+/* Bouton thème : afficher l'icône pertinente selon le mode courant */
+#themeBtn .theme-ico-moon { display: none; }
+#themeBtn .theme-ico-sun { display: block; }
+:root[data-theme="dark"] #themeBtn .theme-ico-sun { display: none; }
+:root[data-theme="dark"] #themeBtn .theme-ico-moon { display: block; }
+
+/* ════════════════════════════════════════════════════════════════
+   Comparateur — surbrillance des meilleures valeurs + perf
+   ════════════════════════════════════════════════════════════════ */
+.cmp-table td.cmp-best {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.cmp-tag { color: var(--amber); margin-left: 2px; }
+.cmp-best { background: var(--accent-wash); border-radius: 6px; }
+
+.perf-pill, .usage-word {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.perf-pill.exc, .usage-word.exc { background: rgba(29, 158, 87, 0.16); color: var(--green); }
+.perf-pill.good, .usage-word.good { background: var(--accent-wash); color: var(--accent-ink); }
+.perf-pill.ok, .usage-word.ok { background: rgba(178, 80, 0, 0.14); color: var(--amber); }
+.perf-pill.mid, .usage-word.mid { background: rgba(110, 110, 115, 0.16); color: var(--text-dim); }
+.perf-pill.low, .usage-word.low { background: rgba(215, 0, 21, 0.12); color: var(--red); }
+
+/* ════════════════════════════════════════════════════════════════
+   Configurateur — score par usage + profils rapides
+   ════════════════════════════════════════════════════════════════ */
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.presets-label { font-weight: 600; color: var(--text-dim); margin-right: 4px; font-size: 0.9rem; }
+.preset-btn {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+.preset-btn.preset-reset { color: var(--text-dim); }
+
+.usage-scores { margin: 16px 0; }
+.usage-scores h3 { font-size: 0.95rem; margin-bottom: 10px; }
+.usage-row {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+.usage-name { color: var(--text-dim); }
+.score-track {
+  height: 7px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.score-track b {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.score-track b.exc { background: var(--green); }
+.score-track b.good { background: var(--accent); }
+.score-track b.ok { background: var(--amber); }
+.score-track b.mid { background: var(--text-faint); }
+.score-track b.low { background: var(--red); }
+
+/* Grille de recommandations (fiche produit) : un peu plus compacte */
+.reco-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }

@@ -17,39 +17,58 @@ doit pas empêcher une commande payée d'être finalisée.
 """
 from __future__ import annotations
 
+import base64
+import json
 import logging
 import os
+import re
 import smtplib
 import ssl
+import urllib.request
 from email.message import EmailMessage
 
 log = logging.getLogger("voltpc.mailer")
 
 
 def smtp_configured() -> bool:
-    """Vrai si l'envoi d'emails est opérationnel (SMTP renseigné dans .env).
+    """Vrai si l'envoi d'emails est opérationnel (Brevo API OU SMTP renseigné).
 
-    Sert au repli « mode dev » : tant que le SMTP n'est pas configuré, les codes
-    de vérification / réinitialisation ne peuvent pas être envoyés par email, et
+    Sert au repli « mode dev » : tant qu'aucun transport n'est configuré, les
+    codes de vérification / réinitialisation ne peuvent pas partir par email, et
     l'API les renvoie alors directement pour permettre les tests en local.
     """
     return _config() is not None
 
 
 def _config():
-    """Renvoie la config SMTP, ou None si incomplète (envoi alors ignoré)."""
-    host = os.environ.get("SMTP_HOST")
-    user = os.environ.get("SMTP_USER")
-    password = os.environ.get("SMTP_PASSWORD")
-    if not (host and user and password):
+    """Réglages d'envoi + transports disponibles, ou None si aucun n'est prêt.
+
+    Deux transports possibles, essayés dans cet ordre par `_deliver` :
+      • Brevo (API HTTP)  → `BREVO_API_KEY` (recommandé sur Render : SMTP bloqué)
+      • SMTP classique    → `SMTP_HOST` + `SMTP_USER` + `SMTP_PASSWORD`
+    L'expéditeur (`MAIL_FROM`, sinon `SMTP_USER`) doit être renseigné dans tous
+    les cas — et vérifié côté Brevo.
+    """
+    smtp_host = os.environ.get("SMTP_HOST")
+    smtp_user = os.environ.get("SMTP_USER")
+    smtp_pwd = os.environ.get("SMTP_PASSWORD")
+    brevo_key = os.environ.get("BREVO_API_KEY")
+    sender = os.environ.get("MAIL_FROM") or smtp_user
+
+    has_smtp = bool(smtp_host and smtp_user and smtp_pwd)
+    has_brevo = bool(brevo_key and sender)
+    if not (has_smtp or has_brevo):
         return None
     return {
-        "host": host,
-        "port": int(os.environ.get("SMTP_PORT", "587")),
-        "user": user,
-        "password": password,
-        "from": os.environ.get("MAIL_FROM", user),
+        "from": sender,
         "shop": os.environ.get("SHOP_NAME", "VOLT PC"),
+        "brevo_key": brevo_key if has_brevo else None,
+        "smtp": {
+            "host": smtp_host,
+            "port": int(os.environ.get("SMTP_PORT", "587")),
+            "user": smtp_user,
+            "password": smtp_pwd,
+        } if has_smtp else None,
     }
 
 
@@ -187,19 +206,92 @@ Adresse de livraison :
     return msg
 
 
-def _deliver(cfg: dict, msg: EmailMessage, what: str) -> bool:
-    """Connexion SMTP + envoi. Ne lève jamais : journalise et renvoie un booléen."""
+def _sender_email(value: str) -> str:
+    """Extrait l'adresse d'un expéditeur « Nom <email> » ou « email »."""
+    m = re.search(r"<([^>]+)>", value or "")
+    return m.group(1).strip() if m else (value or "").strip()
+
+
+def _brevo_deliver(cfg: dict, msg: EmailMessage, what: str) -> bool:
+    """Envoi via l'API HTTP transactionnelle de Brevo (non bloquée par Render).
+
+    On reconstitue le payload Brevo à partir de l'EmailMessage déjà construit
+    (sujet, destinataires, corps texte/HTML, pièces jointes éventuelles).
+    """
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP(cfg["host"], cfg["port"], timeout=15) as server:
-            server.starttls(context=context)
-            server.login(cfg["user"], cfg["password"])
-            server.send_message(msg)
-        log.info("%s — envoyé à %s", what, msg["To"])
+        text_part = html_part = None
+        attachments = []
+        for part in msg.walk():
+            if part.get_content_maintype() == "multipart":
+                continue
+            if part.get_content_disposition() == "attachment":
+                attachments.append({
+                    "name": part.get_filename() or "fichier",
+                    "content": base64.b64encode(part.get_payload(decode=True)).decode(),
+                })
+            elif part.get_content_type() == "text/plain" and text_part is None:
+                text_part = part.get_content()
+            elif part.get_content_type() == "text/html" and html_part is None:
+                html_part = part.get_content()
+
+        to_list = [{"email": e.strip()} for e in str(msg["To"]).split(",") if e.strip()]
+        payload = {
+            "sender": {"email": _sender_email(cfg["from"]), "name": cfg["shop"]},
+            "to": to_list,
+            "subject": str(msg["Subject"]),
+        }
+        if html_part:
+            payload["htmlContent"] = html_part
+        if text_part:
+            payload["textContent"] = text_part
+        if not html_part and not text_part:
+            payload["textContent"] = " "
+        if attachments:
+            payload["attachment"] = attachments
+
+        req = urllib.request.Request(
+            "https://api.brevo.com/v3/smtp/email",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "api-key": cfg["brevo_key"],
+                "content-type": "application/json",
+                "accept": "application/json",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            if not (200 <= resp.status < 300):
+                raise RuntimeError(f"HTTP {resp.status}")
+        log.info("%s — envoyé via Brevo à %s", what, msg["To"])
         return True
     except Exception:
-        log.exception("Échec d'envoi — %s", what)
+        log.exception("Échec Brevo — %s", what)
         return False
+
+
+def _smtp_deliver(cfg: dict, msg: EmailMessage, what: str) -> bool:
+    """Connexion SMTP + envoi. Ne lève jamais : journalise et renvoie un booléen."""
+    smtp = cfg["smtp"]
+    try:
+        context = ssl.create_default_context()
+        with smtplib.SMTP(smtp["host"], smtp["port"], timeout=15) as server:
+            server.starttls(context=context)
+            server.login(smtp["user"], smtp["password"])
+            server.send_message(msg)
+        log.info("%s — envoyé via SMTP à %s", what, msg["To"])
+        return True
+    except Exception:
+        log.exception("Échec SMTP — %s", what)
+        return False
+
+
+def _deliver(cfg: dict, msg: EmailMessage, what: str) -> bool:
+    """Envoie via Brevo en priorité (si configuré), avec repli SMTP. Ne lève jamais."""
+    if cfg.get("brevo_key") and _brevo_deliver(cfg, msg, what):
+        return True
+    if cfg.get("smtp"):
+        return _smtp_deliver(cfg, msg, what)
+    return False
 
 
 def send_order_confirmation(order: dict, items: list[dict], invoice_pdf: bytes | None = None) -> bool:
