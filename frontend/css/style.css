@@ -11,56 +11,61 @@
    produit), typo SF Pro/Inter serrée, CTA en pilule.
    ════════════════════════════════════════════════════════════════ */
 :root {
+  /* ── Mode clair « atelier électrique » : papier crème + encre + orange voltage ──
+     Identité distinctive (le thème sombre est, lui, conservé tel quel plus bas). */
   /* Surfaces & fonds */
-  --bg: #ffffff;
-  --bg-soft: #f5f5f7;       /* parchemin Apple */
-  --surface: #ffffff;
-  --surface-2: #f5f5f7;
-  --header-bg: #ffffff;   /* header toujours blanc (île claire) */
-  --hero-base: linear-gradient(180deg, #ffffff, #f4f6fd);  /* fond du bloc hero (clair) */
-  --tile-dark: #1d1d1f;     /* tuile anthracite */
+  --bg: #f5f1e8;            /* papier crème chaud */
+  --bg-soft: #ece5d6;
+  --surface: #fffdf7;       /* blanc chaud des cartes */
+  --surface-2: #f0e9da;
+  --header-bg: #fffdf7;
+  --hero-base: linear-gradient(160deg, #fffaf0 0%, #f2e9d6 100%);
+  --hero-glow-1: rgba(232, 89, 12, 0.16);    /* halo orange voltage */
+  --hero-glow-2: rgba(255, 178, 71, 0.20);   /* halo ambre chaud */
+  --tile-dark: #1c1813;     /* tuile encre chaude */
 
-  /* Bordures fines (hairline) */
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: #d2d2d7;
+  /* Bordures (encre translucide chaude) */
+  --border: rgba(28, 22, 13, 0.10);
+  --border-strong: #ddd1ba;
 
-  /* Texte */
-  --text: #1d1d1f;          /* encre near-black */
-  --text-dim: #6e6e73;
-  --text-faint: #86868b;
+  /* Texte (encre chaude) */
+  --text: #1c1812;          /* near-black chaud */
+  --text-dim: #6a6151;
+  --text-faint: #9c917b;
 
-  /* Accent — Action Blue UNIQUE (aucune 2e couleur de marque) */
-  --accent: #0066cc;
-  --accent-soft: #0071e3;
-  --accent-ink: #0066cc;
-  --accent-2: #0066cc;
-  --accent-on-dark: #2997ff;
-  --gradient: #0066cc;      /* plus de dégradé : couleur pleine */
-  --accent-wash: rgba(0, 102, 204, 0.08);
-  --accent-wash-strong: rgba(0, 102, 204, 0.12);
+  /* Accent — orange voltage (énergie / performance), une seule couleur de marque */
+  --accent: #e8590c;
+  --accent-soft: #ff6a2b;
+  --accent-ink: #c2410c;    /* variante texte (contraste sur clair) */
+  --accent-2: #e8590c;
+  --accent-on-dark: #ff7a44;
+  --gradient: linear-gradient(118deg, #ff6a2b, #e8590c);  /* dégradé chaud (logo, hero, bandeau) */
+  --accent-wash: rgba(232, 89, 12, 0.09);
+  --accent-wash-strong: rgba(232, 89, 12, 0.15);
   --on-primary: #ffffff;
 
-  /* Sémantique */
-  --green: #1d9e57;
+  /* Sémantique (réchauffées) */
+  --green: #1c7d4d;
   --green-soft: #2dbd6e;
-  --red: #d70015;
+  --red: #c81e2b;
   --amber: #b25000;
 
-  /* Rayons Apple */
+  /* Rayons */
   --radius: 18px;
   --radius-sm: 12px;
 
-  /* Élévation : une seule ombre = sous les visuels produit. Le reste = plat. */
+  /* Élévation : ombres chaudes et douces (profondeur sans lourdeur) */
   --shadow-xs: none;
   --shadow-sm: none;
   --shadow: none;
-  --shadow-lg: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 14px 38px -16px rgba(54, 38, 16, 0.26);
   --shadow-accent: none;
-  --shadow-product: rgba(0, 0, 0, 0.22) 0 5px 30px 3px;
+  --shadow-product: rgba(54, 38, 16, 0.20) 0 6px 32px 2px;
 
-  /* SF Pro sur Apple, sinon Inter (substitut le plus proche) */
-  --font-display: -apple-system, "SF Pro Display", system-ui, "Inter", sans-serif;
-  --font-body: -apple-system, "SF Pro Text", system-ui, "Inter", sans-serif;
+  /* Typo distinctive : display caractériel + grotesk de lecture
+     (on évite volontairement Inter / Space Grotesk, trop « génériques »). */
+  --font-display: "Bricolage Grotesque", -apple-system, system-ui, sans-serif;
+  --font-body: "Manrope", -apple-system, system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -305,8 +310,8 @@ img { max-width: 100%; }
   padding: 68px 56px;
   border-radius: 32px;
   background:
-    radial-gradient(ellipse 70% 90% at 82% 18%, rgba(139, 92, 246, 0.16), transparent 60%),
-    radial-gradient(ellipse 60% 80% at 6% 88%, rgba(37, 99, 235, 0.14), transparent 60%),
+    radial-gradient(ellipse 70% 90% at 82% 18%, var(--hero-glow-1), transparent 60%),
+    radial-gradient(ellipse 60% 80% at 6% 88%, var(--hero-glow-2), transparent 60%),
     var(--hero-base);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
@@ -1405,6 +1410,9 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
   --surface-2: #202023;
   --header-bg: #1c1c1f;   /* header : noir moins foncé que le body → contraste */
   --hero-base: #1c1c1f;   /* hero : même couleur que le header en sombre */
+  --hero-glow-1: rgba(139, 92, 246, 0.16);   /* sombre inchangé : halos d'origine */
+  --hero-glow-2: rgba(37, 99, 235, 0.14);
+  --accent-on-dark: #2997ff;
   --tile-dark: #000000;
   --border: rgba(255, 255, 255, 0.10);
   --border-strong: #3a3a40;
