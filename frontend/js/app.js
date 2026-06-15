@@ -16,7 +16,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
 const state = {
   token: localStorage.getItem("volt_token") || null,
   user: JSON.parse(localStorage.getItem("volt_user") || "null"),
-  cart: JSON.parse(localStorage.getItem("volt_cart") || "[]"),
+  cart: localStorage.getItem("volt_token") ? [] : JSON.parse(localStorage.getItem("volt_cart") || "[]"),
   promo: JSON.parse(localStorage.getItem("volt_promo") || "null"),
   build: {},          // configurateur : { categorie: produit }
   afterLogin: null,   // action à reprendre après connexion
@@ -66,6 +66,23 @@ async function syncCartOnLogin() {
   await pushCart();
   updateCartCount();
   renderCartDrawer();
+}
+
+async function restoreSessionAndCart() {
+  if (!state.token) return;
+  try {
+    const me = await api("/auth/me");
+    state.user = { ...(state.user || {}), ...me };
+    saveAuth();
+    await syncCartOnLogin();
+  } catch {
+    state.token = null;
+    state.user = null;
+    saveAuth();
+    state.cart = JSON.parse(localStorage.getItem("volt_cart") || "[]");
+    updateCartCount();
+    renderCartDrawer();
+  }
 }
 function savePromo() { localStorage.setItem("volt_promo", JSON.stringify(state.promo)); }
 function saveAuth() {
@@ -2840,11 +2857,14 @@ function init() {
   });
 
   renderCompareBar();
-  // Si déjà connecté : charge les favoris ET le panier du compte avant le premier
-  // rendu (cœurs dans le bon état, panier rattaché à l'utilisateur).
+  // Si déjà connecté : valide la session, puis charge les favoris ET le panier
+  // du compte avant le premier rendu (panier rattaché au serveur).
   (async () => {
-    if (state.user) {
-      try { await loadFavorites(); await syncCartOnLogin(); } catch { /* non bloquant */ }
+    if (state.token) {
+      try {
+        await restoreSessionAndCart();
+        if (state.user) await loadFavorites();
+      } catch { /* non bloquant */ }
     }
     render();
   })();

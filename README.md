@@ -76,7 +76,7 @@ Tout se règle dans `backend/.env` (copié depuis `.env.example`). Chaque bloc e
 - Recherche, filtres (catégorie, marque, prix), tri, **pagination**, fiches produit détaillées avec specs
 - Avis clients avec notes : **un avis par client**, **modification/suppression** de son avis, badge **« achat vérifié »**
 - **Favoris** (liste de souhaits) et **comparateur** de produits (jusqu'à 4 en parallèle)
-- Panier latéral persistant (localStorage), codes promo, livraison offerte dès 50 €
+- Panier latéral : temporaire en invité, puis sauvegardé côté serveur dès connexion, codes promo, livraison offerte dès 50 €
 - Checkout complet : **réservation de stock dès la commande** (anti-survente), purge automatique des paniers abandonnés
 
 **Configurateur PC**
@@ -86,6 +86,7 @@ Tout se règle dans `backend/.env` (copié depuis `.env.example`). Chaque bloc e
 
 **Compte**
 - Inscription / connexion (mots de passe hachés scrypt, jetons signés HMAC, 7 jours)
+- Comptes, paniers, favoris, adresses et commandes persistés en base serveur (PostgreSQL sur Render via `DATABASE_URL`, SQLite locale en développement)
 - **Vérification d'email obligatoire** à l'inscription (code à 6 chiffres, valable 15 min)
 - **Sécurité anti-bruteforce** : code invalidé après 5 essais, compte verrouillé 15 min après 5 mots de passe erronés, rate-limiting par IP sur toutes les routes d'authentification
 - **Mot de passe oublié** (réinitialisation par code email) et **changement de mot de passe**
