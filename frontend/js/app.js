@@ -16,7 +16,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
 const state = {
   token: localStorage.getItem("volt_token") || null,
   user: JSON.parse(localStorage.getItem("volt_user") || "null"),
-  cart: localStorage.getItem("volt_token") ? [] : JSON.parse(localStorage.getItem("volt_cart") || "[]"),
+  cart: [],
   promo: JSON.parse(localStorage.getItem("volt_promo") || "null"),
   build: {},          // configurateur : { categorie: produit }
   afterLogin: null,   // action à reprendre après connexion
@@ -26,12 +26,9 @@ const state = {
 
 function saveCompare() { localStorage.setItem("volt_compare", JSON.stringify(state.compare)); }
 
-// Persistance du panier :
-//  • invité  → localStorage (le temps de la session de navigation)
-//  • connecté → côté serveur, rattaché au compte (suit l'utilisateur, pas le navigateur)
+// Le panier appartient au compte client : aucune persistance navigateur invitée.
 function saveCart() {
   if (state.user) pushCart();
-  else localStorage.setItem("volt_cart", JSON.stringify(state.cart));
   updateCartCount();
 }
 
@@ -45,25 +42,16 @@ async function pushCart() {
   } catch { /* la persistance ne doit jamais bloquer l'UI */ }
 }
 
-// À la connexion : fusionne le panier invité (localStorage) avec le panier
-// enregistré sur le compte, puis persiste le résultat et vide le panier invité.
+// À la connexion : charge le panier enregistré sur le compte serveur.
 async function syncCartOnLogin() {
   if (!state.user) return;
-  const guest = JSON.parse(localStorage.getItem("volt_cart") || "[]");
   let server = [];
   try { server = await api("/cart"); } catch { server = []; }
   const byId = new Map(server.map((i) => [i.id, { ...i }]));
-  for (const g of guest) {
-    const ex = byId.get(g.id);
-    if (ex) ex.qty = Math.min(ex.qty + g.qty, g.stock || 99, 99);
-    else byId.set(g.id, g);
-  }
   state.cart = [...byId.values()].map((i) => ({
     id: i.id, name: i.name, brand: i.brand, category: i.category,
     price: i.price, stock: i.stock, qty: i.qty,
   }));
-  localStorage.removeItem("volt_cart");   // le panier invité a été absorbé
-  await pushCart();
   updateCartCount();
   renderCartDrawer();
 }
@@ -79,7 +67,7 @@ async function restoreSessionAndCart() {
     state.token = null;
     state.user = null;
     saveAuth();
-    state.cart = JSON.parse(localStorage.getItem("volt_cart") || "[]");
+    state.cart = [];
     updateCartCount();
     renderCartDrawer();
   }
@@ -539,6 +527,11 @@ function updateCartCount() {
 }
 
 function addToCart(p, qty = 1, quiet = false) {
+  if (!state.user) {
+    requireAuth(() => addToCart(p, qty, quiet));
+    toast("Connectez-vous pour enregistrer votre panier sur votre compte", "info");
+    return;
+  }
   const line = state.cart.find((i) => i.id === p.id);
   if (line) {
     if (line.qty + qty > p.stock) { if (!quiet) toast("Stock maximum atteint pour ce produit", "error"); return; }
@@ -561,6 +554,14 @@ function cartTotals() {
 function renderCartDrawer() {
   const body = $("#cartBody");
   const foot = $("#cartFoot");
+  if (!state.user) {
+    body.innerHTML = `<div class="empty-state"><div class="big">🔐</div><p>Connectez-vous pour retrouver votre panier lié à votre compte.</p><br>
+      <button class="btn btn-primary btn-sm" id="cartLoginBtn">Se connecter</button></div>`;
+    foot.innerHTML = "";
+    const btn = $("#cartLoginBtn");
+    if (btn) btn.onclick = () => { closeCart(); openAuth(); };
+    return;
+  }
   if (state.cart.length === 0) {
     body.innerHTML = `<div class="empty-state"><div class="big">🛒</div><p>Votre panier est vide.</p><br>
       <a class="btn btn-primary btn-sm" href="/catalogue" onclick="closeCart()">Voir le catalogue</a></div>`;
@@ -683,7 +684,7 @@ async function finishLogin(data) {
   closeAuth();
   toast(`Bienvenue, ${state.user.name} ⚡`);
   await loadFavorites();
-  await syncCartOnLogin();   // fusionne le panier invité avec celui du compte
+  await syncCartOnLogin();   // charge le panier lié au compte
   if (state.afterLogin) { const fn = state.afterLogin; state.afterLogin = null; fn(); }
   else render();
 }
@@ -826,7 +827,6 @@ function logout() {
   // « fuie » pas vers l'utilisateur suivant sur le même navigateur.
   state.cart = [];
   state.promo = null;
-  localStorage.removeItem("volt_cart");
   savePromo();
   saveAuth();
   updateCartCount();
@@ -1933,6 +1933,11 @@ async function viewBuilder(app) {
     $$("[data-unpick]").forEach((b) => b.onclick = () => { delete state.build[b.dataset.unpick]; renderSlots(); });
     const toCart = $("#buildToCart");
     if (toCart) toCart.onclick = () => {
+      if (!state.user) {
+        requireAuth(() => toCart.click());
+        toast("Connectez-vous pour enregistrer cette configuration sur votre compte", "info");
+        return;
+      }
       for (const p of Object.values(state.build)) {
         const line = state.cart.find((i) => i.id === p.id);
         if (line) line.qty += 1;

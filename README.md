@@ -76,7 +76,7 @@ Tout se règle dans `backend/.env` (copié depuis `.env.example`). Chaque bloc e
 - Recherche, filtres (catégorie, marque, prix), tri, **pagination**, fiches produit détaillées avec specs
 - Avis clients avec notes : **un avis par client**, **modification/suppression** de son avis, badge **« achat vérifié »**
 - **Favoris** (liste de souhaits) et **comparateur** de produits (jusqu'à 4 en parallèle)
-- Panier latéral : temporaire en invité, puis sauvegardé côté serveur dès connexion, codes promo, livraison offerte dès 50 €
+- Panier latéral lié au compte client et sauvegardé côté serveur, codes promo, livraison offerte dès 50 €
 - Checkout complet : **réservation de stock dès la commande** (anti-survente), purge automatique des paniers abandonnés
 
 **Configurateur PC**
