@@ -185,6 +185,31 @@ function toast(msg, type = "success") {
   setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 320); }, 3400);
 }
 
+function setupCookieBanner() {
+  if (localStorage.getItem("volt_cookie_consent")) return;
+  const banner = document.createElement("div");
+  banner.className = "cookie-banner";
+  banner.setAttribute("role", "dialog");
+  banner.setAttribute("aria-label", "Préférences cookies");
+  banner.innerHTML = `
+    <div>
+      <strong>Cookies et confidentialité</strong>
+      <p>Les cookies nécessaires servent au panier, au compte et à la sécurité. Les cookies de mesure ou marketing ne sont activés qu'avec votre accord.</p>
+    </div>
+    <div class="cookie-actions">
+      <button class="btn btn-ghost btn-sm" data-cookie="necessary">Refuser</button>
+      <button class="btn btn-primary btn-sm" data-cookie="all">Accepter</button>
+    </div>`;
+  document.body.appendChild(banner);
+  banner.querySelectorAll("[data-cookie]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      localStorage.setItem("volt_cookie_consent", btn.dataset.cookie);
+      banner.remove();
+      toast(btn.dataset.cookie === "all" ? "Préférences cookies enregistrées" : "Cookies optionnels refusés", "info");
+    });
+  });
+}
+
 /* ─── Catégories & visuels SVG ─── */
 const CATS = {
   gpu: { label: "Cartes graphiques", short: "GPU" },
@@ -930,7 +955,7 @@ async function viewHome(app) {
   <section class="section">
     <div class="perks">
       <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></div><div><h4>Livraison 24 h</h4><p>Offerte dès 50 € d'achat, partout en France.</p></div></div>
-      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garantie sereine</h4><p>Retours 30 jours et garantie constructeur complète.</p></div></div>
+      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garantie sereine</h4><p>Rétractation légale 14 jours, retours 30 jours et garantie légale de conformité.</p></div></div>
       <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></div><div><h4>Conseil d'experts</h4><p>Notre configurateur vérifie la compatibilité à votre place.</p></div></div>
       <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><h4>Paiement sécurisé</h4><p>Transactions chiffrées et données protégées.</p></div></div>
     </div>
@@ -956,8 +981,8 @@ async function viewHome(app) {
       <div>
         <h4>Garanties</h4>
         <span>✓ Montage & test 24 h</span>
-        <span>✓ Garantie 2 ans pièces</span>
-        <span>✓ Retours 30 jours</span>
+        <span>✓ Garantie légale de conformité</span>
+        <span>✓ Rétractation 14 jours</span>
         <span>✓ Support 7j/7</span>
       </div>
       <div>
@@ -1049,10 +1074,11 @@ const trustIcon = (path) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d
 function trustStrip() {
   const items = [
     ["Paiement sécurisé Stripe", "M12 3 5 6v5c0 4.4 2.9 7.6 7 9 4.1-1.4 7-4.6 7-9V6l-7-3z"],
-    ["Retours 30 jours", "M4 7h10a5 5 0 1 1-4 8M4 7l4-4M4 7l4 4"],
+    ["Rétractation 14 jours", "M4 7h10a5 5 0 1 1-4 8M4 7l4-4M4 7l4 4"],
     ["Support client", "M5 18v-5a7 7 0 0 1 14 0v5M5 18h4v-6H5v6zm10 0h4v-6h-4v6z"],
     ["Facture PDF", "M7 3h8l4 4v14H7z"],
-    ["Livraison suivie", "M3 7h11v8H3zM14 10h4l3 3v2h-7z"],
+    ["Garantie légale", "M12 3 5 6v5c0 4.4 2.9 7.6 7 9 4.1-1.4 7-4.6 7-9V6l-7-3z"],
+    ["DEEE / recyclage", "M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 10v7M14 10v7"],
   ];
   return `<div class="trust-strip">${items.map(([label, path]) =>
     `<span>${trustIcon(path)}${label}</span>`).join("")}</div>`;
@@ -1083,42 +1109,53 @@ function viewAbout(app) {
 const LEGAL_PAGES = {
   mentions: {
     title: "Mentions légales",
-    intro: "Informations d'identification et de contact de la boutique VOLT PC.",
+    intro: "Informations d'identification, de contact et de responsabilité de la boutique VOLT PC.",
     sections: [
-      ["Éditeur du site", "VOLT PC, boutique française de composants PC. Les informations société définitives peuvent être renseignées depuis la configuration de production."],
-      ["Contact", "Pour toute question : support@voltpc.fr. Les demandes liées aux commandes doivent préciser le numéro de commande."],
-      ["Hébergement", "Site hébergé sur Render en démonstration, avec service applicatif FastAPI et base de données de développement."],
+      ["Éditeur du site", "VOLT PC, boutique française de composants PC. Avant mise en production, compléter la raison sociale, la forme juridique, le capital, l'adresse du siège, le SIRET/RCS, le numéro de TVA si applicable et le responsable de publication."],
+      ["Contact", "Pour toute question ou réclamation : support@voltpc.fr. Les demandes liées aux commandes doivent préciser le numéro de commande et l'adresse e-mail utilisée lors de l'achat."],
+      ["Hébergement", "Site hébergé sur Render pour la démonstration, avec service applicatif FastAPI et base de données de développement. Remplacer par les informations exactes de l'hébergeur en production."],
+      ["Facturation", "Une facture PDF est générée après paiement et reste disponible depuis l'espace client. Les mentions société des factures doivent être renseignées dans la configuration de production."],
       ["Propriété intellectuelle", "Les textes, interfaces et éléments de marque VOLT PC sont protégés. Les photos produits référencées indiquent leurs crédits dans le fichier dédié."],
+      ["Approvisionnement", "Les produits proposés doivent provenir de fournisseurs légitimes. Les factures d'achat sont à conserver afin de justifier l'origine des marchandises et d'éviter toute vente de contrefaçon ou d'importation irrégulière."],
     ],
   },
   cgv: {
     title: "Conditions générales de vente",
-    intro: "Résumé clair des conditions d'achat, de paiement, de livraison et de garantie.",
+    intro: "Conditions d'achat applicables aux commandes de composants PC et périphériques vendus par VOLT PC.",
     sections: [
-      ["Commande", "La commande est confirmée après validation du paiement. Les prix sont recalculés côté serveur pour éviter toute modification côté navigateur."],
-      ["Paiement", "Le paiement est traité par Stripe Checkout. Les coordonnées bancaires ne transitent jamais par les serveurs VOLT PC."],
-      ["Livraison", "La livraison est suivie et offerte dès 50 € d'achat après remise. Les délais exacts sont indiqués lors de la commande."],
-      ["Garantie", "Les produits bénéficient de la garantie constructeur applicable et d'un support client pour le diagnostic initial."],
+      ["Commande", "La commande est confirmée après validation du paiement. Les prix, remises, frais de livraison et disponibilités sont recalculés côté serveur avant le paiement."],
+      ["Paiement sécurisé", "Le paiement est traité par Stripe Checkout. Les coordonnées bancaires ne transitent jamais par les serveurs VOLT PC. Les moyens de paiement disponibles dépendent de la configuration Stripe active."],
+      ["Livraison", "La livraison est suivie et offerte dès 50 EUR d'achat après remise. Les délais exacts sont indiqués lors de la commande et peuvent varier selon le transporteur."],
+      ["Droit de rétractation", "Le consommateur dispose d'un délai légal de 14 jours à compter de la réception pour se rétracter, sauf exceptions prévues par la loi. VOLT PC peut proposer une politique commerciale plus favorable de 30 jours lorsque le produit est complet et en bon état."],
+      ["Garanties légales", "Les produits bénéficient de la garantie légale de conformité et de la garantie contre les vices cachés. Les garanties commerciales ou constructeur s'ajoutent à ces droits sans les remplacer."],
+      ["SAV et réclamations", "Le support accompagne le diagnostic initial, les demandes de retour, les échanges avec le transporteur et les réclamations. Le client doit fournir le numéro de commande, le produit concerné et une description du problème."],
+      ["Équipements électroniques", "Les composants et périphériques électroniques peuvent relever de la filière DEEE. Selon le rôle exact de VOLT PC, revendeur, importateur ou metteur sur le marché, des obligations de reprise, de déclaration ou d'éco-participation peuvent s'appliquer."],
+      ["Factures", "Une facture est fournie après paiement. Elle peut être téléchargée depuis l'espace client lorsque la commande n'est plus en attente de paiement."],
     ],
   },
   privacy: {
     title: "Politique de confidentialité",
-    intro: "Les données collectées servent uniquement au fonctionnement de la boutique et au suivi des commandes.",
+    intro: "Les données collectées servent au fonctionnement de la boutique, au suivi des commandes, au support et à la sécurité.",
     sections: [
-      ["Données collectées", "Compte client, adresse de livraison, panier, commandes, avis et préférences nécessaires au service."],
-      ["Utilisation", "Préparation des commandes, facturation, support client, sécurité du compte et amélioration de l'expérience d'achat."],
+      ["Données collectées", "Compte client, adresse de livraison, panier, commandes, factures, avis, préférences et informations nécessaires au support client."],
+      ["Finalités", "Préparation des commandes, livraison, facturation, service après-vente, sécurité du compte, lutte contre la fraude et amélioration de l'expérience d'achat."],
       ["Paiement", "Les données de paiement sont gérées par Stripe. VOLT PC ne stocke pas les numéros de carte bancaire."],
-      ["Vos droits", "Vous pouvez demander l'accès, la correction ou la suppression de vos données via support@voltpc.fr."],
+      ["Cookies", "Les cookies strictement nécessaires permettent le panier, la session et la sécurité. Les cookies de mesure d'audience ou de marketing ne doivent être utilisés qu'après consentement."],
+      ["Sécurité", "Les accès sensibles sont protégés par authentification. Les données clients doivent être limitées aux personnes qui en ont besoin pour traiter les commandes et le support."],
+      ["Durées de conservation", "Les données de compte sont conservées tant que le compte reste actif. Les données de commande et de facturation sont conservées selon les obligations comptables et légales applicables."],
+      ["Vos droits", "Vous pouvez demander l'accès, la rectification, l'effacement, la limitation, l'opposition ou la portabilité de vos données via support@voltpc.fr."],
     ],
   },
   returns: {
     title: "Retours et remboursement",
-    intro: "Un cadre simple pour retourner un produit et suivre le remboursement.",
+    intro: "Un cadre simple pour exercer la rétractation, demander un retour SAV et suivre le remboursement.",
     sections: [
-      ["Délai", "Vous disposez de 30 jours après réception pour demander un retour, sous réserve d'un produit complet et en bon état."],
-      ["Procédure", "Contactez le support avec le numéro de commande, le produit concerné et le motif du retour."],
-      ["Remboursement", "Après réception et contrôle, le remboursement est effectué sur le moyen de paiement initial."],
-      ["Exceptions", "Les produits endommagés, incomplets ou personnalisés peuvent nécessiter une vérification complémentaire."],
+      ["Rétractation légale", "Vous disposez d'un délai légal de 14 jours à compter de la réception pour exercer votre droit de rétractation, sauf exceptions prévues par la loi."],
+      ["Retour commercial", "VOLT PC peut accepter les demandes de retour jusqu'à 30 jours après réception lorsque le produit est complet, non endommagé et renvoyé avec ses accessoires."],
+      ["Procédure", "Contactez le support avec le numéro de commande, le produit concerné et le motif du retour. Le support vous indiquera l'adresse et les consignes de retour."],
+      ["Remboursement", "Lorsque le remboursement est dû, il est effectué sur le moyen de paiement initial dans les délais légaux après réception ou preuve d'expédition du retour, selon le cas applicable."],
+      ["Garanties et SAV", "En cas de défaut ou de panne, la garantie légale de conformité s'applique. Le support peut demander des photos, tests ou informations techniques pour orienter la prise en charge."],
+      ["Exceptions", "Les produits endommagés par mauvaise manipulation, incomplets, retournés sans accessoires essentiels ou personnalisés peuvent nécessiter une vérification complémentaire."],
     ],
   },
 };
@@ -2001,6 +2038,10 @@ async function viewCheckout(app) {
         🔒 Vous serez redirigé vers la page de paiement sécurisée <strong>Stripe</strong>.
         Vos coordonnées bancaires ne transitent jamais par nos serveurs.</p>
       <p style="color:var(--text-faint);font-size:.78rem">Carte de test : <code>4242 4242 4242 4242</code> · date future · CVC libre.</p>
+      <label class="legal-consent">
+        <input type="checkbox" name="legal_accept" required>
+        <span>J'accepte les <a href="/cgv">CGV</a>, la <a href="/confidentialite">politique de confidentialité</a> et les conditions de <a href="/retours-remboursements">retour/remboursement</a>.</span>
+      </label>
       <br>
       <button class="btn btn-primary btn-block" type="submit">Payer ${fmt(t.total)} →</button>
     </form>
@@ -2743,6 +2784,7 @@ function init() {
   fillNavMenus();
 
   setupTheme();
+  setupCookieBanner();
   $("#cartBtn").onclick = () => { renderCartDrawer(); openCart(); };
   $("#cartClose").onclick = closeCart;
   $("#drawerOverlay").onclick = closeCart;

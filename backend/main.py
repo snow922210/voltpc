@@ -2010,21 +2010,21 @@ STATIC_PAGES = {
     ),
     "cgv": (
         "Conditions générales de vente — VOLT PC",
-        "Conditions générales de vente VOLT PC : commande, paiement Stripe, livraison, garantie et support.",
+        "Conditions générales de vente VOLT PC : commande, paiement Stripe, rétractation 14 jours, livraison, garanties légales et SAV.",
         "Conditions générales de vente",
-        "Résumé des conditions d'achat, de paiement sécurisé Stripe, de livraison suivie, de garantie et de support client.",
+        "Résumé des conditions d'achat, de paiement sécurisé Stripe, de livraison suivie, de rétractation, de garanties légales, de SAV et de facturation.",
     ),
     "confidentialite": (
         "Politique de confidentialité — VOLT PC",
-        "Politique de confidentialité VOLT PC : données de compte, commandes, paiement et droits client.",
+        "Politique de confidentialité VOLT PC : données de compte, commandes, paiement, cookies, sécurité et droits RGPD.",
         "Politique de confidentialité",
-        "Les données collectées servent au fonctionnement de la boutique, au suivi des commandes, à la facturation, au support et à la sécurité du compte.",
+        "Les données collectées servent au fonctionnement de la boutique, au suivi des commandes, à la facturation, au support, à la sécurité du compte et au respect des droits RGPD.",
     ),
     "retours-remboursements": (
         "Retours et remboursement — VOLT PC",
-        "Retours VOLT PC : délai de 30 jours, procédure de retour et remboursement après contrôle.",
+        "Retours VOLT PC : droit de rétractation 14 jours, retour commercial 30 jours, SAV et remboursement.",
         "Retours et remboursement",
-        "Les retours peuvent être demandés sous 30 jours après réception pour les produits complets et en bon état.",
+        "Le consommateur dispose d'un droit légal de rétractation de 14 jours. Une politique commerciale de retour jusqu'à 30 jours peut s'appliquer aux produits complets et en bon état.",
     ),
 }
 

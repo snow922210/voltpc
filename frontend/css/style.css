@@ -874,6 +874,66 @@ img { max-width: 100%; }
   margin-top: 26px;
 }
 
+.legal-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+.legal-consent input {
+  width: auto;
+  flex: none;
+  margin-top: 3px;
+}
+.legal-consent a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.cookie-banner {
+  position: fixed;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 120;
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+.cookie-banner strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.cookie-banner p {
+  color: var(--text-dim);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+.cookie-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 /* ─── Compte / commandes ─── */
 .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 14px; box-shadow: var(--shadow-xs); }
 .order-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
@@ -974,6 +1034,9 @@ img { max-width: 100%; }
 @media (max-width: 820px) {
   .product-grid, .cat-grid, .perks { grid-template-columns: repeat(2, 1fr); }
   .catalog-layout, .product-page, .checkout-layout, .builder-layout, .story-grid, .legal-grid { grid-template-columns: 1fr; }
+  .cookie-banner { grid-template-columns: 1fr; }
+  .cookie-actions { justify-content: stretch; }
+  .cookie-actions .btn { flex: 1; }
   .filters, .product-gallery, .builder-summary { position: static; }
   .header { flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
   .header-search { order: 3; max-width: none; flex-basis: 100%; }
