@@ -2719,12 +2719,16 @@ function setupTheme() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   btn.onclick = () => {
     const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    if (!reduce) {
+    if (reduce) { apply(next); return; }
+    // Cross-fade composité GPU si dispo (Chrome/Edge), sinon repli par transition.
+    if (document.startViewTransition) {
+      document.startViewTransition(() => apply(next));
+    } else {
       const root = document.documentElement;
       root.classList.add("theme-anim");
       setTimeout(() => root.classList.remove("theme-anim"), 320);
+      apply(next);
     }
-    apply(next);
   };
 }
 

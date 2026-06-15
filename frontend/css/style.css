@@ -16,6 +16,7 @@
   --bg-soft: #f5f5f7;       /* parchemin Apple */
   --surface: #ffffff;
   --surface-2: #f5f5f7;
+  --header-bg: rgba(255, 255, 255, 0.72);   /* header translucide (clair) */
   --tile-dark: #1d1d1f;     /* tuile anthracite */
 
   /* Bordures fines (hairline) */
@@ -125,7 +126,7 @@ img { max-width: 100%; }
   align-items: center;
   gap: 22px;
   padding: 14px 28px;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--header-bg);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--border);
@@ -1382,8 +1383,8 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
 .section-head a, .nav-menu-all, .footer-grid a:hover, .footer-bottom a, .auth-hint a { color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
 
-/* Header : verre dépoli neutre (sub-nav Apple), pas de teinte */
-.header { background: rgba(255,255,255,0.72); border-bottom: 1px solid var(--border); }
+/* Header : verre dépoli neutre (sub-nav Apple), s'adapte au thème */
+.header { background: var(--header-bg); border-bottom: 1px solid var(--border); }
 .nav a.active { background: var(--accent-wash); color: var(--accent); }
 .icon-btn:hover { color: var(--accent); border-color: var(--border-strong); transform: none; }
 
@@ -1401,6 +1402,7 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
   --bg-soft: #141416;
   --surface: #161618;
   --surface-2: #202023;
+  --header-bg: rgba(18, 18, 20, 0.72);   /* header translucide (sombre) */
   --tile-dark: #000000;
   --border: rgba(255, 255, 255, 0.10);
   --border-strong: #3a3a40;
@@ -1427,9 +1429,16 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
 /* Transition douce lors du basculement de thème (classe ajoutée ~0,45 s par JS).
    Limitée à ce court instant → aucun coût sur les survols/animations habituels.
    Respecte « prefers-reduced-motion » (la classe n'est alors jamais ajoutée). */
+/* Bascule de thème — cross-fade composité GPU (API View Transitions, Chrome/Edge).
+   Toute la page est capturée et fondue en une seule couche → parfaitement fluide. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+  animation-timing-function: ease;
+}
+/* Repli pour les navigateurs sans View Transitions (Firefox/Safari anciens). */
 .theme-anim, .theme-anim *:not(canvas) {
   transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease !important;
-  transition-timing-function: ease !important;
 }
 /* Petit clin d'œil : l'icône soleil/lune pivote au changement. */
 #themeBtn svg { transition: transform 0.45s ease; }
