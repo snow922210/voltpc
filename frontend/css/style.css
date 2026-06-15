@@ -16,7 +16,7 @@
   --bg-soft: #f5f5f7;       /* parchemin Apple */
   --surface: #ffffff;
   --surface-2: #f5f5f7;
-  --header-bg: rgba(255, 255, 255, 0.72);   /* header translucide (clair) */
+  --header-bg: #ffffff;   /* header toujours blanc (île claire) */
   --tile-dark: #1d1d1f;     /* tuile anthracite */
 
   /* Bordures fines (hairline) */
@@ -130,6 +130,16 @@ img { max-width: 100%; }
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--border);
+  /* Île claire : le header garde la palette claire (texte noir, surfaces
+     claires) même en thème sombre — il reste blanc avec texte noir. */
+  --text: #1d1d1f;
+  --text-dim: #6e6e73;
+  --text-faint: #86868b;
+  --surface: #ffffff;
+  --surface-2: #f5f5f7;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: #d2d2d7;
+  color: #1d1d1f;   /* éléments qui héritent la couleur (logo…) restent noirs */
 }
 
 .logo {
@@ -1402,7 +1412,7 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
   --bg-soft: #141416;
   --surface: #161618;
   --surface-2: #202023;
-  --header-bg: rgba(18, 18, 20, 0.72);   /* header translucide (sombre) */
+  --header-bg: #ffffff;   /* header reste blanc même en thème sombre */
   --tile-dark: #000000;
   --border: rgba(255, 255, 255, 0.10);
   --border-strong: #3a3a40;
