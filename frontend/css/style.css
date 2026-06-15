@@ -11,61 +11,55 @@
    produit), typo SF Pro/Inter serrée, CTA en pilule.
    ════════════════════════════════════════════════════════════════ */
 :root {
-  /* ── Mode clair « atelier électrique » : papier crème + encre + orange voltage ──
-     Identité distinctive (le thème sombre est, lui, conservé tel quel plus bas). */
-  /* Surfaces & fonds */
-  --bg: #f5f1e8;            /* papier crème chaud */
-  --bg-soft: #ece5d6;
-  --surface: #fffdf7;       /* blanc chaud des cartes */
-  --surface-2: #f0e9da;
-  --header-bg: #fffdf7;
-  --hero-base: linear-gradient(160deg, #fffaf0 0%, #f2e9d6 100%);
-  --hero-glow-1: rgba(232, 89, 12, 0.16);    /* halo orange voltage */
-  --hero-glow-2: rgba(255, 178, 71, 0.20);   /* halo ambre chaud */
-  --tile-dark: #1c1813;     /* tuile encre chaude */
+  /* ── Variante CLAIRE de l'identité électrique (même marque cyan) ── */
+  --bg: #eef2f8;
+  --bg-soft: #e2e8f1;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --header-bg: rgba(255, 255, 255, 0.78);
+  --hero-base: linear-gradient(160deg, #ffffff 0%, #e7f3f8 100%);
+  --hero-glow-1: rgba(8, 145, 178, 0.16);
+  --hero-glow-2: rgba(59, 130, 246, 0.12);
+  --tile-dark: #0c1320;
 
-  /* Bordures (encre translucide chaude) */
-  --border: rgba(28, 22, 13, 0.10);
-  --border-strong: #ddd1ba;
+  --border: rgba(10, 22, 40, 0.10);
+  --border-strong: #cdd8e6;
 
-  /* Texte (encre chaude) */
-  --text: #1c1812;          /* near-black chaud */
-  --text-dim: #6a6151;
-  --text-faint: #9c917b;
+  --text: #0b1320;
+  --text-dim: #566374;
+  --text-faint: #8893a4;
 
-  /* Accent — orange voltage (énergie / performance), une seule couleur de marque */
-  --accent: #e8590c;
-  --accent-soft: #ff6a2b;
-  --accent-ink: #c2410c;    /* variante texte (contraste sur clair) */
-  --accent-2: #e8590c;
-  --accent-on-dark: #ff7a44;
-  --gradient: linear-gradient(118deg, #ff6a2b, #e8590c);  /* dégradé chaud (logo, hero, bandeau) */
-  --accent-wash: rgba(232, 89, 12, 0.09);
-  --accent-wash-strong: rgba(232, 89, 12, 0.15);
+  --accent: #0891b2;            /* cyan-teal (contraste sur clair) */
+  --accent-soft: #06b6d4;
+  --accent-ink: #0e7490;
+  --accent-2: #2563eb;
+  --accent-on-dark: #22d3ee;
+  --gradient: linear-gradient(118deg, #06b6d4, #0891b2);
+  --accent-wash: rgba(8, 145, 178, 0.10);
+  --accent-wash-strong: rgba(8, 145, 178, 0.16);
   --on-primary: #ffffff;
 
-  /* Sémantique (réchauffées) */
-  --green: #1c7d4d;
+  --green: #15803d;
   --green-soft: #2dbd6e;
-  --red: #c81e2b;
-  --amber: #b25000;
+  --red: #dc2626;
+  --amber: #b45309;
 
   /* Rayons */
   --radius: 18px;
   --radius-sm: 12px;
 
-  /* Élévation : ombres chaudes et douces (profondeur sans lourdeur) */
+  /* Élévation */
   --shadow-xs: none;
   --shadow-sm: none;
   --shadow: none;
-  --shadow-lg: 0 14px 38px -16px rgba(54, 38, 16, 0.26);
-  --shadow-accent: none;
-  --shadow-product: rgba(54, 38, 16, 0.20) 0 6px 32px 2px;
+  --shadow-lg: 0 16px 40px -18px rgba(15, 30, 55, 0.28);
+  --shadow-accent: 0 10px 28px -12px rgba(8, 145, 178, 0.5);
+  --shadow-product: rgba(15, 30, 55, 0.18) 0 8px 36px 2px;
 
-  /* Typo distinctive : display caractériel + grotesk de lecture
-     (on évite volontairement Inter / Space Grotesk, trop « génériques »). */
+  /* Typo : display caractériel + grotesk de lecture + mono technique */
   --font-display: "Bricolage Grotesque", -apple-system, system-ui, sans-serif;
   --font-body: "Manrope", -apple-system, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1404,35 +1398,38 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
    Thème sombre — surcharge des variables (activé via data-theme="dark")
    ════════════════════════════════════════════════════════════════ */
 :root[data-theme="dark"] {
-  --bg: #0b0b0d;
-  --bg-soft: #141416;
-  --surface: #161618;
-  --surface-2: #202023;
-  --header-bg: #1c1c1f;   /* header : noir moins foncé que le body → contraste */
-  --hero-base: #1c1c1f;   /* hero : même couleur que le header en sombre */
-  --hero-glow-1: rgba(139, 92, 246, 0.16);   /* sombre inchangé : halos d'origine */
-  --hero-glow-2: rgba(37, 99, 235, 0.14);
-  --accent-on-dark: #2997ff;
+  /* ── Thème PRINCIPAL : dark électrique / gaming premium ──
+     Base bleu-noir profond, accent cyan haute-tension, halos néon. */
+  --bg: #07090f;
+  --bg-soft: #0c0f17;
+  --surface: #11151f;
+  --surface-2: #182030;
+  --header-bg: rgba(9, 12, 19, 0.72);
+  --hero-base: radial-gradient(120% 130% at 80% -10%, #122436 0%, #0a0d15 55%);
+  --hero-glow-1: rgba(34, 211, 238, 0.22);   /* halo cyan */
+  --hero-glow-2: rgba(59, 130, 246, 0.16);   /* halo bleu */
   --tile-dark: #000000;
-  --border: rgba(255, 255, 255, 0.10);
-  --border-strong: #3a3a40;
-  --text: #f5f5f7;
-  --text-dim: #a1a1a6;
-  --text-faint: #86868b;
-  --accent: #2997ff;
-  --accent-soft: #2997ff;
-  --accent-ink: #2997ff;
-  --accent-2: #2997ff;
-  --gradient: #2997ff;
-  --accent-wash: rgba(41, 151, 255, 0.16);
-  --accent-wash-strong: rgba(41, 151, 255, 0.24);
-  --on-primary: #ffffff;
-  --green: #2dbd6e;
-  --green-soft: #34d27c;
-  --red: #ff453a;
-  --amber: #ff9f0a;
-  --shadow-lg: 0 1px 2px rgba(0, 0, 0, 0.55);
-  --shadow-product: rgba(0, 0, 0, 0.6) 0 5px 30px 3px;
+  --border: rgba(120, 200, 255, 0.10);
+  --border-strong: rgba(120, 200, 255, 0.22);
+  --text: #eef3fb;
+  --text-dim: #9aa6ba;
+  --text-faint: #65718a;
+  --accent: #22d3ee;            /* cyan électrique */
+  --accent-soft: #5ee9ff;
+  --accent-ink: #67e8f9;        /* variante texte sur fond sombre */
+  --accent-2: #3b82f6;
+  --accent-on-dark: #5ee9ff;
+  --gradient: linear-gradient(118deg, #5ee9ff 0%, #22d3ee 45%, #3b82f6 100%);
+  --accent-wash: rgba(34, 211, 238, 0.12);
+  --accent-wash-strong: rgba(34, 211, 238, 0.22);
+  --on-primary: #04141b;        /* encre sombre sur bouton néon → contraste punchy */
+  --green: #34d399;
+  --green-soft: #4ade80;
+  --red: #fb7185;
+  --amber: #fbbf24;
+  --shadow-lg: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
+  --shadow-accent: 0 0 0 1px rgba(34, 211, 238, 0.35), 0 10px 34px -10px rgba(34, 211, 238, 0.5);
+  --shadow-product: rgba(0, 0, 0, 0.65) 0 10px 44px 2px;
 }
 :root[data-theme="dark"] body { background: var(--bg); color: var(--text); }
 
@@ -1545,3 +1542,147 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
 
 /* Grille de recommandations (fiche produit) : un peu plus compacte */
 .reco-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+
+/* ════════════════════════════════════════════════════════════════
+   REDESIGN « VOLT — dark électrique / gaming premium »
+   Couche signature : atmosphère, néon, halos, reveal, mono technique.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Typo : titres serrés et gras, lecture aérée */
+.hero h1, .build-copy h2, .scene-3d-copy h2, .section-head h2,
+.catalog-toolbar h1, .product-page-info h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+
+/* Accents techniques en monospace (kicker, marque produit, badges, prix) */
+.hero-kicker, .product-brand, .badge, .pb-tag, .discount-chip,
+.kpi-label, .breadcrumb {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.product-brand { font-size: 0.72rem; }
+.price, .product-bottom .price, .hero-stat strong {
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Atmosphère : halo cyan diffus + grille fine, fixés derrière le contenu */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 50% -8%, var(--hero-glow-1), transparent 70%),
+    radial-gradient(45% 40% at 100% 0%, var(--hero-glow-2), transparent 70%);
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000, transparent 75%);
+}
+
+/* Boutons néon : dégradé cyan + halo, lift au survol */
+.btn-primary {
+  background: var(--gradient);
+  color: var(--on-primary);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: var(--shadow-accent);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: var(--shadow-accent), 0 0 28px -4px var(--accent);
+}
+.btn-ghost {
+  border: 1px solid var(--border-strong);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent-ink); }
+
+/* Cartes produit : surface élevée, halo cyan + lift au survol */
+.product-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+.product-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: 0 18px 50px -22px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--accent-wash-strong);
+}
+.product-visual { background: var(--surface-2); }
+.add-btn {
+  background: var(--gradient);
+  color: var(--on-primary);
+  box-shadow: 0 0 18px -6px var(--accent);
+}
+
+/* Badges : pastille technique nette */
+.badge {
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  border: 1px solid var(--border-strong);
+  backdrop-filter: blur(6px);
+  font-size: 0.62rem;
+  padding: 4px 9px;
+}
+
+/* En-têtes de section : barre d'accent cyan */
+.section-head h2 { position: relative; padding-left: 16px; }
+.section-head h2::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.1em; bottom: 0.1em;
+  width: 4px;
+  border-radius: 4px;
+  background: var(--gradient);
+  box-shadow: 0 0 14px -2px var(--accent);
+}
+
+/* Hero : profondeur + halo cyan sur l'illustration + reveal échelonné */
+.hero { border-radius: 28px; }
+.hero-art svg { filter: drop-shadow(0 24px 60px var(--accent-wash-strong)); }
+.hero-kicker {
+  border: 1px solid var(--border-strong);
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+@keyframes voltReveal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-kicker, .hero h1, .hero p, .hero-cta, .hero-stats, .hero-art {
+    animation: voltReveal 0.62s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+  .hero h1 { animation-delay: 0.08s; }
+  .hero p { animation-delay: 0.16s; }
+  .hero-cta { animation-delay: 0.24s; }
+  .hero-stats { animation-delay: 0.32s; }
+  .hero-art { animation-delay: 0.18s; }
+}
+
+/* Nav active : pastille accent avec lueur discrète */
+.nav a.active { background: var(--accent-wash); color: var(--accent-ink); }
+.nav-sale { color: var(--accent-ink); }
+
+/* Champs de recherche / inputs : focus cyan lumineux */
+.header-search:focus-within,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash-strong);
+}
