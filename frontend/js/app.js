@@ -270,6 +270,64 @@ function art(category, hue = 30) {
   return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${grad}${shapes[category] || shapes.cpu}</svg>`;
 }
 
+// Tour PC qui s'assemble / se démonte en boucle (composants animés par CSS).
+// Style filaire sunset ; chaque pièce a une classe .bp + .bp-<cat> (positions
+// explosées définies en CSS) et les ventilateurs tournent (.bp-spin).
+function buildSceneSVG() {
+  const blades = (cx, cy, r) => `<g class="bp-spin">${
+    [0, 1, 2, 3, 4, 5].map((i) => {
+      const a = i / 6 * Math.PI * 2;
+      return `<path d="M${cx} ${cy} L${(cx + Math.cos(a) * r).toFixed(1)} ${(cy + Math.sin(a) * r).toFixed(1)}" stroke="var(--accent)" stroke-width="2"/>`;
+    }).join("")}</g>`;
+  return `
+  <svg viewBox="0 0 200 226" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <defs><linearGradient id="sunStrip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="var(--accent-soft)"/><stop offset="1" stop-color="var(--accent-2)"/>
+    </linearGradient></defs>
+
+    <!-- Châssis (fixe) + panneau vitré -->
+    <rect x="44" y="16" width="112" height="194" rx="15" fill="var(--surface)" opacity="0.45"/>
+    <rect x="44" y="16" width="112" height="194" rx="15" stroke="var(--text-faint)" stroke-width="2.5"/>
+    <rect x="150" y="24" width="3.5" height="178" rx="2" fill="url(#sunStrip)"/>
+
+    <!-- Carte mère -->
+    <g class="bp bp-mobo">
+      <rect x="56" y="32" width="64" height="124" rx="5" fill="var(--surface-2)" stroke="var(--accent-2)" stroke-width="2"/>
+      <path d="M62 42h22M62 49h15M62 56h19" stroke="var(--accent-2)" stroke-width="2" opacity="0.55"/>
+    </g>
+
+    <!-- Refroidissement CPU (ventilo qui tourne) -->
+    <g class="bp bp-cool">
+      <rect x="70" y="44" width="40" height="40" rx="7" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="90" cy="64" r="15" stroke="var(--accent)" stroke-width="2"/>
+      ${blades(90, 64, 13)}
+      <circle cx="90" cy="64" r="3.4" fill="var(--accent)"/>
+    </g>
+
+    <!-- Mémoire RAM -->
+    <g class="bp bp-ram">
+      <rect x="122" y="40" width="9" height="54" rx="2" fill="var(--surface-2)" stroke="var(--accent-2)" stroke-width="2"/>
+      <rect x="134" y="40" width="9" height="54" rx="2" fill="var(--surface-2)" stroke="var(--accent-2)" stroke-width="2"/>
+      <rect x="122" y="40" width="9" height="6" rx="1" fill="var(--accent)"/>
+      <rect x="134" y="40" width="9" height="6" rx="1" fill="var(--accent-2)"/>
+    </g>
+
+    <!-- Carte graphique (2 ventilos) -->
+    <g class="bp bp-gpu">
+      <rect x="54" y="116" width="94" height="34" rx="7" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"/>
+      <circle cx="80" cy="133" r="11" stroke="var(--accent)" stroke-width="2"/>${blades(80, 133, 9)}
+      <circle cx="116" cy="133" r="11" stroke="var(--accent)" stroke-width="2"/>${blades(116, 133, 9)}
+      <rect x="56" y="120" width="40" height="3" rx="1.5" fill="url(#sunStrip)"/>
+    </g>
+
+    <!-- Alimentation (ventilo grille) -->
+    <g class="bp bp-psu">
+      <rect x="54" y="170" width="94" height="30" rx="7" fill="var(--surface-2)" stroke="var(--accent-2)" stroke-width="2.5"/>
+      <circle cx="100" cy="185" r="11" stroke="var(--accent-2)" stroke-width="2"/>${blades(100, 185, 9)}
+    </g>
+  </svg>`;
+}
+
 const hueOf = (p) => 18 + ((p.id * 37) % 24);
 const tintOf = (p) => `hsla(${hueOf(p) + 205}, 60%, 60%, 0.12)`;
 
@@ -887,7 +945,7 @@ async function viewHome(app) {
         <div class="hero-stat"><strong>4.8/5</strong><span>avis clients</span></div>
       </div>
     </div>
-    <div class="hero-art">${art("gpu", 32)}</div>
+    <div class="hero-art"><div class="hero-build">${buildSceneSVG()}</div></div>
   </section>
 
   <!-- Animation 3D #1 : zoom à travers un anneau → révèle les PC prémontés -->
