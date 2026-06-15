@@ -1669,42 +1669,33 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   box-shadow: 0 0 0 3px var(--accent-wash-strong);
 }
 
-/* ─── Hero : PC qui s'assemble / se démonte en boucle (SVG, parts animées) ─── */
+/* ─── Hero : vraie photo de tour dans un écrin lumineux (halo + flottement) ─── */
 .hero-build {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 470px;
   margin-inline: auto;
+  border-radius: 28px;
+  padding: 18px 26px 8px;
+  background: radial-gradient(125% 100% at 50% 0%, #ffffff 0%, #fff0e2 100%);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
 }
-.hero-build svg { width: 100%; height: auto; display: block; overflow: visible; }
-.hero-build::after {   /* halo sunset pulsant derrière la tour */
+.hero-build::before {   /* halo sunset balayant l'écrin */
   content: "";
   position: absolute;
-  inset: -6%;
-  z-index: -1;
-  background: radial-gradient(circle at 50% 46%, var(--accent-wash-strong), transparent 62%);
-  filter: blur(14px);
-  animation: buildGlow 5.4s ease-in-out infinite;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(55% 50% at 82% 8%, var(--accent-wash-strong), transparent 60%);
 }
-@keyframes buildGlow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-
-/* Chaque pièce part de sa position « explosée » et rejoint le châssis (puis repart). */
-.bp { transform-box: fill-box; transform-origin: center; }
-@keyframes pGpu    { from { transform: translateY(58px);  opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes pCool   { from { transform: translateY(-54px); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes pRam    { from { transform: translateX(56px);  opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes pMobo   { from { transform: translateX(-52px); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes pPsu    { from { transform: translateY(60px);  opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes pFan    { from { transform: translate(46px, 30px); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes spin    { to { transform: rotate(360deg); } }
-
-@media (prefers-reduced-motion: no-preference) {
-  .bp { animation-duration: 4.8s; animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1); animation-iteration-count: infinite; animation-direction: alternate; }
-  .bp-mobo { animation-name: pMobo; }
-  .bp-gpu  { animation-name: pGpu;  animation-delay: 0.12s; }
-  .bp-cool { animation-name: pCool; animation-delay: 0.06s; }
-  .bp-ram  { animation-name: pRam;  animation-delay: 0.18s; }
-  .bp-psu  { animation-name: pPsu;  animation-delay: 0.10s; }
-  .bp-fan  { animation-name: pFan;  animation-delay: 0.20s; }
-  .bp-spin { transform-box: fill-box; transform-origin: center; animation: spin 4s linear infinite; }
+.hero-build img {
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 24px 40px rgba(50, 24, 10, 0.30));
+  animation: heroFloat 6s ease-in-out infinite;
 }
+@keyframes heroFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@media (prefers-reduced-motion: reduce) { .hero-build img { animation: none; } }
