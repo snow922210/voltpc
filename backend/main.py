@@ -582,7 +582,7 @@ class ProductCreateIn(BaseModel):
 # (le middleware est ajouté à l'import, avant l'événement startup).
 load_env()
 
-app = FastAPI(title="VOLT PC API", version="1.0.0")
+app = FastAPI(title="VoltCore API", version="1.0.0")
 
 # CORS — par défaut permissif (pratique en dev). En PRODUCTION, définir
 # CORS_ORIGINS dans .env (origines séparées par des virgules) pour restreindre
@@ -1966,9 +1966,9 @@ def _catalog_render(tpl, params) -> Response:
     else:
         heading, canonical = "Catalogue", f"{SITE_URL}/catalogue"
 
-    title = f"{heading} — VOLT PC"
+    title = f"{heading} — VoltCore"
     desc = _clip(f"{heading} : {len(rows)} produits PC haute performance au meilleur "
-                 "prix chez VOLT PC. Livraison 24 h, paiement sécurisé.")
+                 "prix chez VoltCore. Livraison 24 h, paiement sécurisé.")
     items = "".join(
         f'<li><a href="/produit/{r["id"]}">{_E(r["name"])}</a> — '
         f'{_E(r["brand"])} — {_money(r["price"])}</li>' for r in rows
@@ -1996,7 +1996,7 @@ def _home_ssr() -> str:
         for c, lbl in CAT_LABELS.items()
     )
     return (
-        '<section><h1>VOLT PC — Composants PC haute performance</h1>'
+        '<section><h1>VoltCore — Composants PC haute performance</h1>'
         '<p>Cartes graphiques, processeurs, mémoire, stockage et périphériques '
         'gaming au meilleur prix. Configurateur intelligent, compatibilité vérifiée '
         'et livraison en 24 h.</p>'
@@ -2007,32 +2007,32 @@ def _home_ssr() -> str:
 
 STATIC_PAGES = {
     "qui-sommes-nous": (
-        "Qui sommes-nous — VOLT PC",
-        "VOLT PC, boutique française de composants PC : conseil configuration, composants PC, expédition suivie et support client.",
+        "Qui sommes-nous — VoltCore",
+        "VoltCore, boutique française de composants PC : conseil configuration, composants PC, expédition suivie et support client.",
         "Qui sommes-nous",
-        "VOLT PC est une boutique française de composants PC pensée pour rendre le choix d'une configuration plus clair : catalogue lisible, conseil compatibilité, configurateur PC, paiement sécurisé et livraison suivie.",
+        "VoltCore est une boutique française de composants PC pensée pour rendre le choix d'une configuration plus clair : catalogue lisible, conseil compatibilité, configurateur PC, paiement sécurisé et livraison suivie.",
     ),
     "mentions-legales": (
-        "Mentions légales — VOLT PC",
-        "Mentions légales de VOLT PC : éditeur, contact, hébergement et propriété intellectuelle.",
+        "Mentions légales — VoltCore",
+        "Mentions légales de VoltCore : éditeur, contact, hébergement et propriété intellectuelle.",
         "Mentions légales",
-        "Informations d'identification, contact, hébergement et propriété intellectuelle de la boutique VOLT PC.",
+        "Informations d'identification, contact, hébergement et propriété intellectuelle de la boutique VoltCore.",
     ),
     "cgv": (
-        "Conditions générales de vente — VOLT PC",
-        "Conditions générales de vente VOLT PC : commande, paiement Stripe, rétractation 14 jours, livraison, garanties légales et SAV.",
+        "Conditions générales de vente — VoltCore",
+        "Conditions générales de vente VoltCore : commande, paiement Stripe, rétractation 14 jours, livraison, garanties légales et SAV.",
         "Conditions générales de vente",
         "Résumé des conditions d'achat, de paiement sécurisé Stripe, de livraison suivie, de rétractation, de garanties légales, de SAV et de facturation.",
     ),
     "confidentialite": (
-        "Politique de confidentialité — VOLT PC",
-        "Politique de confidentialité VOLT PC : données de compte, commandes, paiement, cookies, sécurité et droits RGPD.",
+        "Politique de confidentialité — VoltCore",
+        "Politique de confidentialité VoltCore : données de compte, commandes, paiement, cookies, sécurité et droits RGPD.",
         "Politique de confidentialité",
         "Les données collectées servent au fonctionnement de la boutique, au suivi des commandes, à la facturation, au support, à la sécurité du compte et au respect des droits RGPD.",
     ),
     "retours-remboursements": (
-        "Retours et remboursement — VOLT PC",
-        "Retours VOLT PC : droit de rétractation 14 jours, retour commercial 30 jours, SAV et remboursement.",
+        "Retours et remboursement — VoltCore",
+        "Retours VoltCore : droit de rétractation 14 jours, retour commercial 30 jours, SAV et remboursement.",
         "Retours et remboursement",
         "Le consommateur dispose d'un droit légal de rétractation de 14 jours. Une politique commerciale de retour jusqu'à 30 jours peut s'appliquer aux produits complets et en bon état.",
     ),
@@ -2086,7 +2086,7 @@ def spa_fallback(full_path: str, request: Request):
                 p = conn.execute("SELECT * FROM products WHERE id = ?", (pid,)).fetchone()
             if p:
                 return _html(_render(
-                    tpl, title=f'{p["name"]} — VOLT PC',
+                    tpl, title=f'{p["name"]} — VoltCore',
                     desc=_clip(p["description"]),
                     canonical=f"{SITE_URL}/produit/{pid}",
                     og_title=p["name"], og_desc=_clip(p["description"]),
@@ -2094,7 +2094,7 @@ def spa_fallback(full_path: str, request: Request):
                     jsonld=_product_jsonld(p), main=_product_ssr(p),
                 ))
         return _html(_render(
-            tpl, title="Produit introuvable — VOLT PC",
+            tpl, title="Produit introuvable — VoltCore",
             desc="Ce produit n'existe pas ou n'est plus disponible.",
             canonical=f"{SITE_URL}/catalogue", og_title="Produit introuvable",
             og_desc="", robots="noindex, follow",

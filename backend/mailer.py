@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""VOLT PC — Envoi d'emails transactionnels (confirmation de commande) via SMTP.
+"""VoltCore — Envoi d'emails transactionnels (confirmation de commande) via SMTP.
 
 Module isolé, sans dépendance externe (smtplib de la stdlib).
 
@@ -9,7 +9,7 @@ Configuration par variables d'environnement (backend/.env) :
     SMTP_USER       login SMTP / adresse d'envoi
     SMTP_PASSWORD   mot de passe d'application (JAMAIS le mot de passe du compte)
     MAIL_FROM       expéditeur affiché (déf. = SMTP_USER)
-    SHOP_NAME       nom affiché de la boutique (déf. « VOLT PC »)
+    SHOP_NAME       nom affiché de la boutique (déf. « VoltCore »)
 
 ⚠️  Robustesse : si la config est absente ou si l'envoi échoue, on journalise et
 on renvoie False — JAMAIS d'exception remontée à l'appelant. Un email raté ne
@@ -52,7 +52,7 @@ def _config():
         return None
     return {
         "from": sender,
-        "shop": os.environ.get("SHOP_NAME", "VOLT PC"),
+        "shop": os.environ.get("SHOP_NAME", "VoltCore"),
         "brevo_key": brevo_key if has_brevo else None,
         "smtp": {
             "host": smtp_host,

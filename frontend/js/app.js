@@ -134,6 +134,10 @@ async function loadFavorites() {
   } catch { state.favorites = new Set(); }
 }
 
+function routeNeedsAuth(path) {
+  return path === "compte" || path === "commande" || path.startsWith("admin");
+}
+
 // Bascule un favori, puis met à jour l'icône cœur correspondante à l'écran.
 async function toggleFavorite(id, btn) {
   if (!state.user) { requireAuth(() => toggleFavorite(id)); return; }
@@ -922,7 +926,7 @@ async function viewHome(app) {
     <div>
       <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
       <h1>Assemblez la machine<br>de <span class="grad">vos rêves</span></h1>
-      <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5 et refroidissement maîtrisé : chaque VOLT PC est monté à la main, stress-testé 24 h et expédié sous 24 h.</p>
+      <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5 et refroidissement maîtrisé : chaque PC VoltCore est monté à la main, stress-testé 24 h et expédié sous 24 h.</p>
       <div class="hero-cta">
         <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
         <a class="btn btn-ghost" href="/configurateur">Configurer le mien</a>
@@ -934,7 +938,7 @@ async function viewHome(app) {
       </div>
     </div>
     <div class="hero-art"><div class="hero-build">
-      <img src="/images/36-1.jpg" alt="PC gaming VOLT monté : verre trempé, RTX et RGB" loading="eager" decoding="async">
+      <img src="/images/36-1.jpg" alt="PC gaming VoltCore monté : verre trempé, RTX et RGB" loading="eager" decoding="async">
     </div></div>
   </section>
 
@@ -959,7 +963,7 @@ async function viewHome(app) {
   </section>
 
   <section class="section">
-    <div class="section-head"><h2>La sélection VOLT</h2><a href="/catalogue">Tout le catalogue →</a></div>
+    <div class="section-head"><h2>La sélection VoltCore</h2><a href="/catalogue">Tout le catalogue →</a></div>
     <div id="featuredGrid">${skeletons(4)}</div>
   </section>
 
@@ -1039,11 +1043,11 @@ async function viewHome(app) {
 
 /* ─── PC prémontés (configs curées, compatibilité vérifiée) ─── */
 const PREBUILTS = [
-  { key: "spark", tier: "Entrée gaming", name: "VOLT Spark", tag: "Gaming 1080p haute fréquence", featured: false,
+  { key: "spark", tier: "Entrée gaming", name: "VoltCore Spark", tag: "Gaming 1080p haute fréquence", featured: false,
     ids: { "Processeur": 141, "Carte graphique": 166, "Mémoire": 80, "Carte mère": 75, "Stockage": 89, "Refroidissement": 102, "Alimentation": 93, "Boîtier": 230 } },
-  { key: "surge", tier: "Performance", name: "VOLT Surge", tag: "1440p haut niveau & création", featured: true,
+  { key: "surge", tier: "Performance", name: "VoltCore Surge", tag: "1440p haut niveau & création", featured: true,
     ids: { "Processeur": 138, "Carte graphique": 169, "Mémoire": 81, "Carte mère": 214, "Stockage": 64, "Refroidissement": 105, "Alimentation": 223, "Boîtier": 100 } },
-  { key: "apex", tier: "Ultra haut de gamme", name: "VOLT Apex", tag: "4K ultra & IA", featured: false,
+  { key: "apex", tier: "Ultra haut de gamme", name: "VoltCore Apex", tag: "4K ultra & IA", featured: false,
     ids: { "Processeur": 136, "Carte graphique": 17, "Mémoire": 20, "Carte mère": 28, "Stockage": 204, "Refroidissement": 243, "Alimentation": 225, "Boîtier": 38 } },
 ];
 
@@ -1116,7 +1120,7 @@ function viewAbout(app) {
     <nav class="breadcrumb"><a href="/">Accueil</a> / Qui sommes-nous</nav>
     <div class="content-hero">
       <span class="eyebrow">Boutique française</span>
-      <h1>VOLT PC aide à choisir les bons composants, sans jargon inutile.</h1>
+      <h1>VoltCore aide à choisir les bons composants, sans jargon inutile.</h1>
       <p>Nous sélectionnons des cartes graphiques, processeurs, alimentations, boîtiers et périphériques pensés pour des configurations fiables, équilibrées et faciles à faire évoluer.</p>
     </div>
     ${trustStrip()}
@@ -1135,27 +1139,27 @@ function viewAbout(app) {
 const LEGAL_PAGES = {
   mentions: {
     title: "Mentions légales",
-    intro: "Informations d'identification, de contact et de responsabilité de la boutique VOLT PC.",
+    intro: "Informations d'identification, de contact et de responsabilité de la boutique VoltCore.",
     sections: [
-      ["Éditeur du site", "VOLT PC, boutique française de composants PC. Avant mise en production, compléter la raison sociale, la forme juridique, le capital, l'adresse du siège, le SIRET/RCS, le numéro de TVA si applicable et le responsable de publication."],
+      ["Éditeur du site", "VoltCore, boutique française de composants PC. Avant mise en production, compléter la raison sociale, la forme juridique, le capital, l'adresse du siège, le SIRET/RCS, le numéro de TVA si applicable et le responsable de publication."],
       ["Contact", "Pour toute question ou réclamation : support@voltpc.fr. Les demandes liées aux commandes doivent préciser le numéro de commande et l'adresse e-mail utilisée lors de l'achat."],
       ["Hébergement", "Site hébergé sur Render pour la démonstration, avec service applicatif FastAPI et base de données de développement. Remplacer par les informations exactes de l'hébergeur en production."],
       ["Facturation", "Une facture PDF est générée après paiement et reste disponible depuis l'espace client. Les mentions société des factures doivent être renseignées dans la configuration de production."],
-      ["Propriété intellectuelle", "Les textes, interfaces et éléments de marque VOLT PC sont protégés. Les photos produits référencées indiquent leurs crédits dans le fichier dédié."],
+      ["Propriété intellectuelle", "Les textes, interfaces et éléments de marque VoltCore sont protégés. Les photos produits référencées indiquent leurs crédits dans le fichier dédié."],
       ["Approvisionnement", "Les produits proposés doivent provenir de fournisseurs légitimes. Les factures d'achat sont à conserver afin de justifier l'origine des marchandises et d'éviter toute vente de contrefaçon ou d'importation irrégulière."],
     ],
   },
   cgv: {
     title: "Conditions générales de vente",
-    intro: "Conditions d'achat applicables aux commandes de composants PC et périphériques vendus par VOLT PC.",
+    intro: "Conditions d'achat applicables aux commandes de composants PC et périphériques vendus par VoltCore.",
     sections: [
       ["Commande", "La commande est confirmée après validation du paiement. Les prix, remises, frais de livraison et disponibilités sont recalculés côté serveur avant le paiement."],
-      ["Paiement sécurisé", "Le paiement est traité par Stripe Checkout. Les coordonnées bancaires ne transitent jamais par les serveurs VOLT PC. Les moyens de paiement disponibles dépendent de la configuration Stripe active."],
+      ["Paiement sécurisé", "Le paiement est traité par Stripe Checkout. Les coordonnées bancaires ne transitent jamais par les serveurs VoltCore. Les moyens de paiement disponibles dépendent de la configuration Stripe active."],
       ["Livraison", "La livraison est suivie et offerte dès 50 EUR d'achat après remise. Les délais exacts sont indiqués lors de la commande et peuvent varier selon le transporteur."],
-      ["Droit de rétractation", "Le consommateur dispose d'un délai légal de 14 jours à compter de la réception pour se rétracter, sauf exceptions prévues par la loi. VOLT PC peut proposer une politique commerciale plus favorable de 30 jours lorsque le produit est complet et en bon état."],
+      ["Droit de rétractation", "Le consommateur dispose d'un délai légal de 14 jours à compter de la réception pour se rétracter, sauf exceptions prévues par la loi. VoltCore peut proposer une politique commerciale plus favorable de 30 jours lorsque le produit est complet et en bon état."],
       ["Garanties légales", "Les produits bénéficient de la garantie légale de conformité et de la garantie contre les vices cachés. Les garanties commerciales ou constructeur s'ajoutent à ces droits sans les remplacer."],
       ["SAV et réclamations", "Le support accompagne le diagnostic initial, les demandes de retour, les échanges avec le transporteur et les réclamations. Le client doit fournir le numéro de commande, le produit concerné et une description du problème."],
-      ["Équipements électroniques", "Les composants et périphériques électroniques peuvent relever de la filière DEEE. Selon le rôle exact de VOLT PC, revendeur, importateur ou metteur sur le marché, des obligations de reprise, de déclaration ou d'éco-participation peuvent s'appliquer."],
+      ["Équipements électroniques", "Les composants et périphériques électroniques peuvent relever de la filière DEEE. Selon le rôle exact de VoltCore, revendeur, importateur ou metteur sur le marché, des obligations de reprise, de déclaration ou d'éco-participation peuvent s'appliquer."],
       ["Factures", "Une facture est fournie après paiement. Elle peut être téléchargée depuis l'espace client lorsque la commande n'est plus en attente de paiement."],
     ],
   },
@@ -1165,7 +1169,7 @@ const LEGAL_PAGES = {
     sections: [
       ["Données collectées", "Compte client, adresse de livraison, panier, commandes, factures, avis, préférences et informations nécessaires au support client."],
       ["Finalités", "Préparation des commandes, livraison, facturation, service après-vente, sécurité du compte, lutte contre la fraude et amélioration de l'expérience d'achat."],
-      ["Paiement", "Les données de paiement sont gérées par Stripe. VOLT PC ne stocke pas les numéros de carte bancaire."],
+      ["Paiement", "Les données de paiement sont gérées par Stripe. VoltCore ne stocke pas les numéros de carte bancaire."],
       ["Cookies", "Les cookies strictement nécessaires permettent le panier, la session et la sécurité. Les cookies de mesure d'audience ou de marketing ne doivent être utilisés qu'après consentement."],
       ["Sécurité", "Les accès sensibles sont protégés par authentification. Les données clients doivent être limitées aux personnes qui en ont besoin pour traiter les commandes et le support."],
       ["Durées de conservation", "Les données de compte sont conservées tant que le compte reste actif. Les données de commande et de facturation sont conservées selon les obligations comptables et légales applicables."],
@@ -1177,7 +1181,7 @@ const LEGAL_PAGES = {
     intro: "Un cadre simple pour exercer la rétractation, demander un retour SAV et suivre le remboursement.",
     sections: [
       ["Rétractation légale", "Vous disposez d'un délai légal de 14 jours à compter de la réception pour exercer votre droit de rétractation, sauf exceptions prévues par la loi."],
-      ["Retour commercial", "VOLT PC peut accepter les demandes de retour jusqu'à 30 jours après réception lorsque le produit est complet, non endommagé et renvoyé avec ses accessoires."],
+      ["Retour commercial", "VoltCore peut accepter les demandes de retour jusqu'à 30 jours après réception lorsque le produit est complet, non endommagé et renvoyé avec ses accessoires."],
       ["Procédure", "Contactez le support avec le numéro de commande, le produit concerné et le motif du retour. Le support vous indiquera l'adresse et les consignes de retour."],
       ["Remboursement", "Lorsque le remboursement est dû, il est effectué sur le moyen de paiement initial dans les délais légaux après réception ou preuve d'expédition du retour, selon le cas applicable."],
       ["Garanties et SAV", "En cas de défaut ou de panne, la garantie légale de conformité s'applique. Le support peut demander des photos, tests ou informations techniques pour orienter la prise en charge."],
@@ -2891,8 +2895,13 @@ function init() {
   });
 
   renderCompareBar();
-  // Si déjà connecté : valide la session, puis charge les favoris ET le panier
-  // du compte avant le premier rendu (panier rattaché au serveur).
+  const { path } = parsePath();
+  const needsAuth = routeNeedsAuth(path);
+
+  // Les pages publiques s'affichent tout de suite, puis on hydrate la session
+  // en arrière-plan pour éviter un premier chargement visiblement bloquant.
+  if (!needsAuth) render();
+
   (async () => {
     if (state.token) {
       try {
@@ -2900,7 +2909,8 @@ function init() {
         if (state.user) await loadFavorites();
       } catch { /* non bloquant */ }
     }
-    render();
+    if (needsAuth) render();
+    else if (state.user) render();
   })();
 }
 

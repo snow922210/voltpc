@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""VOLT PC — Génération de factures PDF (via fpdf2).
+"""VoltCore — Génération de factures PDF (via fpdf2).
 
 Module isolé. La fonction principale `generate_invoice_pdf(order, items)` renvoie
 les octets d'un PDF de facture, prêt à être téléchargé ou joint à un email.
 
 Infos société (mentions légales) lues dans les variables d'environnement :
-    SHOP_NAME     nom commercial (déf. « VOLT PC »)
+    SHOP_NAME     nom commercial (déf. « VoltCore »)
     SHOP_ADDRESS  adresse postale
     SHOP_SIRET    numéro SIRET
     SHOP_VAT      n° TVA intracommunautaire (vide = non assujetti à la TVA)
@@ -28,7 +28,7 @@ NEXT = dict(new_x=XPos.LMARGIN, new_y=YPos.NEXT)  # passage à la ligne suivante
 
 def _cfg() -> dict:
     return {
-        "name": os.environ.get("SHOP_NAME", "VOLT PC"),
+        "name": os.environ.get("SHOP_NAME", "VoltCore"),
         "address": os.environ.get("SHOP_ADDRESS", ""),
         "siret": os.environ.get("SHOP_SIRET", ""),
         "vat": os.environ.get("SHOP_VAT", ""),
