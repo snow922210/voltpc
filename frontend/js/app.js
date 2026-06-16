@@ -24,6 +24,19 @@ const state = {
   compare: JSON.parse(localStorage.getItem("volt_compare") || "[]"), // ids à comparer
 };
 
+const apiCache = new Map();
+const API_CACHE_TTL_MS = 30_000;
+
+function isCacheableApiPath(path) {
+  return path === "/categories" || path.startsWith("/products");
+}
+
+function clearApiCache(prefix = "") {
+  for (const key of apiCache.keys()) {
+    if (!prefix || key.startsWith(prefix)) apiCache.delete(key);
+  }
+}
+
 function saveCompare() { localStorage.setItem("volt_compare", JSON.stringify(state.compare)); }
 
 // Le panier appartient au compte client : aucune persistance navigateur invitée.
@@ -86,6 +99,12 @@ function saveAuth() {
 
 /* ─── API ─── */
 async function api(path, options = {}) {
+  const method = (options.method || "GET").toUpperCase();
+  if (method === "GET" && isCacheableApiPath(path)) {
+    const cached = apiCache.get(path);
+    if (cached && cached.expiresAt > Date.now()) return cached.value;
+  }
+
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   if (state.token) headers["Authorization"] = "Bearer " + state.token;
   const res = await fetch(API + path, { ...options, headers });
@@ -99,6 +118,13 @@ async function api(path, options = {}) {
   if (!res.ok) {
     if (res.status === 401 && state.token) { state.token = null; state.user = null; saveAuth(); }
     throw new Error(data?.detail || "Erreur réseau");
+  }
+
+  if (method === "GET" && isCacheableApiPath(path)) {
+    apiCache.set(path, { value: data, expiresAt: Date.now() + API_CACHE_TTL_MS });
+  } else if (method !== "GET" && (path.startsWith("/admin/products") || path.includes("/reviews") || path === "/products")) {
+    clearApiCache("/products");
+    clearApiCache("/categories");
   }
   return data;
 }
@@ -334,20 +360,27 @@ async function validateProductGallery() {
   const main = $("#ppMain");
   if (!thumbs) return;
   const seen = new Set();
-
-  for (const btn of $$(".pp-thumb", thumbs)) {
-    try {
-      const res = await fetch(btn.dataset.src, { cache: "force-cache" });
-      if (!res.ok) throw new Error("missing");
-      const blob = await res.blob();
-      if (blob.size < 10000) throw new Error("too-small");
-      const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await blob.arrayBuffer())))
-        .map((b) => b.toString(16).padStart(2, "0")).join("");
-      if (seen.has(hash)) throw new Error("duplicate");
-      seen.add(hash);
-    } catch {
-      btn.remove();
+  const buttons = $$(".pp-thumb", thumbs);
+  const checks = await Promise.all(buttons.map(async (btn) => {
+    const img = $("img", btn);
+    if (!img) return { btn, ok: false };
+    if (!img.complete) {
+      await new Promise((resolve) => {
+        const done = () => resolve();
+        img.addEventListener("load", done, { once: true });
+        img.addEventListener("error", done, { once: true });
+      });
     }
+    const src = img.currentSrc || img.src || btn.dataset.src;
+    const ok = !!(img.naturalWidth && img.naturalHeight);
+    return { btn, ok, src };
+  }));
+  for (const { btn, ok, src } of checks) {
+    if (!ok || !src || seen.has(src)) {
+      btn.remove();
+      continue;
+    }
+    seen.add(src);
   }
 
   const first = $("#ppThumbs .pp-thumb");
@@ -1573,6 +1606,7 @@ async function viewProduct(app, id) {
         if (!confirm("Supprimer votre avis ?")) return;
         try {
           await api(`/products/${id}/reviews`, { method: "DELETE" });
+          clearApiCache("/products");
           toast("Avis supprimé");
           $("#reviewText").value = ""; pickedStars = 5;
           $("#reviewSubmit").dataset.mode = "create";
@@ -1598,6 +1632,7 @@ async function viewProduct(app, id) {
         method: editing ? "PATCH" : "POST",
         body: JSON.stringify({ rating: pickedStars, comment }),
       });
+      clearApiCache("/products");
       $("#reviewText").value = "";
       $("#reviewSubmit").dataset.mode = "create";
       toast(editing ? "Avis mis à jour ✔" : "Merci pour votre avis !");
