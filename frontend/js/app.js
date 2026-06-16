@@ -905,6 +905,11 @@ function go(to) {
 }
 
 const skeletons = (n) => `<div class="product-grid">${"<div class='skeleton'></div>".repeat(n)}</div>`;
+let currentRenderToken = 0;
+
+function isStaleRender(token, app) {
+  return token !== currentRenderToken || !app?.isConnected || app !== $("#app");
+}
 
 // Construit la barre de pagination (rendue sous la grille du catalogue).
 function pagerHtml(page, pageCount) {
@@ -929,6 +934,7 @@ function pagerHtml(page, pageCount) {
 async function render() {
   const { path, params } = parsePath();
   const app = $("#app");
+  const renderToken = ++currentRenderToken;
   $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === path.split("/")[0]));
   window.scrollTo({ top: 0 });
 
@@ -947,11 +953,12 @@ async function render() {
     else if (path === "commande/annulee") viewPaymentCancelled(app);
     else if (path === "commande") await viewCheckout(app);
     else if (path === "compte") await viewAccount(app, params);
-    else if (path === "admin/produits") await viewAdminProducts(app);
-    else if (path === "admin/stats") await viewAdminStats(app);
-    else if (path === "admin") await viewAdmin(app, params);
+    else if (path === "admin/produits") await viewAdminProducts(app, renderToken);
+    else if (path === "admin/stats") await viewAdminStats(app, renderToken);
+    else if (path === "admin") await viewAdmin(app, params, renderToken);
     else app.innerHTML = `<div class="empty-state"><div class="big">🧭</div><h2>Page introuvable</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
   } catch (e) {
+    if (isStaleRender(renderToken, app)) return;
     app.innerHTML = `<div class="empty-state"><div class="big">⚡</div><h2>Oups, une erreur</h2><p>${esc(e.message)}</p><br>
       <p style="color:var(--text-faint);font-size:.85rem">Le serveur est-il lancé ? <code>uvicorn main:app</code> dans voltpc/backend</p></div>`;
   }
@@ -2452,9 +2459,10 @@ function adminNav(active) {
 }
 
 /* ─── Vue : espace admin — tableau de bord ─── */
-async function viewAdminStats(app) {
+async function viewAdminStats(app, renderToken = currentRenderToken) {
   if (!state.user) { go("/"); openAuth(); return; }
   try { const me = await api("/auth/me"); state.user = { ...state.user, ...me }; saveAuth(); } catch { /* géré par api() */ }
+  if (isStaleRender(renderToken, app)) return;
   if (!state.user?.is_admin) {
     app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Accueil</a></div>`;
     return;
@@ -2468,15 +2476,21 @@ async function viewAdminStats(app) {
   let s;
   try { s = await api("/admin/stats"); }
   catch (err) {
-    $("#statsBody").innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="/">Accueil</a></div>`;
+    if (isStaleRender(renderToken, app)) return;
+    const statsBody = $("#statsBody");
+    if (!statsBody) return;
+    statsBody.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="/">Accueil</a></div>`;
     return;
   }
+  if (isStaleRender(renderToken, app)) return;
 
   const kpi = (label, value, sub = "") =>
     `<div class="kpi-card"><span class="kpi-label">${label}</span><strong class="kpi-value">${value}</strong>${sub ? `<span class="kpi-sub">${sub}</span>` : ""}</div>`;
   const statusOrder = ["en attente de paiement", "payée", "préparée", "expédiée", "livrée", "annulée"];
 
-  $("#statsBody").innerHTML = `
+  const statsBody = $("#statsBody");
+  if (!statsBody) return;
+  statsBody.innerHTML = `
     <div class="kpi-grid">
       ${kpi("Chiffre d'affaires", fmt(s.revenue), "commandes réglées")}
       ${kpi("CA aujourd'hui", fmt(s.revenue_today), `${s.orders_today} commande${s.orders_today > 1 ? "s" : ""}`)}
@@ -2523,9 +2537,10 @@ async function viewAdminStats(app) {
 }
 
 /* ─── Vue : espace admin (toutes les commandes) ─── */
-async function viewAdmin(app, params) {
+async function viewAdmin(app, params, renderToken = currentRenderToken) {
   if (!state.user) { go("/"); openAuth(); return; }
   try { const me = await api("/auth/me"); state.user = { ...state.user, ...me }; saveAuth(); } catch { /* géré par api() */ }
+  if (isStaleRender(renderToken, app)) return;
   if (!state.user?.is_admin) {
     app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
     return;
@@ -2583,10 +2598,12 @@ async function viewAdmin(app, params) {
     if (query) qs.set("q", query);
     orders = await api("/admin/orders" + (qs.toString() ? "?" + qs.toString() : ""));
   } catch (err) {
+    if (isStaleRender(renderToken, app)) return;
     // 403 = compte non administrateur
     app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
     return;
   }
+  if (isStaleRender(renderToken, app)) return;
 
   const date = (t) => new Date(t * 1000).toLocaleString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
@@ -2605,7 +2622,9 @@ async function viewAdmin(app, params) {
       </div>`;
   };
 
-  $("#adminOrders").innerHTML = orders.length
+  const adminOrders = $("#adminOrders");
+  if (!adminOrders) return;
+  adminOrders.innerHTML = orders.length
     ? orders.map((o) => `
       <div class="order-card">
         <div class="order-head">
@@ -2649,7 +2668,7 @@ async function viewAdmin(app, params) {
           body: JSON.stringify({ status, tracking_number: tracking, carrier }),
         });
         toast(status === "expédiée" ? "Statut mis à jour — email d'expédition envoyé ✔" : "Statut mis à jour ✔");
-        viewAdmin(app, params); // recharge la liste
+        viewAdmin(app, params, currentRenderToken); // recharge la liste
       } catch (err) {
         toast(err.message, "error");
         btn.disabled = false;
@@ -2692,10 +2711,11 @@ function orderProgress(o) {
 }
 
 /* ─── Vue : espace admin — gestion des produits ─── */
-async function viewAdminProducts(app) {
+async function viewAdminProducts(app, renderToken = currentRenderToken) {
   if (!state.user) { go("/"); openAuth(); return; }
   // Rafraîchit le statut admin puis verrouille l'accès.
   try { const me = await api("/auth/me"); state.user = { ...state.user, ...me }; saveAuth(); } catch { /* géré par api() */ }
+  if (isStaleRender(renderToken, app)) return;
   if (!state.user.is_admin) {
     app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
     return;
@@ -2731,7 +2751,10 @@ async function viewAdminProducts(app) {
 
   async function load() {
     const products = await api("/products?sort=name");
-    $("#adminProducts").innerHTML =
+    if (isStaleRender(renderToken, app)) return;
+    const adminProducts = $("#adminProducts");
+    if (!adminProducts) return;
+    adminProducts.innerHTML =
       `<p style="color:var(--text-dim);margin-bottom:12px">${products.length} produits</p>` +
       products.map((p) => `
       <div class="order-card" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
