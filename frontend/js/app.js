@@ -183,8 +183,12 @@ async function renderCompareBar() {
 
 /* ─── Toasts ─── */
 function toast(msg, type = "success") {
+  const existing = Array.from($$("#toasts .toast")).find((t) => t.dataset.msg === msg && t.dataset.type === type);
+  if (existing) return;
   const el = document.createElement("div");
   el.className = `toast ${type}`;
+  el.dataset.msg = msg;
+  el.dataset.type = type;
   el.innerHTML = `<span>${type === "error" ? "⚠️" : type === "info" ? "ℹ️" : "✓"}</span><span>${esc(msg)}</span>`;
   $("#toasts").appendChild(el);
   setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 320); }, 3400);
@@ -1077,6 +1081,11 @@ async function renderPrebuilts() {
     </article>`;
   }).join("");
   grid.querySelectorAll("[data-pb]").forEach((btn) => btn.onclick = () => {
+    if (!state.user) {
+      requireAuth(() => btn.click());
+      toast("Connectez-vous pour enregistrer votre panier sur votre compte", "info");
+      return;
+    }
     const b = PREBUILTS.find((x) => x.key === btn.dataset.pb);
     let n = 0;
     Object.values(b.ids).forEach((id) => { const p = byId.get(id); if (p && p.stock > 0) { addToCart(p, 1, true); n++; } });
