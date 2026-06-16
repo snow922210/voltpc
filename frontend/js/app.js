@@ -90,7 +90,12 @@ async function api(path, options = {}) {
   if (state.token) headers["Authorization"] = "Bearer " + state.token;
   const res = await fetch(API + path, { ...options, headers });
   let data = null;
-  try { data = await res.json(); } catch { /* réponse vide */ }
+  let raw = "";
+  try { raw = await res.text(); } catch { /* réponse vide */ }
+  if (raw) {
+    try { data = JSON.parse(raw); }
+    catch { data = { detail: raw.trim() }; }
+  }
   if (!res.ok) {
     if (res.status === 401 && state.token) { state.token = null; state.user = null; saveAuth(); }
     throw new Error(data?.detail || "Erreur réseau");
@@ -2414,6 +2419,11 @@ function adminNav(active) {
 /* ─── Vue : espace admin — tableau de bord ─── */
 async function viewAdminStats(app) {
   if (!state.user) { go("/"); openAuth(); return; }
+  try { const me = await api("/auth/me"); state.user = { ...state.user, ...me }; saveAuth(); } catch { /* géré par api() */ }
+  if (!state.user?.is_admin) {
+    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Accueil</a></div>`;
+    return;
+  }
   app.innerHTML = `
   <div class="section-head" style="margin-top:0"><h1>📊 Tableau de bord — Admin</h1>
     <a class="btn btn-ghost btn-sm" href="/compte">← Mon compte</a></div>
@@ -2480,6 +2490,11 @@ async function viewAdminStats(app) {
 /* ─── Vue : espace admin (toutes les commandes) ─── */
 async function viewAdmin(app, params) {
   if (!state.user) { go("/"); openAuth(); return; }
+  try { const me = await api("/auth/me"); state.user = { ...state.user, ...me }; saveAuth(); } catch { /* géré par api() */ }
+  if (!state.user?.is_admin) {
+    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
+    return;
+  }
 
   const current = params.get("status") || "";
   const query = params.get("q") || "";
