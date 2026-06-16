@@ -24,6 +24,7 @@ import os
 import re
 import smtplib
 import ssl
+import urllib.error
 import urllib.request
 from email.message import EmailMessage
 
@@ -264,6 +265,14 @@ def _brevo_deliver(cfg: dict, msg: EmailMessage, what: str) -> bool:
                 raise RuntimeError(f"HTTP {resp.status}")
         log.info("%s — envoyé via Brevo à %s", what, msg["To"])
         return True
+    except urllib.error.HTTPError as exc:
+        body = ""
+        try:
+            body = exc.read().decode("utf-8", errors="replace")
+        except Exception:
+            body = "<réponse illisible>"
+        log.error("Échec Brevo — %s — HTTP %s — %s", what, exc.code, body)
+        return False
     except Exception:
         log.exception("Échec Brevo — %s", what)
         return False

@@ -58,15 +58,16 @@ uvicorn main:app --host 0.0.0.0 --port 8000
       devant l'app. Apple Pay / Google Pay sur Stripe exigent un domaine HTTPS vérifié.
 - [ ] **`PUBLIC_BASE_URL`** = l'URL publique HTTPS réelle (sert aux `success_url` /
       `cancel_url` Stripe). Par défaut `http://127.0.0.1:8000` (dev uniquement).
-- [ ] **`CORS_ORIGINS`** = le(s) domaine(s) réel(s) (ex. `https://voltpc.fr`).
+- [ ] **`CORS_ORIGINS`** = le(s) domaine(s) réel(s) (ex. `https://voltcore.fr`).
       Par défaut `*` (à ne PAS laisser en production).
 - [ ] **`ENABLE_HSTS=1`** une fois le site servi en HTTPS (active l'en-tête HSTS).
 - [ ] **Clés Stripe `live`** + webhook pointant vers `https://<domaine>/api/webhook`
       (récupérer le `whsec_…` dans le Dashboard Stripe, pas via `stripe listen`).
-- [ ] **SMTP** renseigné et fonctionnel. ⚠️ Si l'envoi échoue, l'API renvoie le
-      code de vérification / réinitialisation dans la réponse (`dev_code`) pour ne
-      pas bloquer les tests : un SMTP cassé en prod exposerait donc ces codes.
-- [ ] **`ADMIN_EMAILS`** = les comptes autorisés à l'espace admin.
+- [ ] **Email transactionnel** renseigné et fonctionnel (`BREVO_API_KEY` recommandé
+      sur Render, ou SMTP complet). Les codes de vérification/réinitialisation ne
+      sont jamais affichés en production si l'email échoue.
+- [ ] **`ADMIN_EMAILS`** = les comptes autorisés à l'espace admin et notifiés lors
+      des nouvelles commandes.
 - [ ] **Sauvegarde** régulière du volume (`voltpc.db`).
 - [ ] **Un seul worker uvicorn** : SQLite, le thread de purge ET le rate-limiting
       en mémoire ne sont pas compatibles multi-process. Pour scaler, migrer vers

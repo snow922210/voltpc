@@ -839,12 +839,12 @@ def _dev_show_codes() -> bool:
 
 
 def _with_dev_code(resp: dict, code: str) -> dict:
-    """Renvoie le code dans la réponse UNIQUEMENT si l'email ne peut pas être
-    délivré (SMTP non configuré) ou si le mode dev est explicitement activé
-    (DEV_SHOW_CODES=1). Avec un SMTP configuré et DEV_SHOW_CODES désactivé, le
-    code n'est JAMAIS exposé : il ne part que par email.
+    """Renvoie le code dans la réponse UNIQUEMENT en mode développement explicite.
+
+    En production, un SMTP/Brevo mal configuré ne doit jamais exposer un code de
+    vérification ou de réinitialisation dans le navigateur.
     """
-    if not smtp_configured() or _dev_show_codes():
+    if _dev_show_codes():
         resp["dev_code"] = code
     return resp
 

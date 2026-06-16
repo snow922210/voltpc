@@ -21,24 +21,43 @@ services:
     plan: free
     healthCheckPath: /api/categories
     envVars:
-      # Démo : le code de vérification s'affiche à l'écran (pas besoin d'email).
-      # ⚠️ Mettre à vide pour une vraie boutique avec de vrais clients.
       - key: DEV_SHOW_CODES
-        value: "1"
+        value: ""
+      - key: ADMIN_EMAILS
+        value: "salut_c_moi@yahoo.com,yohannlemire@gmail.com"
       - key: CORS_ORIGINS
-        value: "*"
+        value: "https://voltcore.fr,https://www.voltcore.fr"
+      # Passer à "1" UNIQUEMENT après avoir confirmé que https://voltcore.fr
+      # répond avec un certificat valide (custom domain Render OK).
+      - key: ENABLE_HSTS
+        value: ""
       # Clé de signature stable (sessions conservées entre redémarrages).
       - key: VOLTPC_SECRET
         generateValue: true
-      # À renseigner après le 1er déploiement avec l'URL Render
-      # (https://voltpc-xxxx.onrender.com) si tu veux tester le paiement Stripe.
+      # URL publique du site (redirections Stripe, liens emails).
       - key: PUBLIC_BASE_URL
-        sync: false
+        value: "https://voltcore.fr"
       # Base serveur persistante : comptes, paniers, commandes, adresses.
       - key: DATABASE_URL
         fromDatabase:
           name: voltpc-db
           property: connectionString
+      # Emails transactionnels : renseigner les valeurs privées dans Render.
+      # Brevo est recommandé sur Render ; SMTP classique fonctionne aussi selon le fournisseur.
+      - key: BREVO_API_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: SHOP_EMAIL
+        value: "salut_c_moi@yahoo.com"
 
 # ─── Base de données managée ─────────────────────────────────────────
 databases:
