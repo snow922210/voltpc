@@ -47,6 +47,9 @@ DATA_DIR = Path(os.environ.get("VOLTPC_DATA_DIR") or BASE)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH = DATA_DIR / "voltpc.db"
 SECRET_PATH = DATA_DIR / ".secret"
+PRODUCT_CACHE_TTL = 15.0
+_product_cache = {}
+_product_cache_lock = threading.Lock()
 
 TOKEN_TTL = 60 * 60 * 24 * 7  # 7 jours
 FREE_SHIPPING_FROM = 50.0
@@ -653,17 +656,44 @@ def product_out(row: sqlite3.Row) -> dict:
     return d
 
 
+def _cache_get(key):
+    now = time.time()
+    with _product_cache_lock:
+        entry = _product_cache.get(key)
+        if not entry:
+            return None
+        if entry["expires_at"] <= now:
+            _product_cache.pop(key, None)
+            return None
+        return entry["value"]
+
+
+def _cache_set(key, value):
+    with _product_cache_lock:
+        _product_cache[key] = {"value": value, "expires_at": time.time() + PRODUCT_CACHE_TTL}
+
+
+def _invalidate_product_cache() -> None:
+    with _product_cache_lock:
+        _product_cache.clear()
+
+
 # ─── Catalogue ───────────────────────────────────────────────────────
 
 
 @app.get("/api/categories")
 def list_categories():
+    cached = _cache_get(("categories",))
+    if cached is not None:
+        return cached
     with db() as conn:
         rows = conn.execute(
             "SELECT category, COUNT(*) AS count, MIN(price) AS min_price"
             " FROM products GROUP BY category"
         ).fetchall()
-    return [dict(r) for r in rows]
+    out = [dict(r) for r in rows]
+    _cache_set(("categories",), out)
+    return out
 
 
 @app.get("/api/products")
@@ -675,6 +705,10 @@ def list_products(
     max_price: Optional[float] = None,
     sort: str = Query("featured", pattern="^(featured|performance|price_asc|price_desc|rating|name)$"),
 ):
+    cache_key = ("products", category, search, brand, min_price, max_price, sort)
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return cached
     sql = "SELECT * FROM products WHERE 1=1"
     args: list = []
     if category:
@@ -702,6 +736,7 @@ def list_products(
             key=lambda d: perf_score(d["category"], d["specs"], d["price"], d["name"]),
             reverse=True,
         )
+        _cache_set(cache_key, out)
         return out
 
     order = {
@@ -714,16 +749,23 @@ def list_products(
     sql += f" ORDER BY {order}"
     with db() as conn:
         rows = conn.execute(sql, args).fetchall()
-    return [product_out(r) for r in rows]
+    out = [product_out(r) for r in rows]
+    _cache_set(cache_key, out)
+    return out
 
 
 @app.get("/api/products/{product_id}")
 def get_product(product_id: int):
+    cached = _cache_get(("product", product_id))
+    if cached is not None:
+        return cached
     with db() as conn:
         row = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
     if row is None:
         raise HTTPException(404, "Produit introuvable")
-    return product_out(row)
+    out = product_out(row)
+    _cache_set(("product", product_id), out)
+    return out
 
 
 def _recompute_rating(conn: sqlite3.Connection, product_id: int) -> None:
@@ -736,6 +778,7 @@ def _recompute_rating(conn: sqlite3.Connection, product_id: int) -> None:
         "UPDATE products SET rating = ?, rating_count = ? WHERE id = ?",
         (round(agg["avg"], 1) if agg["avg"] else 0, agg["count"], product_id),
     )
+    _invalidate_product_cache()
 
 
 def _has_purchased(conn: sqlite3.Connection, user_id: int, product_id: int) -> bool:
@@ -1304,6 +1347,7 @@ def create_pending_order(conn: sqlite3.Connection, user: sqlite3.Row,
         conn.execute(
             "UPDATE products SET stock = stock - ? WHERE id = ?", (qty, p["id"])
         )
+    _invalidate_product_cache()
     return order_id
 
 
@@ -1327,6 +1371,7 @@ def release_stock(conn: sqlite3.Connection, order_id: int) -> None:
             (it["quantity"], it["product_id"]),
         )
     conn.execute("UPDATE orders SET stock_restored = 1 WHERE id = ?", (order_id,))
+    _invalidate_product_cache()
 
 
 # Délai au-delà duquel une commande « en attente de paiement » est considérée
@@ -1410,6 +1455,7 @@ def finalize_order_paid(order_id: int, session_id: Optional[str] = None) -> bool
         )
 
         # Coordonnées client pour l'email de confirmation.
+        _invalidate_product_cache()
         customer = conn.execute(
             "SELECT name, email FROM users WHERE id = ?", (order["user_id"],)
         ).fetchone()
@@ -1679,6 +1725,7 @@ def admin_update_product(
         )
         row = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
     log.info("Produit %s mis à jour (%s)", product_id, ", ".join(fields))
+    _invalidate_product_cache()
     return product_out(row)
 
 
@@ -1697,6 +1744,7 @@ def admin_create_product(body: ProductCreateIn, _: sqlite3.Row = Depends(current
         )
         row = conn.execute("SELECT * FROM products WHERE id = ?", (cur.lastrowid,)).fetchone()
     log.info("Produit créé : %s (#%s)", body.name, row["id"])
+    _invalidate_product_cache()
     return product_out(row)
 
 
@@ -1718,6 +1766,7 @@ def admin_delete_product(product_id: int, _: sqlite3.Row = Depends(current_admin
         conn.execute("DELETE FROM reviews WHERE product_id = ?", (product_id,))
         conn.execute("DELETE FROM products WHERE id = ?", (product_id,))
     log.info("Produit %s supprimé", product_id)
+    _invalidate_product_cache()
     return {"ok": True}
 
 
