@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import sys
-import time
 import urllib.request
 from pathlib import Path
 

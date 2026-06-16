@@ -31,16 +31,6 @@ from email.message import EmailMessage
 log = logging.getLogger("voltpc.mailer")
 
 
-def smtp_configured() -> bool:
-    """Vrai si l'envoi d'emails est opérationnel (Brevo API OU SMTP renseigné).
-
-    Sert au repli « mode dev » : tant qu'aucun transport n'est configuré, les
-    codes de vérification / réinitialisation ne peuvent pas partir par email, et
-    l'API les renvoie alors directement pour permettre les tests en local.
-    """
-    return _config() is not None
-
-
 def _config():
     """Réglages d'envoi + transports disponibles, ou None si aucun n'est prêt.
 

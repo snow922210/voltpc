@@ -2224,10 +2224,26 @@ async function viewAccount(app, params) {
   tabs[startTab]();
 }
 
+/* ─── Compte : message d'erreur d'un panneau (évite le squelette figé) ─── */
+// Si un chargement échoue (token expiré → 401, réseau, serveur), on remplace le
+// squelette par un message clair + un bouton « Réessayer », au lieu de laisser
+// l'utilisateur devant un panneau vide indéfiniment.
+function renderPanelError(panel, retry) {
+  const reauth = !state.token; // api() vide le token sur 401 : session expirée.
+  panel.innerHTML = `<div class="empty-state">
+      <div class="big">⚠️</div>
+      <p>${reauth ? "Votre session a expiré. Reconnectez-vous pour voir vos données." : "Impossible de charger ces informations pour le moment."}</p><br>
+      <button class="btn btn-primary" id="panelRetry">${reauth ? "Se reconnecter" : "Réessayer"}</button>
+    </div>`;
+  $("#panelRetry", panel).onclick = () => (reauth ? (go("/"), openAuth()) : retry());
+}
+
 /* ─── Compte : commandes (avec annulation) ─── */
 async function renderAccountOrders(panel) {
   panel.innerHTML = `<div class="skeleton" style="min-height:110px"></div>`;
-  const orders = await api("/orders");
+  let orders;
+  try { orders = await api("/orders"); }
+  catch { return renderPanelError(panel, () => renderAccountOrders(panel)); }
   const cancellable = new Set(["en attente de paiement", "payée", "préparée"]);
   panel.innerHTML = orders.length
     ? orders.map((o) => `
@@ -2262,7 +2278,9 @@ async function renderAccountOrders(panel) {
 /* ─── Compte : favoris ─── */
 async function renderAccountFavorites(panel) {
   panel.innerHTML = skeletons(4);
-  const favs = await api("/favorites");
+  let favs;
+  try { favs = await api("/favorites"); }
+  catch { return renderPanelError(panel, () => renderAccountFavorites(panel)); }
   state.favorites = new Set(favs.map((p) => p.id));
   panel.innerHTML = favs.length
     ? `<div class="product-grid">${favs.map(productCard).join("")}</div>`
@@ -2273,7 +2291,9 @@ async function renderAccountFavorites(panel) {
 /* ─── Compte : carnet d'adresses ─── */
 async function renderAccountAddresses(panel) {
   panel.innerHTML = `<div class="skeleton" style="min-height:110px"></div>`;
-  const addresses = await api("/addresses");
+  let addresses;
+  try { addresses = await api("/addresses"); }
+  catch { return renderPanelError(panel, () => renderAccountAddresses(panel)); }
   panel.innerHTML = `
     ${addresses.length ? addresses.map((a) => `
       <div class="order-card" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">

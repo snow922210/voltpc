@@ -35,7 +35,6 @@ from mailer import (
     send_password_reset,
     send_shipping_notification,
     send_verification_code,
-    smtp_configured,
 )
 from seed import PROMO_CODES, SEED_PRODUCTS, SEED_REVIEWS
 
@@ -630,6 +629,17 @@ def startup() -> None:
     global SECRET
     load_env()          # charge les clés Stripe depuis backend/.env
     SECRET = get_secret()
+    # Diagnostic explicite du backend de stockage : une base SQLite sur disque
+    # éphémère (Render gratuit) PERD les commandes à chaque redémarrage. Ce log
+    # permet de vérifier en un coup d'œil que la persistance PostgreSQL est active.
+    if IS_PG:
+        log.info("Base de données : PostgreSQL (persistant) — commandes conservées.")
+    else:
+        log.warning(
+            "Base de données : SQLite sur %s — NON persistant sur un hébergement "
+            "à disque éphémère (les commandes seront perdues au redémarrage). "
+            "Définissez DATABASE_URL (PostgreSQL) en production.", DB_PATH,
+        )
     init_db()
     # Purge initiale au démarrage, puis périodiquement en arrière-plan.
     purge_expired_orders()
@@ -1751,7 +1761,7 @@ app.include_router(payment_router)
 
 
 # ─── SEO : robots.txt + sitemap.xml ──────────────────────────────────
-SITE_URL = os.environ.get("SITE_URL", "https://voltpc.onrender.com").rstrip("/")
+SITE_URL = os.environ.get("SITE_URL", "https://voltcore.fr").rstrip("/")
 
 # Libellés FR des catégories (miroir de CATS côté frontend).
 CAT_LABELS = {
@@ -2047,7 +2057,13 @@ def spa_fallback(full_path: str, request: Request):
         and candidate.is_file()
         and candidate.is_relative_to(FRONTEND_DIR)  # anti path-traversal
     ):
-        return FileResponse(candidate)
+        # Cache : les assets référencés avec une version (ex. app.js?v=36) sont
+        # immuables → cache long ; le changement de numéro suffit à forcer le
+        # rechargement après un déploiement. Les autres fichiers (images…) ont un
+        # cache court pour s'auto-rafraîchir s'ils sont remplacés sur place.
+        cache = ("public, max-age=31536000, immutable"
+                 if request.url.query else "public, max-age=3600")
+        return FileResponse(candidate, headers={"Cache-Control": cache})
 
     tpl = INDEX_FILE.read_text(encoding="utf-8")
     seg = full_path.strip("/")
