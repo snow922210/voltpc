@@ -1032,7 +1032,7 @@ async function viewHome(app) {
   <section class="hero">
     <div>
       <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
-      <h1>Assemblez la machine<br>de <span class="grad">vos rêves</span></h1>
+      <h1>Assemblez<br class="hero-mobile-only"> la machine<br>de <span class="grad">vos rêves</span></h1>
       <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5 et refroidissement maîtrisé : chaque PC VoltCore est monté à la main, stress-testé 24 h et expédié sous 24 h.</p>
       <div class="hero-cta">
         <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
@@ -1049,12 +1049,32 @@ async function viewHome(app) {
     </div></div>
   </section>
 
-  <!-- Animation 3D #1 : zoom à travers un anneau → révèle les PC prémontés -->
-  <div class="sep-zoom" data-sep aria-hidden="true">
-    <div class="zoom-rings"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
-    <div class="zoom-core">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="11" height="18" rx="2"/><circle cx="9.5" cy="8" r="2"/><circle cx="9.5" cy="14" r="2"/><path d="M19 7v10"/></svg>
-      <span>Prêts à dominer</span>
+  <div class="motion-reel motion-reel-build" id="drop-reel" data-sep aria-hidden="true">
+    <div class="reel-stage">
+      <div class="reel-atmosphere">
+        <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span>
+      </div>
+      <div class="reel-rails rail-top">
+        <span>RTX 50</span><span>Ryzen X3D</span><span>DDR5</span><span>NVMe Gen5</span><span>WiFi 7</span>
+      </div>
+      <div class="reel-rails rail-bottom">
+        <span>1440p</span><span>4K Ultra</span><span>Ray tracing</span><span>IA ready</span><span>Silence</span>
+      </div>
+      <div class="reel-machine">
+        <div class="machine-card card-gpu"><span>GPU</span><strong>RTX 50</strong></div>
+        <div class="machine-card card-cpu"><span>CPU</span><strong>Ryzen X3D</strong></div>
+        <div class="machine-core">
+          <img src="/images/36-1.jpg" alt="" loading="eager" decoding="async">
+          <i class="core-halo"></i>
+          <i class="core-sweep"></i>
+        </div>
+        <div class="machine-card card-ram"><span>RAM</span><strong>DDR5</strong></div>
+        <div class="machine-card card-ssd"><span>SSD</span><strong>Gen5</strong></div>
+      </div>
+      <div class="reel-copy">
+        <span>Configs prêtes</span>
+        <strong>Drop gaming</strong>
+      </div>
     </div>
   </div>
 
@@ -1093,12 +1113,26 @@ async function viewHome(app) {
     </div>
   </section>
 
-  <!-- Animation 3D #2 : zoom sur le bouclier → révèle garanties & mentions légales -->
-  <div class="sep-zoom sep-zoom-alt" data-sep aria-hidden="true">
-    <div class="zoom-rings"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
-    <div class="zoom-core">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6z"/><path d="m8.5 12 2.3 2.3L16 9"/></svg>
-      <span>Sérénité garantie</span>
+  <div class="motion-reel motion-reel-trust" id="trust-reel" data-sep aria-hidden="true">
+    <div class="reel-stage">
+      <div class="trust-grid">
+        <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span>
+      </div>
+      <div class="scan-window">
+        <span class="scan-line"></span>
+        <div class="scan-card scan-card-pay"><span>Paiement</span><strong>Validé</strong></div>
+        <div class="scan-card scan-card-ship"><span>Expédition</span><strong>24 h</strong></div>
+        <div class="scan-card scan-card-warranty"><span>Garantie</span><strong>14 j + SAV</strong></div>
+      </div>
+      <div class="trust-core">
+        <span class="core-mark">VC</span>
+        <i class="orbit orbit-a"></i><i class="orbit orbit-b"></i><i class="orbit orbit-c"></i>
+        <b></b>
+      </div>
+      <div class="reel-copy">
+        <span>Suivi complet</span>
+        <strong>Commande protégée</strong>
+      </div>
     </div>
   </div>
 
