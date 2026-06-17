@@ -2152,34 +2152,17 @@ async function viewCheckout(app) {
     return;
   }
   const t = cartTotals();
-  // Carnet d'adresses : pré-remplissage rapide depuis une adresse enregistrée.
+  const checkoutRenderToken = currentRenderToken;
   let addresses = [];
-  try { addresses = await api("/addresses"); } catch { /* non bloquant */ }
+  let formTouched = false;
 
-  // Une adresse enregistrée dans le compte est OBLIGATOIRE pour accéder au paiement
-  // (elle reste modifiable ci-dessous). Sinon, on renvoie vers le carnet d'adresses.
-  if (addresses.length === 0) {
-    app.innerHTML = `
-      <div class="empty-state">
-        <div class="big">📍</div>
-        <h2>Ajoutez une adresse de livraison</h2>
-        <p style="margin-top:10px">Pour passer au paiement, enregistrez d'abord une adresse de livraison dans votre compte. Vous pourrez la modifier au moment de la commande.</p>
-        <br>
-        <a class="btn btn-primary" href="/compte?tab=addresses">Ajouter une adresse</a>
-        &nbsp;<a class="btn btn-ghost" href="/catalogue">Continuer mes achats</a>
-      </div>`;
-    window.scrollTo({ top: 0 });
-    return;
-  }
-
-  const addressPicker = addresses.length ? `
-      <label class="full">Adresse enregistrée
-        <select id="addrPicker">
-          <option value="">— Nouvelle adresse —</option>
-          ${addresses.map((a) => `<option value="${a.id}">${esc(a.label || a.ship_name)} — ${esc(a.ship_address)}, ${esc(a.ship_zip)} ${esc(a.ship_city)}</option>`).join("")}
-        </select>
-      </label>` : "";
-  const def = addresses.find((a) => a.is_default);
+  const fillAddress = (form, a) => {
+    if (!form || !a) return;
+    form.ship_name.value = a.ship_name;
+    form.ship_address.value = a.ship_address;
+    form.ship_city.value = a.ship_city;
+    form.ship_zip.value = a.ship_zip;
+  };
 
   app.innerHTML = `
   <h1 style="margin-bottom:24px">Finaliser ma commande</h1>
@@ -2187,12 +2170,16 @@ async function viewCheckout(app) {
     <form class="panel" id="checkoutForm">
       <h2>Adresse de livraison</h2>
       <div class="form-grid">
-        ${addressPicker}
-        <label class="full">Nom complet<input name="ship_name" required minlength="2" value="${esc(def?.ship_name || state.user.name)}"></label>
-        <label class="full">Adresse<input name="ship_address" required minlength="4" placeholder="12 rue de la Paix" value="${esc(def?.ship_address || "")}"></label>
-        <label>Ville<input name="ship_city" required minlength="2" placeholder="Paris" value="${esc(def?.ship_city || "")}"></label>
-        <label>Code postal<input name="ship_zip" required minlength="4" placeholder="75001" value="${esc(def?.ship_zip || "")}"></label>
-        <label class="full" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="saveAddr" style="width:auto"> Enregistrer cette adresse dans mon carnet</label>
+        <label class="full" id="addrPickerWrap">Adresse enregistrée
+          <select id="addrPicker" disabled>
+            <option value="">Chargement des adresses...</option>
+          </select>
+        </label>
+        <label class="full">Nom complet<input name="ship_name" required minlength="2" autocomplete="name" value="${esc(state.user.name)}"></label>
+        <label class="full">Adresse<input name="ship_address" required minlength="4" autocomplete="street-address" placeholder="12 rue de la Paix"></label>
+        <label>Ville<input name="ship_city" required minlength="2" autocomplete="address-level2" placeholder="Paris"></label>
+        <label>Code postal<input name="ship_zip" required minlength="4" autocomplete="postal-code" placeholder="75001"></label>
+        <label class="full" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="saveAddr" style="width:auto"> Enregistrer cette adresse dans Mon compte &gt; Adresses</label>
       </div>
       <br>
       <h2>Paiement</h2>
@@ -2205,7 +2192,7 @@ async function viewCheckout(app) {
         <span>J'accepte les <a href="/cgv">CGV</a>, la <a href="/confidentialite">politique de confidentialité</a> et les conditions de <a href="/retours-remboursements">retour/remboursement</a>.</span>
       </label>
       <br>
-      <button class="btn btn-primary btn-block" type="submit">Payer ${fmt(t.total)} →</button>
+      <button class="btn btn-primary btn-block" type="submit">Continuer vers le paiement sécurisé ${fmt(t.total)} →</button>
     </form>
     <div class="panel">
       <h2>Récapitulatif</h2>
@@ -2217,33 +2204,58 @@ async function viewCheckout(app) {
     </div>
   </div>`;
 
-  // Pré-remplit le formulaire depuis une adresse enregistrée.
+  const form = $("#checkoutForm");
   const picker = $("#addrPicker");
+  const saveAddr = $("#saveAddr");
+  ["ship_name", "ship_address", "ship_city", "ship_zip"].forEach((name) => {
+    form[name].addEventListener("input", () => { formTouched = true; }, { once: true });
+  });
+
+  const renderAddressPicker = (list) => {
+    if (isStaleRender(checkoutRenderToken, app)) return;
+    addresses = Array.isArray(list) ? list : [];
+    if (!picker) return;
+    picker.disabled = false;
+    if (!addresses.length) {
+      picker.innerHTML = `<option value="">Aucune adresse enregistrée</option>`;
+      if (saveAddr) saveAddr.checked = true;
+      return;
+    }
+    if (saveAddr) saveAddr.checked = false;
+    picker.innerHTML = `
+      <option value="">— Nouvelle adresse —</option>
+      ${addresses.map((a) => `<option value="${a.id}">${esc(a.label || a.ship_name)} — ${esc(a.ship_address)}, ${esc(a.ship_zip)} ${esc(a.ship_city)}</option>`).join("")}`;
+    const def = addresses.find((a) => a.is_default) || addresses[0];
+    picker.value = String(def.id);
+    if (!formTouched) fillAddress(form, def);
+  };
+
   if (picker) picker.onchange = () => {
     const a = addresses.find((x) => String(x.id) === picker.value);
-    const form = $("#checkoutForm");
     if (a) {
-      form.ship_name.value = a.ship_name; form.ship_address.value = a.ship_address;
-      form.ship_city.value = a.ship_city; form.ship_zip.value = a.ship_zip;
+      if (saveAddr) saveAddr.checked = false;
+      fillAddress(form, a);
+    } else {
+      form.ship_name.value = state.user.name || "";
+      form.ship_address.value = "";
+      form.ship_city.value = "";
+      form.ship_zip.value = "";
+      if (saveAddr) saveAddr.checked = true;
     }
   };
 
-  $("#checkoutForm").onsubmit = async (e) => {
+  api("/addresses").then(renderAddressPicker).catch(() => {
+    if (isStaleRender(checkoutRenderToken, app) || !picker) return;
+    picker.innerHTML = `<option value="">Adresses indisponibles</option>`;
+  });
+
+  form.onsubmit = async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
     const btn = $("button[type=submit]", e.target);
     btn.disabled = true;
     btn.textContent = "Redirection vers le paiement…";
     try {
-      // Enregistrement optionnel de l'adresse dans le carnet (non bloquant).
-      if ($("#saveAddr")?.checked) {
-        try {
-          await api("/addresses", { method: "POST", body: JSON.stringify({
-            ship_name: f.get("ship_name"), ship_address: f.get("ship_address"),
-            ship_city: f.get("ship_city"), ship_zip: f.get("ship_zip"),
-          }) });
-        } catch { /* on n'empêche pas le paiement si la sauvegarde échoue */ }
-      }
       // On n'envoie QUE les identifiants + quantités : le serveur recalcule
       // tous les prix. Aucun montant n'est transmis depuis le navigateur.
       const { url } = await api("/create-checkout-session", {
@@ -2255,6 +2267,7 @@ async function viewCheckout(app) {
           ship_address: f.get("ship_address"),
           ship_city: f.get("ship_city"),
           ship_zip: f.get("ship_zip"),
+          save_address: Boolean($("#saveAddr")?.checked),
         }),
       });
       // Redirection vers la page de paiement hébergée par Stripe.
@@ -2262,7 +2275,7 @@ async function viewCheckout(app) {
     } catch (err) {
       toast(err.message, "error");
       btn.disabled = false;
-      btn.textContent = `Payer ${fmt(t.total)} →`;
+      btn.textContent = `Continuer vers le paiement sécurisé ${fmt(t.total)} →`;
     }
   };
 }

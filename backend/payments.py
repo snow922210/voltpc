@@ -20,6 +20,7 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
+import time
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
@@ -90,6 +91,19 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
         with db() as conn:
             computed = compute_order(conn, body.items, body.promo_code)
             order_id = create_pending_order(conn, user, body, computed)
+            if body.save_address:
+                has_any = conn.execute(
+                    "SELECT 1 FROM addresses WHERE user_id = ? LIMIT 1",
+                    (user["id"],),
+                ).fetchone()
+                conn.execute(
+                    "INSERT INTO addresses (user_id, label, ship_name, ship_address,"
+                    " ship_city, ship_zip, is_default, created_at) VALUES (?,?,?,?,?,?,?,?)",
+                    (
+                        user["id"], "Livraison", body.ship_name, body.ship_address,
+                        body.ship_city, body.ship_zip, 0 if has_any else 1, time.time(),
+                    ),
+                )
 
         # (b) Lignes Stripe construites à partir des PRIX VÉRIFIÉS EN BASE,
         #     jamais à partir de valeurs envoyées par le client.

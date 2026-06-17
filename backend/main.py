@@ -580,6 +580,7 @@ class OrderIn(BaseModel):
     ship_address: str = Field(min_length=4, max_length=200)
     ship_city: str = Field(min_length=2, max_length=80)
     ship_zip: str = Field(min_length=4, max_length=12)
+    save_address: bool = False
 
 
 class PromoIn(BaseModel):
