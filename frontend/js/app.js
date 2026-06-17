@@ -1092,7 +1092,9 @@ async function viewHome(app) {
   $("#featuredGrid").innerHTML = `<div class="product-grid">${featured.filter((p) => p.featured).slice(0, 8).map(productCard).join("")}</div>`;
   bindProductCards(app, featured);
 
-  renderPrebuilts();
+  // `featured` contient déjà TOUS les produits (le tri=featured renvoie tout le
+  // catalogue) : on le passe aux prémontés pour éviter un 2ᵉ fetch /products.
+  renderPrebuilts(featured);
   initHome3D();
 }
 
@@ -1106,12 +1108,15 @@ const PREBUILTS = [
     ids: { "Processeur": 136, "Carte graphique": 17, "Mémoire": 20, "Carte mère": 28, "Stockage": 204, "Refroidissement": 243, "Alimentation": 225, "Boîtier": 38 } },
 ];
 
-async function renderPrebuilts() {
+async function renderPrebuilts(preloaded) {
   const grid = $("#prebuiltGrid");
   if (!grid) return;
   let byId;
   try {
-    const all = await api("/products");
+    // La page d'accueil a déjà chargé la liste complète des produits : on la
+    // réutilise pour éviter un second fetch de ~125 Ko. Repli sur /products
+    // seulement si la fonction est appelée sans données préchargées.
+    const all = preloaded || await api("/products");
     byId = new Map(all.map((p) => [p.id, p]));
   } catch {
     grid.innerHTML = `<p style="color:var(--text-faint)">Configurations momentanément indisponibles.</p>`;
