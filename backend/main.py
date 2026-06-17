@@ -100,6 +100,12 @@ def db():
     try:
         yield conn
         conn.commit()
+    except Exception:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        raise
     finally:
         conn.close()
 
@@ -656,7 +662,9 @@ _CSP = (
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
+    start = time.perf_counter()
     resp = await call_next(request)
+    resp.headers.setdefault("Server-Timing", f"app;dur={(time.perf_counter() - start) * 1000:.1f}")
     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
     resp.headers.setdefault("X-Frame-Options", "DENY")
     resp.headers.setdefault("Referrer-Policy", "no-referrer")

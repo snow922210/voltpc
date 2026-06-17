@@ -162,6 +162,19 @@ def translate(sql: str):
 
 if IS_PG:
     import psycopg
+    from psycopg_pool import ConnectionPool
+
+    _POOL_MIN = int(os.environ.get("DB_POOL_MIN", "1"))
+    _POOL_MAX = int(os.environ.get("DB_POOL_MAX", "5"))
+    _PG_POOL = ConnectionPool(
+        conninfo=DATABASE_URL,
+        min_size=_POOL_MIN,
+        max_size=_POOL_MAX,
+        timeout=float(os.environ.get("DB_POOL_TIMEOUT", "10")),
+        max_idle=float(os.environ.get("DB_POOL_MAX_IDLE", "300")),
+        max_lifetime=float(os.environ.get("DB_POOL_MAX_LIFETIME", "1800")),
+        open=True,
+    )
 
     def _pg_row_factory(cursor):
         cols = [c.name for c in cursor.description] if cursor.description else []
@@ -190,8 +203,9 @@ if IS_PG:
     class PGConnection:
         """Adaptateur minimal exposant l'API sqlite3 utilisée par l'application."""
 
-        def __init__(self, conn):
+        def __init__(self, conn, pool=None):
             self._conn = conn
+            self._pool = pool
 
         def execute(self, sql, params=()):
             sql2, returning = translate(sql)
@@ -219,11 +233,14 @@ if IS_PG:
             self._conn.rollback()
 
         def close(self):
-            self._conn.close()
+            if self._pool is not None:
+                self._pool.putconn(self._conn)
+            else:
+                self._conn.close()
 
     def connect():
         """Ouvre une connexion PostgreSQL enveloppée."""
-        return PGConnection(psycopg.connect(DATABASE_URL))
+        return PGConnection(_PG_POOL.getconn(), _PG_POOL)
 
 else:  # pragma: no cover - chemin SQLite (défaut)
     def connect():
