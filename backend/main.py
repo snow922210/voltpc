@@ -1628,7 +1628,9 @@ def admin_stats(_: sqlite3.Row = Depends(current_admin)):
                 f" SUM(oi.quantity) AS qty, SUM(oi.quantity * oi.unit_price) AS revenue"
                 f" FROM order_items oi JOIN orders o ON o.id = oi.order_id"
                 f" WHERE o.status IN ({placeholders})"
-                f" GROUP BY oi.product_id ORDER BY qty DESC LIMIT 8",
+                # product_name doit figurer dans GROUP BY : PostgreSQL refuse une
+                # colonne sélectionnée ni agrégée ni groupée (SQLite la tolérait).
+                f" GROUP BY oi.product_id, oi.product_name ORDER BY qty DESC LIMIT 8",
                 paid_statuses,
             )
         ]
