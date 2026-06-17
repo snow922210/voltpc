@@ -14,7 +14,12 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
 
 /* ─── État global ─── */
 const state = {
-  token: localStorage.getItem("volt_token") || null,
+  // La session vit désormais dans un cookie HttpOnly posé par le backend
+  // (inaccessible au JS, donc à l'abri du vol par XSS). `token` n'est plus
+  // qu'un drapeau « connecté » côté UI : on n'expose ni ne stocke le jeton brut.
+  // On le déduit du profil mémorisé (volt_user) ; /auth/me le revalidera via le
+  // cookie au démarrage et l'invalidera s'il a expiré.
+  token: localStorage.getItem("volt_user") ? true : null,
   user: JSON.parse(localStorage.getItem("volt_user") || "null"),
   cart: [],
   promo: JSON.parse(localStorage.getItem("volt_promo") || "null"),
@@ -88,11 +93,12 @@ async function restoreSessionAndCart() {
 function savePromo() { localStorage.setItem("volt_promo", JSON.stringify(state.promo)); }
 function saveAuth() {
   if (state.token) {
-    localStorage.setItem("volt_token", state.token);
+    // On ne mémorise QUE le profil d'affichage (nom/email) — jamais le jeton,
+    // qui reste confiné au cookie HttpOnly géré par le navigateur.
     localStorage.setItem("volt_user", JSON.stringify(state.user));
   } else {
-    localStorage.removeItem("volt_token");
     localStorage.removeItem("volt_user");
+    localStorage.removeItem("volt_token"); // nettoyage d'anciennes sessions
   }
   $("#accountLabel").textContent = state.user ? state.user.name.split(" ")[0] : "Compte";
 }
@@ -106,8 +112,8 @@ async function api(path, options = {}) {
   }
 
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
-  if (state.token) headers["Authorization"] = "Bearer " + state.token;
-  const res = await fetch(API + path, { ...options, headers });
+  // credentials: "include" → le cookie de session HttpOnly accompagne la requête.
+  const res = await fetch(API + path, { ...options, headers, credentials: "include" });
   let data = null;
   let raw = "";
   try { raw = await res.text(); } catch { /* réponse vide */ }
@@ -135,7 +141,7 @@ async function api(path, options = {}) {
 async function downloadInvoice(orderId) {
   try {
     const res = await fetch(API + `/orders/${orderId}/invoice`, {
-      headers: { Authorization: "Bearer " + state.token },
+      credentials: "include", // session transmise via le cookie HttpOnly
     });
     if (!res.ok) {
       let d = {};
@@ -723,7 +729,8 @@ function showVerifyStep(email) {
 
 // Connexion réussie : enregistre la session et ferme la modale.
 async function finishLogin(data) {
-  state.token = data.token;
+  // Le backend a posé le cookie de session ; on ne conserve que le drapeau d'état.
+  state.token = true;
   state.user = data.user;
   saveAuth();
   resetAuthView();
@@ -866,6 +873,9 @@ function setupAuth() {
 }
 
 function logout() {
+  // Demande au backend d'effacer le cookie de session HttpOnly (le JS ne peut
+  // pas le supprimer lui-même). Non bloquant : on nettoie l'UI quoi qu'il arrive.
+  api("/auth/logout", { method: "POST" }).catch(() => {});
   state.token = null;
   state.user = null;
   state.favorites = new Set();

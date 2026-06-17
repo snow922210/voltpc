@@ -21,7 +21,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
+from fastapi import Cookie, Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
@@ -342,6 +342,36 @@ def parse_token(token: str) -> Optional[int]:
         return None
 
 
+# ─── Session par cookie HttpOnly ─────────────────────────────────────
+# Le jeton de session est posé dans un cookie HttpOnly : inaccessible au
+# JavaScript, il échappe au vol par injection (XSS) — contrairement à un
+# stockage localStorage. SameSite=Lax bloque l'envoi en contexte cross-site
+# (anti-CSRF). Secure (cookie envoyé uniquement en HTTPS) est activé en prod
+# via le même signal qu'HSTS ; désactivé en dev HTTP local sinon le navigateur
+# n'enverrait jamais le cookie.
+SESSION_COOKIE = "volt_session"
+
+
+def _cookie_secure() -> bool:
+    return bool(os.environ.get("ENABLE_HSTS"))
+
+
+def set_session_cookie(resp: Response, token: str) -> None:
+    resp.set_cookie(
+        key=SESSION_COOKIE,
+        value=token,
+        max_age=TOKEN_TTL,
+        httponly=True,
+        samesite="lax",
+        secure=_cookie_secure(),
+        path="/",
+    )
+
+
+def clear_session_cookie(resp: Response) -> None:
+    resp.delete_cookie(SESSION_COOKIE, path="/")
+
+
 # ─── Rate-limiting (en mémoire, par IP) ──────────────────────────────
 # Fenêtre glissante simple, suffisante pour un seul worker. Pour plusieurs
 # workers/instances, déporter ce compteur dans Redis.
@@ -423,10 +453,19 @@ def issue_verification_code(conn: sqlite3.Connection, user_id: int) -> str:
     return code
 
 
-def current_user(authorization: str = Header(default="")) -> sqlite3.Row:
-    if not authorization.startswith("Bearer "):
+def current_user(
+    authorization: str = Header(default=""),
+    volt_session: str = Cookie(default=""),
+) -> sqlite3.Row:
+    # Priorité à l'en-tête Authorization (clients API, rétro-compatibilité),
+    # sinon repli sur le cookie de session HttpOnly (navigateur).
+    if authorization.startswith("Bearer "):
+        token = authorization[7:]
+    elif volt_session:
+        token = volt_session
+    else:
         raise HTTPException(401, "Authentification requise")
-    user_id = parse_token(authorization[7:])
+    user_id = parse_token(token)
     if user_id is None:
         raise HTTPException(401, "Session expirée, reconnectez-vous")
     with db() as conn:
@@ -929,7 +968,7 @@ def register(body: RegisterIn, _rl: None = Depends(rl_register)):
 
 
 @app.post("/api/auth/login")
-def login(body: LoginIn, _rl: None = Depends(rl_login)):
+def login(body: LoginIn, response: Response, _rl: None = Depends(rl_login)):
     email = body.email.strip().lower()
     code = None
     with db() as conn:
@@ -972,11 +1011,13 @@ def login(body: LoginIn, _rl: None = Depends(rl_login)):
         _send_code_bg(send_verification_code, email, user["name"], code)
         log.info("Connexion d'un compte non vérifié %s — code en arrière-plan", email)
         return _with_dev_code({"verification_required": True, "email": email}, code)
-    return _auth_payload(user)
+    payload = _auth_payload(user)
+    set_session_cookie(response, payload["token"])
+    return payload
 
 
 @app.post("/api/auth/verify")
-def verify_email(body: VerifyIn, _rl: None = Depends(rl_verify)):
+def verify_email(body: VerifyIn, response: Response, _rl: None = Depends(rl_verify)):
     """Valide le code reçu par email et active le compte (connexion immédiate).
 
     Protégé contre le bruteforce : au-delà de MAX_CODE_ATTEMPTS essais erronés, le
@@ -1013,7 +1054,9 @@ def verify_email(body: VerifyIn, _rl: None = Depends(rl_verify)):
             (user["id"],),
         )
     log.info("Compte %s vérifié et activé", email)
-    return _auth_payload(user["id"], user["name"], user["email"])
+    payload = _auth_payload(user["id"], user["name"], user["email"])
+    set_session_cookie(response, payload["token"])
+    return payload
 
 
 @app.post("/api/auth/resend-code")
@@ -1035,6 +1078,13 @@ def resend_code(body: ResendIn, _rl: None = Depends(rl_code)):
 def me(user: sqlite3.Row = Depends(current_user)):
     return {"id": user["id"], "name": user["name"], "email": user["email"],
             "is_admin": is_admin_email(user["email"])}
+
+
+@app.post("/api/auth/logout")
+def logout(response: Response):
+    """Efface le cookie de session côté navigateur (déconnexion)."""
+    clear_session_cookie(response)
+    return {"ok": True}
 
 
 # ─── Réinitialisation du mot de passe ────────────────────────────────
@@ -1066,7 +1116,7 @@ def forgot_password(body: ForgotPasswordIn, _rl: None = Depends(rl_code)):
 
 
 @app.post("/api/auth/reset-password")
-def reset_password(body: ResetPasswordIn, _rl: None = Depends(rl_verify)):
+def reset_password(body: ResetPasswordIn, response: Response, _rl: None = Depends(rl_verify)):
     """Valide le code reçu par email et remplace le mot de passe. Comme pour la
     vérification, le code est invalidé au-delà de MAX_CODE_ATTEMPTS essais."""
     email = body.email.strip().lower()
@@ -1098,7 +1148,9 @@ def reset_password(body: ResetPasswordIn, _rl: None = Depends(rl_verify)):
             (hash_password(body.password, salt), salt.hex(), user["id"]),
         )
     log.info("Mot de passe réinitialisé pour %s", email)
-    return _auth_payload(user["id"], user["name"], user["email"])
+    payload = _auth_payload(user["id"], user["name"], user["email"])
+    set_session_cookie(response, payload["token"])
+    return payload
 
 
 # ─── Gestion du compte ───────────────────────────────────────────────

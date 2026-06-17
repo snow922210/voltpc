@@ -28,10 +28,10 @@ services:
         value: "salut_c_moi@yahoo.com,yohannlemire@gmail.com"
       - key: CORS_ORIGINS
         value: "https://voltcore.fr,https://www.voltcore.fr"
-      # Passer à "1" UNIQUEMENT après avoir confirmé que https://voltcore.fr
-      # répond avec un certificat valide (custom domain Render OK).
+      # Activé : https://voltcore.fr répond avec un certificat valide.
+      # Active HSTS ET le flag Secure du cookie de session (volt_session).
       - key: ENABLE_HSTS
-        value: ""
+        value: "1"
       # Clé de signature stable (sessions conservées entre redémarrages).
       - key: VOLTPC_SECRET
         generateValue: true
