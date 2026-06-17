@@ -77,6 +77,55 @@ def _field(obj, key):
         return None
 
 
+def _checkout_line_items(computed: dict) -> list[dict]:
+    """Construit les lignes Stripe avec la remise deja integree aux prix.
+
+    Cela evite un appel API Stripe supplementaire pour creer un coupon a chaque
+    paiement avec code promo, tout en conservant un total identique au calcul
+    serveur.
+    """
+    lines = computed["lines"]
+    discount_cents = int(round((computed.get("discount") or 0) * 100))
+    subtotal_cents = sum(int(round(p["price"] * 100)) * qty for p, qty in lines)
+    out: list[dict] = []
+    remaining_discount = min(discount_cents, subtotal_cents)
+
+    for idx, (p, qty) in enumerate(lines):
+        unit_cents = int(round(p["price"] * 100))
+        gross_cents = unit_cents * qty
+        if remaining_discount > 0 and subtotal_cents > 0:
+            if idx == len(lines) - 1:
+                line_discount = remaining_discount
+            else:
+                line_discount = round(discount_cents * gross_cents / subtotal_cents)
+                line_discount = min(line_discount, remaining_discount, gross_cents)
+            remaining_discount -= line_discount
+        else:
+            line_discount = 0
+
+        discounted_total = max(0, gross_cents - line_discount)
+        base_unit = max(1, discounted_total // qty)
+        extra_units = max(0, discounted_total - (base_unit * qty))
+        name = p["name"] + (" (remise incluse)" if discount_cents else "")
+
+        def add_item(amount: int, quantity: int) -> None:
+            if quantity <= 0:
+                return
+            out.append({
+                "price_data": {
+                    "currency": CURRENCY,
+                    "product_data": {"name": name},
+                    "unit_amount": amount,
+                },
+                "quantity": quantity,
+            })
+
+        add_item(base_unit, qty - extra_units)
+        add_item(base_unit + 1, extra_units)
+
+    return out
+
+
 # ─── 1. Création de la session de paiement ───────────────────────────
 
 @router.post("/create-checkout-session")
@@ -107,17 +156,7 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
 
         # (b) Lignes Stripe construites à partir des PRIX VÉRIFIÉS EN BASE,
         #     jamais à partir de valeurs envoyées par le client.
-        line_items = [
-            {
-                "price_data": {
-                    "currency": CURRENCY,
-                    "product_data": {"name": p["name"]},
-                    "unit_amount": int(round(p["price"] * 100)),  # en centimes
-                },
-                "quantity": qty,
-            }
-            for (p, qty) in computed["lines"]
-        ]
+        line_items = _checkout_line_items(computed)
 
         params = dict(
             mode="payment",
@@ -153,17 +192,6 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
                     }
                 }
             ]
-
-        # Remise éventuelle via un coupon Stripe à usage unique : le montant
-        # facturé correspond ainsi exactement au total recalculé côté serveur.
-        if computed["discount"] > 0:
-            coupon = sk.Coupon.create(
-                amount_off=int(round(computed["discount"] * 100)),
-                currency=CURRENCY,
-                duration="once",
-                name=(body.promo_code or "Remise").strip().upper(),
-            )
-            params["discounts"] = [{"coupon": coupon.id}]
 
         session = sk.checkout.Session.create(**params)
 

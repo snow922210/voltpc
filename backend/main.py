@@ -1542,6 +1542,7 @@ def finalize_order_paid(order_id: int, session_id: Optional[str] = None) -> bool
             " stripe_session_id = COALESCE(?, stripe_session_id) WHERE id = ?",
             (time.time(), session_id, order_id),
         )
+        conn.execute("DELETE FROM cart_items WHERE user_id = ?", (order["user_id"],))
 
         # Coordonnées client pour l'email de confirmation.
         _invalidate_product_cache()
