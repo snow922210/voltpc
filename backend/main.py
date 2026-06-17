@@ -2160,12 +2160,20 @@ def spa_fallback(full_path: str, request: Request):
         and candidate.is_file()
         and candidate.is_relative_to(FRONTEND_DIR)  # anti path-traversal
     ):
-        # Cache : les assets référencés avec une version (ex. app.js?v=36) sont
-        # immuables → cache long ; le changement de numéro suffit à forcer le
-        # rechargement après un déploiement. Les autres fichiers (images…) ont un
-        # cache court pour s'auto-rafraîchir s'ils sont remplacés sur place.
-        cache = ("public, max-age=31536000, immutable"
-                 if request.url.query else "public, max-age=3600")
+        # Cache :
+        #  • assets versionnés (ex. app.js?v=36) → immuables, cache 1 an (le
+        #    changement de numéro suffit à forcer le rechargement post-déploiement).
+        #  • images (.jpg/.png/.webp…) → cache 30 jours : quasi-stables, ça évite
+        #    de les re-télécharger à chaque navigation/visite (gros gain de vitesse).
+        #    Remplacement sur place rare → 30 j est un bon compromis fraîcheur/perf.
+        #  • autres fichiers sans version → cache court (1 h).
+        _IMG_EXT = {".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".svg", ".ico"}
+        if request.url.query:
+            cache = "public, max-age=31536000, immutable"
+        elif candidate.suffix.lower() in _IMG_EXT:
+            cache = "public, max-age=2592000"  # 30 jours
+        else:
+            cache = "public, max-age=3600"
         return FileResponse(candidate, headers={"Cache-Control": cache})
 
     tpl = INDEX_FILE.read_text(encoding="utf-8")
