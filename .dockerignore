@@ -13,3 +13,6 @@ docker-compose.yml
 Caddyfile
 deploy.env.example
 .claude/
+.vscode/
+graphify-out/
+frontend/_backup_design_*/

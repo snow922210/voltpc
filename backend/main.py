@@ -23,6 +23,7 @@ from typing import Optional
 
 from fastapi import Cookie, Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -637,6 +638,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=6)
 
 # En-têtes de sécurité appliqués à TOUTES les réponses (API + frontend statique).
 # La CSP autorise les styles/handlers inline (le frontend en utilise) tout en
@@ -2200,7 +2202,10 @@ def spa_fallback(full_path: str, request: Request):
             cache = "public, max-age=2592000"  # 30 jours
         else:
             cache = "public, max-age=3600"
-        return FileResponse(candidate, headers={"Cache-Control": cache})
+        headers = {"Cache-Control": cache}
+        if candidate.suffix.lower() in _IMG_EXT:
+            headers["Content-Encoding"] = "identity"
+        return FileResponse(candidate, headers=headers)
 
     tpl = INDEX_FILE.read_text(encoding="utf-8")
     seg = full_path.strip("/")

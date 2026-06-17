@@ -11,6 +11,7 @@ __pycache__/
 
 # Outils / éditeur
 .claude/
+.vscode/
 .graphifyignore
 graphify-out/
 *.log
@@ -18,3 +19,4 @@ graphify-out/
 
 # Sauvegardes locales
 *.localbak
+frontend/_backup_design_*/

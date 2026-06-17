@@ -171,6 +171,11 @@ async function loadFavorites() {
   } catch { state.favorites = new Set(); }
 }
 
+function refreshFavoriteButtons() {
+  $$("[data-fav]").forEach((b) =>
+    b.classList.toggle("on", state.favorites.has(Number(b.dataset.fav))));
+}
+
 function routeNeedsAuth(path) {
   return path === "compte" || path === "commande" || path.startsWith("admin");
 }
@@ -950,6 +955,7 @@ async function render() {
   const app = $("#app");
   const renderToken = ++currentRenderToken;
   $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === path.split("/")[0]));
+  if (path !== "") cleanupHome3D();
   window.scrollTo({ top: 0 });
 
   try {
@@ -1271,7 +1277,15 @@ function viewLegal(app, key) {
    Chaque séparateur reçoit une progression --p (0→1) selon sa traversée du
    viewport ; le CSS la transforme en effets VARIÉS (profondeur, dépliage),
    pas seulement en rotation. La tour du hero réagit au scroll + à la souris. */
+let home3DCleanup = null;
+function cleanupHome3D() {
+  if (!home3DCleanup) return;
+  home3DCleanup();
+  home3DCleanup = null;
+}
+
 function initHome3D() {
+  cleanupHome3D();
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const pc = $("#pc3d");
   const stage = $("#hhStage");
@@ -1303,19 +1317,29 @@ function initHome3D() {
   window.addEventListener("resize", onScroll, { passive: true });
 
   // Tilt souris de la tour (parallaxe douce dans le hero)
+  let onPointerMove = null;
+  let onPointerLeave = null;
   if (stage && pc) {
-    stage.addEventListener("pointermove", (e) => {
+    onPointerMove = (e) => {
       const r = stage.getBoundingClientRect();
       const dx = (e.clientX - r.left) / r.width - 0.5;
       const dy = (e.clientY - r.top) / r.height - 0.5;
       pc.style.setProperty("--tiltx", `${(-dy * 10).toFixed(1)}deg`);
       pc.style.setProperty("--tilty", `${(dx * 16).toFixed(1)}deg`);
-    });
-    stage.addEventListener("pointerleave", () => {
+    };
+    onPointerLeave = () => {
       pc.style.setProperty("--tiltx", "0deg");
       pc.style.setProperty("--tilty", "0deg");
-    });
+    };
+    stage.addEventListener("pointermove", onPointerMove);
+    stage.addEventListener("pointerleave", onPointerLeave);
   }
+  home3DCleanup = () => {
+    window.removeEventListener("scroll", onScroll);
+    window.removeEventListener("resize", onScroll);
+    if (stage && onPointerMove) stage.removeEventListener("pointermove", onPointerMove);
+    if (stage && onPointerLeave) stage.removeEventListener("pointerleave", onPointerLeave);
+  };
   update();
 }
 
@@ -2997,11 +3021,13 @@ function init() {
     if (state.token) {
       try {
         await restoreSessionAndCart();
-        if (state.user) await loadFavorites();
+        if (state.user) {
+          await loadFavorites();
+          refreshFavoriteButtons();
+        }
       } catch { /* non bloquant */ }
     }
     if (needsAuth) render();
-    else if (state.user) render();
   })();
 }
 
