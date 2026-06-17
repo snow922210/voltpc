@@ -30,7 +30,10 @@ const state = {
 };
 
 const apiCache = new Map();
+const productIndex = new Map();
 const API_CACHE_TTL_MS = 30_000;
+let cartDrawerDirty = true;
+let cartPushTimer = null;
 
 function isCacheableApiPath(path) {
   return path === "/categories" || path.startsWith("/products");
@@ -42,12 +45,34 @@ function clearApiCache(prefix = "") {
   }
 }
 
+function indexProducts(products = []) {
+  for (const p of products) {
+    if (p?.id) productIndex.set(Number(p.id), p);
+  }
+}
+
+async function getIndexedProduct(id) {
+  const key = Number(id);
+  let p = productIndex.get(key);
+  if (!p) {
+    p = await api("/products/" + key);
+    indexProducts([p]);
+  }
+  return p;
+}
+
 function saveCompare() { localStorage.setItem("volt_compare", JSON.stringify(state.compare)); }
 
 // Le panier appartient au compte client : aucune persistance navigateur invitée.
 function saveCart() {
-  if (state.user) pushCart();
+  if (state.user) schedulePushCart();
   updateCartCount();
+  cartDrawerDirty = true;
+}
+
+function schedulePushCart() {
+  clearTimeout(cartPushTimer);
+  cartPushTimer = setTimeout(pushCart, 250);
 }
 
 // Envoie le panier courant au serveur (connecté uniquement). Non bloquant.
@@ -71,7 +96,7 @@ async function syncCartOnLogin() {
     price: i.price, stock: i.stock, qty: i.qty,
   }));
   updateCartCount();
-  renderCartDrawer();
+  refreshCartDrawer();
 }
 
 async function restoreSessionAndCart() {
@@ -87,7 +112,7 @@ async function restoreSessionAndCart() {
     saveAuth();
     state.cart = [];
     updateCartCount();
-    renderCartDrawer();
+    refreshCartDrawer();
   }
 }
 function savePromo() { localStorage.setItem("volt_promo", JSON.stringify(state.promo)); }
@@ -597,7 +622,7 @@ function addToCart(p, qty = 1, quiet = false) {
     state.cart.push({ id: p.id, name: p.name, brand: p.brand, category: p.category, price: p.price, stock: p.stock, qty });
   }
   saveCart();
-  renderCartDrawer();
+  refreshCartDrawer();
   if (!quiet) { toast(`${p.name} ajouté au panier`); openCart(); }
 }
 
@@ -609,6 +634,7 @@ function cartTotals() {
 }
 
 function renderCartDrawer() {
+  cartDrawerDirty = false;
   const body = $("#cartBody");
   const foot = $("#cartFoot");
   if (!state.user) {
@@ -676,10 +702,20 @@ async function applyPromo() {
   } catch (e) {
     toast(e.message, "error");
   }
-  renderCartDrawer();
+  refreshCartDrawer();
 }
 
-function openCart() { $("#cartDrawer").classList.add("open"); $("#drawerOverlay").hidden = false; }
+function refreshCartDrawer() {
+  const drawer = $("#cartDrawer");
+  if (drawer?.classList.contains("open")) renderCartDrawer();
+  else cartDrawerDirty = true;
+}
+
+function openCart() {
+  if (cartDrawerDirty) renderCartDrawer();
+  $("#cartDrawer").classList.add("open");
+  $("#drawerOverlay").hidden = false;
+}
 function closeCart() { $("#cartDrawer").classList.remove("open"); $("#drawerOverlay").hidden = true; }
 window.closeCart = closeCart;
 
@@ -891,7 +927,7 @@ function logout() {
   savePromo();
   saveAuth();
   updateCartCount();
-  renderCartDrawer();
+  refreshCartDrawer();
   toast("Vous êtes déconnecté");
   go("/");
 }
@@ -1806,8 +1842,7 @@ async function viewCompare(app) {
     </table>
   </div>`;
 
-  const map = new Map(products.map((p) => [p.id, p]));
-  $$("[data-add]", app).forEach((b) => b.onclick = () => { const p = map.get(Number(b.dataset.add)); if (p) addToCart(p); });
+  indexProducts(products);
   $$("[data-cmp-rm]", app).forEach((b) => b.onclick = () => { toggleCompare(Number(b.dataset.cmpRm)); viewCompare(app); });
   $("#cmpClearAll").onclick = () => { state.compare = []; saveCompare(); renderCompareBar(); viewCompare(app); };
 }
@@ -2880,29 +2915,49 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
 
 /* ─── Liaisons communes ─── */
 function bindProductCards(root, products) {
-  const map = new Map(products.map((p) => [p.id, p]));
-  $$("[data-goto]", root).forEach((card) => {
-    card.addEventListener("click", (e) => {
-      // Les boutons d'action (panier, favori, comparer) ne déclenchent pas la navigation.
-      if (e.target.closest("[data-add],[data-fav],[data-cmp]")) return;
-      go(card.dataset.goto);
-    });
-  });
-  $$("[data-add]", root).forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const p = map.get(Number(btn.dataset.add));
-      if (p) addToCart(p);
-    });
-  });
-  $$("[data-fav]", root).forEach((btn) => {
-    btn.addEventListener("click", (e) => { e.stopPropagation(); toggleFavorite(Number(btn.dataset.fav), btn); });
-  });
-  $$("[data-cmp]", root).forEach((btn) => {
-    btn.addEventListener("click", (e) => { e.stopPropagation(); toggleCompare(Number(btn.dataset.cmp)); });
-  });
+  indexProducts(products);
 }
 
 /* ─── Sous-menus de navigation ─── */
+function setupDelegatedProductClicks() {
+  document.addEventListener("click", async (e) => {
+    const add = e.target.closest("[data-add]");
+    if (add && !add.disabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        const p = await getIndexedProduct(add.dataset.add);
+        if (p) addToCart(p);
+      } catch (err) {
+        toast(err.message, "error");
+      }
+      return;
+    }
+
+    const fav = e.target.closest("[data-fav]");
+    if (fav && fav.id !== "ppFav") {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFavorite(Number(fav.dataset.fav), fav);
+      return;
+    }
+
+    const cmp = e.target.closest("[data-cmp]");
+    if (cmp && cmp.id !== "ppCmp") {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleCompare(Number(cmp.dataset.cmp));
+      return;
+    }
+
+    const card = e.target.closest("[data-goto]");
+    if (card && !e.target.closest("[data-add],[data-fav],[data-cmp]")) {
+      e.preventDefault();
+      go(card.dataset.goto);
+    }
+  });
+}
+
 function fillNavMenus() {
   const link = (k) => `
     <a class="nav-menu-link" href="/catalogue?cat=${k}">
@@ -2948,14 +3003,14 @@ function setupTheme() {
 /* ─── Initialisation ─── */
 function init() {
   saveAuth();
+  setupDelegatedProductClicks();
   updateCartCount();
-  renderCartDrawer();
   setupAuth();
   fillNavMenus();
 
   setupTheme();
   setupCookieBanner();
-  $("#cartBtn").onclick = () => { renderCartDrawer(); openCart(); };
+  $("#cartBtn").onclick = openCart;
   $("#cartClose").onclick = closeCart;
   $("#drawerOverlay").onclick = closeCart;
   $("#accountBtn").onclick = () => requireAuth(() => go("/compte", { force: true }));
