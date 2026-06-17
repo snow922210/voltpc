@@ -99,20 +99,26 @@ async function syncCartOnLogin() {
   refreshCartDrawer();
 }
 
-async function restoreSessionAndCart() {
-  if (!state.token) return;
+async function restoreSessionAndCart({ syncCart = true, clearOnFail = true } = {}) {
   try {
     const me = await api("/auth/me");
+    state.token = true;
     state.user = { ...(state.user || {}), ...me };
     saveAuth();
-    await syncCartOnLogin();
+    if (syncCart) await syncCartOnLogin();
+    return true;
   } catch {
-    state.token = null;
-    state.user = null;
-    saveAuth();
-    state.cart = [];
-    updateCartCount();
-    refreshCartDrawer();
+    if (clearOnFail) {
+      state.token = null;
+      state.user = null;
+      saveAuth();
+      if (syncCart) {
+        state.cart = [];
+        updateCartCount();
+        refreshCartDrawer();
+      }
+    }
+    return false;
   }
 }
 function savePromo() { localStorage.setItem("volt_promo", JSON.stringify(state.promo)); }
@@ -2264,33 +2270,46 @@ async function viewCheckout(app) {
 /* ─── Vue : retour de paiement réussi (Stripe → success_url) ─── */
 async function viewPaymentSuccess(app, params) {
   const sessionId = params.get("session_id");
+  const ordersUrl = "/compte?tab=orders";
   app.innerHTML = `<div class="empty-state"><div class="big">⏳</div><h2>Vérification du paiement…</h2></div>`;
   try {
     // On confirme l'état réel auprès du serveur (qui interroge Stripe).
     const res = await api("/checkout/status?session_id=" + encodeURIComponent(sessionId || ""));
     if (res.payment_status !== "paid") throw new Error("Paiement non confirmé");
+    await restoreSessionAndCart({ syncCart: false, clearOnFail: false });
     // Paiement validé : on vide le panier local.
     state.cart = [];
     state.promo = null;
     saveCart();
     savePromo();
-    renderCartDrawer();
+    refreshCartDrawer();
     app.innerHTML = `
       <div class="empty-state">
         <div class="big">🎉</div>
         <h2>Commande n°${res.order_id} confirmée !</h2>
-        <p style="margin-top:10px">Paiement reçu — total réglé : <strong>${fmt(res.amount_total)}</strong>.<br>Expédition sous 24 h, suivi disponible dans votre compte.</p>
+        <p style="margin-top:10px">Paiement reçu — total réglé : <strong>${fmt(res.amount_total)}</strong>.<br>Redirection vers vos commandes...</p>
         <br>
-        <a class="btn btn-primary" href="/compte">Voir mes commandes</a>
+        <a class="btn btn-primary" href="${ordersUrl}">Voir mes commandes</a>
         &nbsp;<a class="btn btn-ghost" href="/catalogue">Continuer mes achats</a>
       </div>`;
+    if (state.user) {
+      setTimeout(() => {
+        const current = parsePath();
+        if (current.path === "commande/succes" && current.params.get("session_id") === sessionId) {
+          go(ordersUrl, { force: true });
+        }
+      }, 800);
+    } else {
+      state.afterLogin = () => go(ordersUrl, { force: true });
+      openAuth();
+    }
   } catch (err) {
     app.innerHTML = `
       <div class="empty-state">
         <div class="big">⚠️</div>
         <h2>Paiement non confirmé</h2>
         <p style="margin-top:10px">${esc(err.message)}. Si vous avez été débité, votre commande sera validée automatiquement sous peu.</p>
-        <br><a class="btn btn-primary" href="/compte">Voir mes commandes</a>
+        <br><a class="btn btn-primary" href="${ordersUrl}">Voir mes commandes</a>
       </div>`;
   }
   window.scrollTo({ top: 0 });
@@ -2312,9 +2331,22 @@ function viewPaymentCancelled(app) {
 
 /* ─── Vue : compte ─── */
 async function viewAccount(app, params) {
+  const requestedTab = params?.get("tab") || "orders";
   if (!state.user) {
-    requireAuth(() => go("/compte", { force: true }));
-    return;
+    app.innerHTML = `<div class="empty-state"><div class="big">⏳</div><h2>Connexion au compte...</h2></div>`;
+    const restored = await restoreSessionAndCart({ syncCart: false });
+    if (!restored || !state.user) {
+      state.afterLogin = () => go(`/compte?tab=${encodeURIComponent(requestedTab)}`, { force: true });
+      openAuth();
+      app.innerHTML = `
+        <div class="empty-state">
+          <div class="big">🔐</div>
+          <h2>Connectez-vous pour voir votre compte</h2>
+          <br><button class="btn btn-primary" id="accountLoginBtn">Se connecter</button>
+        </div>`;
+      $("#accountLoginBtn", app).onclick = openAuth;
+      return;
+    }
   }
   // Rafraîchit le profil (notamment le statut admin) pour les sessions déjà
   // ouvertes avant l'ajout de cette fonctionnalité.
@@ -2355,7 +2387,7 @@ async function viewAccount(app, params) {
     tabs[tab.dataset.tab]();
   });
   // Onglet initial (permet le lien profond #/compte?tab=addresses).
-  const initial = params?.get("tab");
+  const initial = requestedTab;
   const startTab = tabs[initial] ? initial : "orders";
   $$(".account-tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === startTab));
   tabs[startTab]();
@@ -3013,7 +3045,13 @@ function init() {
   $("#cartBtn").onclick = openCart;
   $("#cartClose").onclick = closeCart;
   $("#drawerOverlay").onclick = closeCart;
-  $("#accountBtn").onclick = () => requireAuth(() => go("/compte", { force: true }));
+  $("#accountBtn").onclick = async () => {
+    const ordersUrl = "/compte?tab=orders";
+    if (state.user) { go(ordersUrl, { force: true }); return; }
+    const restored = await restoreSessionAndCart({ syncCart: false });
+    if (restored && state.user) { go(ordersUrl, { force: true }); return; }
+    requireAuth(() => go(ordersUrl, { force: true }));
+  };
   $("#searchInput").onkeydown = (e) => {
     if (e.key === "Enter") {
       const q = e.target.value.trim();
@@ -3073,7 +3111,7 @@ function init() {
   if (!needsAuth) render();
 
   (async () => {
-    if (state.token) {
+    if (state.token || needsAuth) {
       try {
         await restoreSessionAndCart();
         if (state.user) {

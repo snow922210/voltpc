@@ -232,7 +232,7 @@ async def stripe_webhook(request: Request):
 # ─── 3. Filet de sécurité pour le développement local ────────────────
 
 @router.get("/checkout/status")
-def checkout_status(session_id: str, user: sqlite3.Row = Depends(current_user)):
+def checkout_status(session_id: str):
     """Consulté par la page de succès. En production le webhook fait foi ; en
     local (sans tunnel Stripe), cette route finalise la commande en secours.
     """
