@@ -695,6 +695,12 @@ def product_out(row: sqlite3.Row) -> dict:
     return d
 
 
+def product_summary_out(row: sqlite3.Row) -> dict:
+    d = dict(row)
+    d["featured"] = bool(d["featured"])
+    return d
+
+
 def _cache_get(key):
     now = time.time()
     with _product_cache_lock:
@@ -742,14 +748,27 @@ def list_products(
     brand: Optional[str] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
+    ids: Optional[str] = None,
+    compact: bool = False,
+    limit: Optional[int] = Query(None, ge=1, le=280),
     sort: str = Query("featured", pattern="^(featured|performance|price_asc|price_desc|rating|name)$"),
 ):
-    cache_key = ("products", category, search, brand, min_price, max_price, sort)
+    cache_key = ("products", category, search, brand, min_price, max_price, ids, compact, limit, sort)
     cached = _cache_get(cache_key)
     if cached is not None:
         return cached
-    sql = "SELECT * FROM products WHERE 1=1"
+    summary_cols = "id, name, brand, category, price, old_price, stock, rating, rating_count, featured, badge, image_url"
+    sql = f"SELECT {'*' if not compact or sort == 'performance' else summary_cols} FROM products WHERE 1=1"
     args: list = []
+    id_list = []
+    if ids:
+        try:
+            id_list = [int(x) for x in ids.split(",") if x.strip()]
+        except ValueError:
+            raise HTTPException(400, "Liste d'identifiants invalide")
+        if id_list:
+            sql += f" AND id IN ({','.join(['?'] * len(id_list))})"
+            args += id_list
     if category:
         sql += " AND category = ?"
         args.append(category)
@@ -775,6 +794,10 @@ def list_products(
             key=lambda d: perf_score(d["category"], d["specs"], d["price"], d["name"]),
             reverse=True,
         )
+        if limit:
+            out = out[:limit]
+        if compact:
+            out = [{k: v for k, v in p.items() if k != "specs" and k != "description"} for p in out]
         _cache_set(cache_key, out)
         return out
 
@@ -786,9 +809,12 @@ def list_products(
         "name": "name ASC",
     }[sort]
     sql += f" ORDER BY {order}"
+    if limit:
+        sql += " LIMIT ?"
+        args.append(limit)
     with db() as conn:
         rows = conn.execute(sql, args).fetchall()
-    out = [product_out(r) for r in rows]
+    out = [product_summary_out(r) if compact else product_out(r) for r in rows]
     _cache_set(cache_key, out)
     return out
 

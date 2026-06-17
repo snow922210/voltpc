@@ -352,7 +352,7 @@ const tintOf = (p) => `hsla(${hueOf(p) + 205}, 60%, 60%, 0.12)`;
 // local images/{id}.jpg. Si rien ne charge, l'img se retire et le visuel SVG
 // situé dessous reste affiché.
 const imgTag = (p) =>
-  `<img class="pimg" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()">`;
+  `<img class="pimg" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.remove()">`;
 
 function cleanupProductThumbs() {
   const thumbs = $("#ppThumbs");
@@ -907,9 +907,13 @@ function parsePath() {
 }
 
 // Navigation interne sans rechargement. Tolère un ancien lien "#/x".
-function go(to) {
+function go(to, options = {}) {
   if (to.startsWith("#/")) to = to.slice(1);
-  if (to === location.pathname + location.search) { window.scrollTo({ top: 0 }); return; }
+  if (to === location.pathname + location.search) {
+    if (options.force) render();
+    else window.scrollTo({ top: 0 });
+    return;
+  }
   history.pushState(null, "", to);
   render();
 }
@@ -993,7 +997,7 @@ async function viewHome(app) {
       </div>
     </div>
     <div class="hero-art"><div class="hero-build">
-      <img src="/images/36-1.jpg" alt="PC gaming VoltCore monté : verre trempé, RTX et RGB" loading="eager" decoding="async">
+      <img src="/images/36-1.jpg" alt="PC gaming VoltCore monté : verre trempé, RTX et RGB" loading="eager" decoding="async" fetchpriority="high" width="640" height="640">
     </div></div>
   </section>
 
@@ -1077,7 +1081,7 @@ async function viewHome(app) {
 
   const [cats, featured] = await Promise.all([
     api("/categories"),
-    api("/products?sort=featured"),
+    api("/products?sort=featured&compact=1&limit=8"),
   ]);
   const catCount = Object.fromEntries(cats.map((c) => [c.category, c]));
   const total = cats.reduce((s, c) => s + c.count, 0);
@@ -1092,9 +1096,7 @@ async function viewHome(app) {
   $("#featuredGrid").innerHTML = `<div class="product-grid">${featured.filter((p) => p.featured).slice(0, 8).map(productCard).join("")}</div>`;
   bindProductCards(app, featured);
 
-  // `featured` contient déjà TOUS les produits (le tri=featured renvoie tout le
-  // catalogue) : on le passe aux prémontés pour éviter un 2ᵉ fetch /products.
-  renderPrebuilts(featured);
+  renderPrebuilts();
   initHome3D();
 }
 
@@ -1113,10 +1115,8 @@ async function renderPrebuilts(preloaded) {
   if (!grid) return;
   let byId;
   try {
-    // La page d'accueil a déjà chargé la liste complète des produits : on la
-    // réutilise pour éviter un second fetch de ~125 Ko. Repli sur /products
-    // seulement si la fonction est appelée sans données préchargées.
-    const all = preloaded || await api("/products");
+    const prebuiltIds = [...new Set(PREBUILTS.flatMap((b) => Object.values(b.ids)))];
+    const all = preloaded || await api(`/products?compact=1&ids=${prebuiltIds.join(",")}`);
     byId = new Map(all.map((p) => [p.id, p]));
   } catch {
     grid.innerHTML = `<p style="color:var(--text-faint)">Configurations momentanément indisponibles.</p>`;
@@ -2253,7 +2253,10 @@ function viewPaymentCancelled(app) {
 
 /* ─── Vue : compte ─── */
 async function viewAccount(app, params) {
-  if (!state.user) { go("/"); openAuth(); return; }
+  if (!state.user) {
+    requireAuth(() => go("/compte", { force: true }));
+    return;
+  }
   // Rafraîchit le profil (notamment le statut admin) pour les sessions déjà
   // ouvertes avant l'ajout de cette fonctionnalité.
   try {
@@ -2931,7 +2934,7 @@ function init() {
   $("#cartBtn").onclick = () => { renderCartDrawer(); openCart(); };
   $("#cartClose").onclick = closeCart;
   $("#drawerOverlay").onclick = closeCart;
-  $("#accountBtn").onclick = () => { if (state.user) go("/compte"); else openAuth(); };
+  $("#accountBtn").onclick = () => requireAuth(() => go("/compte", { force: true }));
   $("#searchInput").onkeydown = (e) => {
     if (e.key === "Enter") {
       const q = e.target.value.trim();
