@@ -1703,11 +1703,11 @@ body.void-home-active .footer {
   overflow: hidden;
   isolation: isolate;
   background:
-    linear-gradient(90deg, rgba(174,191,194,.08) 0 1px, transparent 1px 100%),
-    linear-gradient(180deg, rgba(174,191,194,.06) 0 1px, transparent 1px 100%),
-    conic-gradient(from 220deg at 66% 46%, rgba(174,191,194,.20), rgba(125,137,140,.08), rgba(154,165,167,.18), rgba(2,3,8,0), rgba(174,191,194,.20)),
+    radial-gradient(ellipse 72% 34% at 50% -10%, rgba(174,191,194,.12), transparent 68%),
+    radial-gradient(ellipse 42% 36% at 76% 42%, rgba(125,137,140,.10), transparent 70%),
+    radial-gradient(ellipse 54% 42% at 22% 82%, rgba(154,165,167,.08), transparent 74%),
     linear-gradient(145deg, #020308 0%, #080a13 38%, #03040b 100%);
-  background-size: 84px 84px, 84px 84px, 100% 100%, 100% 100%;
+  background-size: 100% 100%;
 }
 
 .void-hero {
@@ -2180,27 +2180,38 @@ body.void-home-active .cookie-banner p {
   position: relative;
   min-height: 260px;
   perspective: 900px;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(186,199,201,.10);
+  background:
+    radial-gradient(ellipse 68% 54% at 50% 52%, rgba(174,191,194,.075), transparent 72%),
+    radial-gradient(ellipse 36% 28% at 72% 28%, rgba(205,230,238,.10), transparent 70%),
+    radial-gradient(ellipse 44% 36% at 24% 76%, rgba(70,92,106,.18), transparent 74%),
+    #020308;
 }
 .void-console-lines i {
   position: absolute;
-  left: 4%;
-  right: 4%;
-  height: 46px;
-  border: 1px solid rgba(164,231,221,.16);
-  border-radius: 8px;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  width: clamp(12px, 2.5vw, 24px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(205,230,238,.20);
+  border-radius: 999px;
   background:
-    linear-gradient(90deg, rgba(174,191,194,.06), rgba(154,165,167,.12), rgba(125,137,140,.08), rgba(255,255,255,.04));
-  transform: rotateX(62deg) translateY(calc(var(--i, 0) * 42px));
-  animation: voidLines 4.8s ease-in-out infinite;
+    radial-gradient(circle at 36% 28%, rgba(245,252,253,.95), rgba(205,230,238,.46) 32%, rgba(112,145,160,.14) 58%, transparent 74%);
+  box-shadow: 0 0 26px rgba(205,230,238,.18), inset 0 1px rgba(255,255,255,.40);
+  transform: translate3d(0, 0, 0) scale(var(--s, 1));
+  opacity: .68;
+  animation: voidMotes 7.6s ease-in-out infinite;
 }
-.void-console-lines i:nth-child(1) { --i: 0; top: 10%; }
-.void-console-lines i:nth-child(2) { --i: 1; top: 17%; animation-delay: -.5s; }
-.void-console-lines i:nth-child(3) { --i: 2; top: 24%; animation-delay: -1s; }
-.void-console-lines i:nth-child(4) { --i: 3; top: 31%; animation-delay: -1.5s; }
-.void-console-lines i:nth-child(5) { --i: 4; top: 38%; animation-delay: -2s; }
-@keyframes voidLines {
-  0%, 100% { translate: 0 0; opacity: .62; }
-  50% { translate: 0 -16px; opacity: 1; }
+.void-console-lines i:nth-child(1) { --x: 22%; --y: 24%; --s: 1.08; animation-delay: -.2s; }
+.void-console-lines i:nth-child(2) { --x: 68%; --y: 18%; --s: .76; animation-delay: -1.1s; }
+.void-console-lines i:nth-child(3) { --x: 78%; --y: 62%; --s: 1.28; animation-delay: -2s; }
+.void-console-lines i:nth-child(4) { --x: 42%; --y: 72%; --s: .92; animation-delay: -3.2s; }
+.void-console-lines i:nth-child(5) { --x: 14%; --y: 58%; --s: .68; animation-delay: -4.4s; }
+@keyframes voidMotes {
+  0%, 100% { transform: translate3d(-8px, 8px, 0) scale(var(--s, 1)); opacity: .42; }
+  50% { transform: translate3d(12px, -14px, 0) scale(var(--s, 1)); opacity: .92; }
 }
 .void-promo {
   border-radius: 8px;
@@ -2312,6 +2323,8 @@ body.void-home-active .cookie-banner strong {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after,
   .void-home *,
   .void-home *::before,
   .void-home *::after {
@@ -2527,8 +2540,9 @@ body.void-home-active .cookie-banner {
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.22), 0 12px 32px rgba(0, 0, 0, 0.28);
 }
 .void-console-lines i {
-  border-color: rgba(186,199,201,.08);
-  background: linear-gradient(90deg, transparent, rgba(200,210,210,.055), transparent);
+  border-color: rgba(205,230,238,.18);
+  background:
+    radial-gradient(circle at 36% 28%, rgba(246,252,253,.92), rgba(205,230,238,.42) 32%, rgba(112,145,160,.12) 58%, transparent 74%);
 }
 .void-promo {
   background:
@@ -2578,11 +2592,10 @@ body.void-home-active .cookie-banner {
 
 body {
   background:
-    linear-gradient(115deg, transparent 0 38%, rgba(196, 226, 238, .028) 46%, transparent 54% 100%),
-    repeating-linear-gradient(90deg, rgba(205, 232, 240, .026) 0 1px, transparent 1px 92px),
-    radial-gradient(circle at 74% 8%, rgba(159,183,195,.075), transparent 0 28%, transparent 56%),
-    radial-gradient(ellipse 70% 24% at 50% 106%, rgba(155, 190, 204, .10), transparent 62%),
-    radial-gradient(circle at 9% 88%, rgba(210,226,232,.045), transparent 0 24%, transparent 54%),
+    radial-gradient(ellipse 92% 42% at 50% -16%, rgba(192, 226, 238, .105), transparent 64%),
+    radial-gradient(ellipse 48% 30% at 78% 18%, rgba(95, 118, 128, .12), transparent 68%),
+    radial-gradient(ellipse 58% 34% at 12% 88%, rgba(210, 226, 232, .05), transparent 70%),
+    radial-gradient(ellipse 72% 26% at 50% 112%, rgba(132, 170, 185, .12), transparent 66%),
     linear-gradient(180deg, #010205 0%, #05070b 48%, #010205 100%);
   color: var(--text);
   background-attachment: fixed;
@@ -2590,11 +2603,10 @@ body {
 
 .void-home {
   background:
-    linear-gradient(115deg, transparent 0 40%, rgba(196, 226, 238, .026) 48%, transparent 56% 100%),
-    repeating-linear-gradient(90deg, rgba(205, 232, 240, .022) 0 1px, transparent 1px 92px),
-    radial-gradient(circle at 62% 42%, rgba(130,145,150,.11), transparent 0 24%, transparent 48%),
-    radial-gradient(ellipse 70% 24% at 50% 106%, rgba(155, 190, 204, .10), transparent 62%),
-    radial-gradient(circle at 22% 78%, rgba(68,77,82,.12), transparent 0 26%, transparent 56%),
+    radial-gradient(ellipse 86% 36% at 50% -12%, rgba(185, 224, 238, .105), transparent 64%),
+    radial-gradient(ellipse 44% 34% at 66% 38%, rgba(91, 117, 128, .13), transparent 70%),
+    radial-gradient(ellipse 54% 40% at 24% 82%, rgba(64, 78, 86, .16), transparent 74%),
+    radial-gradient(ellipse 72% 24% at 50% 108%, rgba(155, 190, 204, .10), transparent 66%),
     linear-gradient(180deg, #010205 0%, #05070b 42%, #010205 100%) !important;
 }
 
@@ -2949,12 +2961,17 @@ body::after {
 }
 body::before {
   z-index: 0;
-  opacity: .72;
+  opacity: .78;
+  inset: -18%;
   background:
-    radial-gradient(ellipse 58% 18% at 50% 104%, rgba(164, 205, 222, .12), transparent 64%),
-    radial-gradient(ellipse 54% 20% at 18% 8%, rgba(145, 175, 190, .070), transparent 64%),
-    linear-gradient(118deg, transparent 0 37%, rgba(211, 235, 242, .035) 44%, rgba(122, 154, 170, .025) 50%, transparent 58% 100%);
+    radial-gradient(ellipse 72% 26% at 50% 104%, rgba(164, 205, 222, .13), transparent 66%),
+    radial-gradient(ellipse 54% 24% at 18% 8%, rgba(145, 175, 190, .09), transparent 66%),
+    radial-gradient(ellipse 46% 34% at 82% 20%, rgba(49, 65, 78, .22), transparent 72%),
+    radial-gradient(ellipse 38% 28% at 56% 46%, rgba(178, 224, 239, .085), transparent 74%);
+  filter: blur(16px);
   mix-blend-mode: screen;
+  will-change: transform, opacity;
+  animation: voidAuroraDrift 24s ease-in-out infinite alternate;
 }
 body::after {
   z-index: 0;
@@ -2962,10 +2979,11 @@ body::after {
   background:
     radial-gradient(circle, rgba(231, 245, 248, .28) 0 1px, transparent 1.2px),
     radial-gradient(circle, rgba(180, 209, 219, .18) 0 .7px, transparent 1px),
-    linear-gradient(135deg, transparent 0 49.5%, rgba(211,235,242,.08) 50%, transparent 50.5% 100%),
-    linear-gradient(45deg, transparent 0 49.6%, rgba(211,235,242,.045) 50%, transparent 50.4% 100%);
-  background-size: 146px 146px, 92px 92px, 220px 220px, 180px 180px;
-  background-position: 12px 18px, 66px 28px, 0 0, 40px 80px;
+    radial-gradient(circle, rgba(235, 248, 252, .12) 0 .8px, transparent 1.1px),
+    radial-gradient(circle, rgba(146, 185, 202, .10) 0 .7px, transparent 1px);
+  background-size: 146px 146px, 92px 92px, 260px 260px, 380px 380px;
+  background-position: 12px 18px, 66px 28px, 140px 80px, 30px 220px;
+  animation: voidDustDrift 38s linear infinite;
   mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 72%, transparent 100%);
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 72%, transparent 100%);
 }
@@ -2982,14 +3000,20 @@ body::after {
 .void-home::before {
   content: "";
   position: fixed;
-  inset: 0;
+  inset: -16%;
   z-index: 0;
   pointer-events: none;
+  opacity: .82;
   background:
-    radial-gradient(ellipse 56% 20% at 50% 103%, rgba(164, 205, 222, .22), transparent 66%),
-    radial-gradient(ellipse 42% 16% at 22% 7%, rgba(180, 210, 222, .12), transparent 64%),
-    linear-gradient(112deg, transparent 0 34%, rgba(211, 235, 242, .095) 44%, rgba(92, 122, 138, .055) 52%, transparent 62% 100%) !important;
+    radial-gradient(ellipse 74% 22% at 50% 104%, rgba(175, 219, 235, .20), transparent 65%),
+    radial-gradient(ellipse 58% 26% at 20% 2%, rgba(189, 222, 235, .11), transparent 66%),
+    radial-gradient(ellipse 48% 42% at 84% 30%, rgba(60, 83, 96, .20), transparent 72%),
+    radial-gradient(ellipse 54% 32% at 16% 74%, rgba(121, 160, 177, .12), transparent 74%),
+    radial-gradient(ellipse 40% 30% at 52% 42%, rgba(205, 238, 246, .085), transparent 74%) !important;
+  filter: blur(18px);
   mix-blend-mode: screen;
+  will-change: transform, opacity;
+  animation: voidMistDrift 18s ease-in-out infinite alternate;
 }
 .void-home::after {
   content: "";
@@ -3001,14 +3025,72 @@ body::after {
   background:
     radial-gradient(circle, rgba(235, 248, 252, .52) 0 1.1px, transparent 1.4px),
     radial-gradient(circle, rgba(170, 204, 218, .34) 0 .9px, transparent 1.1px),
-    linear-gradient(135deg, transparent 0 49.2%, rgba(211,235,242,.16) 50%, transparent 50.8% 100%),
-    linear-gradient(45deg, transparent 0 49.4%, rgba(211,235,242,.10) 50%, transparent 50.6% 100%);
-  background-size: 128px 128px, 74px 74px, 190px 190px, 156px 156px;
-  background-position: 18px 22px, 48px 12px, 0 0, 38px 70px;
+    radial-gradient(circle, rgba(232, 248, 251, .16) 0 .8px, transparent 1.1px),
+    radial-gradient(circle, rgba(185, 224, 238, .13) 0 .7px, transparent 1px);
+  background-size: 128px 128px, 74px 74px, 230px 230px, 410px 410px;
+  background-position: 18px 22px, 48px 12px, 90px 160px, 210px 40px;
+  animation: voidSnowFall 32s linear infinite;
   mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 82%, transparent 100%);
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 82%, transparent 100%);
 }
 .void-home > * {
   position: relative;
   z-index: 1;
+}
+
+@keyframes voidAuroraDrift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1.02) rotate(-2deg);
+    opacity: .58;
+  }
+  48% {
+    transform: translate3d(2%, 1%, 0) scale(1.07) rotate(3deg);
+    opacity: .82;
+  }
+  100% {
+    transform: translate3d(-1%, 2%, 0) scale(1.04) rotate(-1deg);
+    opacity: .68;
+  }
+}
+
+@keyframes voidMistDrift {
+  0% {
+    transform: translate3d(-1.5%, 0, 0) scale(1.03);
+    opacity: .62;
+  }
+  50% {
+    transform: translate3d(1.6%, -1%, 0) scale(1.08);
+    opacity: .88;
+  }
+  100% {
+    transform: translate3d(.4%, 1.4%, 0) scale(1.05);
+    opacity: .72;
+  }
+}
+
+@keyframes voidDustDrift {
+  from {
+    background-position: 12px 18px, 66px 28px, 140px 80px, 30px 220px;
+  }
+  to {
+    background-position: 110px 360px, -90px 520px, 260px 420px, -120px 620px;
+  }
+}
+
+@keyframes voidSnowFall {
+  from {
+    background-position: 18px 22px, 48px 12px, 90px 160px, 210px 40px;
+  }
+  to {
+    background-position: 86px 560px, 18px 680px, 170px 700px, 120px 820px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after,
+  .void-home::before,
+  .void-home::after {
+    animation: none !important;
+  }
 }
