@@ -689,7 +689,7 @@ function renderCartDrawer() {
     <div class="cart-trust">
       <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 2.9 7.6 7 9 4.1-1.4 7-4.6 7-9V6l-7-3z"/><path d="m9 12 2 2 4-4"/></svg>Paiement sécurisé Stripe</span>
       <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="17.5" cy="17.5" r="1.5"/></svg>Livraison suivie</span>
-      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7z"/><path d="M9 3h6M9 21h6M3 9v6M21 9v6"/></svg>Support client</span>
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7z"/><path d="M9 3h6M9 21h6M3 9v6M21 9v6"/></svg>Espace client</span>
       <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5"/><path d="M10 13h7M10 17h5"/></svg>Facture PDF</span>
     </div>
     ${t.shipping ? `<div class="shipping-meter"><span>${fmt(Math.max(0, 50 - (t.subtotal - t.discount)))} avant livraison offerte</span><b style="width:${Math.min(100, ((t.subtotal - t.discount) / 50) * 100)}%"></b></div>` : ""}
@@ -967,6 +967,8 @@ function go(to, options = {}) {
   }
   history.pushState(null, "", to);
   render();
+  const hash = to.includes("#") ? to.split("#")[1] : "";
+  if (hash) setTimeout(() => document.getElementById(hash)?.scrollIntoView({ block: "start" }), 0);
 }
 
 const skeletons = (n) => `<div class="product-grid">${"<div class='skeleton'></div>".repeat(n)}</div>`;
@@ -1008,6 +1010,7 @@ async function render() {
     if (path === "") await viewHome(app);
     else if (path === "catalogue") await viewCatalog(app, params);
     else if (path.startsWith("produit/")) await viewProduct(app, Number(path.split("/")[1]));
+    else if (path.startsWith("prebuilt/")) await viewPrebuilt(app, path.split("/")[1]);
     else if (path === "configurateur") await viewBuilder(app);
     else if (path === "comparer") await viewCompare(app);
     else if (path === "qui-sommes-nous") viewAbout(app);
@@ -1037,15 +1040,15 @@ async function viewHome(app) {
     <div>
       <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
       <h1>Assemblez<br class="hero-mobile-only"> la machine<br>de <span class="grad">vos rêves</span></h1>
-      <p>RTX série 50, Ryzen 9000X3D, NVMe Gen5 et refroidissement maîtrisé : chaque PC VoltCore est monté à la main, stress-testé 24 h et expédié sous 24 h.</p>
+      <p>Cartes graphiques, processeurs, mémoire, stockage et refroidissement : parcourez le catalogue ou partez d'une configuration équilibrée et ajustable.</p>
       <div class="hero-cta">
         <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
         <a class="btn btn-ghost" href="/configurateur">Configurer le mien</a>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat"><strong id="statCount">280+</strong><span>références premium</span></div>
-        <div class="hero-stat"><strong>24 h</strong><span>expédition éclair</span></div>
-        <div class="hero-stat"><strong>4.8/5</strong><span>avis clients</span></div>
+        <div class="hero-stat"><strong id="statCount">280+</strong><span>références catalogue</span></div>
+        <div class="hero-stat"><strong>3</strong><span>configurations de départ</span></div>
+        <div class="hero-stat"><strong>8</strong><span>familles de composants</span></div>
       </div>
     </div>
     <div class="hero-art"><div class="hero-build">
@@ -1088,7 +1091,7 @@ async function viewHome(app) {
 
   <section class="section prebuilts" id="prebuilts">
     <div class="section-head"><h2>PC prémontés</h2><a href="/configurateur">Composer le mien →</a></div>
-    <p class="pb-sub">Des configurations équilibrées, assemblées et testées par nos soins. Compatibilité vérifiée par notre moteur — il ne reste qu'à brancher.</p>
+    <p class="pb-sub">Des configurations équilibrées à partir du catalogue. Les composants sont listés clairement, avec prix calculé et disponibilité selon le stock.</p>
     <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton' style='min-height:420px'></div>".repeat(3)}</div>
   </section>
 
@@ -1114,9 +1117,9 @@ async function viewHome(app) {
 
   <section class="section">
     <div class="perks">
-      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></div><div><h4>Livraison 24 h</h4><p>Offerte dès 50 € d'achat, partout en France.</p></div></div>
-      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garantie sereine</h4><p>Rétractation légale 14 jours, retours 30 jours et garantie légale de conformité.</p></div></div>
-      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></div><div><h4>Conseil d'experts</h4><p>Notre configurateur vérifie la compatibilité à votre place.</p></div></div>
+      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></div><div><h4>Livraison</h4><p>Les frais et options disponibles sont calculés au panier.</p></div></div>
+      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garanties légales</h4><p>Rétractation légale 14 jours et garantie légale de conformité.</p></div></div>
+      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></div><div><h4>Aide au choix</h4><p>Le configurateur vérifie la compatibilité des composants sélectionnés.</p></div></div>
       <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><h4>Paiement sécurisé</h4><p>Transactions chiffrées et données protégées.</p></div></div>
     </div>
   </section>
@@ -1129,7 +1132,7 @@ async function viewHome(app) {
       <div class="scan-window">
         <span class="scan-line"></span>
         <div class="scan-card scan-card-pay"><span>Paiement</span><strong>Validé</strong></div>
-        <div class="scan-card scan-card-ship"><span>Expédition</span><strong>24 h</strong></div>
+        <div class="scan-card scan-card-ship"><span>Commande</span><strong>Suivi</strong></div>
         <div class="scan-card scan-card-warranty"><span>Garantie</span><strong>14 j + SAV</strong></div>
       </div>
       <div class="trust-core">
@@ -1154,10 +1157,10 @@ async function viewHome(app) {
       </div>
       <div>
         <h4>Garanties</h4>
-        <span>✓ Montage & test 24 h</span>
+        <span>✓ Compatibilité vérifiée</span>
         <span>✓ Garantie légale de conformité</span>
         <span>✓ Rétractation 14 jours</span>
-        <span>✓ Support 7j/7</span>
+        <span>✓ Espace client</span>
       </div>
       <div>
         <h4>Mentions légales</h4>
@@ -1200,82 +1203,116 @@ const PREBUILTS = [
     ids: { "Processeur": 136, "Carte graphique": 17, "Mémoire": 20, "Carte mère": 28, "Stockage": 204, "Refroidissement": 243, "Alimentation": 225, "Boîtier": 38 } },
 ];
 
+const PREBUILT_ROLES = ["Processeur", "Carte graphique", "Mémoire", "Carte mère", "Stockage", "Refroidissement", "Alimentation", "Boîtier"];
+const prebuiltRoleLabel = (role) => ({
+  "Carte graphique": "GPU",
+  "Processeur": "CPU",
+  "Carte mère": "CM",
+  "Mémoire": "RAM",
+  "Refroidissement": "Cooling",
+  "Alimentation": "PSU",
+}[role] || role);
+const findPrebuilt = (key) => PREBUILTS.find((b) => b.key === key);
+const prebuiltIds = () => [...new Set(PREBUILTS.flatMap((b) => Object.values(b.ids)))];
+const loadPrebuiltProducts = async () => {
+  const all = await api(`/products?compact=1&ids=${prebuiltIds().join(",")}`);
+  return new Map(all.map((p) => [p.id, p]));
+};
+const prebuiltParts = (b, byId) =>
+  PREBUILT_ROLES.map((role) => ({ role, product: byId.get(b.ids[role]) })).filter((x) => x.product);
+const prebuiltTotal = (parts) => parts.reduce((s, { product }) => s + product.price, 0);
+
+function addPrebuiltToCart(b, byId) {
+  if (!state.user) {
+    requireAuth(() => addPrebuiltToCart(b, byId));
+    toast("Connectez-vous pour enregistrer votre panier sur votre compte", "info");
+    return;
+  }
+  let n = 0;
+  prebuiltParts(b, byId).forEach(({ product }) => {
+    if (product.stock > 0) { addToCart(product, 1, true); n++; }
+  });
+  toast(`${b.name} ajouté : ${n} composants 🛒`, "success");
+  openCart();
+}
+
+async function viewPrebuilt(app, key) {
+  const b = findPrebuilt(key);
+  if (!b) {
+    app.innerHTML = `<div class="empty-state"><div class="big">🧭</div><h2>Configuration introuvable</h2><br><a class="btn btn-primary" href="/#prebuilts">Voir les PC prémontés</a></div>`;
+    return;
+  }
+
+  app.innerHTML = `<div class="empty-state"><div class="big">⏳</div><h2>Chargement de la configuration...</h2></div>`;
+  let byId;
+  try { byId = await loadPrebuiltProducts(); }
+  catch {
+    app.innerHTML = `<div class="empty-state"><div class="big">⚠️</div><h2>Configuration indisponible</h2><p>Impossible de charger les composants pour le moment.</p></div>`;
+    return;
+  }
+
+  const parts = prebuiltParts(b, byId);
+  const total = prebuiltTotal(parts);
+  const available = parts.filter(({ product }) => product.stock > 0).length;
+  const allAvailable = available === parts.length;
+  app.innerHTML = `
+  <div class="breadcrumb"><a href="/">Accueil</a><span>/</span><a href="/#prebuilts">PC prémontés</a><span>/</span><span>${esc(b.name)}</span></div>
+  <section class="prebuilt-page">
+    <div class="prebuilt-page-head">
+      <span class="pb-tier">${esc(b.tier)}</span>
+      <h1>${esc(b.name)}</h1>
+      <p>${esc(b.tag)}</p>
+      <div class="prebuilt-facts">
+        <span>Compatibilité vérifiée</span>
+        <span>${parts.length} composants</span>
+        <span>${allAvailable ? "Disponible selon stock actuel" : `${available}/${parts.length} composants en stock`}</span>
+      </div>
+    </div>
+    <aside class="prebuilt-summary panel">
+      <span>Total composants</span>
+      <strong>${fmt(total)}</strong>
+      <p>Prix calculé à partir des composants listés ci-dessous. Les frais éventuels sont calculés au panier.</p>
+      <button class="btn btn-primary btn-block" id="prebuiltAdd">Ajouter la configuration</button>
+      <a class="btn btn-ghost btn-block" href="/configurateur">Ouvrir le configurateur</a>
+    </aside>
+  </section>
+  <section class="section">
+    <div class="section-head"><h2>Composants inclus</h2><a href="/#prebuilts">Retour aux configurations</a></div>
+    <div class="prebuilt-component-list">
+      ${parts.map(({ role, product }) => `
+        <a class="prebuilt-component" href="/produit/${product.id}">
+          <div class="prebuilt-component-visual">${art(product.category, hueOf(product))}${imgTag(product)}</div>
+          <div>
+            <span>${prebuiltRoleLabel(role)}</span>
+            <strong>${esc(product.brand)} ${esc(product.name)}</strong>
+          </div>
+          <div class="prebuilt-component-meta">
+            <strong>${fmt(product.price)}</strong>
+            <small class="${product.stock > 0 ? "" : "out"}">${product.stock > 0 ? `${product.stock} en stock` : "Rupture"}</small>
+          </div>
+        </a>
+      `).join("")}
+    </div>
+  </section>`;
+  $("#prebuiltAdd").onclick = () => addPrebuiltToCart(b, byId);
+}
+
 async function renderPrebuilts(preloaded) {
   const grid = $("#prebuiltGrid");
   if (!grid) return;
   let byId;
   try {
-    const prebuiltIds = [...new Set(PREBUILTS.flatMap((b) => Object.values(b.ids)))];
-    const all = preloaded || await api(`/products?compact=1&ids=${prebuiltIds.join(",")}`);
+    const all = preloaded || await api(`/products?compact=1&ids=${prebuiltIds().join(",")}`);
     byId = new Map(all.map((p) => [p.id, p]));
   } catch {
     grid.innerHTML = `<p style="color:var(--text-faint)">Configurations momentanément indisponibles.</p>`;
     return;
   }
-  const ROLES = ["Processeur", "Carte graphique", "Mémoire", "Carte mère", "Stockage", "Refroidissement", "Alimentation", "Boîtier"];
-  const roleLabel = (role) => ({
-    "Carte graphique": "GPU",
-    "Processeur": "CPU",
-    "Carte mère": "CM",
-    "Mémoire": "RAM",
-    "Refroidissement": "Cooling",
-    "Alimentation": "PSU",
-  }[role] || role);
-  const prebuiltParts = (b) => ROLES.map((role) => ({ role, product: byId.get(b.ids[role]) })).filter((x) => x.product);
-  const addPrebuiltToCart = (b) => {
-    if (!state.user) {
-      requireAuth(() => addPrebuiltToCart(b));
-      toast("Connectez-vous pour enregistrer votre panier sur votre compte", "info");
-      return;
-    }
-    let n = 0;
-    prebuiltParts(b).forEach(({ product }) => {
-      if (product.stock > 0) { addToCart(product, 1, true); n++; }
-    });
-    toast(`${b.name} ajouté : ${n} composants 🛒`, "success");
-    openCart();
-  };
-  const openPrebuiltDetails = (b) => {
-    const parts = prebuiltParts(b);
-    const total = parts.reduce((s, { product }) => s + product.price, 0);
-    const overlay = document.createElement("div");
-    overlay.className = "modal-overlay";
-    overlay.innerHTML = `
-      <div class="modal wide pb-detail-modal">
-        <button class="modal-close">✕</button>
-        <span class="pb-tier">${esc(b.tier)}</span>
-        <h2>${esc(b.name)}</h2>
-        <p class="pb-detail-tag">${esc(b.tag)}</p>
-        <div class="pb-detail-total">
-          <span>Total composants</span>
-          <strong>${fmt(total)}</strong>
-        </div>
-        <div class="pb-detail-list">
-          ${parts.map(({ role, product }) => `
-            <a class="pb-detail-row" href="/produit/${product.id}">
-              <span class="pb-detail-role">${roleLabel(role)}</span>
-              <span class="pb-detail-name">${esc(product.brand)} ${esc(product.name)}</span>
-              <span class="pb-detail-meta">${fmt(product.price)} · ${product.stock > 0 ? `${product.stock} en stock` : "rupture"}</span>
-            </a>
-          `).join("")}
-        </div>
-        <div class="pb-detail-actions">
-          <button class="btn btn-primary" data-pb-add="${b.key}">Ajouter la configuration</button>
-          <a class="btn btn-ghost" href="/configurateur">Modifier dans le configurateur</a>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-    const close = () => overlay.remove();
-    overlay.onclick = (e) => { if (e.target === overlay) close(); };
-    $(".modal-close", overlay).onclick = close;
-    $("[data-pb-add]", overlay).onclick = () => { close(); addPrebuiltToCart(b); };
-    $$(".pb-detail-row, .pb-detail-actions a", overlay).forEach((link) => link.onclick = close);
-  };
   grid.innerHTML = PREBUILTS.map((b) => {
-    const parts = prebuiltParts(b);
-    const total = parts.reduce((s, { product }) => s + product.price, 0);
+    const parts = prebuiltParts(b, byId);
+    const total = prebuiltTotal(parts);
     const specs = parts.map(({ role, product }) =>
-      `<li><span class="k">${roleLabel(role)}</span><span class="v">${esc(product.brand)} ${esc(product.name)}</span></li>`
+      `<li><span class="k">${prebuiltRoleLabel(role)}</span><span class="v">${esc(product.brand)} ${esc(product.name)}</span></li>`
     ).join("");
     return `<article class="pb-card${b.featured ? " featured" : ""}">
       <div class="pb-head">
@@ -1286,9 +1323,9 @@ async function renderPrebuilts(preloaded) {
       </div>
       <ul class="pb-specs">${specs}</ul>
       <div class="pb-foot">
-        <div class="pb-price">${fmt(total)}<small>${parts.length} composants montés & testés</small></div>
+        <div class="pb-price">${fmt(total)}<small>${parts.length} composants sélectionnés</small></div>
         <div class="pb-actions">
-          <button class="btn btn-ghost btn-sm" data-pb-detail="${b.key}">Détails</button>
+          <a class="btn btn-ghost btn-sm" href="/prebuilt/${b.key}">Détails</a>
           <button class="btn btn-primary btn-sm" data-pb="${b.key}">Ajouter</button>
         </div>
       </div>
@@ -1296,11 +1333,7 @@ async function renderPrebuilts(preloaded) {
   }).join("");
   grid.querySelectorAll("[data-pb]").forEach((btn) => btn.onclick = () => {
     const b = PREBUILTS.find((x) => x.key === btn.dataset.pb);
-    addPrebuiltToCart(b);
-  });
-  grid.querySelectorAll("[data-pb-detail]").forEach((btn) => btn.onclick = () => {
-    const b = PREBUILTS.find((x) => x.key === btn.dataset.pbDetail);
-    openPrebuiltDetails(b);
+    addPrebuiltToCart(b, byId);
   });
 }
 
@@ -1311,7 +1344,7 @@ function trustStrip() {
   const items = [
     ["Paiement sécurisé Stripe", "M12 3 5 6v5c0 4.4 2.9 7.6 7 9 4.1-1.4 7-4.6 7-9V6l-7-3z"],
     ["Rétractation 14 jours", "M4 7h10a5 5 0 1 1-4 8M4 7l4-4M4 7l4 4"],
-    ["Support client", "M5 18v-5a7 7 0 0 1 14 0v5M5 18h4v-6H5v6zm10 0h4v-6h-4v6z"],
+    ["Espace client", "M5 18v-5a7 7 0 0 1 14 0v5M5 18h4v-6H5v6zm10 0h4v-6h-4v6z"],
     ["Facture PDF", "M7 3h8l4 4v14H7z"],
     ["Garantie légale", "M12 3 5 6v5c0 4.4 2.9 7.6 7 9 4.1-1.4 7-4.6 7-9V6l-7-3z"],
     ["DEEE / recyclage", "M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 10v7M14 10v7"],
@@ -1333,7 +1366,7 @@ function viewAbout(app) {
     <div class="story-grid">
       <article><h2>Notre rôle</h2><p>Rendre l'achat PC plus clair : des fiches lisibles, des conseils de compatibilité, un configurateur guidé et un panier qui garde les informations importantes sous les yeux.</p></article>
       <article><h2>Notre méthode</h2><p>Chaque recommandation met en avant l'usage réel : gaming 1080p, 1440p, création vidéo, silence, évolutivité ou budget maîtrisé.</p></article>
-      <article><h2>Expédition</h2><p>Les commandes sont préparées en France, avec livraison suivie, facture PDF et support client pour les questions de choix ou d'après-vente.</p></article>
+      <article><h2>Expédition</h2><p>Les informations de livraison, de facture et de suivi de commande sont affichées dans l'espace client lorsque la commande est disponible.</p></article>
     </div>
     <div class="content-actions">
       <a class="btn btn-primary" href="/configurateur">Configurer un PC</a>
@@ -1373,7 +1406,7 @@ const LEGAL_PAGES = {
     title: "Politique de confidentialité",
     intro: "Les données collectées servent au fonctionnement de la boutique, au suivi des commandes, au support et à la sécurité.",
     sections: [
-      ["Données collectées", "Compte client, adresse de livraison, panier, commandes, factures, avis, préférences et informations nécessaires au support client."],
+      ["Données collectées", "Compte client, adresse de livraison, panier, commandes, factures, avis, préférences et informations nécessaires au traitement des demandes."],
       ["Finalités", "Préparation des commandes, livraison, facturation, service après-vente, sécurité du compte, lutte contre la fraude et amélioration de l'expérience d'achat."],
       ["Paiement", "Les données de paiement sont gérées par Stripe. VoltCore ne stocke pas les numéros de carte bancaire."],
       ["Cookies", "Les cookies strictement nécessaires permettent le panier, la session et la sécurité. Les cookies de mesure d'audience ou de marketing ne doivent être utilisés qu'après consentement."],
