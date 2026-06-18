@@ -1036,12 +1036,14 @@ async function render() {
   const { path, params } = parsePath();
   const app = $("#app");
   const renderToken = ++currentRenderToken;
+  const isHome = path === "";
   $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === path.split("/")[0]));
-  if (path !== "") cleanupHome3D();
+  document.body.classList.toggle("home-redesign-active", isHome);
+  if (!isHome) cleanupHome3D();
   window.scrollTo({ top: 0 });
 
   try {
-    if (path === "") await viewHome(app);
+    if (isHome) await viewHome(app);
     else if (path === "catalogue") await viewCatalog(app, params);
     else if (path.startsWith("produit/")) await viewProduct(app, Number(path.split("/")[1]));
     else if (path.startsWith("prebuilt/")) await viewPrebuilt(app, path.split("/")[1]);
@@ -1070,24 +1072,37 @@ async function render() {
 /* ─── Vue : accueil ─── */
 async function viewHome(app) {
   app.innerHTML = `
-  <section class="hero">
-    <div>
-      <span class="hero-kicker"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Nouvelle génération disponible</span>
-      <h1>Assemblez<br class="hero-mobile-only"> la machine<br>de <span class="grad">vos rêves</span></h1>
-      <p>Cartes graphiques, processeurs, mémoire, stockage et refroidissement : parcourez le catalogue ou partez d'une configuration équilibrée et ajustable.</p>
+  <div class="home-redesign">
+  <section class="hero hero-cockpit">
+    <div class="hero-copy cockpit-copy">
+      <span class="hero-kicker hero-status"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Signal catalogue actif</span>
+      <h1>Une config qui démarre fort. <span>Sans compromis.</span></h1>
+      <p>Choisissez une base prête à jouer ou composez votre machine pièce par pièce, avec un rendu plus direct, plus nerveux et pensé pour aller vite.</p>
       <div class="hero-cta">
         <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
         <a class="btn btn-ghost" href="/configurateur">Configurer le mien</a>
       </div>
-      <div class="hero-stats">
-        <div class="hero-stat"><strong id="statCount">280+</strong><span>références catalogue</span></div>
-        <div class="hero-stat"><strong>3</strong><span>configurations de départ</span></div>
-        <div class="hero-stat"><strong>8</strong><span>familles de composants</span></div>
+      <div class="hero-stats hero-telemetry">
+        <div class="hero-stat"><strong id="statCount">280+</strong><span>références détectées</span></div>
+        <div class="hero-stat"><strong>3</strong><span>profils prêts</span></div>
+        <div class="hero-stat"><strong>8</strong><span>familles pilotées</span></div>
       </div>
     </div>
-    <div class="hero-art"><div class="hero-build">
-      <img src="/images/36-1.jpg" alt="PC gaming VoltCore monté : verre trempé, RTX et RGB" loading="eager" decoding="async" fetchpriority="high" width="640" height="640">
-    </div></div>
+    <div class="hero-art cockpit-art" id="hhStage">
+      <div class="cockpit-grid" aria-hidden="true"></div>
+      <div class="cockpit-radar" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="cockpit-orbit orbit-a" aria-hidden="true"></div>
+      <div class="cockpit-orbit orbit-b" aria-hidden="true"></div>
+      <div class="cockpit-machine" id="pc3d">
+        <span class="machine-glow" aria-hidden="true"></span>
+        <img src="/images/36-1.jpg" alt="PC gaming VoltCore monté : verre trempé, RTX et RGB" loading="eager" decoding="async" fetchpriority="high" width="640" height="640">
+      </div>
+      <div class="cockpit-panel panel-gpu"><span>GPU</span><strong>RTX prêt</strong></div>
+      <div class="cockpit-panel panel-cpu"><span>CPU</span><strong>Fréquence stable</strong></div>
+      <div class="cockpit-panel panel-ram"><span>RAM</span><strong>Profil DDR5</strong></div>
+      <div class="cockpit-panel panel-ship"><span>Suivi</span><strong>Commande claire</strong></div>
+      <div class="cockpit-readout"><b>VoltCore</b><span>Build channel 01</span></div>
+    </div>
   </section>
 
   <div class="motion-reel motion-reel-forge" id="drop-reel" data-sep aria-hidden="true">
@@ -1199,7 +1214,8 @@ async function viewHome(app) {
         <a href="/retours-remboursements">Retours & remboursement</a>
       </div>
     </div>
-  </section>`;
+  </section>
+  </div>`;
 
   const [cats, featured] = await Promise.all([
     api("/categories"),
@@ -1323,7 +1339,8 @@ async function viewPrebuilt(app, key) {
         </a>
       `).join("")}
     </div>
-  </section>`;
+  </section>
+  </div>`;
   $("#prebuiltAdd").onclick = () => addPrebuiltToCart(b, byId);
 }
 
@@ -1488,167 +1505,6 @@ function cleanupHome3D() {
 }
 
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
-
-function initAssemblyArcs(reel, canvas) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return () => {};
-
-  const chips = [".chip-gpu", ".chip-cpu", ".chip-ram", ".chip-ssd"];
-  const pointer = { x: 0, y: 0, hot: false };
-  const sparks = [];
-  let raf = 0;
-  let dpr = 1;
-  let w = 0;
-  let h = 0;
-  let last = performance.now();
-
-  const resize = () => {
-    const r = canvas.getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = Math.max(1, Math.floor(r.width * dpr));
-    h = Math.max(1, Math.floor(r.height * dpr));
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
-  };
-
-  const centerOf = (el, base) => {
-    const r = el.getBoundingClientRect();
-    return {
-      x: r.left - base.left + r.width / 2,
-      y: r.top - base.top + r.height / 2,
-    };
-  };
-
-  const spark = (x, y, power = 1) => {
-    if (sparks.length > 92) sparks.shift();
-    const a = Math.random() * Math.PI * 2;
-    const v = 0.45 + Math.random() * 1.45;
-    sparks.push({
-      x,
-      y,
-      vx: Math.cos(a) * v,
-      vy: Math.sin(a) * v - 0.2,
-      life: 1,
-      size: (1.2 + Math.random() * 2.7) * power,
-      hue: Math.random() > 0.55 ? 190 : 28,
-    });
-  };
-
-  const drawArc = (from, to, idx, now, progress) => {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const len = Math.hypot(dx, dy) || 1;
-    const nx = -dy / len;
-    const ny = dx / len;
-    const amp = (8 + idx * 2.2) * (0.45 + progress * 0.75);
-    const steps = 8;
-
-    ctx.beginPath();
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const wave = Math.sin(now * 0.006 + i * 1.85 + idx * 2.4);
-      const taper = Math.sin(Math.PI * t);
-      const x = from.x + dx * t + nx * wave * amp * taper;
-      const y = from.y + dy * t + ny * wave * amp * taper;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-
-    ctx.lineWidth = 1.2 + progress * 1.2;
-    ctx.strokeStyle = `rgba(255, 151, 78, ${0.16 + progress * 0.42})`;
-    ctx.shadowColor = "rgba(255, 122, 46, 0.72)";
-    ctx.shadowBlur = 16;
-    ctx.stroke();
-
-    ctx.lineWidth = 0.8;
-    ctx.strokeStyle = `rgba(91, 229, 255, ${0.08 + progress * 0.28})`;
-    ctx.shadowColor = "rgba(91, 229, 255, 0.45)";
-    ctx.shadowBlur = 9;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    if (Math.random() < 0.038 + progress * 0.035) {
-      const t = 0.2 + Math.random() * 0.62;
-      spark(from.x + dx * t, from.y + dy * t, 0.9 + progress * 0.6);
-    }
-  };
-
-  const frame = (now) => {
-    if (!canvas.isConnected) return;
-    raf = requestAnimationFrame(frame);
-    if (Math.floor(canvas.clientWidth * dpr) !== w || Math.floor(canvas.clientHeight * dpr) !== h) resize();
-
-    const dt = Math.min(34, now - last);
-    last = now;
-    const progress = clamp01(parseFloat(reel.style.getPropertyValue("--p")) || 0);
-    const cw = canvas.clientWidth || 1;
-    const ch = canvas.clientHeight || 1;
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, cw, ch);
-
-    if (progress > 0.08) {
-      const base = canvas.getBoundingClientRect();
-      const core = $(".assembly-product", reel);
-      if (core) {
-        const to = centerOf(core, base);
-        chips.forEach((sel, idx) => {
-          const chip = $(sel, reel);
-          if (chip) drawArc(centerOf(chip, base), to, idx, now, progress);
-        });
-      }
-    }
-
-    if (pointer.hot && progress > 0.12) {
-      const glow = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 120);
-      glow.addColorStop(0, "rgba(255, 177, 112, 0.2)");
-      glow.addColorStop(0.55, "rgba(91, 229, 255, 0.08)");
-      glow.addColorStop(1, "rgba(91, 229, 255, 0)");
-      ctx.fillStyle = glow;
-      ctx.fillRect(pointer.x - 120, pointer.y - 120, 240, 240);
-      if (Math.random() < 0.2) spark(pointer.x, pointer.y, 0.7);
-    }
-
-    for (let i = sparks.length - 1; i >= 0; i--) {
-      const s = sparks[i];
-      s.life -= dt / 520;
-      if (s.life <= 0) { sparks.splice(i, 1); continue; }
-      s.x += s.vx * dt * 0.075;
-      s.y += s.vy * dt * 0.075;
-      s.vy += dt * 0.0016;
-      ctx.globalAlpha = Math.max(0, s.life);
-      ctx.fillStyle = s.hue > 100 ? "rgba(140, 244, 255, 0.95)" : "rgba(255, 198, 128, 0.95)";
-      ctx.shadowColor = s.hue > 100 ? "rgba(91, 229, 255, 0.9)" : "rgba(255, 122, 46, 0.9)";
-      ctx.shadowBlur = 12;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.globalAlpha = 1;
-    }
-  };
-
-  const onMove = (e) => {
-    const r = canvas.getBoundingClientRect();
-    pointer.x = e.clientX - r.left;
-    pointer.y = e.clientY - r.top;
-    pointer.hot = true;
-  };
-  const onLeave = () => { pointer.hot = false; };
-
-  reel.addEventListener("pointermove", onMove, { passive: true });
-  reel.addEventListener("pointerleave", onLeave);
-  resize();
-  raf = requestAnimationFrame(frame);
-
-  return () => {
-    cancelAnimationFrame(raf);
-    reel.removeEventListener("pointermove", onMove);
-    reel.removeEventListener("pointerleave", onLeave);
-  };
-}
 
 function initMotionField(reel, canvas) {
   const ctx = canvas.getContext("2d");
