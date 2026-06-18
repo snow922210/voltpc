@@ -1049,31 +1049,35 @@ async function viewHome(app) {
     </div></div>
   </section>
 
-  <div class="motion-reel motion-reel-build" id="drop-reel" data-sep aria-hidden="true">
+  <div class="motion-reel motion-reel-build motion-reel-assembly" id="drop-reel" data-sep aria-hidden="true">
     <div class="reel-stage">
       <div class="reel-atmosphere">
         <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span>
       </div>
-      <div class="reel-rails rail-top">
-        <span>RTX 50</span><span>Ryzen X3D</span><span>DDR5</span><span>NVMe Gen5</span><span>WiFi 7</span>
-      </div>
-      <div class="reel-rails rail-bottom">
-        <span>1440p</span><span>4K Ultra</span><span>Ray tracing</span><span>IA ready</span><span>Silence</span>
-      </div>
-      <div class="reel-machine">
-        <div class="machine-card card-gpu"><span>GPU</span><strong>RTX 50</strong></div>
-        <div class="machine-card card-cpu"><span>CPU</span><strong>Ryzen X3D</strong></div>
-        <div class="machine-core">
-          <img src="/images/36-1.jpg" alt="" loading="eager" decoding="async">
-          <i class="core-halo"></i>
-          <i class="core-sweep"></i>
+      <div class="assembly-scene">
+        <div class="assembly-backplate">
+          <span></span><span></span><span></span><span></span>
         </div>
-        <div class="machine-card card-ram"><span>RAM</span><strong>DDR5</strong></div>
-        <div class="machine-card card-ssd"><span>SSD</span><strong>Gen5</strong></div>
+        <div class="assembly-orbit">
+          <i></i><i></i><i></i>
+        </div>
+        <div class="assembly-energy energy-a"></div>
+        <div class="assembly-energy energy-b"></div>
+        <div class="assembly-energy energy-c"></div>
+        <div class="assembly-product">
+          <img src="/images/36-1.jpg" alt="" loading="eager" decoding="async">
+        </div>
+        <div class="assembly-chip chip-gpu"><span>GPU</span><strong>RTX 50</strong></div>
+        <div class="assembly-chip chip-cpu"><span>CPU</span><strong>X3D</strong></div>
+        <div class="assembly-chip chip-ram"><span>RAM</span><strong>DDR5</strong></div>
+        <div class="assembly-chip chip-ssd"><span>SSD</span><strong>Gen5</strong></div>
+        <div class="assembly-readout">
+          <span>PCIe 5.0</span><span>4K Ultra</span><span>Silence</span>
+        </div>
       </div>
       <div class="reel-copy">
-        <span>Configs prêtes</span>
-        <strong>Drop gaming</strong>
+        <span>Assemblage calibré</span>
+        <strong>Performance prête</strong>
       </div>
     </div>
   </div>
