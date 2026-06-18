@@ -2578,10 +2578,24 @@ body.void-home-active .cookie-banner {
 
 body {
   background:
+    linear-gradient(115deg, transparent 0 38%, rgba(196, 226, 238, .028) 46%, transparent 54% 100%),
+    repeating-linear-gradient(90deg, rgba(205, 232, 240, .026) 0 1px, transparent 1px 92px),
     radial-gradient(circle at 74% 8%, rgba(159,183,195,.075), transparent 0 28%, transparent 56%),
+    radial-gradient(ellipse 70% 24% at 50% 106%, rgba(155, 190, 204, .10), transparent 62%),
     radial-gradient(circle at 9% 88%, rgba(210,226,232,.045), transparent 0 24%, transparent 54%),
     linear-gradient(180deg, #010205 0%, #05070b 48%, #010205 100%);
   color: var(--text);
+  background-attachment: fixed;
+}
+
+.void-home {
+  background:
+    linear-gradient(115deg, transparent 0 40%, rgba(196, 226, 238, .026) 48%, transparent 56% 100%),
+    repeating-linear-gradient(90deg, rgba(205, 232, 240, .022) 0 1px, transparent 1px 92px),
+    radial-gradient(circle at 62% 42%, rgba(130,145,150,.11), transparent 0 24%, transparent 48%),
+    radial-gradient(ellipse 70% 24% at 50% 106%, rgba(155, 190, 204, .10), transparent 62%),
+    radial-gradient(circle at 22% 78%, rgba(68,77,82,.12), transparent 0 26%, transparent 56%),
+    linear-gradient(180deg, #010205 0%, #05070b 42%, #010205 100%) !important;
 }
 
 #bgfx { opacity: 0 !important; }
