@@ -2932,3 +2932,55 @@ table,
     top: 0 !important;
   }
 }
+
+/* Winter void layer: frost veil, low aurora, sparse cold dust. */
+body {
+  position: relative;
+}
+body > :not(#bgfx) {
+  position: relative;
+}
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+body::before {
+  z-index: 0;
+  opacity: .72;
+  background:
+    radial-gradient(ellipse 58% 18% at 50% 104%, rgba(164, 205, 222, .12), transparent 64%),
+    radial-gradient(ellipse 54% 20% at 18% 8%, rgba(145, 175, 190, .070), transparent 64%),
+    linear-gradient(118deg, transparent 0 37%, rgba(211, 235, 242, .035) 44%, rgba(122, 154, 170, .025) 50%, transparent 58% 100%);
+  mix-blend-mode: screen;
+}
+body::after {
+  z-index: 0;
+  opacity: .26;
+  background:
+    radial-gradient(circle, rgba(231, 245, 248, .28) 0 1px, transparent 1.2px),
+    radial-gradient(circle, rgba(180, 209, 219, .18) 0 .7px, transparent 1px),
+    linear-gradient(135deg, transparent 0 49.5%, rgba(211,235,242,.08) 50%, transparent 50.5% 100%),
+    linear-gradient(45deg, transparent 0 49.6%, rgba(211,235,242,.045) 50%, transparent 50.4% 100%);
+  background-size: 146px 146px, 92px 92px, 220px 220px, 180px 180px;
+  background-position: 12px 18px, 66px 28px, 0 0, 40px 80px;
+  mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 72%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 72%, transparent 100%);
+}
+.header,
+.app,
+.footer,
+.drawer-overlay,
+.cart-drawer,
+.modal-overlay,
+.cookie-banner {
+  position: relative;
+  z-index: 1;
+}
+.void-home::before {
+  background:
+    radial-gradient(ellipse 54% 18% at 50% 108%, rgba(164, 205, 222, .13), transparent 66%),
+    linear-gradient(112deg, transparent 0 39%, rgba(211, 235, 242, .040) 47%, transparent 56% 100%) !important;
+}
