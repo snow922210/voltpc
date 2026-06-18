@@ -216,6 +216,8 @@ def init_db() -> None:
             conn.execute("ALTER TABLE orders ADD COLUMN stock_reserved INTEGER NOT NULL DEFAULT 0")
         if "stock_restored" not in order_cols:
             conn.execute("ALTER TABLE orders ADD COLUMN stock_restored INTEGER NOT NULL DEFAULT 0")
+        if "checkout_return_token" not in order_cols:
+            conn.execute("ALTER TABLE orders ADD COLUMN checkout_return_token TEXT")
         # ─ Migration : URL d'image personnalisée par produit ─
         product_cols = {r["name"] for r in conn.execute("PRAGMA table_info(products)")}
         if "image_url" not in product_cols:
@@ -261,6 +263,7 @@ def _init_db_pg() -> None:
     with db() as conn:
         for stmt in PG_SCHEMA:
             conn.execute(stmt)
+        conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS checkout_return_token TEXT")
         _seed_db(conn)
 
 
@@ -1414,16 +1417,17 @@ def create_pending_order(conn: sqlite3.Connection, user: sqlite3.Row,
     Il est restitué par release_stock() si la commande est annulée ou expire
     sans paiement — voir cancel_order() et purge_expired_orders().
     """
+    return_token = secrets.token_urlsafe(32)
     cur = conn.execute(
         """INSERT INTO orders (user_id, subtotal, discount, shipping, total,
            promo_code, ship_name, ship_address, ship_city, ship_zip, status,
-           created_at, stock_reserved)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1)""",
+           created_at, stock_reserved, checkout_return_token)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1,?)""",
         (user["id"], computed["subtotal"], computed["discount"],
          computed["shipping"], computed["total"],
          body.promo_code.strip().upper() if computed["promo"] else None,
          body.ship_name, body.ship_address, body.ship_city, body.ship_zip,
-         "en attente de paiement", time.time()),
+         "en attente de paiement", time.time(), return_token),
     )
     order_id = cur.lastrowid
     for p, qty in computed["lines"]:

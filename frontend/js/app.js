@@ -2325,12 +2325,15 @@ async function viewCheckout(app) {
 /* ─── Vue : retour de paiement réussi (Stripe → success_url) ─── */
 async function viewPaymentSuccess(app, params) {
   const sessionId = params.get("session_id");
+  const returnToken = params.get("return_token") || "";
   const ordersUrl = "/compte?tab=orders";
   app.innerHTML = `<div class="empty-state"><div class="big">⏳</div><h2>Vérification du paiement…</h2></div>`;
   try {
     await restoreSessionAndCart({ syncCart: false, clearOnFail: false });
     // On confirme l'état réel auprès du serveur (qui interroge Stripe).
-    const res = await api("/checkout/status?session_id=" + encodeURIComponent(sessionId || ""), {
+    const qs = new URLSearchParams({ session_id: sessionId || "" });
+    if (returnToken) qs.set("return_token", returnToken);
+    const res = await api("/checkout/status?" + qs.toString(), {
       preserveAuthOn401: true,
     });
     if (res.payment_status !== "paid") throw new Error("Paiement non confirmé");

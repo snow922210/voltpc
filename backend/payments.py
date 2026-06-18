@@ -22,7 +22,7 @@ import os
 import sqlite3
 import time
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 # Le SDK Stripe est optionnel : l'application doit pouvoir démarrer même s'il
 # n'est pas installé (les routes renverront alors une 503 explicite).
@@ -40,6 +40,8 @@ from main import (
     current_user,
     db,
     finalize_order_paid,
+    make_token,
+    set_session_cookie,
 )
 
 log = logging.getLogger("voltpc.payments")
@@ -140,6 +142,9 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
         with db() as conn:
             computed = compute_order(conn, body.items, body.promo_code)
             order_id = create_pending_order(conn, user, body, computed)
+            return_token = conn.execute(
+                "SELECT checkout_return_token FROM orders WHERE id = ?", (order_id,)
+            ).fetchone()["checkout_return_token"]
             if body.save_address:
                 has_any = conn.execute(
                     "SELECT 1 FROM addresses WHERE user_id = ? LIMIT 1",
@@ -165,7 +170,10 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
             client_reference_id=str(order_id),
             # metadata = lien commande ↔ session, relu tel quel dans le webhook.
             metadata={"order_id": str(order_id), "user_id": str(user["id"])},
-            success_url=f"{_base_url()}/#/commande/succes?session_id={{CHECKOUT_SESSION_ID}}",
+            success_url=(
+                f"{_base_url()}/#/commande/succes?session_id={{CHECKOUT_SESSION_ID}}"
+                f"&return_token={return_token}"
+            ),
             cancel_url=f"{_base_url()}/#/commande/annulee?order_id={order_id}",
         )
 
@@ -274,7 +282,7 @@ async def stripe_webhook(request: Request):
 # ─── 3. Filet de sécurité pour le développement local ────────────────
 
 @router.get("/checkout/status")
-def checkout_status(session_id: str):
+def checkout_status(response: Response, session_id: str, return_token: str = ""):
     """Consulté par la page de succès. En production le webhook fait foi ; en
     local (sans tunnel Stripe), cette route finalise la commande en secours.
     """
@@ -292,6 +300,18 @@ def checkout_status(session_id: str):
     # Filet de sécurité idempotent : si payé mais webhook non reçu, on finalise.
     if payment_status == "paid" and order_id:
         finalize_order_paid(int(order_id), session_id)
+        if return_token:
+            with db() as conn:
+                order = conn.execute(
+                    "SELECT user_id FROM orders WHERE id = ? AND checkout_return_token = ?",
+                    (int(order_id), return_token),
+                ).fetchone()
+                if order:
+                    set_session_cookie(response, make_token(order["user_id"]))
+                    conn.execute(
+                        "UPDATE orders SET checkout_return_token = NULL WHERE id = ?",
+                        (int(order_id),),
+                    )
 
     return {
         "order_id": int(order_id) if order_id else None,

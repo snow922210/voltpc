@@ -93,7 +93,8 @@ PG_SCHEMA = [
         tracking_number TEXT,
         carrier TEXT,
         stock_reserved INTEGER NOT NULL DEFAULT 0,
-        stock_restored INTEGER NOT NULL DEFAULT 0
+        stock_restored INTEGER NOT NULL DEFAULT 0,
+        checkout_return_token TEXT
     )""",
     """CREATE TABLE IF NOT EXISTS order_items (
         id SERIAL PRIMARY KEY,
