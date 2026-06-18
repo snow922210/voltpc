@@ -1463,26 +1463,27 @@ function initVoidField(stage, canvas) {
   let particles = [];
 
   const resetParticle = (p = {}) => {
-    p.x = Math.random() - 0.5;
-    p.y = Math.random() - 0.5;
-    p.z = 0.25 + Math.random() * 1.35;
-    p.speed = 0.00018 + Math.random() * 0.00042;
-    p.size = 0.8 + Math.random() * 2.6;
-    p.hue = Math.random() > 0.78 ? 212 : 196;
-    p.orbit = Math.random() * Math.PI * 2;
+    p.x = Math.random();
+    p.y = Math.random();
+    p.vx = -0.000012 + Math.random() * 0.00004;
+    p.vy = 0.000030 + Math.random() * 0.000085;
+    p.size = 0.8 + Math.random() * 2.8;
+    p.alpha = 0.16 + Math.random() * 0.42;
+    p.sway = Math.random() * Math.PI * 2;
+    p.depth = Math.random();
     return p;
   };
 
   const resize = () => {
     const r = canvas.getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     w = Math.max(1, Math.floor(r.width * dpr));
     h = Math.max(1, Math.floor(r.height * dpr));
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
     }
-    const count = Math.min(82, Math.max(42, Math.floor((canvas.clientWidth || 1) * (canvas.clientHeight || 1) / 16500)));
+    const count = Math.min(92, Math.max(48, Math.floor((canvas.clientWidth || 1) * (canvas.clientHeight || 1) / 18000)));
     particles = Array.from({ length: count }, () => resetParticle());
   };
 
@@ -1501,66 +1502,41 @@ function initVoidField(stage, canvas) {
     const px = pointer.x * cw;
     const py = pointer.y * ch;
     const glow = ctx.createRadialGradient(px, py, 0, px, py, Math.max(cw, ch) * 0.72);
-    glow.addColorStop(0, pointer.hot ? "rgba(210,226,232,0.105)" : "rgba(120,144,154,0.045)");
-    glow.addColorStop(0.22, "rgba(110,132,142,0.045)");
-    glow.addColorStop(0.52, "rgba(50,68,78,0.025)");
+    glow.addColorStop(0, pointer.hot ? "rgba(220,240,246,0.090)" : "rgba(150,178,190,0.040)");
+    glow.addColorStop(0.26, "rgba(110,136,148,0.040)");
+    glow.addColorStop(0.60, "rgba(38,54,66,0.020)");
     glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, cw, ch);
 
-    ctx.strokeStyle = "rgba(122,145,154,0.035)";
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 7; i++) {
-      const y = ch * (0.18 + i * 0.11);
-      ctx.beginPath();
-      ctx.moveTo(cw * 0.05, y);
-      ctx.bezierCurveTo(cw * 0.32, y - 48, cw * 0.65, y + 58, cw * 0.96, y - 12);
-      ctx.stroke();
-    }
-
     for (const p of particles) {
-      p.z -= p.speed * dt * (pointer.hot ? 1.7 : 1);
-      p.orbit += dt * 0.00024;
-      if (p.z <= 0.12) resetParticle(p);
-      const z = Math.max(0.12, p.z);
-      const scale = 1.25 / (z + 0.22);
-      const driftX = Math.cos(p.orbit + now * 0.00016) * 0.018;
-      const driftY = Math.sin(p.orbit + now * 0.00013) * 0.016;
-      const x = cw * 0.5 + (p.x + driftX) * cw * scale * 0.92 + (pointer.x - 0.5) * 42 * (1 - z);
-      const y = ch * 0.5 + (p.y + driftY) * ch * scale * 0.78 + (pointer.y - 0.5) * 34 * (1 - z);
-      const alpha = Math.max(0, Math.min(1, (1.45 - z) * 0.72));
-      if (alpha <= 0) continue;
-      const color = p.hue > 205 ? "150,172,182" : "94,116,126";
+      const speedBoost = pointer.hot ? 1.18 : 1;
+      p.sway += dt * (0.00038 + p.depth * 0.00020);
+      p.x += (p.vx * dt * speedBoost) + Math.cos(p.sway) * 0.000010 * dt;
+      p.y += p.vy * dt * speedBoost;
+      if (p.y > 1.16 || p.x < -0.08 || p.x > 1.08) {
+        resetParticle(p);
+        p.y = -0.12;
+      }
+
+      const depthScale = 0.65 + p.depth * 1.25;
+      const x = p.x * cw + (pointer.x - 0.5) * 18 * p.depth;
+      const y = p.y * ch + (pointer.y - 0.5) * 12 * p.depth;
+      const r = p.size * depthScale;
+      const alpha = p.alpha * (0.72 + p.depth * 0.36);
 
       ctx.globalAlpha = alpha;
-      ctx.strokeStyle = `rgba(${color}, ${0.055 + alpha * 0.09})`;
-      ctx.lineWidth = Math.max(0.6, p.size * scale * 0.42);
+      ctx.fillStyle = p.depth > 0.62 ? "rgba(238,250,252,.88)" : "rgba(172,205,218,.74)";
       ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(cw * 0.5 + (x - cw * 0.5) * 0.86, ch * 0.5 + (y - ch * 0.5) * 0.86);
-      ctx.stroke();
-      ctx.shadowColor = `rgba(${color}, 0.42)`;
-      ctx.shadowBlur = 10;
-      ctx.fillStyle = `rgba(${color}, ${0.22 + alpha * 0.34})`;
-      ctx.beginPath();
-      ctx.arc(x, y, Math.min(7, p.size * scale), 0, Math.PI * 2);
+      ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.globalAlpha = 1;
-    }
 
-    for (let i = 0; i < 3; i++) {
-      const radius = Math.min(cw, ch) * (0.22 + i * 0.12);
-      ctx.save();
-      ctx.translate(px, py);
-      ctx.rotate(now * 0.00018 * (i % 2 ? -1 : 1));
-      ctx.globalAlpha = 0.07 - i * 0.014;
-      ctx.strokeStyle = "rgba(150,172,182,.28)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, radius * 1.8, radius * 0.48, 0, Math.PI * 0.08, Math.PI * 1.62);
-      ctx.stroke();
-      ctx.restore();
+      if (p.depth > 0.58) {
+        ctx.globalAlpha = alpha * 0.18;
+        ctx.fillStyle = "rgba(238,250,252,.70)";
+        ctx.fillRect(x - r * 0.22, y - r * 1.8, Math.max(1, r * 0.34), r * 3.2);
+      }
+      ctx.globalAlpha = 1;
     }
   };
 

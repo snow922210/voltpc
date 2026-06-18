@@ -1760,26 +1760,39 @@ body.void-home-active .footer {
   pointer-events: none;
   perspective: 1000px;
   overflow: hidden;
+  opacity: .58;
 }
 .void-depth span {
   position: absolute;
-  left: 54%;
-  top: 52%;
-  width: 74vw;
-  height: 16vh;
-  border: 1px solid rgba(164, 231, 221, .16);
-  transform:
-    translate(-50%, -50%)
-    rotateX(70deg)
-    translateY(calc(var(--n, 0) * 76px))
-    translateZ(calc(var(--n, 0) * -70px));
-  box-shadow: inset 0 1px rgba(255,255,255,.08);
-  opacity: .46;
+  width: clamp(120px, 18vw, 320px);
+  height: clamp(120px, 18vw, 320px);
+  border: 0;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(231, 249, 252, .20), rgba(160, 194, 208, .08) 38%, transparent 70%);
+  transform: translate3d(0, 0, 0) scale(var(--s, 1));
+  opacity: var(--o, .22);
+  animation: voidDepthSnow 18s ease-in-out infinite alternate;
 }
-.void-depth span:nth-child(1) { --n: -2; }
-.void-depth span:nth-child(2) { --n: -1; }
-.void-depth span:nth-child(3) { --n: 1; }
-.void-depth span:nth-child(4) { --n: 2; }
+.void-depth span:nth-child(1) { left: 10%; top: 18%; --s: .55; --o: .14; animation-delay: -2s; }
+.void-depth span:nth-child(2) { left: 36%; top: 66%; --s: .75; --o: .18; animation-delay: -8s; }
+.void-depth span:nth-child(3) { left: 70%; top: 16%; --s: .62; --o: .16; animation-delay: -5s; }
+.void-depth span:nth-child(4) { left: 82%; top: 72%; --s: .48; --o: .12; animation-delay: -11s; }
+
+@keyframes voidDepthSnow {
+  0% {
+    transform: translate3d(-14px, 18px, 0) scale(var(--s, 1));
+    opacity: var(--o, .18);
+  }
+  50% {
+    transform: translate3d(18px, -10px, 0) scale(var(--s, 1));
+    opacity: var(--o, .18);
+  }
+  100% {
+    transform: translate3d(8px, 24px, 0) scale(var(--s, 1));
+    opacity: var(--o, .18);
+  }
+}
 
 .void-copy,
 .void-stage,
@@ -2396,13 +2409,12 @@ body.void-home-active .icon-btn {
     linear-gradient(180deg, rgba(1,2,5,.08), transparent 54%, #010205);
 }
 .void-field {
-  opacity: .48;
-  filter: grayscale(.85) saturate(.55);
+  opacity: .72;
+  filter: grayscale(.55) saturate(.72);
 }
 .void-depth span {
-  border-color: rgba(186,199,201,.07);
   box-shadow: none;
-  opacity: .28;
+  border: 0;
 }
 .void-eyebrow {
   color: rgba(231,236,236,.52);
