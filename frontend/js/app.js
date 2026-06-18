@@ -1038,7 +1038,7 @@ async function render() {
   const renderToken = ++currentRenderToken;
   const isHome = path === "";
   $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === path.split("/")[0]));
-  document.body.classList.toggle("zero-home-active", isHome);
+  document.body.classList.toggle("void-home-active", isHome);
   if (!isHome) cleanupHome3D();
   window.scrollTo({ top: 0 });
 
@@ -1072,81 +1072,86 @@ async function render() {
 /* ─── Vue : accueil ─── */
 async function viewHome(app) {
   app.innerHTML = `
-  <div class="zero-home">
-    <section class="zero-hero">
-      <canvas class="zero-field" id="zeroField" aria-hidden="true"></canvas>
-      <div class="zero-copy">
-        <span class="zero-kicker">Studio VoltCore</span>
-        <h1>Votre prochain PC, présenté comme une pièce d’exception.</h1>
-        <p>Un showroom clair, des configurations prêtes à comparer, et un configurateur qui garde les choix importants au premier plan.</p>
-        <div class="zero-actions">
-          <a class="btn zero-primary" href="#prebuilts">Voir les PC prêts</a>
-          <a class="btn zero-secondary" href="/configurateur">Créer ma config</a>
+  <div class="void-home">
+    <section class="void-hero">
+      <canvas class="void-field" id="voidField" aria-hidden="true"></canvas>
+      <div class="void-depth" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="void-copy">
+        <span class="void-eyebrow">Black chamber / VoltCore</span>
+        <h1>Un PC qui prend toute la pi&egrave;ce.</h1>
+        <p>Choisis une machine pr&ecirc;te ou compose ton build dans une interface sombre, dense, profonde, pens&eacute;e pour donner envie de cliquer.</p>
+        <div class="void-actions">
+          <a class="btn void-btn void-btn-primary" href="#prebuilts"><span>Voir les builds</span><b aria-hidden="true">&rarr;</b></a>
+          <a class="btn void-btn void-btn-ghost" href="/configurateur"><span>Ouvrir le configurateur</span><b aria-hidden="true">+</b></a>
         </div>
-        <div class="zero-metrics">
-          <div><strong id="statCount">280+</strong><span>références</span></div>
-          <div><strong>3</strong><span>builds prêts</span></div>
-          <div><strong>8</strong><span>familles</span></div>
+        <div class="void-readout">
+          <div><strong id="statCount">280+</strong><span>pieces en stock</span></div>
+          <div><strong>3</strong><span>machines pretes</span></div>
+          <div><strong>24h</strong><span>panier clair</span></div>
         </div>
       </div>
-      <div class="zero-stage" id="zeroStage" aria-label="PC VoltCore en présentation 3D">
-        <span class="zero-glass slab-a" aria-hidden="true"></span>
-        <span class="zero-glass slab-b" aria-hidden="true"></span>
-        <span class="zero-glass slab-c" aria-hidden="true"></span>
-        <div class="zero-ring ring-one" aria-hidden="true"></div>
-        <div class="zero-ring ring-two" aria-hidden="true"></div>
-        <div class="zero-rig" id="zeroRig">
-          <img src="/images/36-1.jpg" alt="PC gaming VoltCore monté : verre trempé, RTX et RGB" loading="eager" decoding="async" fetchpriority="high" width="640" height="640">
+
+      <div class="void-stage" id="voidStage" aria-label="PC VoltCore dans une scene plein ecran">
+        <div class="void-portal" aria-hidden="true">
+          <i></i><i></i><i></i><i></i>
         </div>
-        <div class="zero-spec spec-gpu"><span>Graphismes</span><strong>RTX ready</strong></div>
-        <div class="zero-spec spec-cpu"><span>Calcul</span><strong>X3D stable</strong></div>
-        <div class="zero-spec spec-ship"><span>Commande</span><strong>Suivi clair</strong></div>
+        <div class="void-rig" id="voidRig">
+          <img src="/images/36-1.jpg" alt="PC gaming VoltCore monte : verre trempe, RTX et RGB" loading="eager" decoding="async" fetchpriority="high" width="640" height="640">
+        </div>
+        <div class="void-chip chip-gpu"><span>GPU</span><strong>RTX ready</strong></div>
+        <div class="void-chip chip-cpu"><span>CPU</span><strong>X3D stable</strong></div>
+        <div class="void-chip chip-flow"><span>Flux</span><strong>Build guid&eacute;</strong></div>
       </div>
+
+      <div class="void-scroll" aria-hidden="true"><span></span>scroll</div>
     </section>
 
-    <section class="zero-strip" data-zero-sep>
-      <article><span>01</span><strong>Choisir</strong><p>Partez d’un PC prêt ou du catalogue complet.</p></article>
-      <article><span>02</span><strong>Ajuster</strong><p>Gardez les composants compatibles sous les yeux.</p></article>
-      <article><span>03</span><strong>Commander</strong><p>Panier, paiement et suivi restent lisibles.</p></article>
+    <section class="void-orbit-strip" data-void-sep>
+      <article><span>Catalogue</span><strong>Les composants restent lisibles, m&ecirc;me dans une direction plus cin&eacute;ma.</strong></article>
+      <article><span>Config</span><strong>Les choix importants restent devant toi, sans tunnel confus.</strong></article>
+      <article><span>Commande</span><strong>Panier, paiement et suivi gardent une lecture directe.</strong></article>
     </section>
 
-    <section class="section zero-section prebuilts" id="prebuilts">
-      <div class="section-head"><h2>PC prêts</h2><a href="/configurateur">Composer le mien →</a></div>
-      <p class="pb-sub">Trois bases nettes, faciles à comparer, avec prix calculé et composants visibles.</p>
-      <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton zero-skeleton' style='min-height:420px'></div>".repeat(3)}</div>
+    <section class="section void-section prebuilts" id="prebuilts">
+      <div class="section-head"><h2>Machines pr&ecirc;tes</h2><a href="/configurateur">Composer le mien &rarr;</a></div>
+      <p class="pb-sub">Trois bases noires, lisibles, calibr&eacute;es pour comparer vite sans perdre le c&ocirc;t&eacute; spectaculaire.</p>
+      <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton void-skeleton' style='min-height:420px'></div>".repeat(3)}</div>
     </section>
 
-    <section class="section zero-section">
-      <div class="section-head"><h2>Entrées du catalogue</h2><a href="/catalogue">Tout voir →</a></div>
-      <div class="cat-grid" id="catGrid">${"<div class='skeleton zero-skeleton' style='min-height:130px'></div>".repeat(12)}</div>
-    </section>
-
-    <section class="zero-showcase" data-zero-sep>
+    <section class="void-console" data-void-sep>
       <div>
-        <span>Flux de build</span>
-        <h2>Une page qui laisse respirer les machines.</h2>
+        <span>Control room</span>
+        <h2>Une page qui respire comme un tableau de bord haut de gamme.</h2>
       </div>
-      <div class="zero-flow" aria-hidden="true">
-        <i></i><i></i><i></i><i></i>
+      <div class="void-console-lines" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
       </div>
     </section>
 
-    <section class="section zero-section">
-      <div class="section-head"><h2>Sélection VoltCore</h2><a href="/catalogue">Tout le catalogue →</a></div>
+    <section class="section void-section">
+      <div class="section-head"><h2>Entr&eacute;es du catalogue</h2><a href="/catalogue">Tout voir &rarr;</a></div>
+      <div class="cat-grid" id="catGrid">${"<div class='skeleton void-skeleton' style='min-height:130px'></div>".repeat(12)}</div>
+    </section>
+
+    <section class="section void-section">
+      <div class="section-head"><h2>S&eacute;lection VoltCore</h2><a href="/catalogue">Tout le catalogue &rarr;</a></div>
       <div id="featuredGrid">${skeletons(4)}</div>
     </section>
 
-    <section class="section zero-section">
-      <div class="promo-banner zero-promo">
+    <section class="section void-section">
+      <div class="promo-banner void-promo">
         <div>
           <h3>SUMMER20 : -20 % sur le site</h3>
-          <p>Le code s’applique au panier, avec le même suivi clair jusqu’à la commande.</p>
+          <p>Un code simple, une interface plus tranchante, et le catalogue complet en quelques secondes.</p>
         </div>
-        <a class="btn zero-primary" href="/catalogue">Voir le catalogue</a>
+        <a class="btn void-btn void-btn-primary" href="/catalogue"><span>Voir le catalogue</span><b aria-hidden="true">&rarr;</b></a>
       </div>
     </section>
 
-    <section class="section zero-section">
+    <section class="section void-section">
       <div class="perks">
         <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></div><div><h4>Livraison</h4><p>Les frais et options disponibles sont calculés au panier.</p></div></div>
         <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garanties</h4><p>Rétractation légale 14 jours et garantie légale de conformité.</p></div></div>
@@ -1445,26 +1450,27 @@ function cleanupHome3D() {
 
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
-function initZeroField(stage, canvas) {
+function initVoidField(stage, canvas) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
 
-  const pointer = { x: 0.58, y: 0.42, hot: false };
+  const pointer = { x: 0.62, y: 0.44, hot: false };
   let raf = 0;
   let dpr = 1;
   let w = 0;
   let h = 0;
-  let shards = [];
+  let last = performance.now();
+  let particles = [];
 
-  const resetShard = (s = {}) => {
-    s.x = Math.random();
-    s.y = Math.random();
-    s.z = 0.18 + Math.random() * 1.1;
-    s.a = Math.random() * Math.PI * 2;
-    s.speed = 0.00012 + Math.random() * 0.00024;
-    s.size = 42 + Math.random() * 110;
-    s.alpha = 0.05 + Math.random() * 0.14;
-    return s;
+  const resetParticle = (p = {}) => {
+    p.x = Math.random() - 0.5;
+    p.y = Math.random() - 0.5;
+    p.z = 0.25 + Math.random() * 1.35;
+    p.speed = 0.00018 + Math.random() * 0.00042;
+    p.size = 0.8 + Math.random() * 2.6;
+    p.hue = Math.random() > 0.68 ? 36 : (Math.random() > 0.5 ? 188 : 318);
+    p.orbit = Math.random() * Math.PI * 2;
+    return p;
   };
 
   const resize = () => {
@@ -1476,41 +1482,84 @@ function initZeroField(stage, canvas) {
       canvas.width = w;
       canvas.height = h;
     }
-    shards = Array.from({ length: 28 }, () => resetShard());
+    const count = Math.min(130, Math.max(70, Math.floor((canvas.clientWidth || 1) * (canvas.clientHeight || 1) / 10500)));
+    particles = Array.from({ length: count }, () => resetParticle());
   };
 
   const frame = (now) => {
     if (!canvas.isConnected) return;
     raf = requestAnimationFrame(frame);
     if (Math.floor(canvas.clientWidth * dpr) !== w || Math.floor(canvas.clientHeight * dpr) !== h) resize();
+    const dt = Math.min(36, now - last);
+    last = now;
 
     const cw = canvas.clientWidth || 1;
     const ch = canvas.clientHeight || 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cw, ch);
 
-    const glow = ctx.createRadialGradient(pointer.x * cw, pointer.y * ch, 0, pointer.x * cw, pointer.y * ch, Math.max(cw, ch) * 0.62);
-    glow.addColorStop(0, pointer.hot ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)");
-    glow.addColorStop(0.32, "rgba(135,230,255,0.08)");
-    glow.addColorStop(1, "rgba(135,230,255,0)");
+    const px = pointer.x * cw;
+    const py = pointer.y * ch;
+    const glow = ctx.createRadialGradient(px, py, 0, px, py, Math.max(cw, ch) * 0.72);
+    glow.addColorStop(0, pointer.hot ? "rgba(248,244,222,0.18)" : "rgba(116,238,230,0.08)");
+    glow.addColorStop(0.22, "rgba(116,238,230,0.08)");
+    glow.addColorStop(0.52, "rgba(255,78,148,0.045)");
+    glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, cw, ch);
 
-    for (const s of shards) {
-      s.a += s.speed * 16;
-      const x = (s.x + Math.cos(now * s.speed + s.z) * 0.018) * cw;
-      const y = (s.y + Math.sin(now * s.speed + s.z) * 0.022) * ch;
-      const size = s.size * (0.55 + s.z * 0.45);
+    ctx.strokeStyle = "rgba(116,238,230,0.08)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 7; i++) {
+      const y = ch * (0.18 + i * 0.11);
+      ctx.beginPath();
+      ctx.moveTo(cw * 0.05, y);
+      ctx.bezierCurveTo(cw * 0.32, y - 48, cw * 0.65, y + 58, cw * 0.96, y - 12);
+      ctx.stroke();
+    }
+
+    for (const p of particles) {
+      p.z -= p.speed * dt * (pointer.hot ? 1.7 : 1);
+      p.orbit += dt * 0.00024;
+      if (p.z <= 0.12) resetParticle(p);
+      const z = Math.max(0.12, p.z);
+      const scale = 1.25 / (z + 0.22);
+      const driftX = Math.cos(p.orbit + now * 0.00016) * 0.018;
+      const driftY = Math.sin(p.orbit + now * 0.00013) * 0.016;
+      const x = cw * 0.5 + (p.x + driftX) * cw * scale * 0.92 + (pointer.x - 0.5) * 42 * (1 - z);
+      const y = ch * 0.5 + (p.y + driftY) * ch * scale * 0.78 + (pointer.y - 0.5) * 34 * (1 - z);
+      const alpha = Math.max(0, Math.min(1, (1.45 - z) * 0.72));
+      if (alpha <= 0) continue;
+      const color = p.hue < 80 ? "245,174,85" : (p.hue < 220 ? "116,238,230" : "255,78,148");
+
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = `rgba(${color}, ${0.16 + alpha * 0.2})`;
+      ctx.lineWidth = Math.max(0.6, p.size * scale * 0.42);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(cw * 0.5 + (x - cw * 0.5) * 0.86, ch * 0.5 + (y - ch * 0.5) * 0.86);
+      ctx.stroke();
+      ctx.shadowColor = `rgba(${color}, 0.88)`;
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = `rgba(${color}, ${0.55 + alpha * 0.45})`;
+      ctx.beginPath();
+      ctx.arc(x, y, Math.min(7, p.size * scale), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+
+    for (let i = 0; i < 3; i++) {
+      const radius = Math.min(cw, ch) * (0.22 + i * 0.12);
       ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(s.a);
-      ctx.globalAlpha = s.alpha;
-      const g = ctx.createLinearGradient(-size / 2, 0, size / 2, 0);
-      g.addColorStop(0, "rgba(255,255,255,0)");
-      g.addColorStop(0.45, "rgba(255,255,255,0.72)");
-      g.addColorStop(1, "rgba(120,230,255,0)");
-      ctx.fillStyle = g;
-      ctx.fillRect(-size / 2, -0.6, size, 1.2);
+      ctx.translate(px, py);
+      ctx.rotate(now * 0.00018 * (i % 2 ? -1 : 1));
+      ctx.globalAlpha = 0.14 - i * 0.026;
+      ctx.strokeStyle = i === 1 ? "rgba(245,174,85,.5)" : "rgba(116,238,230,.48)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, radius * 1.8, radius * 0.48, 0, Math.PI * 0.08, Math.PI * 1.62);
+      ctx.stroke();
       ctx.restore();
     }
   };
@@ -1521,7 +1570,7 @@ function initZeroField(stage, canvas) {
     pointer.y = clamp01((e.clientY - r.top) / (r.height || 1));
     pointer.hot = true;
   };
-  const onLeave = () => { pointer.hot = false; pointer.x = 0.58; pointer.y = 0.42; };
+  const onLeave = () => { pointer.hot = false; pointer.x = 0.62; pointer.y = 0.44; };
 
   stage.addEventListener("pointermove", onMove, { passive: true });
   stage.addEventListener("pointerleave", onLeave);
@@ -1538,11 +1587,11 @@ function initZeroField(stage, canvas) {
 function initHome3D() {
   cleanupHome3D();
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const pc = $("#zeroRig");
-  const stage = $("#zeroStage");
-  const hero = $(".zero-hero");
-  const seps = $$("[data-zero-sep]");
-  const zeroFields = $$(".zero-field");
+  const pc = $("#voidRig");
+  const stage = $("#voidStage");
+  const hero = $(".void-hero");
+  const seps = $$("[data-void-sep]");
+  const voidFields = $$(".void-field");
   if (reduce) {                              // accessibilité : état final figé, zéro mouvement
     seps.forEach((s) => s.style.setProperty("--p", "1"));
     return;
@@ -1556,8 +1605,8 @@ function initHome3D() {
     if (pc) {
       const r = pc.getBoundingClientRect();
       const prog = 1 - (r.top + r.height / 2) / vh;     // ~0 en haut → 1 en bas de l'écran
-      pc.style.setProperty("--rot", `${-26 + prog * 60}deg`);
-      hero?.style.setProperty("--zero-scroll", clamp01(prog).toFixed(3));
+      pc.style.setProperty("--rot", `${-18 + prog * 42}deg`);
+      hero?.style.setProperty("--void-scroll", clamp01(prog).toFixed(3));
     }
     // Séparateurs : 0 quand le bloc entre par le bas, 1 quand il atteint le centre/haut
     for (const s of seps) {
@@ -1570,9 +1619,9 @@ function initHome3D() {
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll, { passive: true });
 
-  const stopZeroFields = zeroFields.map((canvas) => {
-    const host = canvas.closest(".zero-hero") || stage;
-    return host ? initZeroField(host, canvas) : null;
+  const stopVoidFields = voidFields.map((canvas) => {
+    const host = canvas.closest(".void-hero") || stage;
+    return host ? initVoidField(host, canvas) : null;
   }).filter(Boolean);
 
   // Tilt souris de la tour (parallaxe douce dans le hero)
@@ -1585,18 +1634,18 @@ function initHome3D() {
       const dy = (e.clientY - r.top) / r.height - 0.5;
       pc.style.setProperty("--tiltx", `${(-dy * 10).toFixed(1)}deg`);
       pc.style.setProperty("--tilty", `${(dx * 16).toFixed(1)}deg`);
-      hero?.style.setProperty("--zero-x", `${((dx + 0.5) * 100).toFixed(1)}%`);
-      hero?.style.setProperty("--zero-y", `${((dy + 0.5) * 100).toFixed(1)}%`);
-      hero?.style.setProperty("--zero-tilt-x", `${(-dy * 4.8).toFixed(2)}deg`);
-      hero?.style.setProperty("--zero-tilt-y", `${(dx * 6.4).toFixed(2)}deg`);
+      hero?.style.setProperty("--void-x", `${((dx + 0.5) * 100).toFixed(1)}%`);
+      hero?.style.setProperty("--void-y", `${((dy + 0.5) * 100).toFixed(1)}%`);
+      hero?.style.setProperty("--void-tilt-x", `${(-dy * 4.8).toFixed(2)}deg`);
+      hero?.style.setProperty("--void-tilt-y", `${(dx * 6.4).toFixed(2)}deg`);
     };
     onPointerLeave = () => {
       pc.style.setProperty("--tiltx", "0deg");
       pc.style.setProperty("--tilty", "0deg");
-      hero?.style.setProperty("--zero-x", "58%");
-      hero?.style.setProperty("--zero-y", "42%");
-      hero?.style.setProperty("--zero-tilt-x", "0deg");
-      hero?.style.setProperty("--zero-tilt-y", "0deg");
+      hero?.style.setProperty("--void-x", "62%");
+      hero?.style.setProperty("--void-y", "44%");
+      hero?.style.setProperty("--void-tilt-x", "0deg");
+      hero?.style.setProperty("--void-tilt-y", "0deg");
     };
     stage.addEventListener("pointermove", onPointerMove);
     stage.addEventListener("pointerleave", onPointerLeave);
@@ -1604,7 +1653,7 @@ function initHome3D() {
   home3DCleanup = () => {
     window.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onScroll);
-    stopZeroFields.forEach((stop) => stop());
+    stopVoidFields.forEach((stop) => stop());
     if (stage && onPointerMove) stage.removeEventListener("pointermove", onPointerMove);
     if (stage && onPointerLeave) stage.removeEventListener("pointerleave", onPointerLeave);
   };
