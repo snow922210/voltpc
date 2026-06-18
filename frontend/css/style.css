@@ -2945,12 +2945,13 @@ table,
   }
 }
 
-/* Calm snow storm: hand-placed flakes, low fog, no repeating grid. */
+/* Calm snow storm: lightweight layers, visible content, no heavy filters. */
 body {
   position: relative;
 }
 body > :not(#bgfx) {
   position: relative;
+  z-index: 1;
 }
 body::before,
 body::after {
@@ -2958,40 +2959,34 @@ body::after {
   position: fixed;
   inset: 0;
   pointer-events: none;
+  contain: paint;
 }
 body::before {
   z-index: 0;
-  opacity: .70;
-  inset: -28%;
+  opacity: .56;
+  inset: -8vmax;
   background:
-    radial-gradient(ellipse 62% 26% at 52% 102%, rgba(177, 221, 236, .16), transparent 68%),
-    radial-gradient(ellipse 42% 30% at 14% 12%, rgba(209, 237, 244, .10), transparent 70%),
-    radial-gradient(ellipse 36% 34% at 86% 18%, rgba(49, 65, 78, .28), transparent 72%),
-    radial-gradient(ellipse 52% 40% at 44% 48%, rgba(102, 137, 154, .10), transparent 76%),
-    radial-gradient(ellipse 34% 28% at 72% 76%, rgba(215, 242, 248, .07), transparent 74%);
-  filter: blur(24px) saturate(112%);
-  mix-blend-mode: screen;
-  will-change: transform, opacity;
-  animation: voidBlizzardBreath 30s ease-in-out infinite alternate;
+    radial-gradient(ellipse 78% 34% at 50% 110%, rgba(178, 220, 234, .15), transparent 66%),
+    radial-gradient(ellipse 42% 28% at 16% 8%, rgba(219, 244, 250, .10), transparent 70%),
+    radial-gradient(ellipse 38% 34% at 84% 20%, rgba(56, 75, 88, .24), transparent 72%),
+    radial-gradient(ellipse 54% 38% at 48% 48%, rgba(96, 131, 149, .10), transparent 76%),
+    linear-gradient(180deg, rgba(255,255,255,.02), transparent 26%, rgba(197,230,240,.035) 78%, transparent);
+  animation: voidFrostBreath 34s ease-in-out infinite alternate;
 }
 body::after {
   z-index: 0;
-  inset: -16%;
-  opacity: .38;
+  inset: -6vmax;
+  opacity: .20;
   background:
-    radial-gradient(circle at 6% 12%, rgba(238, 250, 252, .48) 0 1px, transparent 1.45px),
-    radial-gradient(circle at 18% 72%, rgba(200, 226, 235, .22) 0 .8px, transparent 1.2px),
-    radial-gradient(circle at 29% 24%, rgba(235, 248, 252, .32) 0 .9px, transparent 1.28px),
-    radial-gradient(circle at 41% 86%, rgba(150, 187, 202, .18) 0 .8px, transparent 1.2px),
-    radial-gradient(circle at 52% 14%, rgba(235, 248, 252, .42) 0 1px, transparent 1.45px),
-    radial-gradient(circle at 63% 58%, rgba(176, 211, 224, .20) 0 .8px, transparent 1.15px),
-    radial-gradient(circle at 73% 30%, rgba(238, 250, 252, .30) 0 .9px, transparent 1.3px),
-    radial-gradient(circle at 84% 82%, rgba(145, 181, 198, .18) 0 .75px, transparent 1.1px),
-    radial-gradient(circle at 94% 44%, rgba(235, 248, 252, .34) 0 .95px, transparent 1.35px);
+    radial-gradient(circle at 7% 16%, rgba(238, 250, 252, .54) 0 1px, transparent 1.45px),
+    radial-gradient(circle at 18% 72%, rgba(200, 226, 235, .24) 0 .8px, transparent 1.2px),
+    radial-gradient(circle at 31% 26%, rgba(235, 248, 252, .36) 0 .9px, transparent 1.28px),
+    radial-gradient(circle at 49% 84%, rgba(150, 187, 202, .20) 0 .8px, transparent 1.2px),
+    radial-gradient(circle at 65% 18%, rgba(235, 248, 252, .45) 0 1px, transparent 1.45px),
+    radial-gradient(circle at 86% 66%, rgba(176, 211, 224, .22) 0 .8px, transparent 1.15px),
+    radial-gradient(circle at 94% 38%, rgba(238, 250, 252, .34) 0 .9px, transparent 1.3px);
   background-repeat: no-repeat;
-  filter: blur(.15px);
-  will-change: transform, opacity;
-  animation: voidSnowDriftFar 44s linear infinite;
+  animation: voidSnowSwayFar 42s ease-in-out infinite alternate;
   mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 72%, transparent 100%);
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 72%, transparent 100%);
 }
@@ -3003,114 +2998,86 @@ body::after {
 .modal-overlay,
 .cookie-banner {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 .void-home::before {
   content: "";
   position: fixed;
-  inset: -24%;
+  inset: -8vmax;
   z-index: 0;
   pointer-events: none;
-  opacity: .88;
+  opacity: .62;
+  contain: paint;
   background:
-    radial-gradient(ellipse 76% 22% at 50% 105%, rgba(175, 219, 235, .22), transparent 66%),
-    radial-gradient(ellipse 46% 24% at 18% 4%, rgba(221, 244, 249, .15), transparent 68%),
-    radial-gradient(ellipse 44% 42% at 84% 30%, rgba(60, 83, 96, .23), transparent 72%),
-    radial-gradient(ellipse 54% 34% at 16% 74%, rgba(121, 160, 177, .13), transparent 76%),
-    radial-gradient(ellipse 34% 26% at 54% 42%, rgba(231, 249, 252, .10), transparent 72%),
-    radial-gradient(ellipse 24% 18% at 76% 70%, rgba(204, 233, 241, .08), transparent 70%) !important;
-  filter: blur(22px) saturate(116%);
-  mix-blend-mode: screen;
-  will-change: transform, opacity;
-  animation: voidWhiteoutBreath 22s ease-in-out infinite alternate;
+    radial-gradient(ellipse 74% 22% at 50% 106%, rgba(177, 221, 236, .24), transparent 66%),
+    radial-gradient(ellipse 48% 24% at 16% 4%, rgba(227, 248, 252, .14), transparent 68%),
+    radial-gradient(ellipse 44% 42% at 86% 30%, rgba(60, 83, 96, .20), transparent 72%),
+    radial-gradient(ellipse 54% 34% at 18% 76%, rgba(121, 160, 177, .12), transparent 76%),
+    radial-gradient(ellipse 34% 26% at 54% 42%, rgba(231, 249, 252, .09), transparent 72%) !important;
+  animation: voidFrostBreath 28s ease-in-out infinite alternate;
 }
 .void-home::after {
   content: "";
   position: fixed;
-  inset: -20%;
+  inset: -6vmax;
   z-index: 0;
   pointer-events: none;
-  opacity: .72;
+  opacity: .48;
+  contain: paint;
   background:
-    radial-gradient(circle at 3% 18%, rgba(246, 252, 253, .62) 0 1.15px, transparent 1.55px),
-    radial-gradient(circle at 9% 78%, rgba(190, 220, 232, .24) 0 .9px, transparent 1.3px),
-    radial-gradient(circle at 17% 42%, rgba(246, 252, 253, .44) 0 1px, transparent 1.42px),
-    radial-gradient(circle at 26% 88%, rgba(220, 241, 247, .28) 0 .95px, transparent 1.32px),
-    radial-gradient(circle at 34% 18%, rgba(246, 252, 253, .60) 0 1.2px, transparent 1.6px),
-    radial-gradient(circle at 46% 64%, rgba(176, 211, 224, .24) 0 .9px, transparent 1.28px),
-    radial-gradient(circle at 57% 30%, rgba(246, 252, 253, .52) 0 1.1px, transparent 1.52px),
-    radial-gradient(circle at 68% 84%, rgba(204, 233, 241, .30) 0 .95px, transparent 1.32px),
-    radial-gradient(circle at 79% 12%, rgba(246, 252, 253, .56) 0 1.08px, transparent 1.5px),
-    radial-gradient(circle at 88% 52%, rgba(179, 214, 226, .25) 0 .9px, transparent 1.25px),
-    radial-gradient(circle at 96% 74%, rgba(246, 252, 253, .48) 0 1px, transparent 1.42px),
-    radial-gradient(ellipse at 71% 38%, rgba(235, 248, 252, .18) 0 1.6px, transparent 2.4px);
+    radial-gradient(circle at 4% 18%, rgba(246, 252, 253, .60) 0 1px, transparent 1.42px),
+    radial-gradient(circle at 12% 74%, rgba(190, 220, 232, .25) 0 .85px, transparent 1.25px),
+    radial-gradient(circle at 23% 40%, rgba(246, 252, 253, .42) 0 .95px, transparent 1.35px),
+    radial-gradient(circle at 36% 86%, rgba(220, 241, 247, .28) 0 .9px, transparent 1.3px),
+    radial-gradient(circle at 49% 17%, rgba(246, 252, 253, .58) 0 1.08px, transparent 1.48px),
+    radial-gradient(circle at 61% 64%, rgba(176, 211, 224, .24) 0 .85px, transparent 1.22px),
+    radial-gradient(circle at 74% 28%, rgba(246, 252, 253, .48) 0 1px, transparent 1.42px),
+    radial-gradient(circle at 88% 78%, rgba(204, 233, 241, .29) 0 .9px, transparent 1.3px),
+    radial-gradient(circle at 96% 48%, rgba(246, 252, 253, .40) 0 .95px, transparent 1.35px);
   background-repeat: no-repeat;
-  filter: drop-shadow(0 0 9px rgba(205,230,238,.18));
-  will-change: transform, opacity;
-  animation: voidSnowDriftNear 26s linear infinite;
+  animation: voidSnowSwayNear 24s ease-in-out infinite alternate;
   mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 82%, transparent 100%);
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 82%, transparent 100%);
 }
 .void-home > * {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
-@keyframes voidBlizzardBreath {
+@keyframes voidFrostBreath {
   0% {
-    transform: translate3d(-2%, -1%, 0) scale(1.02);
-    opacity: .56;
-  }
-  45% {
-    transform: translate3d(2%, .5%, 0) scale(1.08);
-    opacity: .80;
-  }
-  100% {
-    transform: translate3d(-.5%, 2%, 0) scale(1.04);
-    opacity: .64;
-  }
-}
-
-@keyframes voidWhiteoutBreath {
-  0% {
-    transform: translate3d(-1.5%, -.4%, 0) scale(1.03);
-    opacity: .62;
+    transform: translate3d(-1.2%, -.6%, 0) scale(1.01);
+    opacity: .42;
   }
   50% {
-    transform: translate3d(1.6%, -1.2%, 0) scale(1.10);
-    opacity: .92;
+    transform: translate3d(1%, .4%, 0) scale(1.035);
+    opacity: .68;
   }
   100% {
-    transform: translate3d(.2%, 1.2%, 0) scale(1.06);
-    opacity: .76;
+    transform: translate3d(.2%, 1.1%, 0) scale(1.02);
+    opacity: .50;
   }
 }
 
-@keyframes voidSnowDriftFar {
+@keyframes voidSnowSwayFar {
   0% {
-    transform: translate3d(-1%, -8%, 0) rotate(-2deg);
-    opacity: .22;
-  }
-  35% {
-    opacity: .44;
+    transform: translate3d(-1.5%, -2%, 0) rotate(-1deg);
+    opacity: .16;
   }
   100% {
-    transform: translate3d(5%, 30%, 0) rotate(2deg);
-    opacity: .26;
+    transform: translate3d(2.5%, 6%, 0) rotate(1deg);
+    opacity: .30;
   }
 }
 
-@keyframes voidSnowDriftNear {
+@keyframes voidSnowSwayNear {
   0% {
-    transform: translate3d(-4%, -14%, 0) rotate(-3deg);
-    opacity: .48;
-  }
-  42% {
-    opacity: .82;
+    transform: translate3d(-2%, -3%, 0) rotate(-1deg);
+    opacity: .34;
   }
   100% {
-    transform: translate3d(8%, 36%, 0) rotate(3deg);
-    opacity: .54;
+    transform: translate3d(3%, 8%, 0) rotate(1deg);
+    opacity: .52;
   }
 }
 
