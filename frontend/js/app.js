@@ -618,6 +618,39 @@ function updateCartCount() {
   el.hidden = n === 0;
 }
 
+function fireVoltBurst(originEl = document.activeElement) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cart = $("#cartBtn");
+  if (cart) {
+    cart.classList.remove("cart-surge");
+    void cart.offsetWidth;
+    cart.classList.add("cart-surge");
+    setTimeout(() => cart.classList.remove("cart-surge"), 760);
+  }
+
+  const rect = originEl?.getBoundingClientRect?.() || cart?.getBoundingClientRect?.();
+  if (!rect) return;
+  const burst = document.createElement("div");
+  burst.className = "volt-burst";
+  burst.style.left = `${rect.left + rect.width / 2}px`;
+  burst.style.top = `${rect.top + rect.height / 2}px`;
+
+  for (let i = 0; i < 18; i++) {
+    const spark = document.createElement("i");
+    const angle = (i / 18) * Math.PI * 2 + Math.random() * 0.28;
+    const distance = 38 + Math.random() * 64;
+    spark.style.setProperty("--x", `${Math.cos(angle) * distance}px`);
+    spark.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
+    spark.style.setProperty("--d", `${Math.random() * 0.16}s`);
+    spark.style.setProperty("--s", `${0.72 + Math.random() * 0.65}`);
+    spark.style.setProperty("--r", `${angle}rad`);
+    burst.appendChild(spark);
+  }
+
+  document.body.appendChild(burst);
+  setTimeout(() => burst.remove(), 900);
+}
+
 function addToCart(p, qty = 1, quiet = false) {
   if (!state.user) {
     requireAuth(() => addToCart(p, qty, quiet));
@@ -633,6 +666,7 @@ function addToCart(p, qty = 1, quiet = false) {
   }
   saveCart();
   refreshCartDrawer();
+  if (!quiet) fireVoltBurst();
   if (!quiet) { toast(`${p.name} ajouté au panier`); openCart(); }
 }
 
@@ -1057,20 +1091,26 @@ async function viewHome(app) {
   </section>
 
   <div class="motion-reel motion-reel-build motion-reel-assembly" id="drop-reel" data-sep aria-hidden="true">
-    <div class="reel-stage">
-      <div class="reel-atmosphere">
-        <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span>
-      </div>
-      <div class="assembly-scene">
-        <div class="assembly-backplate">
-          <span></span><span></span><span></span><span></span>
+      <div class="reel-stage">
+        <div class="reel-atmosphere">
+          <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span>
+          <span style="--i:6"></span><span style="--i:7"></span><span style="--i:8"></span><span style="--i:9"></span>
         </div>
-        <div class="assembly-orbit">
-          <i></i><i></i><i></i>
-        </div>
-        <div class="assembly-energy energy-a"></div>
-        <div class="assembly-energy energy-b"></div>
-        <div class="assembly-energy energy-c"></div>
+        <div class="assembly-scene">
+          <canvas class="assembly-arcs" aria-hidden="true"></canvas>
+          <div class="assembly-backplate">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <div class="assembly-orbit">
+            <i></i><i></i><i></i>
+          </div>
+          <span class="assembly-node node-gpu"></span>
+          <span class="assembly-node node-cpu"></span>
+          <span class="assembly-node node-ram"></span>
+          <span class="assembly-node node-ssd"></span>
+          <div class="assembly-energy energy-a"></div>
+          <div class="assembly-energy energy-b"></div>
+          <div class="assembly-energy energy-c"></div>
         <div class="assembly-product">
           <img src="/images/36-1.jpg" alt="" loading="eager" decoding="async">
         </div>
@@ -1232,6 +1272,7 @@ function addPrebuiltToCart(b, byId) {
   prebuiltParts(b, byId).forEach(({ product }) => {
     if (product.stock > 0) { addToCart(product, 1, true); n++; }
   });
+  fireVoltBurst();
   toast(`${b.name} ajouté : ${n} composants 🛒`, "success");
   openCart();
 }
@@ -1457,12 +1498,178 @@ function cleanupHome3D() {
   home3DCleanup = null;
 }
 
+const clamp01 = (n) => Math.max(0, Math.min(1, n));
+
+function initAssemblyArcs(reel, canvas) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return () => {};
+
+  const chips = [".chip-gpu", ".chip-cpu", ".chip-ram", ".chip-ssd"];
+  const pointer = { x: 0, y: 0, hot: false };
+  const sparks = [];
+  let raf = 0;
+  let dpr = 1;
+  let w = 0;
+  let h = 0;
+  let last = performance.now();
+
+  const resize = () => {
+    const r = canvas.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = Math.max(1, Math.floor(r.width * dpr));
+    h = Math.max(1, Math.floor(r.height * dpr));
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+  };
+
+  const centerOf = (el, base) => {
+    const r = el.getBoundingClientRect();
+    return {
+      x: r.left - base.left + r.width / 2,
+      y: r.top - base.top + r.height / 2,
+    };
+  };
+
+  const spark = (x, y, power = 1) => {
+    if (sparks.length > 92) sparks.shift();
+    const a = Math.random() * Math.PI * 2;
+    const v = 0.45 + Math.random() * 1.45;
+    sparks.push({
+      x,
+      y,
+      vx: Math.cos(a) * v,
+      vy: Math.sin(a) * v - 0.2,
+      life: 1,
+      size: (1.2 + Math.random() * 2.7) * power,
+      hue: Math.random() > 0.55 ? 190 : 28,
+    });
+  };
+
+  const drawArc = (from, to, idx, now, progress) => {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len;
+    const ny = dx / len;
+    const amp = (8 + idx * 2.2) * (0.45 + progress * 0.75);
+    const steps = 8;
+
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const wave = Math.sin(now * 0.006 + i * 1.85 + idx * 2.4);
+      const taper = Math.sin(Math.PI * t);
+      const x = from.x + dx * t + nx * wave * amp * taper;
+      const y = from.y + dy * t + ny * wave * amp * taper;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+
+    ctx.lineWidth = 1.2 + progress * 1.2;
+    ctx.strokeStyle = `rgba(255, 151, 78, ${0.16 + progress * 0.42})`;
+    ctx.shadowColor = "rgba(255, 122, 46, 0.72)";
+    ctx.shadowBlur = 16;
+    ctx.stroke();
+
+    ctx.lineWidth = 0.8;
+    ctx.strokeStyle = `rgba(91, 229, 255, ${0.08 + progress * 0.28})`;
+    ctx.shadowColor = "rgba(91, 229, 255, 0.45)";
+    ctx.shadowBlur = 9;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    if (Math.random() < 0.038 + progress * 0.035) {
+      const t = 0.2 + Math.random() * 0.62;
+      spark(from.x + dx * t, from.y + dy * t, 0.9 + progress * 0.6);
+    }
+  };
+
+  const frame = (now) => {
+    if (!canvas.isConnected) return;
+    raf = requestAnimationFrame(frame);
+    if (Math.floor(canvas.clientWidth * dpr) !== w || Math.floor(canvas.clientHeight * dpr) !== h) resize();
+
+    const dt = Math.min(34, now - last);
+    last = now;
+    const progress = clamp01(parseFloat(reel.style.getPropertyValue("--p")) || 0);
+    const cw = canvas.clientWidth || 1;
+    const ch = canvas.clientHeight || 1;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cw, ch);
+
+    if (progress > 0.08) {
+      const base = canvas.getBoundingClientRect();
+      const core = $(".assembly-product", reel);
+      if (core) {
+        const to = centerOf(core, base);
+        chips.forEach((sel, idx) => {
+          const chip = $(sel, reel);
+          if (chip) drawArc(centerOf(chip, base), to, idx, now, progress);
+        });
+      }
+    }
+
+    if (pointer.hot && progress > 0.12) {
+      const glow = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 120);
+      glow.addColorStop(0, "rgba(255, 177, 112, 0.2)");
+      glow.addColorStop(0.55, "rgba(91, 229, 255, 0.08)");
+      glow.addColorStop(1, "rgba(91, 229, 255, 0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(pointer.x - 120, pointer.y - 120, 240, 240);
+      if (Math.random() < 0.2) spark(pointer.x, pointer.y, 0.7);
+    }
+
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.life -= dt / 520;
+      if (s.life <= 0) { sparks.splice(i, 1); continue; }
+      s.x += s.vx * dt * 0.075;
+      s.y += s.vy * dt * 0.075;
+      s.vy += dt * 0.0016;
+      ctx.globalAlpha = Math.max(0, s.life);
+      ctx.fillStyle = s.hue > 100 ? "rgba(140, 244, 255, 0.95)" : "rgba(255, 198, 128, 0.95)";
+      ctx.shadowColor = s.hue > 100 ? "rgba(91, 229, 255, 0.9)" : "rgba(255, 122, 46, 0.9)";
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+  };
+
+  const onMove = (e) => {
+    const r = canvas.getBoundingClientRect();
+    pointer.x = e.clientX - r.left;
+    pointer.y = e.clientY - r.top;
+    pointer.hot = true;
+  };
+  const onLeave = () => { pointer.hot = false; };
+
+  reel.addEventListener("pointermove", onMove, { passive: true });
+  reel.addEventListener("pointerleave", onLeave);
+  resize();
+  raf = requestAnimationFrame(frame);
+
+  return () => {
+    cancelAnimationFrame(raf);
+    reel.removeEventListener("pointermove", onMove);
+    reel.removeEventListener("pointerleave", onLeave);
+  };
+}
+
 function initHome3D() {
   cleanupHome3D();
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const pc = $("#pc3d");
   const stage = $("#hhStage");
   const seps = $$("[data-sep]");
+  const reels = $$(".motion-reel");
+  const assemblyReel = $(".motion-reel-assembly");
+  const assemblyCanvas = assemblyReel ? $(".assembly-arcs", assemblyReel) : null;
   if (reduce) {                              // accessibilité : état final figé, zéro mouvement
     seps.forEach((s) => s.style.setProperty("--p", "1"));
     return;
@@ -1489,6 +1696,38 @@ function initHome3D() {
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll, { passive: true });
 
+  const reelListeners = [];
+  for (const reel of reels) {
+    const onReelMove = (e) => {
+      const r = reel.getBoundingClientRect();
+      const x = clamp01((e.clientX - r.left) / (r.width || 1));
+      const y = clamp01((e.clientY - r.top) / (r.height || 1));
+      reel.style.setProperty("--mx", (x - 0.5).toFixed(3));
+      reel.style.setProperty("--my", (y - 0.5).toFixed(3));
+      reel.style.setProperty("--spot-x", `${(x * 100).toFixed(1)}%`);
+      reel.style.setProperty("--spot-y", `${(y * 100).toFixed(1)}%`);
+      reel.style.setProperty("--tilt-x", `${((0.5 - y) * 5).toFixed(2)}deg`);
+      reel.style.setProperty("--tilt-y", `${((x - 0.5) * 7).toFixed(2)}deg`);
+      reel.classList.add("is-hot");
+    };
+    const onReelLeave = () => {
+      reel.style.setProperty("--mx", "0");
+      reel.style.setProperty("--my", "0");
+      reel.style.setProperty("--spot-x", "50%");
+      reel.style.setProperty("--spot-y", "50%");
+      reel.style.setProperty("--tilt-x", "0deg");
+      reel.style.setProperty("--tilt-y", "0deg");
+      reel.classList.remove("is-hot");
+    };
+    reel.addEventListener("pointermove", onReelMove, { passive: true });
+    reel.addEventListener("pointerleave", onReelLeave);
+    reelListeners.push([reel, onReelMove, onReelLeave]);
+  }
+
+  const stopAssemblyArcs = assemblyReel && assemblyCanvas
+    ? initAssemblyArcs(assemblyReel, assemblyCanvas)
+    : null;
+
   // Tilt souris de la tour (parallaxe douce dans le hero)
   let onPointerMove = null;
   let onPointerLeave = null;
@@ -1510,6 +1749,11 @@ function initHome3D() {
   home3DCleanup = () => {
     window.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onScroll);
+    for (const [reel, onReelMove, onReelLeave] of reelListeners) {
+      reel.removeEventListener("pointermove", onReelMove);
+      reel.removeEventListener("pointerleave", onReelLeave);
+    }
+    if (stopAssemblyArcs) stopAssemblyArcs();
     if (stage && onPointerMove) stage.removeEventListener("pointermove", onPointerMove);
     if (stage && onPointerLeave) stage.removeEventListener("pointerleave", onPointerLeave);
   };
