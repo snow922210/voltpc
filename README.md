@@ -67,7 +67,7 @@ Tout se règle dans `backend/.env` (copié depuis `.env.example`). Chaque bloc e
 |---|---|
 | Compte démo | `demo@voltpc.fr` / `demo1234` |
 | Codes promo | `VOLT10` (-10 %) · `GAMER15` (-15 %) · `SUMMER20` (-20 %) |
-| Carte de test | n'importe quels chiffres (paiement simulé) |
+| Carte de test | `4242 4242 4242 4242`, date future, CVC libre |
 
 ## Fonctionnalités
 

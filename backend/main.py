@@ -17,7 +17,7 @@ import secrets
 import sqlite3
 import threading
 import time
-from contextlib import contextmanager
+from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
 from typing import Optional
 
@@ -635,7 +635,13 @@ class ProductCreateIn(BaseModel):
 # (le middleware est ajouté à l'import, avant l'événement startup).
 load_env()
 
-app = FastAPI(title="VoltCore API", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    startup()
+    yield
+
+
+app = FastAPI(title="VoltCore API", version="1.0.0", lifespan=lifespan)
 
 # CORS — par défaut permissif (pratique en dev). En PRODUCTION, définir
 # CORS_ORIGINS dans .env (origines séparées par des virgules) pour restreindre
@@ -680,7 +686,6 @@ async def security_headers(request: Request, call_next):
     return resp
 
 
-@app.on_event("startup")
 def startup() -> None:
     global SECRET
     load_env()          # charge les clés Stripe depuis backend/.env

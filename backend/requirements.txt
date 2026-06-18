@@ -6,3 +6,6 @@ fpdf2==2.8.7
 # Pilote PostgreSQL — importé uniquement si DATABASE_URL est défini (production).
 # En local sans DATABASE_URL, jamais chargé (base SQLite par défaut).
 psycopg[binary,pool]>=3.1,<4
+
+# Tests automatises
+pytest>=8.0,<9
