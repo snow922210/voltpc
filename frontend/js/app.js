@@ -1038,7 +1038,7 @@ async function render() {
   const renderToken = ++currentRenderToken;
   const isHome = path === "";
   $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === path.split("/")[0]));
-  document.body.classList.toggle("home-redesign-active", isHome);
+  document.body.classList.toggle("zero-home-active", isHome);
   if (!isHome) cleanupHome3D();
   window.scrollTo({ top: 0 });
 
@@ -1072,149 +1072,88 @@ async function render() {
 /* ─── Vue : accueil ─── */
 async function viewHome(app) {
   app.innerHTML = `
-  <div class="home-redesign">
-  <section class="hero hero-cockpit">
-    <div class="hero-copy cockpit-copy">
-      <span class="hero-kicker hero-status"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Signal catalogue actif</span>
-      <h1>Une config qui démarre fort. <span>Sans compromis.</span></h1>
-      <p>Choisissez une base prête à jouer ou composez votre machine pièce par pièce, avec un rendu plus direct, plus nerveux et pensé pour aller vite.</p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="#prebuilts">Voir les PC prémontés</a>
-        <a class="btn btn-ghost" href="/configurateur">Configurer le mien</a>
+  <div class="zero-home">
+    <section class="zero-hero">
+      <canvas class="zero-field" id="zeroField" aria-hidden="true"></canvas>
+      <div class="zero-copy">
+        <span class="zero-kicker">Studio VoltCore</span>
+        <h1>Votre prochain PC, présenté comme une pièce d’exception.</h1>
+        <p>Un showroom clair, des configurations prêtes à comparer, et un configurateur qui garde les choix importants au premier plan.</p>
+        <div class="zero-actions">
+          <a class="btn zero-primary" href="#prebuilts">Voir les PC prêts</a>
+          <a class="btn zero-secondary" href="/configurateur">Créer ma config</a>
+        </div>
+        <div class="zero-metrics">
+          <div><strong id="statCount">280+</strong><span>références</span></div>
+          <div><strong>3</strong><span>builds prêts</span></div>
+          <div><strong>8</strong><span>familles</span></div>
+        </div>
       </div>
-      <div class="hero-stats hero-telemetry">
-        <div class="hero-stat"><strong id="statCount">280+</strong><span>références détectées</span></div>
-        <div class="hero-stat"><strong>3</strong><span>profils prêts</span></div>
-        <div class="hero-stat"><strong>8</strong><span>familles pilotées</span></div>
+      <div class="zero-stage" id="zeroStage" aria-label="PC VoltCore en présentation 3D">
+        <span class="zero-glass slab-a" aria-hidden="true"></span>
+        <span class="zero-glass slab-b" aria-hidden="true"></span>
+        <span class="zero-glass slab-c" aria-hidden="true"></span>
+        <div class="zero-ring ring-one" aria-hidden="true"></div>
+        <div class="zero-ring ring-two" aria-hidden="true"></div>
+        <div class="zero-rig" id="zeroRig">
+          <img src="/images/36-1.jpg" alt="PC gaming VoltCore monté : verre trempé, RTX et RGB" loading="eager" decoding="async" fetchpriority="high" width="640" height="640">
+        </div>
+        <div class="zero-spec spec-gpu"><span>Graphismes</span><strong>RTX ready</strong></div>
+        <div class="zero-spec spec-cpu"><span>Calcul</span><strong>X3D stable</strong></div>
+        <div class="zero-spec spec-ship"><span>Commande</span><strong>Suivi clair</strong></div>
       </div>
-    </div>
-    <div class="hero-art cockpit-art" id="hhStage">
-      <div class="cockpit-grid" aria-hidden="true"></div>
-      <div class="cockpit-radar" aria-hidden="true"><span></span><span></span><span></span></div>
-      <div class="cockpit-orbit orbit-a" aria-hidden="true"></div>
-      <div class="cockpit-orbit orbit-b" aria-hidden="true"></div>
-      <div class="cockpit-machine" id="pc3d">
-        <span class="machine-glow" aria-hidden="true"></span>
-        <img src="/images/36-1.jpg" alt="PC gaming VoltCore monté : verre trempé, RTX et RGB" loading="eager" decoding="async" fetchpriority="high" width="640" height="640">
-      </div>
-      <div class="cockpit-panel panel-gpu"><span>GPU</span><strong>RTX prêt</strong></div>
-      <div class="cockpit-panel panel-cpu"><span>CPU</span><strong>Fréquence stable</strong></div>
-      <div class="cockpit-panel panel-ram"><span>RAM</span><strong>Profil DDR5</strong></div>
-      <div class="cockpit-panel panel-ship"><span>Suivi</span><strong>Commande claire</strong></div>
-      <div class="cockpit-readout"><b>VoltCore</b><span>Build channel 01</span></div>
-    </div>
-  </section>
+    </section>
 
-  <div class="motion-reel motion-reel-forge" id="drop-reel" data-sep aria-hidden="true">
-    <div class="reel-stage forge-stage">
-      <canvas class="motion-field forge-field" data-field="forge" aria-hidden="true"></canvas>
-      <div class="forge-horizon">
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <div class="forge-tunnel">
-        <span style="--r:0"></span><span style="--r:1"></span><span style="--r:2"></span><span style="--r:3"></span><span style="--r:4"></span>
-      </div>
-      <div class="forge-core">
-        <i class="core-ring ring-a"></i><i class="core-ring ring-b"></i><i class="core-ring ring-c"></i>
-        <img src="/images/36-1.jpg" alt="" loading="eager" decoding="async">
-        <b>VC</b>
-      </div>
-      <div class="forge-module module-gpu"><span>GPU</span><strong>RTX 50</strong><em>ray tracing</em></div>
-      <div class="forge-module module-cpu"><span>CPU</span><strong>X3D</strong><em>latence basse</em></div>
-      <div class="forge-module module-ram"><span>RAM</span><strong>DDR5</strong><em>profil stable</em></div>
-      <div class="forge-module module-ssd"><span>SSD</span><strong>Gen5</strong><em>chargement instant</em></div>
-      <div class="forge-readout">
-        <span>Flux calibré</span><span>Température stable</span><span>Prêt à jouer</span>
-      </div>
-      <div class="reel-copy">
-        <span>Noyau VoltCore</span>
-        <strong>La config prend vie</strong>
-      </div>
-    </div>
-  </div>
+    <section class="zero-strip" data-zero-sep>
+      <article><span>01</span><strong>Choisir</strong><p>Partez d’un PC prêt ou du catalogue complet.</p></article>
+      <article><span>02</span><strong>Ajuster</strong><p>Gardez les composants compatibles sous les yeux.</p></article>
+      <article><span>03</span><strong>Commander</strong><p>Panier, paiement et suivi restent lisibles.</p></article>
+    </section>
 
-  <section class="section prebuilts" id="prebuilts">
-    <div class="section-head"><h2>PC prémontés</h2><a href="/configurateur">Composer le mien →</a></div>
-    <p class="pb-sub">Des configurations équilibrées à partir du catalogue. Les composants sont listés clairement, avec prix calculé et disponibilité selon le stock.</p>
-    <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton' style='min-height:420px'></div>".repeat(3)}</div>
-  </section>
+    <section class="section zero-section prebuilts" id="prebuilts">
+      <div class="section-head"><h2>PC prêts</h2><a href="/configurateur">Composer le mien →</a></div>
+      <p class="pb-sub">Trois bases nettes, faciles à comparer, avec prix calculé et composants visibles.</p>
+      <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton zero-skeleton' style='min-height:420px'></div>".repeat(3)}</div>
+    </section>
 
-  <section class="section">
-    <div class="section-head"><h2>Catégories</h2><a href="/catalogue">Tout voir →</a></div>
-    <div class="cat-grid" id="catGrid">${"<div class='skeleton' style='min-height:130px'></div>".repeat(12)}</div>
-  </section>
+    <section class="section zero-section">
+      <div class="section-head"><h2>Entrées du catalogue</h2><a href="/catalogue">Tout voir →</a></div>
+      <div class="cat-grid" id="catGrid">${"<div class='skeleton zero-skeleton' style='min-height:130px'></div>".repeat(12)}</div>
+    </section>
 
-  <section class="section">
-    <div class="section-head"><h2>La sélection VoltCore</h2><a href="/catalogue">Tout le catalogue →</a></div>
-    <div id="featuredGrid">${skeletons(4)}</div>
-  </section>
-
-  <section class="section">
-    <div class="promo-banner">
+    <section class="zero-showcase" data-zero-sep>
       <div>
-        <h3><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>Soldes d'été — jusqu'à -20 %</h3>
-        <p>Utilisez le code <code>SUMMER20</code> au panier et profitez de -20 % sur l'intégralité du site.</p>
+        <span>Flux de build</span>
+        <h2>Une page qui laisse respirer les machines.</h2>
       </div>
-      <a class="btn btn-primary" href="/catalogue">J'en profite</a>
-    </div>
-  </section>
+      <div class="zero-flow" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+      </div>
+    </section>
 
-  <section class="section">
-    <div class="perks">
-      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></div><div><h4>Livraison</h4><p>Les frais et options disponibles sont calculés au panier.</p></div></div>
-      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garanties légales</h4><p>Rétractation légale 14 jours et garantie légale de conformité.</p></div></div>
-      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></div><div><h4>Aide au choix</h4><p>Le configurateur vérifie la compatibilité des composants sélectionnés.</p></div></div>
-      <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><h4>Paiement sécurisé</h4><p>Transactions chiffrées et données protégées.</p></div></div>
-    </div>
-  </section>
+    <section class="section zero-section">
+      <div class="section-head"><h2>Sélection VoltCore</h2><a href="/catalogue">Tout le catalogue →</a></div>
+      <div id="featuredGrid">${skeletons(4)}</div>
+    </section>
 
-  <div class="motion-reel motion-reel-route" id="trust-reel" data-sep aria-hidden="true">
-    <div class="reel-stage route-stage">
-      <canvas class="motion-field route-field" data-field="route" aria-hidden="true"></canvas>
-      <div class="route-map">
-        <span class="route-line line-a"></span>
-        <span class="route-line line-b"></span>
-        <span class="route-line line-c"></span>
-        <i class="route-node node-pay"><b>Paiement</b></i>
-        <i class="route-node node-pack"><b>Prépa</b></i>
-        <i class="route-node node-ship"><b>Suivi</b></i>
-        <i class="route-node node-home"><b>Réception</b></i>
-        <strong class="route-packet">VC</strong>
+    <section class="section zero-section">
+      <div class="promo-banner zero-promo">
+        <div>
+          <h3>SUMMER20 : -20 % sur le site</h3>
+          <p>Le code s’applique au panier, avec le même suivi clair jusqu’à la commande.</p>
+        </div>
+        <a class="btn zero-primary" href="/catalogue">Voir le catalogue</a>
       </div>
-      <div class="route-card card-pay"><span>Crypté</span><strong>Paiement confirmé</strong></div>
-      <div class="route-card card-pack"><span>Atelier</span><strong>Stock réservé</strong></div>
-      <div class="route-card card-ship"><span>Client</span><strong>Suivi visible</strong></div>
-      <div class="reel-copy">
-        <span>Après la commande</span>
-        <strong>Chaque étape pulse</strong>
-      </div>
-    </div>
-  </div>
+    </section>
 
-  <section class="section svc-block">
-    <div class="svc-cols">
-      <div>
-        <h4>Services</h4>
-        <a href="/configurateur">Configurateur PC</a>
-        <a href="/catalogue">Catalogue complet</a>
-        <a href="/compte">Mon compte & commandes</a>
+    <section class="section zero-section">
+      <div class="perks">
+        <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></div><div><h4>Livraison</h4><p>Les frais et options disponibles sont calculés au panier.</p></div></div>
+        <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garanties</h4><p>Rétractation légale 14 jours et garantie légale de conformité.</p></div></div>
+        <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></div><div><h4>Compatibilité</h4><p>Le configurateur vérifie les choix au fil de la sélection.</p></div></div>
+        <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><h4>Paiement</h4><p>Transactions chiffrées et données protégées.</p></div></div>
       </div>
-      <div>
-        <h4>Garanties</h4>
-        <span>✓ Compatibilité vérifiée</span>
-        <span>✓ Garantie légale de conformité</span>
-        <span>✓ Rétractation 14 jours</span>
-        <span>✓ Espace client</span>
-      </div>
-      <div>
-        <h4>Mentions légales</h4>
-        <a href="/mentions-legales">Mentions légales</a>
-        <a href="/cgv">Conditions générales de vente</a>
-        <a href="/confidentialite">Politique de confidentialité</a>
-        <a href="/retours-remboursements">Retours & remboursement</a>
-      </div>
-    </div>
-  </section>
+    </section>
   </div>`;
 
   const [cats, featured] = await Promise.all([
@@ -1506,36 +1445,26 @@ function cleanupHome3D() {
 
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
-function initMotionField(reel, canvas) {
+function initZeroField(stage, canvas) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
 
-  const mode = canvas.dataset.field || "forge";
-  const pointer = { x: 0, y: 0, hot: false };
+  const pointer = { x: 0.58, y: 0.42, hot: false };
   let raf = 0;
   let dpr = 1;
   let w = 0;
   let h = 0;
-  let last = performance.now();
-  let particles = [];
+  let shards = [];
 
-  const resetParticle = (p = {}) => {
-    if (mode === "route") {
-      p.x = -80 - Math.random() * 420;
-      p.y = 0.24 + Math.random() * 0.52;
-      p.speed = 0.18 + Math.random() * 0.42;
-      p.size = 1.2 + Math.random() * 2.8;
-      p.lane = Math.floor(Math.random() * 3);
-      p.hue = Math.random() > 0.45 ? 184 : 29;
-      return p;
-    }
-    p.angle = Math.random() * Math.PI * 2;
-    p.radius = 0.18 + Math.random() * 0.82;
-    p.depth = 0.18 + Math.random() * 1;
-    p.speed = 0.00026 + Math.random() * 0.00058;
-    p.size = 0.9 + Math.random() * 2.6;
-    p.hue = Math.random() > 0.58 ? 190 : 28;
-    return p;
+  const resetShard = (s = {}) => {
+    s.x = Math.random();
+    s.y = Math.random();
+    s.z = 0.18 + Math.random() * 1.1;
+    s.a = Math.random() * Math.PI * 2;
+    s.speed = 0.00012 + Math.random() * 0.00024;
+    s.size = 42 + Math.random() * 110;
+    s.alpha = 0.05 + Math.random() * 0.14;
+    return s;
   };
 
   const resize = () => {
@@ -1547,135 +1476,73 @@ function initMotionField(reel, canvas) {
       canvas.width = w;
       canvas.height = h;
     }
-    const count = mode === "route" ? 58 : 92;
-    particles = Array.from({ length: count }, () => resetParticle());
-  };
-
-  const drawForge = (cw, ch, now, dt, progress) => {
-    const px = pointer.hot ? (pointer.x / cw - 0.5) : 0;
-    const py = pointer.hot ? (pointer.y / ch - 0.5) : 0;
-    const cx = cw * (0.5 + px * 0.04);
-    const cy = ch * (0.44 + py * 0.035);
-    const maxR = Math.min(cw, ch) * 0.48;
-
-    const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 1.12);
-    halo.addColorStop(0, `rgba(255, 138, 77, ${0.12 + progress * 0.18})`);
-    halo.addColorStop(0.34, `rgba(91, 229, 255, ${0.05 + progress * 0.1})`);
-    halo.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = halo;
-    ctx.fillRect(0, 0, cw, ch);
-
-    for (const p of particles) {
-      p.depth -= p.speed * dt * (0.72 + progress * 1.4);
-      p.angle += dt * 0.00012 * (p.hue > 100 ? -1 : 1);
-      if (p.depth <= 0.08) resetParticle(p);
-      const z = Math.max(0.08, p.depth);
-      const scale = 1.28 / (z + 0.18);
-      const swirl = now * 0.00042 + p.angle;
-      const x = cx + Math.cos(swirl) * p.radius * maxR * scale + px * 52 * (1 - z);
-      const y = cy + Math.sin(swirl) * p.radius * maxR * 0.5 * scale + py * 38 * (1 - z);
-      const alpha = Math.max(0, Math.min(1, (1.12 - z) * progress));
-      if (alpha <= 0) continue;
-
-      const color = p.hue > 100 ? "91, 229, 255" : "255, 155, 84";
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = `rgba(${color}, ${0.16 + alpha * 0.32})`;
-      ctx.lineWidth = Math.max(0.6, p.size * scale * 0.34);
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(cx + (x - cx) * 0.86, cy + (y - cy) * 0.86);
-      ctx.stroke();
-      ctx.shadowColor = `rgba(${color}, .8)`;
-      ctx.shadowBlur = 15;
-      ctx.fillStyle = `rgba(${color}, ${0.55 + alpha * 0.45})`;
-      ctx.beginPath();
-      ctx.arc(x, y, Math.min(7, p.size * scale), 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.globalAlpha = 1;
-    }
-  };
-
-  const drawRoute = (cw, ch, now, dt, progress) => {
-    const lanes = [0.31, 0.48, 0.65];
-    for (let i = 0; i < lanes.length; i++) {
-      const y = ch * lanes[i];
-      ctx.strokeStyle = `rgba(116, 238, 230, ${0.05 + progress * 0.1})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(cw * 0.08, y);
-      ctx.bezierCurveTo(cw * 0.32, y - 44, cw * 0.66, y + 44, cw * 0.92, y);
-      ctx.stroke();
-    }
-
-    for (const p of particles) {
-      p.x += p.speed * dt * (0.62 + progress * 1.25);
-      if (p.x > cw + 110) resetParticle(p);
-      const laneY = ch * lanes[p.lane] + Math.sin(now * 0.003 + p.x * 0.018) * 18;
-      const color = p.hue > 100 ? "116, 238, 230" : "255, 155, 84";
-      const a = Math.max(0, progress * 0.88);
-      ctx.globalAlpha = a;
-      ctx.strokeStyle = `rgba(${color}, .26)`;
-      ctx.lineWidth = p.size;
-      ctx.beginPath();
-      ctx.moveTo(p.x - 62, laneY);
-      ctx.lineTo(p.x, laneY);
-      ctx.stroke();
-      ctx.shadowColor = `rgba(${color}, .85)`;
-      ctx.shadowBlur = 13;
-      ctx.fillStyle = `rgba(${color}, .96)`;
-      ctx.beginPath();
-      ctx.arc(p.x, laneY, p.size + 1.3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.globalAlpha = 1;
-    }
+    shards = Array.from({ length: 28 }, () => resetShard());
   };
 
   const frame = (now) => {
     if (!canvas.isConnected) return;
     raf = requestAnimationFrame(frame);
     if (Math.floor(canvas.clientWidth * dpr) !== w || Math.floor(canvas.clientHeight * dpr) !== h) resize();
-    const dt = Math.min(34, now - last);
-    last = now;
-    const progress = clamp01(parseFloat(reel.style.getPropertyValue("--p")) || 0);
+
     const cw = canvas.clientWidth || 1;
     const ch = canvas.clientHeight || 1;
-
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cw, ch);
-    if (mode === "route") drawRoute(cw, ch, now, dt, progress);
-    else drawForge(cw, ch, now, dt, progress);
+
+    const glow = ctx.createRadialGradient(pointer.x * cw, pointer.y * ch, 0, pointer.x * cw, pointer.y * ch, Math.max(cw, ch) * 0.62);
+    glow.addColorStop(0, pointer.hot ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)");
+    glow.addColorStop(0.32, "rgba(135,230,255,0.08)");
+    glow.addColorStop(1, "rgba(135,230,255,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, cw, ch);
+
+    for (const s of shards) {
+      s.a += s.speed * 16;
+      const x = (s.x + Math.cos(now * s.speed + s.z) * 0.018) * cw;
+      const y = (s.y + Math.sin(now * s.speed + s.z) * 0.022) * ch;
+      const size = s.size * (0.55 + s.z * 0.45);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(s.a);
+      ctx.globalAlpha = s.alpha;
+      const g = ctx.createLinearGradient(-size / 2, 0, size / 2, 0);
+      g.addColorStop(0, "rgba(255,255,255,0)");
+      g.addColorStop(0.45, "rgba(255,255,255,0.72)");
+      g.addColorStop(1, "rgba(120,230,255,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(-size / 2, -0.6, size, 1.2);
+      ctx.restore();
+    }
   };
 
   const onMove = (e) => {
-    const r = canvas.getBoundingClientRect();
-    pointer.x = e.clientX - r.left;
-    pointer.y = e.clientY - r.top;
+    const r = stage.getBoundingClientRect();
+    pointer.x = clamp01((e.clientX - r.left) / (r.width || 1));
+    pointer.y = clamp01((e.clientY - r.top) / (r.height || 1));
     pointer.hot = true;
   };
-  const onLeave = () => { pointer.hot = false; };
+  const onLeave = () => { pointer.hot = false; pointer.x = 0.58; pointer.y = 0.42; };
 
-  reel.addEventListener("pointermove", onMove, { passive: true });
-  reel.addEventListener("pointerleave", onLeave);
+  stage.addEventListener("pointermove", onMove, { passive: true });
+  stage.addEventListener("pointerleave", onLeave);
   resize();
   raf = requestAnimationFrame(frame);
 
   return () => {
     cancelAnimationFrame(raf);
-    reel.removeEventListener("pointermove", onMove);
-    reel.removeEventListener("pointerleave", onLeave);
+    stage.removeEventListener("pointermove", onMove);
+    stage.removeEventListener("pointerleave", onLeave);
   };
 }
 
 function initHome3D() {
   cleanupHome3D();
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const pc = $("#pc3d");
-  const stage = $("#hhStage");
-  const seps = $$("[data-sep]");
-  const reels = $$(".motion-reel");
-  const motionFields = $$(".motion-field");
+  const pc = $("#zeroRig");
+  const stage = $("#zeroStage");
+  const hero = $(".zero-hero");
+  const seps = $$("[data-zero-sep]");
+  const zeroFields = $$(".zero-field");
   if (reduce) {                              // accessibilité : état final figé, zéro mouvement
     seps.forEach((s) => s.style.setProperty("--p", "1"));
     return;
@@ -1690,6 +1557,7 @@ function initHome3D() {
       const r = pc.getBoundingClientRect();
       const prog = 1 - (r.top + r.height / 2) / vh;     // ~0 en haut → 1 en bas de l'écran
       pc.style.setProperty("--rot", `${-26 + prog * 60}deg`);
+      hero?.style.setProperty("--zero-scroll", clamp01(prog).toFixed(3));
     }
     // Séparateurs : 0 quand le bloc entre par le bas, 1 quand il atteint le centre/haut
     for (const s of seps) {
@@ -1702,37 +1570,9 @@ function initHome3D() {
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll, { passive: true });
 
-  const reelListeners = [];
-  for (const reel of reels) {
-    const onReelMove = (e) => {
-      const r = reel.getBoundingClientRect();
-      const x = clamp01((e.clientX - r.left) / (r.width || 1));
-      const y = clamp01((e.clientY - r.top) / (r.height || 1));
-      reel.style.setProperty("--mx", (x - 0.5).toFixed(3));
-      reel.style.setProperty("--my", (y - 0.5).toFixed(3));
-      reel.style.setProperty("--spot-x", `${(x * 100).toFixed(1)}%`);
-      reel.style.setProperty("--spot-y", `${(y * 100).toFixed(1)}%`);
-      reel.style.setProperty("--tilt-x", `${((0.5 - y) * 5).toFixed(2)}deg`);
-      reel.style.setProperty("--tilt-y", `${((x - 0.5) * 7).toFixed(2)}deg`);
-      reel.classList.add("is-hot");
-    };
-    const onReelLeave = () => {
-      reel.style.setProperty("--mx", "0");
-      reel.style.setProperty("--my", "0");
-      reel.style.setProperty("--spot-x", "50%");
-      reel.style.setProperty("--spot-y", "50%");
-      reel.style.setProperty("--tilt-x", "0deg");
-      reel.style.setProperty("--tilt-y", "0deg");
-      reel.classList.remove("is-hot");
-    };
-    reel.addEventListener("pointermove", onReelMove, { passive: true });
-    reel.addEventListener("pointerleave", onReelLeave);
-    reelListeners.push([reel, onReelMove, onReelLeave]);
-  }
-
-  const stopMotionFields = motionFields.map((canvas) => {
-    const reel = canvas.closest(".motion-reel");
-    return reel ? initMotionField(reel, canvas) : null;
+  const stopZeroFields = zeroFields.map((canvas) => {
+    const host = canvas.closest(".zero-hero") || stage;
+    return host ? initZeroField(host, canvas) : null;
   }).filter(Boolean);
 
   // Tilt souris de la tour (parallaxe douce dans le hero)
@@ -1745,10 +1585,18 @@ function initHome3D() {
       const dy = (e.clientY - r.top) / r.height - 0.5;
       pc.style.setProperty("--tiltx", `${(-dy * 10).toFixed(1)}deg`);
       pc.style.setProperty("--tilty", `${(dx * 16).toFixed(1)}deg`);
+      hero?.style.setProperty("--zero-x", `${((dx + 0.5) * 100).toFixed(1)}%`);
+      hero?.style.setProperty("--zero-y", `${((dy + 0.5) * 100).toFixed(1)}%`);
+      hero?.style.setProperty("--zero-tilt-x", `${(-dy * 4.8).toFixed(2)}deg`);
+      hero?.style.setProperty("--zero-tilt-y", `${(dx * 6.4).toFixed(2)}deg`);
     };
     onPointerLeave = () => {
       pc.style.setProperty("--tiltx", "0deg");
       pc.style.setProperty("--tilty", "0deg");
+      hero?.style.setProperty("--zero-x", "58%");
+      hero?.style.setProperty("--zero-y", "42%");
+      hero?.style.setProperty("--zero-tilt-x", "0deg");
+      hero?.style.setProperty("--zero-tilt-y", "0deg");
     };
     stage.addEventListener("pointermove", onPointerMove);
     stage.addEventListener("pointerleave", onPointerLeave);
@@ -1756,11 +1604,7 @@ function initHome3D() {
   home3DCleanup = () => {
     window.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onScroll);
-    for (const [reel, onReelMove, onReelLeave] of reelListeners) {
-      reel.removeEventListener("pointermove", onReelMove);
-      reel.removeEventListener("pointerleave", onReelLeave);
-    }
-    stopMotionFields.forEach((stop) => stop());
+    stopZeroFields.forEach((stop) => stop());
     if (stage && onPointerMove) stage.removeEventListener("pointermove", onPointerMove);
     if (stage && onPointerLeave) stage.removeEventListener("pointerleave", onPointerLeave);
   };
