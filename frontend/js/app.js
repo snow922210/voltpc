@@ -1212,14 +1212,71 @@ async function renderPrebuilts(preloaded) {
     grid.innerHTML = `<p style="color:var(--text-faint)">Configurations momentanément indisponibles.</p>`;
     return;
   }
-  const SHOW = ["Processeur", "Carte graphique", "Mémoire", "Stockage"];
+  const ROLES = ["Processeur", "Carte graphique", "Mémoire", "Carte mère", "Stockage", "Refroidissement", "Alimentation", "Boîtier"];
+  const roleLabel = (role) => ({
+    "Carte graphique": "GPU",
+    "Processeur": "CPU",
+    "Carte mère": "CM",
+    "Mémoire": "RAM",
+    "Refroidissement": "Cooling",
+    "Alimentation": "PSU",
+  }[role] || role);
+  const prebuiltParts = (b) => ROLES.map((role) => ({ role, product: byId.get(b.ids[role]) })).filter((x) => x.product);
+  const addPrebuiltToCart = (b) => {
+    if (!state.user) {
+      requireAuth(() => addPrebuiltToCart(b));
+      toast("Connectez-vous pour enregistrer votre panier sur votre compte", "info");
+      return;
+    }
+    let n = 0;
+    prebuiltParts(b).forEach(({ product }) => {
+      if (product.stock > 0) { addToCart(product, 1, true); n++; }
+    });
+    toast(`${b.name} ajouté : ${n} composants 🛒`, "success");
+    openCart();
+  };
+  const openPrebuiltDetails = (b) => {
+    const parts = prebuiltParts(b);
+    const total = parts.reduce((s, { product }) => s + product.price, 0);
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+      <div class="modal wide pb-detail-modal">
+        <button class="modal-close">✕</button>
+        <span class="pb-tier">${esc(b.tier)}</span>
+        <h2>${esc(b.name)}</h2>
+        <p class="pb-detail-tag">${esc(b.tag)}</p>
+        <div class="pb-detail-total">
+          <span>Total composants</span>
+          <strong>${fmt(total)}</strong>
+        </div>
+        <div class="pb-detail-list">
+          ${parts.map(({ role, product }) => `
+            <a class="pb-detail-row" href="/produit/${product.id}">
+              <span class="pb-detail-role">${roleLabel(role)}</span>
+              <span class="pb-detail-name">${esc(product.brand)} ${esc(product.name)}</span>
+              <span class="pb-detail-meta">${fmt(product.price)} · ${product.stock > 0 ? `${product.stock} en stock` : "rupture"}</span>
+            </a>
+          `).join("")}
+        </div>
+        <div class="pb-detail-actions">
+          <button class="btn btn-primary" data-pb-add="${b.key}">Ajouter la configuration</button>
+          <a class="btn btn-ghost" href="/configurateur">Modifier dans le configurateur</a>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const close = () => overlay.remove();
+    overlay.onclick = (e) => { if (e.target === overlay) close(); };
+    $(".modal-close", overlay).onclick = close;
+    $("[data-pb-add]", overlay).onclick = () => { close(); addPrebuiltToCart(b); };
+    $$(".pb-detail-row, .pb-detail-actions a", overlay).forEach((link) => link.onclick = close);
+  };
   grid.innerHTML = PREBUILTS.map((b) => {
-    const parts = Object.values(b.ids).map((id) => byId.get(id)).filter(Boolean);
-    const total = parts.reduce((s, p) => s + p.price, 0);
-    const specs = SHOW.map((role) => {
-      const p = byId.get(b.ids[role]);
-      return p ? `<li><span class="k">${role === "Carte graphique" ? "GPU" : role === "Processeur" ? "CPU" : role}</span><span class="v">${esc(p.brand)} ${esc(p.name)}</span></li>` : "";
-    }).join("");
+    const parts = prebuiltParts(b);
+    const total = parts.reduce((s, { product }) => s + product.price, 0);
+    const specs = parts.map(({ role, product }) =>
+      `<li><span class="k">${roleLabel(role)}</span><span class="v">${esc(product.brand)} ${esc(product.name)}</span></li>`
+    ).join("");
     return `<article class="pb-card${b.featured ? " featured" : ""}">
       <div class="pb-head">
         <span class="pb-tier">${b.tier}</span>
@@ -1230,21 +1287,20 @@ async function renderPrebuilts(preloaded) {
       <ul class="pb-specs">${specs}</ul>
       <div class="pb-foot">
         <div class="pb-price">${fmt(total)}<small>${parts.length} composants montés & testés</small></div>
-        <button class="btn btn-primary btn-sm" data-pb="${b.key}">Ajouter au panier</button>
+        <div class="pb-actions">
+          <button class="btn btn-ghost btn-sm" data-pb-detail="${b.key}">Détails</button>
+          <button class="btn btn-primary btn-sm" data-pb="${b.key}">Ajouter</button>
+        </div>
       </div>
     </article>`;
   }).join("");
   grid.querySelectorAll("[data-pb]").forEach((btn) => btn.onclick = () => {
-    if (!state.user) {
-      requireAuth(() => btn.click());
-      toast("Connectez-vous pour enregistrer votre panier sur votre compte", "info");
-      return;
-    }
     const b = PREBUILTS.find((x) => x.key === btn.dataset.pb);
-    let n = 0;
-    Object.values(b.ids).forEach((id) => { const p = byId.get(id); if (p && p.stock > 0) { addToCart(p, 1, true); n++; } });
-    toast(`${b.name} ajouté : ${n} composants 🛒`, "success");
-    openCart();
+    addPrebuiltToCart(b);
+  });
+  grid.querySelectorAll("[data-pb-detail]").forEach((btn) => btn.onclick = () => {
+    const b = PREBUILTS.find((x) => x.key === btn.dataset.pbDetail);
+    openPrebuiltDetails(b);
   });
 }
 

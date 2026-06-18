@@ -1260,11 +1260,33 @@ img { max-width: 100%; }
 .pb-specs { list-style: none; padding: 6px 22px 4px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .pb-specs li { display: flex; gap: 10px; font-size: .86rem; padding: 7px 0; border-bottom: 1px solid var(--border); color: var(--text-dim); }
 .pb-specs li:last-child { border-bottom: none; }
-.pb-specs .k { color: var(--text-faint); width: 78px; flex: none; text-transform: uppercase; font-size: .68rem; font-weight: 700; letter-spacing: .04em; padding-top: 2px; }
+.pb-specs .k { color: var(--text-faint); width: 72px; flex: none; text-transform: uppercase; font-size: .68rem; font-weight: 700; letter-spacing: .04em; padding-top: 2px; }
 .pb-specs .v { color: var(--text); font-weight: 500; }
 .pb-foot { padding: 18px 22px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .pb-price { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; }
 .pb-price small { display: block; font-size: .72rem; color: var(--text-faint); font-weight: 400; letter-spacing: .02em; }
+.pb-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.pb-detail-modal { width: min(720px, 100%); max-height: min(760px, calc(100vh - 40px)); overflow: auto; }
+.pb-detail-modal h2 { margin: 4px 0 6px; font-size: 1.55rem; }
+.pb-detail-tag { color: var(--text-dim); margin-bottom: 18px; }
+.pb-detail-total {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 14px 16px; margin-bottom: 14px; border-radius: 14px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.pb-detail-total span { color: var(--text-dim); font-size: .86rem; font-weight: 600; }
+.pb-detail-total strong { font-family: var(--font-display); font-size: 1.45rem; }
+.pb-detail-list { display: grid; gap: 8px; }
+.pb-detail-row {
+  display: grid; grid-template-columns: 92px 1fr auto; gap: 12px; align-items: center;
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--bg); transition: border-color .15s, background .15s;
+}
+.pb-detail-row:hover { border-color: var(--accent); background: var(--surface-2); }
+.pb-detail-role { color: var(--text-faint); font-size: .72rem; font-weight: 800; text-transform: uppercase; }
+.pb-detail-name { color: var(--text); font-weight: 650; min-width: 0; }
+.pb-detail-meta { color: var(--text-dim); font-size: .82rem; white-space: nowrap; }
+.pb-detail-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 18px; }
 
 /* ─── Mini-3D + services / garanties / légal ─── */
 .services-3d { position: relative; margin: 80px 0 20px; padding: 44px; border-radius: 28px;
@@ -1290,6 +1312,11 @@ img { max-width: 100%; }
   .scene-3d, .services-3d { grid-template-columns: 1fr; text-align: center; }
   .scene-3d-copy p { margin-inline: auto; }
   .pb-grid { grid-template-columns: 1fr; }
+  .pb-foot, .pb-detail-row { grid-template-columns: 1fr; }
+  .pb-foot { align-items: stretch; flex-direction: column; }
+  .pb-actions, .pb-detail-actions { justify-content: stretch; }
+  .pb-actions .btn, .pb-detail-actions .btn { flex: 1; }
+  .pb-detail-meta { white-space: normal; }
   .svc-cols { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
