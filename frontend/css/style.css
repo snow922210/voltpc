@@ -2975,30 +2975,43 @@ body::before {
 }
 body::after {
   z-index: 1;
-  inset: -6vmax;
-  opacity: .42;
-  background:
-    radial-gradient(circle at 5% 12%, rgba(238, 250, 252, .72) 0 1.4px, transparent 1.9px),
-    radial-gradient(circle at 11% 43%, rgba(205, 231, 240, .38) 0 1.1px, transparent 1.6px),
-    radial-gradient(circle at 17% 76%, rgba(238, 250, 252, .48) 0 1.2px, transparent 1.7px),
-    radial-gradient(circle at 23% 25%, rgba(172, 208, 223, .34) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 29% 58%, rgba(246, 252, 253, .58) 0 1.35px, transparent 1.85px),
-    radial-gradient(circle at 34% 90%, rgba(184, 218, 230, .32) 0 1px, transparent 1.45px),
-    radial-gradient(circle at 39% 10%, rgba(238, 250, 252, .46) 0 1.15px, transparent 1.7px),
-    radial-gradient(circle at 45% 38%, rgba(208, 234, 242, .42) 0 1.1px, transparent 1.6px),
-    radial-gradient(circle at 52% 72%, rgba(246, 252, 253, .52) 0 1.25px, transparent 1.8px),
-    radial-gradient(circle at 58% 18%, rgba(177, 211, 225, .34) 0 1px, transparent 1.45px),
-    radial-gradient(circle at 64% 50%, rgba(238, 250, 252, .68) 0 1.45px, transparent 1.95px),
-    radial-gradient(circle at 69% 84%, rgba(195, 225, 235, .36) 0 1.1px, transparent 1.6px),
-    radial-gradient(circle at 73% 31%, rgba(246, 252, 253, .50) 0 1.2px, transparent 1.7px),
-    radial-gradient(circle at 80% 63%, rgba(174, 211, 225, .34) 0 1px, transparent 1.45px),
-    radial-gradient(circle at 86% 9%, rgba(238, 250, 252, .56) 0 1.3px, transparent 1.8px),
-    radial-gradient(circle at 91% 42%, rgba(208, 234, 242, .38) 0 1.1px, transparent 1.6px),
-    radial-gradient(circle at 96% 78%, rgba(246, 252, 253, .46) 0 1.2px, transparent 1.7px);
-  background-repeat: no-repeat;
-  animation: voidSnowSwayFar 42s ease-in-out infinite alternate;
-  mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 72%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 72%, transparent 100%);
+  inset: auto;
+  top: -12vh;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  border-radius: 999px;
+  contain: none;
+  opacity: .72;
+  background: rgba(238, 250, 252, .72);
+  box-shadow:
+    4vw 8vh 0 0 rgba(238,250,252,.46),
+    9vw 38vh 0 .2px rgba(202,230,240,.34),
+    14vw 76vh 0 0 rgba(238,250,252,.52),
+    19vw 24vh 0 .3px rgba(172,208,223,.38),
+    24vw 58vh 0 0 rgba(246,252,253,.58),
+    29vw 91vh 0 .2px rgba(184,218,230,.34),
+    34vw 12vh 0 0 rgba(238,250,252,.44),
+    39vw 43vh 0 .2px rgba(208,234,242,.44),
+    43vw 84vh 0 0 rgba(246,252,253,.52),
+    48vw 28vh 0 .3px rgba(177,211,225,.36),
+    53vw 66vh 0 0 rgba(238,250,252,.62),
+    58vw 100vh 0 .2px rgba(195,225,235,.38),
+    63vw 20vh 0 0 rgba(246,252,253,.48),
+    68vw 50vh 0 .3px rgba(174,211,225,.38),
+    73vw 88vh 0 0 rgba(238,250,252,.56),
+    78vw 34vh 0 .2px rgba(208,234,242,.42),
+    83vw 72vh 0 0 rgba(246,252,253,.46),
+    88vw 14vh 0 .3px rgba(177,211,225,.34),
+    93vw 52vh 0 0 rgba(238,250,252,.52),
+    97vw 96vh 0 .2px rgba(202,230,240,.36),
+    2vw 104vh 0 0 rgba(238,250,252,.42),
+    16vw 112vh 0 .2px rgba(202,230,240,.30),
+    31vw 108vh 0 0 rgba(246,252,253,.42),
+    47vw 116vh 0 .2px rgba(177,211,225,.32),
+    62vw 110vh 0 0 rgba(238,250,252,.44),
+    82vw 114vh 0 .2px rgba(202,230,240,.32);
+  animation: voidSnowSwayFar 26s linear infinite;
 }
 .header,
 .app,
@@ -3029,34 +3042,44 @@ body::after {
 .void-home::after {
   content: "";
   position: fixed;
-  inset: -6vmax;
+  inset: auto;
+  top: -14vh;
+  left: 0;
+  width: 3px;
+  height: 3px;
   z-index: 1;
   pointer-events: none;
-  opacity: .74;
-  contain: paint;
-  background:
-    radial-gradient(circle at 2% 22%, rgba(246, 252, 253, .82) 0 1.9px, transparent 2.55px),
-    radial-gradient(circle at 7% 68%, rgba(213, 238, 246, .48) 0 1.45px, transparent 2.05px),
-    radial-gradient(circle at 13% 36%, rgba(246, 252, 253, .64) 0 1.7px, transparent 2.3px),
-    radial-gradient(circle at 19% 88%, rgba(184, 220, 232, .38) 0 1.25px, transparent 1.85px),
-    radial-gradient(circle at 25% 16%, rgba(246, 252, 253, .76) 0 1.85px, transparent 2.45px),
-    radial-gradient(circle at 31% 55%, rgba(205, 232, 241, .48) 0 1.45px, transparent 2.05px),
-    radial-gradient(circle at 37% 79%, rgba(246, 252, 253, .58) 0 1.55px, transparent 2.15px),
-    radial-gradient(circle at 43% 27%, rgba(188, 222, 234, .42) 0 1.3px, transparent 1.9px),
-    radial-gradient(circle at 49% 62%, rgba(246, 252, 253, .80) 0 1.9px, transparent 2.55px),
-    radial-gradient(circle at 55% 12%, rgba(212, 238, 246, .50) 0 1.5px, transparent 2.1px),
-    radial-gradient(circle at 61% 84%, rgba(246, 252, 253, .62) 0 1.65px, transparent 2.25px),
-    radial-gradient(circle at 66% 40%, rgba(184, 220, 232, .42) 0 1.3px, transparent 1.9px),
-    radial-gradient(circle at 72% 70%, rgba(246, 252, 253, .74) 0 1.8px, transparent 2.4px),
-    radial-gradient(circle at 78% 20%, rgba(205, 232, 241, .48) 0 1.45px, transparent 2.05px),
-    radial-gradient(circle at 83% 56%, rgba(246, 252, 253, .60) 0 1.6px, transparent 2.2px),
-    radial-gradient(circle at 88% 91%, rgba(184, 220, 232, .38) 0 1.25px, transparent 1.85px),
-    radial-gradient(circle at 93% 34%, rgba(246, 252, 253, .70) 0 1.75px, transparent 2.35px),
-    radial-gradient(circle at 98% 73%, rgba(213, 238, 246, .46) 0 1.4px, transparent 2px);
-  background-repeat: no-repeat;
-  animation: voidSnowSwayNear 24s ease-in-out infinite alternate;
-  mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 82%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 82%, transparent 100%);
+  opacity: .86;
+  contain: none;
+  border-radius: 999px;
+  background: rgba(246, 252, 253, .88);
+  box-shadow:
+    1vw 18vh 0 .6px rgba(246,252,253,.78),
+    6vw 63vh 0 .2px rgba(213,238,246,.52),
+    11vw 36vh 0 .5px rgba(246,252,253,.66),
+    17vw 88vh 0 0 rgba(184,220,232,.44),
+    22vw 15vh 0 .6px rgba(246,252,253,.76),
+    27vw 54vh 0 .2px rgba(205,232,241,.52),
+    33vw 76vh 0 .4px rgba(246,252,253,.62),
+    38vw 26vh 0 0 rgba(188,222,234,.48),
+    44vw 60vh 0 .7px rgba(246,252,253,.82),
+    49vw 10vh 0 .2px rgba(212,238,246,.54),
+    55vw 84vh 0 .5px rgba(246,252,253,.66),
+    60vw 39vh 0 0 rgba(184,220,232,.46),
+    66vw 70vh 0 .6px rgba(246,252,253,.74),
+    72vw 20vh 0 .2px rgba(205,232,241,.50),
+    78vw 56vh 0 .5px rgba(246,252,253,.64),
+    83vw 92vh 0 0 rgba(184,220,232,.42),
+    89vw 33vh 0 .6px rgba(246,252,253,.72),
+    95vw 72vh 0 .2px rgba(213,238,246,.50),
+    4vw 103vh 0 .4px rgba(246,252,253,.62),
+    15vw 113vh 0 .2px rgba(213,238,246,.46),
+    29vw 106vh 0 .6px rgba(246,252,253,.72),
+    41vw 118vh 0 0 rgba(184,220,232,.42),
+    57vw 108vh 0 .5px rgba(246,252,253,.66),
+    74vw 116vh 0 .2px rgba(205,232,241,.48),
+    91vw 110vh 0 .4px rgba(246,252,253,.62);
+  animation: voidSnowSwayNear 18s linear infinite;
 }
 .void-home > * {
   position: relative;
@@ -3080,23 +3103,31 @@ body::after {
 
 @keyframes voidSnowSwayFar {
   0% {
-    transform: translate3d(-1.5%, -2%, 0) rotate(-1deg);
-    opacity: .16;
+    transform: translate3d(-1.5vw, -4vh, 0);
+    opacity: .34;
+  }
+  50% {
+    transform: translate3d(1.2vw, 30vh, 0);
+    opacity: .56;
   }
   100% {
-    transform: translate3d(2.5%, 6%, 0) rotate(1deg);
-    opacity: .30;
+    transform: translate3d(3vw, 64vh, 0);
+    opacity: .36;
   }
 }
 
 @keyframes voidSnowSwayNear {
   0% {
-    transform: translate3d(-2%, -3%, 0) rotate(-1deg);
-    opacity: .34;
+    transform: translate3d(-2vw, -6vh, 0);
+    opacity: .52;
+  }
+  50% {
+    transform: translate3d(1.4vw, 34vh, 0);
+    opacity: .88;
   }
   100% {
-    transform: translate3d(3%, 8%, 0) rotate(1deg);
-    opacity: .52;
+    transform: translate3d(4vw, 70vh, 0);
+    opacity: .58;
   }
 }
 
