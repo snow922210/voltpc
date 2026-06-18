@@ -1094,16 +1094,17 @@ async function viewHome(app) {
         </div>
       </div>
 
-      <div class="void-stage" id="voidStage" aria-label="PC VoltCore dans une scene plein ecran">
-        <div class="void-portal" aria-hidden="true">
-          <i></i><i></i><i></i><i></i>
+      <div class="void-stage" id="voidStage" aria-label="Scene froide VoltCore en mouvement">
+        <div class="void-reactor" id="voidRig" aria-hidden="true">
+          <span class="void-reactor-glow"></span>
+          <span class="void-reactor-shell"></span>
+          <span class="void-reactor-core"></span>
+          <span class="void-reactor-veil"></span>
+          <span class="void-reactor-dust"></span>
         </div>
-        <div class="void-rig" id="voidRig">
-          <img src="/images/36-1.jpg" alt="PC gaming VoltCore monte : verre trempe, RTX et RGB" loading="eager" decoding="async" fetchpriority="high" width="640" height="640">
-        </div>
-        <div class="void-chip chip-gpu"><span>GPU</span><strong>RTX ready</strong></div>
-        <div class="void-chip chip-cpu"><span>CPU</span><strong>X3D stable</strong></div>
-        <div class="void-chip chip-flow"><span>Calme</span><strong>Choix guid&eacute;</strong></div>
+        <div class="void-chip chip-gpu"><span>Froid</span><strong>Flux stable</strong></div>
+        <div class="void-chip chip-cpu"><span>Silence</span><strong>Sans bruit</strong></div>
+        <div class="void-chip chip-flow"><span>Guide</span><strong>Choix clair</strong></div>
       </div>
 
       <div class="void-scroll" aria-hidden="true"><span></span>scroll</div>

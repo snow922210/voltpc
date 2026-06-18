@@ -1940,77 +1940,174 @@ body.void-home-active .footer {
   perspective: 1300px;
   transform-style: preserve-3d;
 }
-.void-portal {
-  position: absolute;
-  inset: 5%;
-  display: grid;
-  place-items: center;
-  transform-style: preserve-3d;
-}
-.void-portal i {
-  position: absolute;
-  width: min(58vw, 640px);
-  aspect-ratio: 1 / .58;
-  border: 1px solid rgba(174,191,194,.22);
-  border-radius: 50%;
-  transform:
-    rotateX(72deg)
-    translateZ(calc(var(--z, 0) * 64px))
-    scale(calc(1 - var(--z, 0) * .11));
-  box-shadow: 0 0 42px rgba(174,191,194,.08), inset 0 0 32px rgba(154,165,167,.05);
-  animation: voidPortal 10s linear infinite;
-}
-.void-portal i:nth-child(1) { --z: -1; animation-duration: 13s; }
-.void-portal i:nth-child(2) { --z: 0; border-color: rgba(154,165,167,.2); animation-direction: reverse; }
-.void-portal i:nth-child(3) { --z: 1; animation-duration: 16s; }
-.void-portal i:nth-child(4) { --z: 2; border-color: rgba(125,137,140,.2); animation-duration: 19s; animation-direction: reverse; }
-@keyframes voidPortal {
-  to { rotate: 360deg; }
-}
-.void-rig {
+.void-reactor {
   --rot: -14deg;
   --tiltx: 0deg;
   --tilty: 0deg;
   position: relative;
   z-index: 6;
-  width: min(490px, 78%);
-  aspect-ratio: 1;
+  width: min(620px, 86%);
+  aspect-ratio: 1.28 / 1;
   display: grid;
   place-items: center;
   transform:
     rotateX(var(--tiltx))
-    rotateY(calc(var(--rot) + var(--tilty)))
-    translateZ(95px)
-    translateY(calc(var(--void-scroll) * -18px));
+    rotateY(var(--tilty))
+    translateZ(70px)
+    translateY(calc(var(--void-scroll) * -12px));
   transform-style: preserve-3d;
-  filter: drop-shadow(0 54px 80px rgba(0,0,0,.58));
-  animation: voidFloat 6.4s ease-in-out infinite;
+  animation: voidReactorFloat 8s ease-in-out infinite;
 }
-.void-rig::before {
+.void-reactor::before,
+.void-reactor::after {
   content: "";
   position: absolute;
-  inset: 9%;
-  border: 1px solid rgba(164, 231, 221, .18);
-  border-radius: 36px;
-  background: linear-gradient(145deg, rgba(174,191,194,.11), rgba(125,137,140,.07));
-  filter: blur(18px);
-  transform: translateZ(-70px);
+  pointer-events: none;
 }
-.void-rig img {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 12px;
-  border: 1px solid rgba(164, 231, 221, .24);
-  border-radius: 30px;
+.void-reactor::before {
+  inset: 14% 4% 10%;
+  border-radius: 999px;
   background:
-    linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.045)),
-    #080a13;
+    radial-gradient(ellipse at center, rgba(214, 243, 250, .18), transparent 60%);
+  transform: translateZ(-72px) rotateX(68deg);
+  opacity: .72;
+}
+.void-reactor::after {
+  inset: 26% 12%;
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse at center, rgba(238, 250, 252, .16), rgba(108, 143, 160, .08) 42%, transparent 70%);
+  transform: translateZ(-24px);
+  animation: voidReactorPulse 5.6s ease-in-out infinite;
+}
+.void-reactor-glow,
+.void-reactor-shell,
+.void-reactor-core,
+.void-reactor-veil,
+.void-reactor-dust {
+  position: absolute;
+  pointer-events: none;
+}
+.void-reactor-glow {
+  inset: 8%;
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(229, 249, 252, .20), rgba(92, 124, 140, .10) 34%, transparent 68%);
+  transform: translateZ(-42px);
+  animation: voidReactorBreath 12s ease-in-out infinite;
+}
+.void-reactor-shell {
+  width: 62%;
+  aspect-ratio: 1.08 / 1;
+  border-radius: 34px;
+  border: 1px solid rgba(218, 239, 245, .18);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.026)),
+    radial-gradient(circle at 28% 18%, rgba(238,250,252,.16), transparent 34%),
+    rgba(5, 8, 13, .58);
   box-shadow:
-    inset 0 1px rgba(255,255,255,.15),
-    0 38px 100px rgba(0,0,0,.56);
+    inset 0 1px rgba(255,255,255,.16),
+    inset 0 -1px rgba(255,255,255,.05),
+    0 34px 86px rgba(0,0,0,.46);
+  transform: translateZ(34px);
+  overflow: hidden;
+}
+.void-reactor-shell::before,
+.void-reactor-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.void-reactor-shell::before {
+  background:
+    linear-gradient(112deg, transparent 0 26%, rgba(255,255,255,.16) 36%, transparent 48% 100%);
+  opacity: .34;
+  transform: translateX(-32%);
+  animation: voidGlassSweep 9s ease-in-out infinite;
+}
+.void-reactor-shell::after {
+  inset: 14% 12%;
+  border-radius: 26px;
+  border: 1px solid rgba(218,239,245,.09);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(221,246,251,.11), transparent 38%),
+    linear-gradient(180deg, rgba(255,255,255,.05), transparent 72%);
+}
+.void-reactor-core {
+  width: 28%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 42% 34%, rgba(255,255,255,.92), rgba(220,245,250,.52) 19%, rgba(93, 127, 143, .18) 43%, transparent 68%);
+  box-shadow:
+    0 0 26px rgba(219, 245, 250, .24),
+    0 0 84px rgba(90, 132, 154, .18);
+  transform: translateZ(72px);
+  animation: voidCoreDrift 7.4s ease-in-out infinite;
+}
+.void-reactor-veil {
+  width: 78%;
+  height: 56%;
+  border-radius: 999px;
+  background:
+    linear-gradient(100deg, transparent, rgba(225, 246, 250, .10), transparent 66%),
+    radial-gradient(ellipse at 50% 50%, rgba(191, 227, 238, .10), transparent 72%);
+  transform: translateZ(52px) rotate(-7deg);
+  animation: voidVeilSlide 11s ease-in-out infinite;
+}
+.void-reactor-dust {
+  top: 13%;
+  left: 9%;
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(244, 252, 253, .78);
+  box-shadow:
+    54px 44px 0 .5px rgba(214,238,245,.48),
+    134px 8px 0 0 rgba(244,252,253,.60),
+    206px 96px 0 .6px rgba(190,222,234,.44),
+    304px 34px 0 0 rgba(244,252,253,.68),
+    402px 124px 0 .4px rgba(214,238,245,.48),
+    476px 56px 0 0 rgba(244,252,253,.52),
+    114px 198px 0 .5px rgba(214,238,245,.44),
+    268px 236px 0 0 rgba(244,252,253,.54),
+    372px 212px 0 .4px rgba(190,222,234,.42);
+  transform: translateZ(88px);
+  animation: voidStageSnow 16s linear infinite;
+}
+@keyframes voidReactorFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -14px; }
+}
+@keyframes voidReactorPulse {
+  0%, 100% { opacity: .42; transform: translateZ(-24px) scale(.96); }
+  50% { opacity: .78; transform: translateZ(-24px) scale(1.04); }
+}
+@keyframes voidReactorBreath {
+  0%, 100% { opacity: .52; scale: .98; }
+  50% { opacity: .88; scale: 1.04; }
+}
+@keyframes voidGlassSweep {
+  0%, 38% { transform: translateX(-42%); opacity: .18; }
+  60% { opacity: .40; }
+  100% { transform: translateX(42%); opacity: .18; }
+}
+@keyframes voidCoreDrift {
+  0%, 100% { transform: translate3d(-8px, 4px, 72px) scale(.96); }
+  50% { transform: translate3d(10px, -7px, 72px) scale(1.04); }
+}
+@keyframes voidVeilSlide {
+  0%, 100% { transform: translate3d(-18px, 6px, 52px) rotate(-7deg); opacity: .32; }
+  50% { transform: translate3d(20px, -8px, 52px) rotate(5deg); opacity: .58; }
+}
+@keyframes voidStageSnow {
+  from { transform: translate3d(-22px, -28px, 88px); opacity: .42; }
+  50% { opacity: .88; }
+  to { transform: translate3d(28px, 126px, 88px); opacity: .48; }
+}
+.void-rig {
+  position: relative;
 }
 @keyframes voidFloat {
   0%, 100% { margin-top: 0; }
@@ -2043,6 +2140,25 @@ body.void-home-active .footer {
 .chip-gpu { left: 4%; top: 19%; transform: rotate(-4deg) translateZ(130px); }
 .chip-cpu { right: 0; top: 28%; transform: rotate(3deg) translateZ(120px); }
 .chip-flow { right: 10%; bottom: 16%; transform: rotate(-2deg) translateZ(126px); }
+
+@media (max-width: 1080px) {
+  .void-reactor {
+    width: min(560px, 92%);
+  }
+}
+
+@media (max-width: 760px) {
+  .void-reactor {
+    width: min(380px, 94%);
+  }
+  .void-reactor-shell {
+    width: 70%;
+    border-radius: 24px;
+  }
+  .void-reactor-dust {
+    opacity: .72;
+  }
+}
 .void-scroll {
   position: absolute;
   left: clamp(22px, 6vw, 96px);
