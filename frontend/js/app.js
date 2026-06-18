@@ -2356,10 +2356,6 @@ async function viewPaymentSuccess(app, params) {
         go(ordersUrl, { force: true });
       }
     }, 800);
-    if (!state.user) {
-      state.afterLogin = () => go(ordersUrl, { force: true });
-      openAuth();
-    }
   } catch (err) {
     app.innerHTML = `
       <div class="empty-state">
