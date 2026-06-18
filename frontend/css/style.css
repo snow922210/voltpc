@@ -2974,17 +2974,27 @@ body::before {
   animation: voidFrostBreath 34s ease-in-out infinite alternate;
 }
 body::after {
-  z-index: 0;
+  z-index: 1;
   inset: -6vmax;
-  opacity: .20;
+  opacity: .42;
   background:
-    radial-gradient(circle at 7% 16%, rgba(238, 250, 252, .54) 0 1px, transparent 1.45px),
-    radial-gradient(circle at 18% 72%, rgba(200, 226, 235, .24) 0 .8px, transparent 1.2px),
-    radial-gradient(circle at 31% 26%, rgba(235, 248, 252, .36) 0 .9px, transparent 1.28px),
-    radial-gradient(circle at 49% 84%, rgba(150, 187, 202, .20) 0 .8px, transparent 1.2px),
-    radial-gradient(circle at 65% 18%, rgba(235, 248, 252, .45) 0 1px, transparent 1.45px),
-    radial-gradient(circle at 86% 66%, rgba(176, 211, 224, .22) 0 .8px, transparent 1.15px),
-    radial-gradient(circle at 94% 38%, rgba(238, 250, 252, .34) 0 .9px, transparent 1.3px);
+    radial-gradient(circle at 5% 12%, rgba(238, 250, 252, .72) 0 1.4px, transparent 1.9px),
+    radial-gradient(circle at 11% 43%, rgba(205, 231, 240, .38) 0 1.1px, transparent 1.6px),
+    radial-gradient(circle at 17% 76%, rgba(238, 250, 252, .48) 0 1.2px, transparent 1.7px),
+    radial-gradient(circle at 23% 25%, rgba(172, 208, 223, .34) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 29% 58%, rgba(246, 252, 253, .58) 0 1.35px, transparent 1.85px),
+    radial-gradient(circle at 34% 90%, rgba(184, 218, 230, .32) 0 1px, transparent 1.45px),
+    radial-gradient(circle at 39% 10%, rgba(238, 250, 252, .46) 0 1.15px, transparent 1.7px),
+    radial-gradient(circle at 45% 38%, rgba(208, 234, 242, .42) 0 1.1px, transparent 1.6px),
+    radial-gradient(circle at 52% 72%, rgba(246, 252, 253, .52) 0 1.25px, transparent 1.8px),
+    radial-gradient(circle at 58% 18%, rgba(177, 211, 225, .34) 0 1px, transparent 1.45px),
+    radial-gradient(circle at 64% 50%, rgba(238, 250, 252, .68) 0 1.45px, transparent 1.95px),
+    radial-gradient(circle at 69% 84%, rgba(195, 225, 235, .36) 0 1.1px, transparent 1.6px),
+    radial-gradient(circle at 73% 31%, rgba(246, 252, 253, .50) 0 1.2px, transparent 1.7px),
+    radial-gradient(circle at 80% 63%, rgba(174, 211, 225, .34) 0 1px, transparent 1.45px),
+    radial-gradient(circle at 86% 9%, rgba(238, 250, 252, .56) 0 1.3px, transparent 1.8px),
+    radial-gradient(circle at 91% 42%, rgba(208, 234, 242, .38) 0 1.1px, transparent 1.6px),
+    radial-gradient(circle at 96% 78%, rgba(246, 252, 253, .46) 0 1.2px, transparent 1.7px);
   background-repeat: no-repeat;
   animation: voidSnowSwayFar 42s ease-in-out infinite alternate;
   mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 72%, transparent 100%);
@@ -3020,20 +3030,29 @@ body::after {
   content: "";
   position: fixed;
   inset: -6vmax;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
-  opacity: .48;
+  opacity: .74;
   contain: paint;
   background:
-    radial-gradient(circle at 4% 18%, rgba(246, 252, 253, .60) 0 1px, transparent 1.42px),
-    radial-gradient(circle at 12% 74%, rgba(190, 220, 232, .25) 0 .85px, transparent 1.25px),
-    radial-gradient(circle at 23% 40%, rgba(246, 252, 253, .42) 0 .95px, transparent 1.35px),
-    radial-gradient(circle at 36% 86%, rgba(220, 241, 247, .28) 0 .9px, transparent 1.3px),
-    radial-gradient(circle at 49% 17%, rgba(246, 252, 253, .58) 0 1.08px, transparent 1.48px),
-    radial-gradient(circle at 61% 64%, rgba(176, 211, 224, .24) 0 .85px, transparent 1.22px),
-    radial-gradient(circle at 74% 28%, rgba(246, 252, 253, .48) 0 1px, transparent 1.42px),
-    radial-gradient(circle at 88% 78%, rgba(204, 233, 241, .29) 0 .9px, transparent 1.3px),
-    radial-gradient(circle at 96% 48%, rgba(246, 252, 253, .40) 0 .95px, transparent 1.35px);
+    radial-gradient(circle at 2% 22%, rgba(246, 252, 253, .82) 0 1.9px, transparent 2.55px),
+    radial-gradient(circle at 7% 68%, rgba(213, 238, 246, .48) 0 1.45px, transparent 2.05px),
+    radial-gradient(circle at 13% 36%, rgba(246, 252, 253, .64) 0 1.7px, transparent 2.3px),
+    radial-gradient(circle at 19% 88%, rgba(184, 220, 232, .38) 0 1.25px, transparent 1.85px),
+    radial-gradient(circle at 25% 16%, rgba(246, 252, 253, .76) 0 1.85px, transparent 2.45px),
+    radial-gradient(circle at 31% 55%, rgba(205, 232, 241, .48) 0 1.45px, transparent 2.05px),
+    radial-gradient(circle at 37% 79%, rgba(246, 252, 253, .58) 0 1.55px, transparent 2.15px),
+    radial-gradient(circle at 43% 27%, rgba(188, 222, 234, .42) 0 1.3px, transparent 1.9px),
+    radial-gradient(circle at 49% 62%, rgba(246, 252, 253, .80) 0 1.9px, transparent 2.55px),
+    radial-gradient(circle at 55% 12%, rgba(212, 238, 246, .50) 0 1.5px, transparent 2.1px),
+    radial-gradient(circle at 61% 84%, rgba(246, 252, 253, .62) 0 1.65px, transparent 2.25px),
+    radial-gradient(circle at 66% 40%, rgba(184, 220, 232, .42) 0 1.3px, transparent 1.9px),
+    radial-gradient(circle at 72% 70%, rgba(246, 252, 253, .74) 0 1.8px, transparent 2.4px),
+    radial-gradient(circle at 78% 20%, rgba(205, 232, 241, .48) 0 1.45px, transparent 2.05px),
+    radial-gradient(circle at 83% 56%, rgba(246, 252, 253, .60) 0 1.6px, transparent 2.2px),
+    radial-gradient(circle at 88% 91%, rgba(184, 220, 232, .38) 0 1.25px, transparent 1.85px),
+    radial-gradient(circle at 93% 34%, rgba(246, 252, 253, .70) 0 1.75px, transparent 2.35px),
+    radial-gradient(circle at 98% 73%, rgba(213, 238, 246, .46) 0 1.4px, transparent 2px);
   background-repeat: no-repeat;
   animation: voidSnowSwayNear 24s ease-in-out infinite alternate;
   mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 82%, transparent 100%);
