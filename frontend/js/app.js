@@ -101,7 +101,7 @@ async function syncCartOnLogin() {
 
 async function restoreSessionAndCart({ syncCart = true, clearOnFail = true } = {}) {
   try {
-    const me = await api("/auth/me");
+    const me = await api("/auth/me", { preserveAuthOn401: !clearOnFail });
     state.token = true;
     state.user = { ...(state.user || {}), ...me };
     saveAuth();
@@ -153,7 +153,11 @@ async function api(path, options = {}) {
     catch { data = { detail: raw.trim() }; }
   }
   if (!res.ok) {
-    if (res.status === 401 && state.token) { state.token = null; state.user = null; saveAuth(); }
+    if (res.status === 401 && state.token && !options.preserveAuthOn401) {
+      state.token = null;
+      state.user = null;
+      saveAuth();
+    }
     throw new Error(data?.detail || "Erreur réseau");
   }
 
@@ -2324,8 +2328,11 @@ async function viewPaymentSuccess(app, params) {
   const ordersUrl = "/compte?tab=orders";
   app.innerHTML = `<div class="empty-state"><div class="big">⏳</div><h2>Vérification du paiement…</h2></div>`;
   try {
+    await restoreSessionAndCart({ syncCart: false, clearOnFail: false });
     // On confirme l'état réel auprès du serveur (qui interroge Stripe).
-    const res = await api("/checkout/status?session_id=" + encodeURIComponent(sessionId || ""));
+    const res = await api("/checkout/status?session_id=" + encodeURIComponent(sessionId || ""), {
+      preserveAuthOn401: true,
+    });
     if (res.payment_status !== "paid") throw new Error("Paiement non confirmé");
     await restoreSessionAndCart({ syncCart: false, clearOnFail: false });
     // Paiement validé : on vide le panier local.
@@ -2343,14 +2350,13 @@ async function viewPaymentSuccess(app, params) {
         <a class="btn btn-primary" href="${ordersUrl}">Voir mes commandes</a>
         &nbsp;<a class="btn btn-ghost" href="/catalogue">Continuer mes achats</a>
       </div>`;
-    if (state.user) {
-      setTimeout(() => {
-        const current = parsePath();
-        if (current.path === "commande/succes" && current.params.get("session_id") === sessionId) {
-          go(ordersUrl, { force: true });
-        }
-      }, 800);
-    } else {
+    setTimeout(() => {
+      const current = parsePath();
+      if (current.path === "commande/succes" && current.params.get("session_id") === sessionId) {
+        go(ordersUrl, { force: true });
+      }
+    }, 800);
+    if (!state.user) {
       state.afterLogin = () => go(ordersUrl, { force: true });
       openAuth();
     }
