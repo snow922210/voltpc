@@ -1080,17 +1080,17 @@ async function viewHome(app) {
       </div>
 
       <div class="void-copy">
-        <span class="void-eyebrow">Black chamber / VoltCore</span>
-        <h1>Un PC qui prend toute la pi&egrave;ce.</h1>
-        <p>Choisis une machine pr&ecirc;te ou compose ton build dans une interface sombre, dense, profonde, pens&eacute;e pour donner envie de cliquer.</p>
+        <span class="void-eyebrow">VoltCore / void build</span>
+        <h1>Construis dans le noir.</h1>
+        <p>Un espace calme pour choisir ton PC. Peu de bruit, des composants lisibles, une machine qui sort lentement du vide.</p>
         <div class="void-actions">
-          <a class="btn void-btn void-btn-primary" href="#prebuilts"><span>Voir les builds</span><b aria-hidden="true">&rarr;</b></a>
-          <a class="btn void-btn void-btn-ghost" href="/configurateur"><span>Ouvrir le configurateur</span><b aria-hidden="true">+</b></a>
+          <a class="btn void-btn void-btn-primary" href="#prebuilts"><span>Voir les machines</span><b aria-hidden="true">&rarr;</b></a>
+          <a class="btn void-btn void-btn-ghost" href="/configurateur"><span>Configurer</span><b aria-hidden="true">+</b></a>
         </div>
         <div class="void-readout">
           <div><strong id="statCount">280+</strong><span>pieces en stock</span></div>
           <div><strong>3</strong><span>machines pretes</span></div>
-          <div><strong>24h</strong><span>panier clair</span></div>
+          <div><strong>0</strong><span>distraction</span></div>
         </div>
       </div>
 
@@ -1103,28 +1103,28 @@ async function viewHome(app) {
         </div>
         <div class="void-chip chip-gpu"><span>GPU</span><strong>RTX ready</strong></div>
         <div class="void-chip chip-cpu"><span>CPU</span><strong>X3D stable</strong></div>
-        <div class="void-chip chip-flow"><span>Flux</span><strong>Build guid&eacute;</strong></div>
+        <div class="void-chip chip-flow"><span>Calme</span><strong>Choix guid&eacute;</strong></div>
       </div>
 
       <div class="void-scroll" aria-hidden="true"><span></span>scroll</div>
     </section>
 
     <section class="void-orbit-strip" data-void-sep>
-      <article><span>Catalogue</span><strong>Les composants restent lisibles, m&ecirc;me dans une direction plus cin&eacute;ma.</strong></article>
-      <article><span>Config</span><strong>Les choix importants restent devant toi, sans tunnel confus.</strong></article>
-      <article><span>Commande</span><strong>Panier, paiement et suivi gardent une lecture directe.</strong></article>
+      <article><span>Catalogue</span><strong>Des composants visibles, sans lumi&egrave;re inutile.</strong></article>
+      <article><span>Config</span><strong>Une s&eacute;lection lente, claire, sans tunnel confus.</strong></article>
+      <article><span>Commande</span><strong>Panier, paiement et suivi restent sobres.</strong></article>
     </section>
 
     <section class="section void-section prebuilts" id="prebuilts">
       <div class="section-head"><h2>Machines pr&ecirc;tes</h2><a href="/configurateur">Composer le mien &rarr;</a></div>
-      <p class="pb-sub">Trois bases noires, lisibles, calibr&eacute;es pour comparer vite sans perdre le c&ocirc;t&eacute; spectaculaire.</p>
+      <p class="pb-sub">Trois bases noires, lisibles, calibr&eacute;es pour comparer vite sans effet inutile.</p>
       <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton void-skeleton' style='min-height:420px'></div>".repeat(3)}</div>
     </section>
 
     <section class="void-console" data-void-sep>
       <div>
         <span>Control room</span>
-        <h2>Une page qui respire comme un tableau de bord haut de gamme.</h2>
+        <h2>Le vide autour. Les choix devant.</h2>
       </div>
       <div class="void-console-lines" aria-hidden="true">
         <i></i><i></i><i></i><i></i><i></i>
@@ -1468,7 +1468,7 @@ function initVoidField(stage, canvas) {
     p.z = 0.25 + Math.random() * 1.35;
     p.speed = 0.00018 + Math.random() * 0.00042;
     p.size = 0.8 + Math.random() * 2.6;
-    p.hue = Math.random() > 0.68 ? 36 : (Math.random() > 0.5 ? 188 : 318);
+    p.hue = Math.random() > 0.78 ? 212 : 196;
     p.orbit = Math.random() * Math.PI * 2;
     return p;
   };
@@ -1482,7 +1482,7 @@ function initVoidField(stage, canvas) {
       canvas.width = w;
       canvas.height = h;
     }
-    const count = Math.min(130, Math.max(70, Math.floor((canvas.clientWidth || 1) * (canvas.clientHeight || 1) / 10500)));
+    const count = Math.min(82, Math.max(42, Math.floor((canvas.clientWidth || 1) * (canvas.clientHeight || 1) / 16500)));
     particles = Array.from({ length: count }, () => resetParticle());
   };
 
@@ -1501,14 +1501,14 @@ function initVoidField(stage, canvas) {
     const px = pointer.x * cw;
     const py = pointer.y * ch;
     const glow = ctx.createRadialGradient(px, py, 0, px, py, Math.max(cw, ch) * 0.72);
-    glow.addColorStop(0, pointer.hot ? "rgba(248,244,222,0.18)" : "rgba(116,238,230,0.08)");
-    glow.addColorStop(0.22, "rgba(116,238,230,0.08)");
-    glow.addColorStop(0.52, "rgba(255,78,148,0.045)");
+    glow.addColorStop(0, pointer.hot ? "rgba(210,226,232,0.105)" : "rgba(120,144,154,0.045)");
+    glow.addColorStop(0.22, "rgba(110,132,142,0.045)");
+    glow.addColorStop(0.52, "rgba(50,68,78,0.025)");
     glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, cw, ch);
 
-    ctx.strokeStyle = "rgba(116,238,230,0.08)";
+    ctx.strokeStyle = "rgba(122,145,154,0.035)";
     ctx.lineWidth = 1;
     for (let i = 0; i < 7; i++) {
       const y = ch * (0.18 + i * 0.11);
@@ -1530,18 +1530,18 @@ function initVoidField(stage, canvas) {
       const y = ch * 0.5 + (p.y + driftY) * ch * scale * 0.78 + (pointer.y - 0.5) * 34 * (1 - z);
       const alpha = Math.max(0, Math.min(1, (1.45 - z) * 0.72));
       if (alpha <= 0) continue;
-      const color = p.hue < 80 ? "245,174,85" : (p.hue < 220 ? "116,238,230" : "255,78,148");
+      const color = p.hue > 205 ? "150,172,182" : "94,116,126";
 
       ctx.globalAlpha = alpha;
-      ctx.strokeStyle = `rgba(${color}, ${0.16 + alpha * 0.2})`;
+      ctx.strokeStyle = `rgba(${color}, ${0.055 + alpha * 0.09})`;
       ctx.lineWidth = Math.max(0.6, p.size * scale * 0.42);
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(cw * 0.5 + (x - cw * 0.5) * 0.86, ch * 0.5 + (y - ch * 0.5) * 0.86);
       ctx.stroke();
-      ctx.shadowColor = `rgba(${color}, 0.88)`;
-      ctx.shadowBlur = 18;
-      ctx.fillStyle = `rgba(${color}, ${0.55 + alpha * 0.45})`;
+      ctx.shadowColor = `rgba(${color}, 0.42)`;
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = `rgba(${color}, ${0.22 + alpha * 0.34})`;
       ctx.beginPath();
       ctx.arc(x, y, Math.min(7, p.size * scale), 0, Math.PI * 2);
       ctx.fill();
@@ -1554,8 +1554,8 @@ function initVoidField(stage, canvas) {
       ctx.save();
       ctx.translate(px, py);
       ctx.rotate(now * 0.00018 * (i % 2 ? -1 : 1));
-      ctx.globalAlpha = 0.14 - i * 0.026;
-      ctx.strokeStyle = i === 1 ? "rgba(245,174,85,.5)" : "rgba(116,238,230,.48)";
+      ctx.globalAlpha = 0.07 - i * 0.014;
+      ctx.strokeStyle = "rgba(150,172,182,.28)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.ellipse(0, 0, radius * 1.8, radius * 0.48, 0, Math.PI * 0.08, Math.PI * 1.62);
