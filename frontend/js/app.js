@@ -1090,41 +1090,30 @@ async function viewHome(app) {
     </div></div>
   </section>
 
-  <div class="motion-reel motion-reel-build motion-reel-assembly" id="drop-reel" data-sep aria-hidden="true">
-      <div class="reel-stage">
-        <div class="reel-atmosphere">
-          <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span>
-          <span style="--i:6"></span><span style="--i:7"></span><span style="--i:8"></span><span style="--i:9"></span>
-        </div>
-        <div class="assembly-scene">
-          <canvas class="assembly-arcs" aria-hidden="true"></canvas>
-          <div class="assembly-backplate">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <div class="assembly-orbit">
-            <i></i><i></i><i></i>
-          </div>
-          <span class="assembly-node node-gpu"></span>
-          <span class="assembly-node node-cpu"></span>
-          <span class="assembly-node node-ram"></span>
-          <span class="assembly-node node-ssd"></span>
-          <div class="assembly-energy energy-a"></div>
-          <div class="assembly-energy energy-b"></div>
-          <div class="assembly-energy energy-c"></div>
-        <div class="assembly-product">
-          <img src="/images/36-1.jpg" alt="" loading="eager" decoding="async">
-        </div>
-        <div class="assembly-chip chip-gpu"><span>GPU</span><strong>RTX 50</strong></div>
-        <div class="assembly-chip chip-cpu"><span>CPU</span><strong>X3D</strong></div>
-        <div class="assembly-chip chip-ram"><span>RAM</span><strong>DDR5</strong></div>
-        <div class="assembly-chip chip-ssd"><span>SSD</span><strong>Gen5</strong></div>
-        <div class="assembly-readout">
-          <span>PCIe 5.0</span><span>4K Ultra</span><span>Silence</span>
-        </div>
+  <div class="motion-reel motion-reel-forge" id="drop-reel" data-sep aria-hidden="true">
+    <div class="reel-stage forge-stage">
+      <canvas class="motion-field forge-field" data-field="forge" aria-hidden="true"></canvas>
+      <div class="forge-horizon">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="forge-tunnel">
+        <span style="--r:0"></span><span style="--r:1"></span><span style="--r:2"></span><span style="--r:3"></span><span style="--r:4"></span>
+      </div>
+      <div class="forge-core">
+        <i class="core-ring ring-a"></i><i class="core-ring ring-b"></i><i class="core-ring ring-c"></i>
+        <img src="/images/36-1.jpg" alt="" loading="eager" decoding="async">
+        <b>VC</b>
+      </div>
+      <div class="forge-module module-gpu"><span>GPU</span><strong>RTX 50</strong><em>ray tracing</em></div>
+      <div class="forge-module module-cpu"><span>CPU</span><strong>X3D</strong><em>latence basse</em></div>
+      <div class="forge-module module-ram"><span>RAM</span><strong>DDR5</strong><em>profil stable</em></div>
+      <div class="forge-module module-ssd"><span>SSD</span><strong>Gen5</strong><em>chargement instant</em></div>
+      <div class="forge-readout">
+        <span>Flux calibré</span><span>Température stable</span><span>Prêt à jouer</span>
       </div>
       <div class="reel-copy">
-        <span>Assemblage calibré</span>
-        <strong>Performance prête</strong>
+        <span>Noyau VoltCore</span>
+        <strong>La config prend vie</strong>
       </div>
     </div>
   </div>
@@ -1164,25 +1153,25 @@ async function viewHome(app) {
     </div>
   </section>
 
-  <div class="motion-reel motion-reel-trust" id="trust-reel" data-sep aria-hidden="true">
-    <div class="reel-stage">
-      <div class="trust-grid">
-        <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span>
+  <div class="motion-reel motion-reel-route" id="trust-reel" data-sep aria-hidden="true">
+    <div class="reel-stage route-stage">
+      <canvas class="motion-field route-field" data-field="route" aria-hidden="true"></canvas>
+      <div class="route-map">
+        <span class="route-line line-a"></span>
+        <span class="route-line line-b"></span>
+        <span class="route-line line-c"></span>
+        <i class="route-node node-pay"><b>Paiement</b></i>
+        <i class="route-node node-pack"><b>Prépa</b></i>
+        <i class="route-node node-ship"><b>Suivi</b></i>
+        <i class="route-node node-home"><b>Réception</b></i>
+        <strong class="route-packet">VC</strong>
       </div>
-      <div class="scan-window">
-        <span class="scan-line"></span>
-        <div class="scan-card scan-card-pay"><span>Paiement</span><strong>Validé</strong></div>
-        <div class="scan-card scan-card-ship"><span>Commande</span><strong>Suivi</strong></div>
-        <div class="scan-card scan-card-warranty"><span>Garantie</span><strong>14 j + SAV</strong></div>
-      </div>
-      <div class="trust-core">
-        <span class="core-mark">VC</span>
-        <i class="orbit orbit-a"></i><i class="orbit orbit-b"></i><i class="orbit orbit-c"></i>
-        <b></b>
-      </div>
+      <div class="route-card card-pay"><span>Crypté</span><strong>Paiement confirmé</strong></div>
+      <div class="route-card card-pack"><span>Atelier</span><strong>Stock réservé</strong></div>
+      <div class="route-card card-ship"><span>Client</span><strong>Suivi visible</strong></div>
       <div class="reel-copy">
-        <span>Suivi complet</span>
-        <strong>Commande protégée</strong>
+        <span>Après la commande</span>
+        <strong>Chaque étape pulse</strong>
       </div>
     </div>
   </div>
@@ -1661,6 +1650,168 @@ function initAssemblyArcs(reel, canvas) {
   };
 }
 
+function initMotionField(reel, canvas) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return () => {};
+
+  const mode = canvas.dataset.field || "forge";
+  const pointer = { x: 0, y: 0, hot: false };
+  let raf = 0;
+  let dpr = 1;
+  let w = 0;
+  let h = 0;
+  let last = performance.now();
+  let particles = [];
+
+  const resetParticle = (p = {}) => {
+    if (mode === "route") {
+      p.x = -80 - Math.random() * 420;
+      p.y = 0.24 + Math.random() * 0.52;
+      p.speed = 0.18 + Math.random() * 0.42;
+      p.size = 1.2 + Math.random() * 2.8;
+      p.lane = Math.floor(Math.random() * 3);
+      p.hue = Math.random() > 0.45 ? 184 : 29;
+      return p;
+    }
+    p.angle = Math.random() * Math.PI * 2;
+    p.radius = 0.18 + Math.random() * 0.82;
+    p.depth = 0.18 + Math.random() * 1;
+    p.speed = 0.00026 + Math.random() * 0.00058;
+    p.size = 0.9 + Math.random() * 2.6;
+    p.hue = Math.random() > 0.58 ? 190 : 28;
+    return p;
+  };
+
+  const resize = () => {
+    const r = canvas.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = Math.max(1, Math.floor(r.width * dpr));
+    h = Math.max(1, Math.floor(r.height * dpr));
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+    const count = mode === "route" ? 58 : 92;
+    particles = Array.from({ length: count }, () => resetParticle());
+  };
+
+  const drawForge = (cw, ch, now, dt, progress) => {
+    const px = pointer.hot ? (pointer.x / cw - 0.5) : 0;
+    const py = pointer.hot ? (pointer.y / ch - 0.5) : 0;
+    const cx = cw * (0.5 + px * 0.04);
+    const cy = ch * (0.44 + py * 0.035);
+    const maxR = Math.min(cw, ch) * 0.48;
+
+    const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 1.12);
+    halo.addColorStop(0, `rgba(255, 138, 77, ${0.12 + progress * 0.18})`);
+    halo.addColorStop(0.34, `rgba(91, 229, 255, ${0.05 + progress * 0.1})`);
+    halo.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = halo;
+    ctx.fillRect(0, 0, cw, ch);
+
+    for (const p of particles) {
+      p.depth -= p.speed * dt * (0.72 + progress * 1.4);
+      p.angle += dt * 0.00012 * (p.hue > 100 ? -1 : 1);
+      if (p.depth <= 0.08) resetParticle(p);
+      const z = Math.max(0.08, p.depth);
+      const scale = 1.28 / (z + 0.18);
+      const swirl = now * 0.00042 + p.angle;
+      const x = cx + Math.cos(swirl) * p.radius * maxR * scale + px * 52 * (1 - z);
+      const y = cy + Math.sin(swirl) * p.radius * maxR * 0.5 * scale + py * 38 * (1 - z);
+      const alpha = Math.max(0, Math.min(1, (1.12 - z) * progress));
+      if (alpha <= 0) continue;
+
+      const color = p.hue > 100 ? "91, 229, 255" : "255, 155, 84";
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = `rgba(${color}, ${0.16 + alpha * 0.32})`;
+      ctx.lineWidth = Math.max(0.6, p.size * scale * 0.34);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(cx + (x - cx) * 0.86, cy + (y - cy) * 0.86);
+      ctx.stroke();
+      ctx.shadowColor = `rgba(${color}, .8)`;
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = `rgba(${color}, ${0.55 + alpha * 0.45})`;
+      ctx.beginPath();
+      ctx.arc(x, y, Math.min(7, p.size * scale), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+  };
+
+  const drawRoute = (cw, ch, now, dt, progress) => {
+    const lanes = [0.31, 0.48, 0.65];
+    for (let i = 0; i < lanes.length; i++) {
+      const y = ch * lanes[i];
+      ctx.strokeStyle = `rgba(116, 238, 230, ${0.05 + progress * 0.1})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cw * 0.08, y);
+      ctx.bezierCurveTo(cw * 0.32, y - 44, cw * 0.66, y + 44, cw * 0.92, y);
+      ctx.stroke();
+    }
+
+    for (const p of particles) {
+      p.x += p.speed * dt * (0.62 + progress * 1.25);
+      if (p.x > cw + 110) resetParticle(p);
+      const laneY = ch * lanes[p.lane] + Math.sin(now * 0.003 + p.x * 0.018) * 18;
+      const color = p.hue > 100 ? "116, 238, 230" : "255, 155, 84";
+      const a = Math.max(0, progress * 0.88);
+      ctx.globalAlpha = a;
+      ctx.strokeStyle = `rgba(${color}, .26)`;
+      ctx.lineWidth = p.size;
+      ctx.beginPath();
+      ctx.moveTo(p.x - 62, laneY);
+      ctx.lineTo(p.x, laneY);
+      ctx.stroke();
+      ctx.shadowColor = `rgba(${color}, .85)`;
+      ctx.shadowBlur = 13;
+      ctx.fillStyle = `rgba(${color}, .96)`;
+      ctx.beginPath();
+      ctx.arc(p.x, laneY, p.size + 1.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+  };
+
+  const frame = (now) => {
+    if (!canvas.isConnected) return;
+    raf = requestAnimationFrame(frame);
+    if (Math.floor(canvas.clientWidth * dpr) !== w || Math.floor(canvas.clientHeight * dpr) !== h) resize();
+    const dt = Math.min(34, now - last);
+    last = now;
+    const progress = clamp01(parseFloat(reel.style.getPropertyValue("--p")) || 0);
+    const cw = canvas.clientWidth || 1;
+    const ch = canvas.clientHeight || 1;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cw, ch);
+    if (mode === "route") drawRoute(cw, ch, now, dt, progress);
+    else drawForge(cw, ch, now, dt, progress);
+  };
+
+  const onMove = (e) => {
+    const r = canvas.getBoundingClientRect();
+    pointer.x = e.clientX - r.left;
+    pointer.y = e.clientY - r.top;
+    pointer.hot = true;
+  };
+  const onLeave = () => { pointer.hot = false; };
+
+  reel.addEventListener("pointermove", onMove, { passive: true });
+  reel.addEventListener("pointerleave", onLeave);
+  resize();
+  raf = requestAnimationFrame(frame);
+
+  return () => {
+    cancelAnimationFrame(raf);
+    reel.removeEventListener("pointermove", onMove);
+    reel.removeEventListener("pointerleave", onLeave);
+  };
+}
+
 function initHome3D() {
   cleanupHome3D();
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1668,8 +1819,7 @@ function initHome3D() {
   const stage = $("#hhStage");
   const seps = $$("[data-sep]");
   const reels = $$(".motion-reel");
-  const assemblyReel = $(".motion-reel-assembly");
-  const assemblyCanvas = assemblyReel ? $(".assembly-arcs", assemblyReel) : null;
+  const motionFields = $$(".motion-field");
   if (reduce) {                              // accessibilité : état final figé, zéro mouvement
     seps.forEach((s) => s.style.setProperty("--p", "1"));
     return;
@@ -1724,9 +1874,10 @@ function initHome3D() {
     reelListeners.push([reel, onReelMove, onReelLeave]);
   }
 
-  const stopAssemblyArcs = assemblyReel && assemblyCanvas
-    ? initAssemblyArcs(assemblyReel, assemblyCanvas)
-    : null;
+  const stopMotionFields = motionFields.map((canvas) => {
+    const reel = canvas.closest(".motion-reel");
+    return reel ? initMotionField(reel, canvas) : null;
+  }).filter(Boolean);
 
   // Tilt souris de la tour (parallaxe douce dans le hero)
   let onPointerMove = null;
@@ -1753,7 +1904,7 @@ function initHome3D() {
       reel.removeEventListener("pointermove", onReelMove);
       reel.removeEventListener("pointerleave", onReelLeave);
     }
-    if (stopAssemblyArcs) stopAssemblyArcs();
+    stopMotionFields.forEach((stop) => stop());
     if (stage && onPointerMove) stage.removeEventListener("pointermove", onPointerMove);
     if (stage && onPointerLeave) stage.removeEventListener("pointerleave", onPointerLeave);
   };
