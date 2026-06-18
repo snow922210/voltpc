@@ -1097,10 +1097,12 @@ async function viewHome(app) {
       <div class="void-stage" id="voidStage" aria-label="Scene froide VoltCore en mouvement">
         <div class="void-reactor" id="voidRig" aria-hidden="true">
           <span class="void-reactor-glow"></span>
-          <span class="void-reactor-shell"></span>
+          <span class="void-reactor-halo"></span>
+          <span class="void-reactor-shell"><i></i><i></i><i></i></span>
           <span class="void-reactor-core"></span>
           <span class="void-reactor-veil"></span>
           <span class="void-reactor-dust"></span>
+          <span class="void-reactor-readout"><b></b><b></b><b></b></span>
         </div>
         <div class="void-chip chip-gpu"><span>Froid</span><strong>Flux stable</strong></div>
         <div class="void-chip chip-cpu"><span>Silence</span><strong>Sans bruit</strong></div>
