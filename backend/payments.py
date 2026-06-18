@@ -11,7 +11,7 @@ un APIRouter monté par main.py.  Trois routes :
 Variables d'environnement attendues (fichier backend/.env, voir .env.example) :
     STRIPE_SECRET_KEY       clé secrète serveur        (sk_test_… / sk_live_…)
     STRIPE_WEBHOOK_SECRET   secret de signature webhook (whsec_…)
-    PUBLIC_BASE_URL         URL publique du site (déf. http://127.0.0.1:8000)
+    PUBLIC_BASE_URL         URL publique de secours (déf. http://127.0.0.1:8000)
 
 ⚠️  Aucune clé n'est jamais codée en dur : tout passe par os.environ.
 """
@@ -65,6 +65,27 @@ def _stripe():
 
 def _base_url() -> str:
     return os.environ.get("PUBLIC_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+
+
+def _request_base_url(request: Request) -> str:
+    """URL publique du domaine qui a lance le paiement.
+
+    Une session cookie ne traverse pas deux domaines differents. On renvoie donc
+    l'utilisateur vers le meme host que celui utilise pour creer le Checkout.
+    """
+    host = (
+        request.headers.get("x-forwarded-host")
+        or request.headers.get("host")
+        or request.url.netloc
+    )
+    if not host:
+        return _base_url()
+    proto = (
+        request.headers.get("x-forwarded-proto")
+        or request.url.scheme
+        or "https"
+    ).split(",")[0].strip()
+    return f"{proto}://{host}".rstrip("/")
 
 
 def _field(obj, key):
@@ -131,7 +152,11 @@ def _checkout_line_items(computed: dict) -> list[dict]:
 # ─── 1. Création de la session de paiement ───────────────────────────
 
 @router.post("/create-checkout-session")
-def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_user)):
+def create_checkout_session(
+    body: OrderIn,
+    request: Request,
+    user: sqlite3.Row = Depends(current_user),
+):
     """Reçoit le panier, VÉRIFIE les prix en base, crée la commande (en attente)
     puis la session Stripe Checkout. Renvoie l'URL de redirection sécurisée.
     """
@@ -162,6 +187,7 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
         # (b) Lignes Stripe construites à partir des PRIX VÉRIFIÉS EN BASE,
         #     jamais à partir de valeurs envoyées par le client.
         line_items = _checkout_line_items(computed)
+        base_url = _request_base_url(request)
 
         params = dict(
             mode="payment",
@@ -171,10 +197,10 @@ def create_checkout_session(body: OrderIn, user: sqlite3.Row = Depends(current_u
             # metadata = lien commande ↔ session, relu tel quel dans le webhook.
             metadata={"order_id": str(order_id), "user_id": str(user["id"])},
             success_url=(
-                f"{_base_url()}/#/commande/succes?session_id={{CHECKOUT_SESSION_ID}}"
+                f"{base_url}/#/commande/succes?session_id={{CHECKOUT_SESSION_ID}}"
                 f"&return_token={return_token}"
             ),
-            cancel_url=f"{_base_url()}/#/commande/annulee?order_id={order_id}",
+            cancel_url=f"{base_url}/#/commande/annulee?order_id={order_id}",
         )
 
         # Moyens de paiement : par défaut, on laisse Stripe afficher ceux ACTIVÉS
