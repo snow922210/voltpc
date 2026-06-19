@@ -21,237 +21,274 @@
     renderer.setClearColor(0x000000, 0);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 1.18;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 80);
-    camera.position.set(0, 1.75, 8.85);
-    camera.lookAt(0, 0.18, 0);
+    const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 80);
+    camera.position.set(0, 0.35, 8.6);
+    camera.lookAt(0, 0.25, 0);
 
     const root = new THREE.Group();
     const rig = new THREE.Group();
     const orbitGroup = new THREE.Group();
-    const floaters = new THREE.Group();
+    const dustGroup = new THREE.Group();
     scene.add(root);
-    root.add(orbitGroup, rig, floaters);
+    root.add(orbitGroup, rig, dustGroup);
 
-    scene.add(new THREE.HemisphereLight(0xdff7ff, 0x02040a, 0.65));
-    const key = new THREE.DirectionalLight(0xf3fbff, 1.45);
-    key.position.set(4.8, 7.2, 5.4);
+    scene.add(new THREE.HemisphereLight(0xe6fbff, 0x02040a, 0.72));
+    const key = new THREE.DirectionalLight(0xf4fbff, 1.55);
+    key.position.set(3.8, 5.8, 4.8);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0x8fb4c4, 0.72);
-    rim.position.set(-5.2, 2.8, -4.8);
+    const rim = new THREE.DirectionalLight(0x8fb8c9, 0.94);
+    rim.position.set(-4.5, 2.4, -3.8);
     scene.add(rim);
-    const pulseLight = new THREE.PointLight(0xd8f8ff, 1.7, 9.5);
-    pulseLight.position.set(0, 1.1, 1.1);
+    const pulseLight = new THREE.PointLight(0xd8f8ff, 1.8, 8.5);
+    pulseLight.position.set(0.16, 0.35, 1.15);
     scene.add(pulseLight);
 
     const mats = {
-      shell: new THREE.MeshStandardMaterial({ color: 0x071017, metalness: 0.82, roughness: 0.34 }),
-      side: new THREE.MeshStandardMaterial({ color: 0x0b151d, metalness: 0.72, roughness: 0.44 }),
-      fin: new THREE.MeshStandardMaterial({ color: 0x101e27, metalness: 0.78, roughness: 0.28 }),
+      caseOuter: new THREE.MeshStandardMaterial({ color: 0x04080d, metalness: 0.76, roughness: 0.36 }),
+      caseEdge: new THREE.MeshStandardMaterial({ color: 0x0c1720, metalness: 0.82, roughness: 0.26 }),
+      inner: new THREE.MeshStandardMaterial({ color: 0x0b151c, metalness: 0.62, roughness: 0.45 }),
+      board: new THREE.MeshStandardMaterial({ color: 0x07141b, metalness: 0.35, roughness: 0.58 }),
+      metal: new THREE.MeshStandardMaterial({ color: 0x132631, metalness: 0.86, roughness: 0.28 }),
       glass: new THREE.MeshPhysicalMaterial({
-        color: 0xbfefff,
+        color: 0xc8f5ff,
         metalness: 0,
         roughness: 0.08,
         transparent: true,
-        opacity: 0.11,
-        transmission: 0.36,
+        opacity: 0.14,
+        transmission: 0.28,
         depthWrite: false,
       }),
-      rail: new THREE.MeshBasicMaterial({ color: 0xbfefff, transparent: true, opacity: 0.18, depthWrite: false }),
+      glassEdge: new THREE.MeshBasicMaterial({ color: 0xcaf7ff, transparent: true, opacity: 0.16, depthWrite: false }),
       glow: new THREE.MeshBasicMaterial({
-        color: 0xdffcff,
+        color: 0xe7fdff,
         transparent: true,
-        opacity: 0.72,
+        opacity: 0.62,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       }),
       dimGlow: new THREE.MeshBasicMaterial({
-        color: 0x8eb8c8,
+        color: 0x8fb9c8,
         transparent: true,
-        opacity: 0.22,
+        opacity: 0.24,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       }),
-      darkGlow: new THREE.MeshBasicMaterial({ color: 0x23333d, transparent: true, opacity: 0.34, depthWrite: false }),
+      line: new THREE.LineBasicMaterial({
+        color: 0xcaf7ff,
+        transparent: true,
+        opacity: 0.15,
+        blending: THREE.AdditiveBlending,
+      }),
     };
 
     const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-    const cyl = (r, h, mat, seg = 40) => new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), mat);
-    const sphere = (r, mat, seg = 32) => new THREE.Mesh(new THREE.SphereGeometry(r, seg, seg / 2), mat);
+    const cyl = (r, h, mat, seg = 48) => new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), mat);
 
-    const board = box(4.9, 0.16, 3.15, mats.shell);
-    board.position.y = -0.14;
-    rig.add(board);
+    const tower = new THREE.Group();
+    rig.add(tower);
 
-    const cover = box(5.35, 0.035, 3.55, mats.glass);
-    cover.position.y = 0.02;
-    rig.add(cover);
+    const caseBack = box(2.05, 3.55, 1.18, mats.caseOuter);
+    caseBack.position.set(0, 0.05, -0.05);
+    tower.add(caseBack);
 
-    const core = box(0.92, 0.14, 0.92, mats.glow.clone());
-    core.position.set(0, 0.18, 0.05);
-    rig.add(core);
+    const sideGlass = box(1.78, 3.18, 0.035, mats.glass);
+    sideGlass.position.set(0.07, 0.05, 0.58);
+    tower.add(sideGlass);
 
-    const coreFrame = box(1.28, 0.08, 1.28, mats.rail);
-    coreFrame.position.set(0, 0.13, 0.05);
-    rig.add(coreFrame);
+    const leftRail = box(0.065, 3.68, 1.26, mats.caseEdge);
+    leftRail.position.set(-1.1, 0.05, 0);
+    tower.add(leftRail);
 
-    const coreTower = new THREE.Group();
-    const coreGlass = cyl(0.42, 1.18, mats.glass, 56);
-    coreGlass.position.y = 0.86;
-    coreTower.add(coreGlass);
-    const coreSpine = cyl(0.18, 1.02, mats.glow.clone(), 44);
-    coreSpine.position.y = 0.86;
-    coreTower.add(coreSpine);
-    const capTop = sphere(0.18, mats.glow.clone(), 32);
-    capTop.position.y = 1.37;
-    coreTower.add(capTop);
-    const capBottom = sphere(0.18, mats.dimGlow.clone(), 32);
-    capBottom.position.y = 0.35;
-    coreTower.add(capBottom);
-    const coreRings = [];
+    const rightRail = box(0.065, 3.68, 1.26, mats.caseEdge);
+    rightRail.position.set(1.1, 0.05, 0);
+    tower.add(rightRail);
+
+    const topRail = box(2.18, 0.08, 1.28, mats.caseEdge);
+    topRail.position.set(0, 1.88, 0);
+    tower.add(topRail);
+
+    const bottomRail = box(2.18, 0.08, 1.28, mats.caseEdge);
+    bottomRail.position.set(0, -1.78, 0);
+    tower.add(bottomRail);
+
+    const frontVent = box(0.10, 3.14, 1.08, mats.metal);
+    frontVent.position.set(-0.98, 0.03, 0.20);
+    tower.add(frontVent);
+
+    const motherboard = box(0.92, 2.15, 0.055, mats.board);
+    motherboard.position.set(0.36, 0.24, 0.63);
+    tower.add(motherboard);
+
+    const cpuGlow = box(0.34, 0.34, 0.035, mats.glow.clone());
+    cpuGlow.position.set(0.26, 0.56, 0.69);
+    tower.add(cpuGlow);
+
+    const cpuFrame = box(0.50, 0.50, 0.028, mats.glassEdge);
+    cpuFrame.position.set(0.26, 0.56, 0.71);
+    tower.add(cpuFrame);
+
+    const ramBars = [];
     for (let i = 0; i < 4; i++) {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.48 + i * 0.045, 0.006, 8, 78), (i % 2 ? mats.dimGlow : mats.rail).clone());
-      ring.rotation.x = Math.PI / 2;
-      ring.position.y = 0.48 + i * 0.24;
-      coreTower.add(ring);
-      coreRings.push(ring);
+      const ram = box(0.055, 0.76, 0.045, i % 2 ? mats.metal : mats.inner);
+      ram.position.set(0.66 + i * 0.07, 0.58, 0.72);
+      tower.add(ram);
+      const ramLight = box(0.018, 0.66, 0.025, mats.dimGlow.clone());
+      ramLight.position.set(ram.position.x, ram.position.y, 0.755);
+      tower.add(ramLight);
+      ramBars.push(ramLight);
     }
-    coreTower.position.set(0, 0.05, 0.05);
-    rig.add(coreTower);
 
-    const gpu = box(3.3, 0.22, 0.66, mats.side);
-    gpu.position.set(0.16, 0.28, -0.82);
-    rig.add(gpu);
+    const gpu = box(1.28, 0.32, 0.26, mats.metal);
+    gpu.position.set(0.34, -0.55, 0.74);
+    tower.add(gpu);
 
-    const gpuLight = box(2.55, 0.035, 0.055, mats.glow.clone());
-    gpuLight.position.set(0.28, 0.42, -1.18);
-    rig.add(gpuLight);
+    const gpuLight = box(0.98, 0.035, 0.035, mats.glow.clone());
+    gpuLight.position.set(0.34, -0.38, 0.90);
+    tower.add(gpuLight);
 
-    const finGroup = new THREE.Group();
-    for (let i = 0; i < 14; i++) {
-      const fin = box(0.035, 0.44 + (i % 3) * 0.05, 0.58, mats.fin);
-      fin.position.set(-2.05 + i * 0.315, 0.46, 1.32);
-      fin.rotation.z = -0.03;
-      finGroup.add(fin);
-    }
-    rig.add(finGroup);
-
-    const ramGroup = new THREE.Group();
-    for (let i = 0; i < 4; i++) {
-      const stick = box(1.9, 0.12, 0.12, mats.side);
-      stick.position.set(-0.1 + i * 0.12, 0.30, 0.88 + i * 0.18);
-      stick.rotation.y = 0.02;
-      ramGroup.add(stick);
-      const line = box(1.66, 0.025, 0.025, mats.dimGlow);
-      line.position.set(stick.position.x, 0.385, stick.position.z);
-      ramGroup.add(line);
-    }
-    rig.add(ramGroup);
+    const psu = box(1.28, 0.42, 0.42, mats.inner);
+    psu.position.set(0.25, -1.30, 0.50);
+    tower.add(psu);
 
     const fanGroup = new THREE.Group();
-    for (const x of [-1.65, 1.72]) {
+    const fanCenters = [
+      [-0.97, 0.98, 0.78],
+      [-0.97, 0.08, 0.78],
+      [-0.97, -0.82, 0.78],
+    ];
+    for (const [x, y, z] of fanCenters) {
       const fan = new THREE.Group();
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.025, 10, 44), mats.rail);
-      ring.rotation.x = Math.PI / 2;
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.31, 0.018, 10, 72), mats.glassEdge.clone());
+      ring.material.opacity = 0.22;
       fan.add(ring);
-      const hub = cyl(0.07, 0.025, mats.dimGlow, 24);
+
+      const innerRing = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.006, 8, 48), mats.dimGlow.clone());
+      innerRing.material.opacity = 0.20;
+      fan.add(innerRing);
+
+      const hub = cyl(0.054, 0.018, mats.dimGlow.clone(), 28);
       hub.rotation.x = Math.PI / 2;
       fan.add(hub);
-      for (let i = 0; i < 6; i++) {
-        const blade = box(0.22, 0.018, 0.055, mats.darkGlow);
-        blade.position.x = Math.cos(i * Math.PI / 3) * 0.13;
-        blade.position.z = Math.sin(i * Math.PI / 3) * 0.13;
-        blade.rotation.y = i * Math.PI / 3;
+
+      for (let i = 0; i < 7; i++) {
+        const blade = box(0.18, 0.030, 0.014, mats.dimGlow.clone());
+        blade.material.opacity = 0.18;
+        blade.position.x = Math.cos(i * Math.PI * 2 / 7) * 0.095;
+        blade.position.y = Math.sin(i * Math.PI * 2 / 7) * 0.095;
+        blade.rotation.z = i * Math.PI * 2 / 7 + 0.48;
         fan.add(blade);
       }
-      fan.position.set(x, 0.31, -0.82);
+      fan.position.set(x, y, z);
       fan.userData.spin = true;
       fanGroup.add(fan);
     }
-    rig.add(fanGroup);
+    tower.add(fanGroup);
 
-    const edgePins = new THREE.Group();
-    for (let i = 0; i < 15; i++) {
-      const pinA = box(0.035, 0.09, 0.20, mats.rail);
-      pinA.position.set(-2.25 + i * 0.32, 0.02, 1.74);
-      edgePins.add(pinA);
-      const pinB = box(0.035, 0.09, 0.20, mats.rail);
-      pinB.position.set(-2.25 + i * 0.32, 0.02, -1.74);
-      edgePins.add(pinB);
+    const portLights = [];
+    for (let i = 0; i < 7; i++) {
+      const slit = box(0.46, 0.018, 0.024, mats.dimGlow.clone());
+      slit.position.set(0.30, -1.08 + i * 0.09, 0.82);
+      slit.material.opacity = 0.10 + i * 0.008;
+      tower.add(slit);
+      portLights.push(slit);
     }
-    rig.add(edgePins);
 
-    const scan = box(5.8, 0.015, 0.045, mats.glow.clone());
-    scan.position.y = 0.54;
-    rig.add(scan);
+    const feet = [
+      [-0.72, -1.98, -0.42],
+      [0.72, -1.98, -0.42],
+      [-0.72, -1.98, 0.44],
+      [0.72, -1.98, 0.44],
+    ];
+    for (const [x, y, z] of feet) {
+      const foot = box(0.36, 0.07, 0.18, mats.caseEdge);
+      foot.position.set(x, y, z);
+      tower.add(foot);
+    }
 
-    rig.rotation.x = -0.52;
-    rig.rotation.y = -0.38;
-    rig.rotation.z = 0.04;
+    const cableMat = mats.line.clone();
+    cableMat.opacity = 0.10;
+    const cablePoints = [
+      new THREE.Vector3(-0.10, -0.58, 0.86),
+      new THREE.Vector3(-0.05, -0.05, 0.96),
+      new THREE.Vector3(0.28, 0.56, 0.88),
+    ];
+    const cable = new THREE.Line(new THREE.BufferGeometry().setFromPoints(cablePoints), cableMat);
+    tower.add(cable);
+
+    tower.rotation.y = -0.28;
+    tower.rotation.x = 0.06;
+    tower.rotation.z = -0.025;
+
+    const shadow = new THREE.Mesh(
+      new THREE.CircleGeometry(1.6, 80),
+      new THREE.MeshBasicMaterial({
+        color: 0x9fd5e4,
+        transparent: true,
+        opacity: 0.055,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    );
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.set(0.12, -2.16, 0.05);
+    shadow.scale.set(1.7, 0.34, 1);
+    rig.add(shadow);
 
     const orbitMat = new THREE.MeshBasicMaterial({
       color: 0xcaf7ff,
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.105,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
-    const orbitA = new THREE.Mesh(new THREE.TorusGeometry(2.65, 0.006, 8, 140), orbitMat);
-    orbitA.scale.set(1.35, 0.42, 1);
-    orbitA.rotation.set(Math.PI / 2.75, 0.14, -0.18);
+    const orbitA = new THREE.Mesh(new THREE.TorusGeometry(2.15, 0.004, 8, 140), orbitMat);
+    orbitA.scale.set(0.88, 1.40, 1);
+    orbitA.rotation.set(0.18, Math.PI / 2.2, 0.10);
     orbitGroup.add(orbitA);
 
-    const orbitB = new THREE.Mesh(new THREE.TorusGeometry(2.16, 0.005, 8, 120), orbitMat.clone());
-    orbitB.material.opacity = 0.11;
-    orbitB.scale.set(0.78, 1.22, 1);
-    orbitB.rotation.set(0.22, Math.PI / 2.25, 0.32);
+    const orbitB = new THREE.Mesh(new THREE.TorusGeometry(2.42, 0.004, 8, 140), orbitMat.clone());
+    orbitB.material.opacity = 0.075;
+    orbitB.scale.set(1.42, 0.28, 1);
+    orbitB.rotation.set(Math.PI / 2.72, 0.06, -0.18);
     orbitGroup.add(orbitB);
 
-    const orbitC = new THREE.Mesh(new THREE.TorusGeometry(1.52, 0.004, 8, 96), orbitMat.clone());
-    orbitC.material.opacity = 0.08;
-    orbitC.rotation.set(Math.PI / 2.15, 0.42, 0.56);
-    orbitGroup.add(orbitC);
-
-    const arcMat = new THREE.LineBasicMaterial({
-      color: 0xcaf7ff,
-      transparent: true,
-      opacity: 0.16,
-      blending: THREE.AdditiveBlending,
-    });
-    const makeArc = (radius, y, z, start, end) => {
+    const traceMat = mats.line.clone();
+    traceMat.opacity = 0.13;
+    const makeTrace = (radius, y, start, end) => {
       const points = [];
-      for (let i = 0; i <= 54; i++) {
-        const p = i / 54;
+      for (let i = 0; i <= 64; i++) {
+        const p = i / 64;
         const a = start + (end - start) * p;
-        points.push(new THREE.Vector3(Math.cos(a) * radius, y + Math.sin(p * Math.PI) * 0.44, z + Math.sin(a) * radius * 0.34));
+        points.push(new THREE.Vector3(Math.cos(a) * radius, y + Math.sin(p * Math.PI) * 0.20, Math.sin(a) * radius * 0.30));
       }
-      const geo = new THREE.BufferGeometry().setFromPoints(points);
-      return new THREE.Line(geo, arcMat.clone());
+      return new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), traceMat.clone());
     };
-    const arcA = makeArc(2.92, 0.20, -0.10, -2.78, -0.35);
-    const arcB = makeArc(2.62, 0.60, 0.08, 0.30, 2.62);
-    arcB.material.opacity = 0.10;
-    orbitGroup.add(arcA, arcB);
+    const traceA = makeTrace(2.56, 0.32, -2.55, -0.30);
+    const traceB = makeTrace(2.20, -0.96, 0.22, 2.52);
+    traceB.material.opacity = 0.08;
+    orbitGroup.add(traceA, traceB);
 
-    for (let i = 0; i < 16; i++) {
-      const chip = box(0.08 + Math.random() * 0.10, 0.028, 0.18 + Math.random() * 0.22, Math.random() > 0.5 ? mats.side : mats.darkGlow);
+    for (let i = 0; i < 18; i++) {
+      const shard = box(0.06 + Math.random() * 0.11, 0.020, 0.16 + Math.random() * 0.18, Math.random() > 0.45 ? mats.inner : mats.dimGlow.clone());
+      if (shard.material.opacity !== undefined) shard.material.opacity = 0.16;
       const a = Math.random() * Math.PI * 2;
-      const r = 2.1 + Math.random() * 1.25;
-      chip.position.set(Math.cos(a) * r, -0.15 + Math.random() * 0.9, Math.sin(a) * r * 0.54);
-      chip.rotation.set(-0.4 + Math.random() * 0.8, a, -0.4 + Math.random() * 0.8);
-      chip.userData.baseY = chip.position.y;
-      chip.userData.speed = 0.4 + Math.random() * 0.9;
-      floaters.add(chip);
+      const r = 1.6 + Math.random() * 1.55;
+      shard.position.set(Math.cos(a) * r, -1.0 + Math.random() * 2.5, Math.sin(a) * r * 0.45);
+      shard.rotation.set(Math.random() * 0.8, a, Math.random() * 0.8);
+      shard.userData.baseY = shard.position.y;
+      shard.userData.speed = 0.35 + Math.random() * 0.8;
+      dustGroup.add(shard);
     }
 
-    const particleCount = 180;
+    const particleCount = 150;
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
-      particlePositions[i * 3] = (Math.random() - 0.5) * 9.5;
-      particlePositions[i * 3 + 1] = (Math.random() - 0.48) * 5.4;
-      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 5.6;
+      particlePositions[i * 3] = (Math.random() - 0.5) * 8.8;
+      particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 5.6;
+      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 5.4;
     }
     const particlesGeo = new THREE.BufferGeometry();
     particlesGeo.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
@@ -260,8 +297,8 @@
       new THREE.PointsMaterial({
         color: 0xcff8ff,
         transparent: true,
-        opacity: 0.28,
-        size: 0.024,
+        opacity: 0.24,
+        size: 0.022,
         sizeAttenuation: true,
         depthWrite: false,
       })
@@ -283,12 +320,12 @@
 
     let w = 0;
     let h = 0;
-    let stageScale = 0.92;
+    let stageScale = 1;
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       const nw = Math.max(1, Math.floor(rect.width));
       const nh = Math.max(1, Math.floor(rect.height));
-      stageScale = nw < 460 ? 0.74 : nw < 620 ? 0.82 : 0.92;
+      stageScale = nw < 430 ? 0.76 : nw < 620 ? 0.86 : 1.02;
       if (nw === w && nh === h) return;
       w = nw;
       h = nh;
@@ -312,36 +349,39 @@
       pointer.x += (pointer.tx - pointer.x) * 0.055;
       pointer.y += (pointer.ty - pointer.y) * 0.055;
 
-      root.rotation.y = pointer.x * 0.16 + Math.sin(t * 0.26) * 0.035;
-      root.rotation.x = -pointer.y * 0.09 + Math.sin(t * 0.18) * 0.018;
-      root.position.y = 0.06 - scroll * 0.16 + Math.sin(t * 0.42) * 0.035;
-      root.scale.setScalar(stageScale * (1 + scroll * 0.02));
+      root.rotation.y = pointer.x * 0.12 + Math.sin(t * 0.23) * 0.030;
+      root.rotation.x = -pointer.y * 0.07 + Math.sin(t * 0.18) * 0.012;
+      root.position.y = -0.03 - scroll * 0.10 + Math.sin(t * 0.42) * 0.040;
+      root.scale.setScalar(stageScale * (1 + scroll * 0.012));
 
-      rig.rotation.y = -0.38 + Math.sin(t * 0.32) * 0.075;
-      rig.rotation.z = 0.04 + Math.sin(t * 0.21) * 0.025;
-      scan.position.z = -1.78 + ((t * 0.42) % 3.56);
-      scan.material.opacity = 0.26 + Math.sin(t * 2.0) * 0.10;
+      rig.rotation.y = Math.sin(t * 0.20) * 0.035;
+      rig.rotation.z = Math.sin(t * 0.16) * 0.012;
+      tower.rotation.y = -0.28 + Math.sin(t * 0.26) * 0.030;
+      tower.rotation.z = -0.025 + Math.sin(t * 0.21) * 0.010;
 
-      orbitA.rotation.z += dt * 0.14;
-      orbitB.rotation.x += dt * 0.10;
-      orbitC.rotation.y -= dt * 0.12;
-      coreTower.rotation.y = Math.sin(t * 0.22) * 0.08;
-      coreRings.forEach((ring, index) => {
-        ring.rotation.z += dt * (0.22 + index * 0.06) * (index % 2 ? -1 : 1);
-        ring.material.opacity = 0.10 + Math.sin(t * 1.15 + index) * 0.035 + index * 0.018;
+      fanGroup.children.forEach((fan) => {
+        if (fan.userData.spin) fan.rotation.z -= dt * 5.4;
       });
-      fanGroup.children.forEach((fan) => { if (fan.userData.spin) fan.rotation.y += dt * 4.8; });
-      floaters.children.forEach((chip, index) => {
-        chip.position.y = chip.userData.baseY + Math.sin(t * chip.userData.speed + index) * 0.05;
-        chip.rotation.y += dt * 0.12;
+      ramBars.forEach((bar, index) => {
+        bar.material.opacity = 0.13 + Math.sin(t * 1.6 + index * 0.8) * 0.045;
       });
+      portLights.forEach((slit, index) => {
+        slit.material.opacity = 0.08 + Math.sin(t * 1.25 + index * 0.4) * 0.025 + index * 0.006;
+      });
+      cpuGlow.material.opacity = 0.44 + Math.sin(t * 1.55) * 0.10;
+      gpuLight.material.opacity = 0.34 + Math.sin(t * 1.32 + 0.8) * 0.08;
+      pulseLight.intensity = 1.25 + Math.sin(t * 1.38) * 0.34;
 
-      core.material.opacity = 0.60 + Math.sin(t * 1.8) * 0.12;
-      coreSpine.material.opacity = 0.54 + Math.sin(t * 1.65) * 0.12;
-      capTop.material.opacity = 0.50 + Math.sin(t * 1.65 + 0.6) * 0.10;
-      pulseLight.intensity = 1.28 + Math.sin(t * 1.45) * 0.38;
-      particles.rotation.y += dt * 0.018;
-      particles.rotation.x = Math.sin(t * 0.08) * 0.035;
+      orbitA.rotation.z += dt * 0.10;
+      orbitB.rotation.x += dt * 0.08;
+      traceA.rotation.y += dt * 0.045;
+      traceB.rotation.y -= dt * 0.035;
+      dustGroup.children.forEach((shard, index) => {
+        shard.position.y = shard.userData.baseY + Math.sin(t * shard.userData.speed + index) * 0.045;
+        shard.rotation.y += dt * 0.10;
+      });
+      particles.rotation.y += dt * 0.016;
+      particles.rotation.x = Math.sin(t * 0.08) * 0.030;
 
       renderer.render(scene, camera);
     };
