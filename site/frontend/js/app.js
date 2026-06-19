@@ -1576,6 +1576,11 @@ function initHome3D() {
   const voidFields = $$(".void-field");
   if (reduce) {                              // accessibilité : état final figé, zéro mouvement
     seps.forEach((s) => s.style.setProperty("--p", "1"));
+    // La tour reste visible (une seule image figée), mais plus aucune animation.
+    const stopStatic = (stage && modelCanvas && window.initVoltVoidModel)
+      ? window.initVoltVoidModel(stage, modelCanvas, { reducedMotion: true })
+      : null;
+    home3DCleanup = () => { if (stopStatic) stopStatic(); };
     return;
   }
 
