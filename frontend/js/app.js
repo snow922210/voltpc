@@ -463,9 +463,9 @@ function usefulBadge(p) {
 }
 
 function stockHtml(stock) {
-  if (stock <= 0) return `<span class="stock-dot out">● Rupture</span>`;
-  if (stock <= 10) return `<span class="stock-dot low">● Plus que ${stock}</span>`;
-  return `<span class="stock-dot">● En stock</span>`;
+  if (stock <= 0) return `<span class="stock-dot out">Rupture</span>`;
+  if (stock <= 10) return `<span class="stock-dot low">Plus que ${stock}</span>`;
+  return `<span class="stock-dot">En stock</span>`;
 }
 
 /* ─── Specs : lecture machine + scoring perf / usage ─────────────────
@@ -1094,22 +1094,11 @@ async function viewHome(app) {
         </div>
       </div>
 
-      <div class="void-stage" id="voidStage" aria-label="Scene froide VoltCore en mouvement">
-        <div class="void-reactor" id="voidRig" aria-hidden="true">
-          <span class="void-reactor-glow"></span>
-          <span class="void-reactor-halo"></span>
-          <span class="void-reactor-shell"><i></i><i></i><i></i></span>
-          <span class="void-reactor-core"></span>
-          <span class="void-reactor-veil"></span>
-          <span class="void-reactor-dust"></span>
-          <span class="void-reactor-readout"><b></b><b></b><b></b></span>
-        </div>
-        <div class="void-chip chip-gpu"><span>Froid</span><strong>Flux stable</strong></div>
-        <div class="void-chip chip-cpu"><span>Silence</span><strong>Sans bruit</strong></div>
-        <div class="void-chip chip-flow"><span>Guide</span><strong>Choix clair</strong></div>
+      <div class="void-stage" id="voidStage" aria-label="Scene 3D VoltCore en mouvement">
+        <canvas class="void-model" id="voidModel" aria-hidden="true"></canvas>
       </div>
 
-      <div class="void-scroll" aria-hidden="true"><span></span>scroll</div>
+      <div class="void-scroll" aria-hidden="true"><span></span></div>
     </section>
 
     <section class="void-orbit-strip" data-void-sep>
@@ -1468,10 +1457,10 @@ function initVoidField(stage, canvas) {
   const resetParticle = (p = {}) => {
     p.x = Math.random();
     p.y = Math.random();
-    p.vx = -0.000006 + Math.random() * 0.000020;
-    p.vy = 0.000012 + Math.random() * 0.000045;
-    p.size = 0.55 + Math.random() * 1.75;
-    p.alpha = 0.10 + Math.random() * 0.28;
+    p.vx = -0.000004 + Math.random() * 0.000014;
+    p.vy = 0.000006 + Math.random() * 0.000026;
+    p.size = 0.45 + Math.random() * 1.28;
+    p.alpha = 0.08 + Math.random() * 0.20;
     p.sway = Math.random() * Math.PI * 2;
     p.depth = Math.random();
     return p;
@@ -1486,7 +1475,7 @@ function initVoidField(stage, canvas) {
       canvas.width = w;
       canvas.height = h;
     }
-    const count = Math.min(92, Math.max(48, Math.floor((canvas.clientWidth || 1) * (canvas.clientHeight || 1) / 18000)));
+    const count = Math.min(64, Math.max(32, Math.floor((canvas.clientWidth || 1) * (canvas.clientHeight || 1) / 26000)));
     particles = Array.from({ length: count }, () => resetParticle());
   };
 
@@ -1505,17 +1494,31 @@ function initVoidField(stage, canvas) {
     const px = pointer.x * cw;
     const py = pointer.y * ch;
     const glow = ctx.createRadialGradient(px, py, 0, px, py, Math.max(cw, ch) * 0.72);
-    glow.addColorStop(0, pointer.hot ? "rgba(220,240,246,0.055)" : "rgba(150,178,190,0.030)");
-    glow.addColorStop(0.30, "rgba(110,136,148,0.026)");
-    glow.addColorStop(0.64, "rgba(38,54,66,0.014)");
+    glow.addColorStop(0, pointer.hot ? "rgba(220,240,246,0.040)" : "rgba(150,178,190,0.024)");
+    glow.addColorStop(0.32, "rgba(110,136,148,0.020)");
+    glow.addColorStop(0.68, "rgba(38,54,66,0.010)");
     glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, cw, ch);
 
+    ctx.globalAlpha = pointer.hot ? 0.16 : 0.10;
+    ctx.strokeStyle = "rgba(226,244,248,.42)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 3; i++) {
+      const y = ch * (0.36 + i * 0.115) + (pointer.y - 0.5) * (7 + i * 3);
+      const start = cw * (0.52 - i * 0.045);
+      const end = cw * (0.88 + i * 0.035);
+      ctx.beginPath();
+      ctx.moveTo(start, y);
+      ctx.bezierCurveTo(cw * 0.66, y - 18 - i * 9, cw * 0.76, y + 18 + i * 5, end, y - 2);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
     for (const p of particles) {
-      const speedBoost = pointer.hot ? 1.05 : 1;
-      p.sway += dt * (0.00026 + p.depth * 0.00012);
-      p.x += (p.vx * dt * speedBoost) + Math.cos(p.sway) * 0.000005 * dt;
+      const speedBoost = pointer.hot ? 1.025 : 1;
+      p.sway += dt * (0.00018 + p.depth * 0.00008);
+      p.x += (p.vx * dt * speedBoost) + Math.cos(p.sway) * 0.000003 * dt;
       p.y += p.vy * dt * speedBoost;
       if (p.y > 1.16 || p.x < -0.08 || p.x > 1.08) {
         resetParticle(p);
@@ -1529,15 +1532,15 @@ function initVoidField(stage, canvas) {
       const alpha = p.alpha * (0.72 + p.depth * 0.36);
 
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = p.depth > 0.62 ? "rgba(238,250,252,.72)" : "rgba(172,205,218,.52)";
+      ctx.fillStyle = p.depth > 0.62 ? "rgba(238,250,252,.58)" : "rgba(172,205,218,.42)";
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
 
-      if (p.depth > 0.58) {
-        ctx.globalAlpha = alpha * 0.18;
+      if (p.depth > 0.70) {
+        ctx.globalAlpha = alpha * 0.10;
         ctx.fillStyle = "rgba(238,250,252,.70)";
-        ctx.fillRect(x - r * 0.22, y - r * 1.8, Math.max(1, r * 0.34), r * 3.2);
+        ctx.fillRect(x - r * 0.18, y - r * 1.2, Math.max(1, r * 0.24), r * 2.1);
       }
       ctx.globalAlpha = 1;
     }
@@ -1566,9 +1569,9 @@ function initVoidField(stage, canvas) {
 function initHome3D() {
   cleanupHome3D();
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const pc = $("#voidRig");
   const stage = $("#voidStage");
   const hero = $(".void-hero");
+  const modelCanvas = $("#voidModel");
   const seps = $$("[data-void-sep]");
   const voidFields = $$(".void-field");
   if (reduce) {                              // accessibilité : état final figé, zéro mouvement
@@ -1581,10 +1584,10 @@ function initHome3D() {
     ticking = false;
     const vh = window.innerHeight;
     // Tour du hero : légère rotation + recul selon le scroll d'entrée
-    if (pc) {
-      const r = pc.getBoundingClientRect();
+    if (stage) {
+      const r = stage.getBoundingClientRect();
       const prog = 1 - (r.top + r.height / 2) / vh;     // ~0 en haut → 1 en bas de l'écran
-      pc.style.setProperty("--rot", `${-6 + prog * 12}deg`);
+      stage.style.setProperty("--void-scroll", clamp01(prog).toFixed(3));
       hero?.style.setProperty("--void-scroll", clamp01(prog).toFixed(3));
     }
     // Séparateurs : 0 quand le bloc entre par le bas, 1 quand il atteint le centre/haut
@@ -1603,38 +1606,15 @@ function initHome3D() {
     return host ? initVoidField(host, canvas) : null;
   }).filter(Boolean);
 
-  // Tilt souris de la tour (parallaxe douce dans le hero)
-  let onPointerMove = null;
-  let onPointerLeave = null;
-  if (stage && pc) {
-    onPointerMove = (e) => {
-      const r = stage.getBoundingClientRect();
-      const dx = (e.clientX - r.left) / r.width - 0.5;
-      const dy = (e.clientY - r.top) / r.height - 0.5;
-      pc.style.setProperty("--tiltx", `${(-dy * 3.2).toFixed(1)}deg`);
-      pc.style.setProperty("--tilty", `${(dx * 4.6).toFixed(1)}deg`);
-      hero?.style.setProperty("--void-x", `${((dx + 0.5) * 100).toFixed(1)}%`);
-      hero?.style.setProperty("--void-y", `${((dy + 0.5) * 100).toFixed(1)}%`);
-      hero?.style.setProperty("--void-tilt-x", "0deg");
-      hero?.style.setProperty("--void-tilt-y", "0deg");
-    };
-    onPointerLeave = () => {
-      pc.style.setProperty("--tiltx", "0deg");
-      pc.style.setProperty("--tilty", "0deg");
-      hero?.style.setProperty("--void-x", "62%");
-      hero?.style.setProperty("--void-y", "44%");
-      hero?.style.setProperty("--void-tilt-x", "0deg");
-      hero?.style.setProperty("--void-tilt-y", "0deg");
-    };
-    stage.addEventListener("pointermove", onPointerMove);
-    stage.addEventListener("pointerleave", onPointerLeave);
-  }
+  const stopModel = (stage && modelCanvas && window.initVoltVoidModel)
+    ? window.initVoltVoidModel(stage, modelCanvas)
+    : null;
+
   home3DCleanup = () => {
     window.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onScroll);
     stopVoidFields.forEach((stop) => stop());
-    if (stage && onPointerMove) stage.removeEventListener("pointermove", onPointerMove);
-    if (stage && onPointerLeave) stage.removeEventListener("pointerleave", onPointerLeave);
+    if (stopModel) stopModel();
   };
   update();
 }

@@ -64,13 +64,17 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
 
 body {
   font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  overflow-x: hidden;
   font-size: 17px;                 /* pace de lecture Apple (pas 16) */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -3020,7 +3024,6 @@ button:disabled {
 }
 
 .badge,
-.stock-dot,
 .pb-compat,
 .discount-chip,
 .perf-pill,
@@ -3684,5 +3687,110 @@ input[type="radio"],
 
   .void-hero {
     padding-top: calc(var(--fixed-header-h) + 28px);
+  }
+}
+
+/* Clean text status: no grey strip behind stock labels. */
+.stock-dot,
+.void-home .stock-dot,
+body.void-home-active .stock-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  min-width: 0;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  line-height: 1.25;
+  color: var(--green) !important;
+}
+
+.stock-dot::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.stock-dot.low {
+  color: var(--amber) !important;
+}
+
+.stock-dot.out {
+  color: var(--red) !important;
+}
+
+/* Cleaner void hero motion: less noise, more depth. */
+body.void-home-active::after,
+.void-home::after {
+  opacity: .22;
+  animation-duration: 36s;
+}
+
+.void-home .void-depth {
+  display: none;
+}
+
+.void-home .void-field {
+  opacity: .54;
+  filter: saturate(.70);
+}
+
+/* WebGL hero stage: the 3D canvas is the artwork, not a framed card. */
+.void-home .void-stage {
+  min-height: min(74vh, 780px);
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  transform: translateY(-1.5vh);
+}
+
+.void-home .void-stage::before {
+  inset: -10% -13% 2%;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background:
+    radial-gradient(ellipse 58% 48% at 50% 48%, rgba(226,249,252,.08), rgba(72,102,120,.030) 42%, transparent 74%),
+    radial-gradient(ellipse 72% 28% at 50% 78%, rgba(126,168,186,.06), transparent 72%);
+  box-shadow: none;
+}
+
+.void-home .void-stage::after {
+  width: min(520px, 66%);
+  height: 78px;
+  bottom: 14%;
+  opacity: .42;
+}
+
+.void-model {
+  position: absolute;
+  inset: -10% -12% -4%;
+  z-index: 7;
+  width: 124%;
+  height: 114%;
+  display: block;
+  pointer-events: none;
+}
+
+.void-scroll {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .void-home .void-stage {
+    min-height: 420px;
+    transform: translateY(0);
+    overflow: hidden;
+  }
+
+  .void-model {
+    inset: -7% -8% -6%;
+    width: 116%;
+    height: 113%;
   }
 }
