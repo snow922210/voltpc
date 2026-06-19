@@ -3577,7 +3577,7 @@ body::after {
   }
 }
 
-/* Final UI fix: readable controls and a header that stays visible. */
+/* Final UI polish: shape refinements only, with the existing palette preserved. */
 :root {
   --fixed-header-h: 78px;
 }
@@ -3589,10 +3589,7 @@ body::after {
   right: 0;
   z-index: 300 !important;
   min-height: var(--fixed-header-h);
-  background:
-    linear-gradient(180deg, rgba(1, 2, 5, .94), rgba(1, 2, 5, .82)) !important;
-  border-bottom: 1px solid rgba(210, 226, 232, .16) !important;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, .34) !important;
+  border-radius: 0 0 18px 18px;
 }
 
 .app {
@@ -3615,35 +3612,34 @@ body.void-home-active .app {
 }
 
 .header-search,
-.header-search input,
-.price-inputs input,
-.filter-option,
-input,
-select,
-textarea {
-  color: #eef4f4 !important;
-}
-
-.header-search,
 .price-inputs input,
 input,
 select,
 textarea,
 .select {
-  background: rgba(15, 19, 26, .94) !important;
-  border-color: rgba(210, 226, 232, .20) !important;
+  min-height: 42px;
+  border-radius: 12px;
 }
 
-.header-search input::placeholder,
-input::placeholder,
-textarea::placeholder {
-  color: rgba(226, 235, 236, .68) !important;
-  opacity: 1;
+.header-search {
+  min-height: 42px;
+  border-radius: 999px;
+  padding-inline: 16px;
+}
+
+.header-search input {
+  min-height: 24px;
 }
 
 .filter-option {
-  background: transparent !important;
+  min-height: 26px;
+  border-radius: 9px;
+  padding: 4px 6px;
   text-shadow: none;
+}
+
+.filter-option:hover {
+  background: var(--accent-wash);
 }
 
 .filter-option input {
@@ -3664,7 +3660,6 @@ input[type="radio"],
   border: 0 !important;
   box-shadow: none !important;
   padding: 0 !important;
-  accent-color: var(--accent-soft);
   cursor: pointer;
 }
 
