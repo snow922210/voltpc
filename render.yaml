@@ -1,0 +1,65 @@
+# ─── Blueprint Render — déploiement gratuit de VOLT PC ───────────────
+# Sur render.com : New ▸ Blueprint ▸ connecter ce dépôt → tout est auto-configuré.
+#
+# ─── Base persistante PostgreSQL via Neon (gratuit, ne s'efface pas) ───
+# Les données (comptes, paniers, commandes, adresses, favoris) ne SURVIVENT aux
+# redéploiements que si DATABASE_URL pointe vers une base externe persistante.
+# On utilise Neon (neon.tech) plutôt que le Postgres gratuit de Render, qui
+# expire au bout de 90 jours.
+#   1. Créer un projet sur neon.tech, copier la "Connection string" (pooled).
+#   2. Dans Render ▸ service voltpc ▸ Environment, coller cette URL dans
+#      DATABASE_URL (déclarée ci-dessous en sync:false).
+#   3. Redéployer : le code détecte DATABASE_URL et bascule sur PostgreSQL
+#      (le log de démarrage affiche « PostgreSQL (persistant) »).
+# Sans DATABASE_URL, l'app retombe sur SQLite local → données NON persistantes.
+# La base est seedée au 1er démarrage (280 produits + compte démo).
+
+services:
+  - type: web
+    name: voltpc
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/categories
+    envVars:
+      - key: DEV_SHOW_CODES
+        value: ""
+      - key: ADMIN_EMAILS
+        value: "salut_c_moi@yahoo.com,yohannlemire@gmail.com"
+      - key: CORS_ORIGINS
+        value: "https://voltcore.fr,https://www.voltcore.fr"
+      # Activé : https://voltcore.fr répond avec un certificat valide.
+      # Active HSTS ET le flag Secure du cookie de session (volt_session).
+      - key: ENABLE_HSTS
+        value: "1"
+      # Clé de signature stable (sessions conservées entre redémarrages).
+      - key: VOLTPC_SECRET
+        generateValue: true
+      # URL publique du site (redirections Stripe, liens emails).
+      - key: PUBLIC_BASE_URL
+        value: "https://voltcore.fr"
+      # URL canonique pour le SEO (sitemap, balises canonical, données structurées).
+      - key: SITE_URL
+        value: "https://voltcore.fr"
+      # Base serveur persistante (Neon). Coller la "Connection string" Neon dans
+      # Render ▸ Environment. Doit contenir ?sslmode=require (fourni par Neon).
+      - key: DATABASE_URL
+        sync: false
+      # Emails transactionnels : renseigner les valeurs privées dans Render.
+      # Brevo est recommandé sur Render ; SMTP classique fonctionne aussi selon le fournisseur.
+      - key: BREVO_API_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: SHOP_EMAIL
+        value: "salut_c_moi@yahoo.com"
+
+# Pas de bloc `databases:` : la base est externe (Neon), branchée via DATABASE_URL.
