@@ -8,6 +8,7 @@ backend/voltpc.db       # base SQLite (recréée automatiquement)
 __pycache__/
 *.pyc
 *.pyo
+.venv/
 
 # Outils / éditeur
 .claude/

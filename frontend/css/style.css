@@ -3268,11 +3268,11 @@ body::after {
   }
 }
 
-/* Final hero polish: quiet cryo chamber, no image dependency. */
+/* Final hero polish: quiet workstation chamber, no image dependency. */
 .void-home .void-hero {
   background:
-    radial-gradient(ellipse 44% 36% at 72% 42%, rgba(186, 225, 238, .085), transparent 70%),
-    radial-gradient(ellipse 38% 30% at 18% 76%, rgba(87, 113, 128, .12), transparent 72%);
+    radial-gradient(ellipse 38% 30% at 72% 42%, rgba(186, 225, 238, .070), transparent 72%),
+    radial-gradient(ellipse 36% 28% at 18% 76%, rgba(87, 113, 128, .10), transparent 72%);
 }
 
 .void-home .void-stage {
@@ -3291,34 +3291,35 @@ body::after {
 .void-home .void-stage::before {
   width: min(760px, 94%);
   height: min(500px, 64vh);
-  border-radius: 42px;
+  border-radius: 28px;
   background:
-    radial-gradient(ellipse at 50% 34%, rgba(225, 248, 252, .080), transparent 54%),
-    radial-gradient(ellipse at 50% 88%, rgba(119, 161, 180, .16), transparent 68%),
+    linear-gradient(90deg, transparent 0 12%, rgba(226,249,252,.045) 12.2% 12.5%, transparent 12.7% 28%, rgba(226,249,252,.032) 28.2% 28.5%, transparent 28.7% 100%),
+    radial-gradient(ellipse at 50% 34%, rgba(225, 248, 252, .060), transparent 56%),
+    radial-gradient(ellipse at 50% 88%, rgba(119, 161, 180, .12), transparent 68%),
     rgba(255,255,255,.010);
-  opacity: .92;
+  opacity: .74;
 }
 
 .void-home .void-stage::after {
   width: min(690px, 88%);
-  height: 120px;
+  height: 96px;
   bottom: 10%;
   border-radius: 999px;
   background:
     radial-gradient(ellipse at center, rgba(211, 241, 248, .18), rgba(104, 138, 156, .08) 38%, transparent 74%);
   transform: rotateX(68deg);
-  opacity: .78;
+  opacity: .56;
 }
 
 .void-home .void-reactor {
-  width: min(660px, 88%);
-  aspect-ratio: 1.18 / 1;
+  width: min(620px, 86%);
+  aspect-ratio: 1.12 / 1;
   transform:
     rotateX(var(--tiltx))
     rotateY(var(--tilty))
-    translateZ(70px)
-    translateY(calc(var(--void-scroll) * -12px));
-  animation: voidCryoFloat 8s ease-in-out infinite;
+    translateZ(46px)
+    translateY(calc(var(--void-scroll) * -8px));
+  animation: voidCryoFloat 11s ease-in-out infinite;
 }
 
 .void-home .void-reactor *,
@@ -3328,17 +3329,17 @@ body::after {
 }
 
 .void-home .void-reactor::before {
-  inset: 14% 2% 9%;
+  inset: 18% 4% 10%;
   background:
-    radial-gradient(ellipse at center, rgba(226, 249, 252, .22), transparent 62%);
-  opacity: .84;
+    radial-gradient(ellipse at center, rgba(226, 249, 252, .15), transparent 64%);
+  opacity: .62;
 }
 
 .void-home .void-reactor::after {
-  inset: 22% 10%;
+  inset: 24% 11%;
   background:
-    radial-gradient(ellipse at center, rgba(238, 250, 252, .20), rgba(108, 143, 160, .09) 44%, transparent 72%);
-  animation: voidCryoPulse 5.6s ease-in-out infinite;
+    radial-gradient(ellipse at center, rgba(238, 250, 252, .12), rgba(108, 143, 160, .06) 44%, transparent 72%);
+  animation: voidCryoPulse 8.2s ease-in-out infinite;
 }
 
 .void-home .void-reactor-halo,
@@ -3348,41 +3349,43 @@ body::after {
 }
 
 .void-home .void-reactor-glow {
-  inset: 4%;
+  inset: 8%;
   background:
-    radial-gradient(ellipse at 50% 48%, rgba(229, 249, 252, .28), rgba(92, 124, 140, .12) 34%, transparent 70%);
-  transform: translateZ(-52px);
-  animation: voidCryoBreath 12s ease-in-out infinite;
+    radial-gradient(ellipse at 50% 48%, rgba(229, 249, 252, .18), rgba(92, 124, 140, .08) 34%, transparent 70%);
+  transform: translateZ(-46px);
+  animation: voidCryoBreath 15s ease-in-out infinite;
 }
 
 .void-home .void-reactor-halo {
-  width: 88%;
-  height: 38%;
+  width: 82%;
+  height: 32%;
   bottom: 13%;
   border-radius: 999px;
   background:
     radial-gradient(ellipse at 50% 44%, rgba(230, 250, 253, .18), rgba(136, 174, 190, .09) 38%, transparent 72%);
   transform: translateZ(-12px) rotateX(70deg);
-  animation: voidCryoHalo 9s ease-in-out infinite;
+  animation: voidCryoHalo 12s ease-in-out infinite;
 }
 
 .void-home .void-reactor-shell {
-  width: 56%;
-  height: 70%;
+  width: 48%;
+  height: 74%;
   aspect-ratio: auto;
-  border-radius: 32px;
-  clip-path: polygon(12% 5%, 84% 0, 100% 18%, 94% 84%, 52% 100%, 8% 86%, 0 20%);
+  border: 1px solid rgba(218,239,245,.13);
+  border-radius: 22px;
+  clip-path: polygon(10% 3%, 82% 0, 100% 15%, 96% 88%, 62% 100%, 8% 92%, 0 18%);
   background:
-    linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.020)),
-    radial-gradient(circle at 28% 18%, rgba(238,250,252,.18), transparent 34%),
-    radial-gradient(ellipse at 58% 72%, rgba(92, 126, 145, .16), transparent 54%),
-    rgba(5, 8, 13, .62);
+    linear-gradient(90deg, transparent 0 10%, rgba(220,244,250,.16) 10.4% 10.8%, transparent 11.2% 100%),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.018)),
+    radial-gradient(circle at 28% 18%, rgba(238,250,252,.12), transparent 34%),
+    radial-gradient(ellipse at 58% 72%, rgba(92, 126, 145, .13), transparent 54%),
+    rgba(5, 8, 13, .70);
   box-shadow:
-    inset 0 1px rgba(255,255,255,.16),
+    inset 0 1px rgba(255,255,255,.13),
     inset 0 -1px rgba(255,255,255,.05),
-    0 34px 86px rgba(0,0,0,.46),
+    0 30px 76px rgba(0,0,0,.44),
     0 0 0 1px rgba(220, 244, 250, .06);
-  transform: translateZ(42px) rotateY(-8deg);
+  transform: translateZ(42px) rotateY(-5deg);
 }
 
 .void-home .void-reactor-shell i {
@@ -3407,8 +3410,8 @@ body::after {
 }
 
 .void-home .void-reactor-core {
-  width: 18%;
-  height: 42%;
+  width: 12%;
+  height: 52%;
   aspect-ratio: auto;
   border-radius: 999px;
   background:
@@ -3418,17 +3421,17 @@ body::after {
     0 0 84px rgba(90, 132, 154, .18),
     inset 0 -16px 22px rgba(3, 8, 13, .34);
   transform: translateZ(86px);
-  animation: voidCryoCore 7.4s ease-in-out infinite;
+  animation: voidCryoCore 10s ease-in-out infinite;
 }
 
 .void-home .void-reactor-veil {
-  width: 88%;
-  height: 62%;
+  width: 74%;
+  height: 54%;
   background:
     linear-gradient(100deg, transparent, rgba(225, 246, 250, .12), transparent 66%),
     radial-gradient(ellipse at 50% 50%, rgba(191, 227, 238, .10), transparent 72%);
   transform: translateZ(62px) rotate(-7deg);
-  animation: voidCryoVeil 11s ease-in-out infinite;
+  animation: voidCryoVeil 16s ease-in-out infinite;
 }
 
 .void-home .void-reactor-dust {
@@ -3448,7 +3451,8 @@ body::after {
     32px 276px 0 0 rgba(244,252,253,.42),
     452px 308px 0 .3px rgba(190,222,234,.34);
   transform: translateZ(98px);
-  animation: voidCryoSnow 14s linear infinite;
+  opacity: .52;
+  animation: voidCryoSnow 24s linear infinite;
 }
 
 .void-home .void-reactor-readout {
@@ -3476,35 +3480,35 @@ body::after {
   padding: 13px 15px 14px;
   border-radius: 10px;
   background:
-    linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.018)),
-    rgba(5, 8, 13, .70);
-  box-shadow: inset 0 1px rgba(255,255,255,.09), 0 20px 56px rgba(0,0,0,.36);
+    linear-gradient(145deg, rgba(255,255,255,.060), rgba(255,255,255,.014)),
+    rgba(5, 8, 13, .62);
+  box-shadow: inset 0 1px rgba(255,255,255,.07), 0 18px 48px rgba(0,0,0,.30);
   backdrop-filter: blur(12px) saturate(130%);
   -webkit-backdrop-filter: blur(12px) saturate(130%);
 }
 
-.void-home .chip-gpu { left: 3%; top: 17%; transform: rotate(-4deg) translateZ(130px); }
-.void-home .chip-cpu { right: 1%; top: 25%; transform: rotate(3deg) translateZ(120px); }
-.void-home .chip-flow { right: 11%; bottom: 14%; transform: rotate(-2deg) translateZ(126px); }
+.void-home .chip-gpu { left: 5%; top: 18%; transform: rotate(-2deg) translateZ(96px); }
+.void-home .chip-cpu { right: 4%; top: 28%; transform: rotate(2deg) translateZ(88px); }
+.void-home .chip-flow { right: 12%; bottom: 15%; transform: rotate(-1deg) translateZ(92px); }
 
 @keyframes voidCryoFloat {
   0%, 100% { translate: 0 0; }
-  50% { translate: 0 -16px; }
+  50% { translate: 0 -8px; }
 }
 
 @keyframes voidCryoPulse {
-  0%, 100% { opacity: .42; transform: translateZ(-24px) scale(.96); }
-  50% { opacity: .78; transform: translateZ(-24px) scale(1.04); }
+  0%, 100% { opacity: .34; transform: translateZ(-24px) scale(.985); }
+  50% { opacity: .58; transform: translateZ(-24px) scale(1.015); }
 }
 
 @keyframes voidCryoBreath {
-  0%, 100% { opacity: .56; transform: translateZ(-52px) scale(.98); }
-  50% { opacity: .90; transform: translateZ(-52px) scale(1.04); }
+  0%, 100% { opacity: .46; transform: translateZ(-46px) scale(.99); }
+  50% { opacity: .72; transform: translateZ(-46px) scale(1.025); }
 }
 
 @keyframes voidCryoHalo {
-  0%, 100% { opacity: .48; transform: translateZ(-12px) rotateX(70deg) scale(.96); }
-  50% { opacity: .80; transform: translateZ(-12px) rotateX(70deg) scale(1.05); }
+  0%, 100% { opacity: .38; transform: translateZ(-12px) rotateX(70deg) scale(.98); }
+  50% { opacity: .62; transform: translateZ(-12px) rotateX(70deg) scale(1.025); }
 }
 
 @keyframes voidCryoSweep {
@@ -3514,19 +3518,19 @@ body::after {
 }
 
 @keyframes voidCryoCore {
-  0%, 100% { transform: translate3d(-8px, 4px, 86px) scale(.96); }
-  50% { transform: translate3d(10px, -7px, 86px) scale(1.04); }
+  0%, 100% { transform: translate3d(-3px, 2px, 86px) scale(.985); }
+  50% { transform: translate3d(4px, -3px, 86px) scale(1.015); }
 }
 
 @keyframes voidCryoVeil {
-  0%, 100% { transform: translate3d(-24px, 6px, 62px) rotate(-7deg); opacity: .30; }
-  50% { transform: translate3d(26px, -8px, 62px) rotate(5deg); opacity: .60; }
+  0%, 100% { transform: translate3d(-14px, 3px, 62px) rotate(-4deg); opacity: .22; }
+  50% { transform: translate3d(16px, -4px, 62px) rotate(3deg); opacity: .42; }
 }
 
 @keyframes voidCryoSnow {
-  from { transform: translate3d(-22px, -42px, 98px); opacity: .42; }
-  50% { opacity: .88; }
-  to { transform: translate3d(34px, 142px, 98px); opacity: .48; }
+  from { transform: translate3d(-14px, -34px, 98px); opacity: .22; }
+  50% { opacity: .56; }
+  to { transform: translate3d(18px, 98px, 98px); opacity: .26; }
 }
 
 @keyframes voidCryoReadout {
@@ -3570,5 +3574,120 @@ body::after {
   .void-home .void-stage::after {
     animation: none !important;
     transition-duration: .01ms !important;
+  }
+}
+
+/* Final UI fix: readable controls and a header that stays visible. */
+:root {
+  --fixed-header-h: 78px;
+}
+
+.header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0;
+  right: 0;
+  z-index: 300 !important;
+  min-height: var(--fixed-header-h);
+  background:
+    linear-gradient(180deg, rgba(1, 2, 5, .94), rgba(1, 2, 5, .82)) !important;
+  border-bottom: 1px solid rgba(210, 226, 232, .16) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .34) !important;
+}
+
+.app {
+  padding-top: calc(32px + var(--fixed-header-h));
+}
+
+body.void-home-active .app {
+  padding-top: 0;
+}
+
+.void-hero {
+  padding-top: max(clamp(124px, 14vh, 160px), calc(var(--fixed-header-h) + 48px));
+}
+
+.filters,
+.builder-summary,
+.product-gallery,
+.prebuilt-summary {
+  top: calc(var(--fixed-header-h) + 18px) !important;
+}
+
+.header-search,
+.header-search input,
+.price-inputs input,
+.filter-option,
+input,
+select,
+textarea {
+  color: #eef4f4 !important;
+}
+
+.header-search,
+.price-inputs input,
+input,
+select,
+textarea,
+.select {
+  background: rgba(15, 19, 26, .94) !important;
+  border-color: rgba(210, 226, 232, .20) !important;
+}
+
+.header-search input::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: rgba(226, 235, 236, .68) !important;
+  opacity: 1;
+}
+
+.filter-option {
+  background: transparent !important;
+  text-shadow: none;
+}
+
+.filter-option input {
+  opacity: 1;
+}
+
+input[type="checkbox"],
+input[type="radio"],
+.filter-option input[type="checkbox"],
+.filter-option input[type="radio"] {
+  all: revert !important;
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  width: 16px !important;
+  height: 16px !important;
+  flex: 0 0 16px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  accent-color: var(--accent-soft);
+  cursor: pointer;
+}
+
+@media (max-width: 920px) {
+  :root {
+    --fixed-header-h: 124px;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --fixed-header-h: 116px;
+  }
+
+  .app {
+    padding-top: calc(20px + var(--fixed-header-h));
+  }
+
+  body.void-home-active .header-search {
+    display: flex;
+  }
+
+  .void-hero {
+    padding-top: calc(var(--fixed-header-h) + 28px);
   }
 }

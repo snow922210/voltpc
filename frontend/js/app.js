@@ -1468,10 +1468,10 @@ function initVoidField(stage, canvas) {
   const resetParticle = (p = {}) => {
     p.x = Math.random();
     p.y = Math.random();
-    p.vx = -0.000012 + Math.random() * 0.00004;
-    p.vy = 0.000030 + Math.random() * 0.000085;
-    p.size = 0.8 + Math.random() * 2.8;
-    p.alpha = 0.16 + Math.random() * 0.42;
+    p.vx = -0.000006 + Math.random() * 0.000020;
+    p.vy = 0.000012 + Math.random() * 0.000045;
+    p.size = 0.55 + Math.random() * 1.75;
+    p.alpha = 0.10 + Math.random() * 0.28;
     p.sway = Math.random() * Math.PI * 2;
     p.depth = Math.random();
     return p;
@@ -1505,17 +1505,17 @@ function initVoidField(stage, canvas) {
     const px = pointer.x * cw;
     const py = pointer.y * ch;
     const glow = ctx.createRadialGradient(px, py, 0, px, py, Math.max(cw, ch) * 0.72);
-    glow.addColorStop(0, pointer.hot ? "rgba(220,240,246,0.090)" : "rgba(150,178,190,0.040)");
-    glow.addColorStop(0.26, "rgba(110,136,148,0.040)");
-    glow.addColorStop(0.60, "rgba(38,54,66,0.020)");
+    glow.addColorStop(0, pointer.hot ? "rgba(220,240,246,0.055)" : "rgba(150,178,190,0.030)");
+    glow.addColorStop(0.30, "rgba(110,136,148,0.026)");
+    glow.addColorStop(0.64, "rgba(38,54,66,0.014)");
     glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, cw, ch);
 
     for (const p of particles) {
-      const speedBoost = pointer.hot ? 1.18 : 1;
-      p.sway += dt * (0.00038 + p.depth * 0.00020);
-      p.x += (p.vx * dt * speedBoost) + Math.cos(p.sway) * 0.000010 * dt;
+      const speedBoost = pointer.hot ? 1.05 : 1;
+      p.sway += dt * (0.00026 + p.depth * 0.00012);
+      p.x += (p.vx * dt * speedBoost) + Math.cos(p.sway) * 0.000005 * dt;
       p.y += p.vy * dt * speedBoost;
       if (p.y > 1.16 || p.x < -0.08 || p.x > 1.08) {
         resetParticle(p);
@@ -1523,13 +1523,13 @@ function initVoidField(stage, canvas) {
       }
 
       const depthScale = 0.65 + p.depth * 1.25;
-      const x = p.x * cw + (pointer.x - 0.5) * 18 * p.depth;
-      const y = p.y * ch + (pointer.y - 0.5) * 12 * p.depth;
+      const x = p.x * cw + (pointer.x - 0.5) * 10 * p.depth;
+      const y = p.y * ch + (pointer.y - 0.5) * 7 * p.depth;
       const r = p.size * depthScale;
       const alpha = p.alpha * (0.72 + p.depth * 0.36);
 
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = p.depth > 0.62 ? "rgba(238,250,252,.88)" : "rgba(172,205,218,.74)";
+      ctx.fillStyle = p.depth > 0.62 ? "rgba(238,250,252,.72)" : "rgba(172,205,218,.52)";
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
@@ -1584,7 +1584,7 @@ function initHome3D() {
     if (pc) {
       const r = pc.getBoundingClientRect();
       const prog = 1 - (r.top + r.height / 2) / vh;     // ~0 en haut → 1 en bas de l'écran
-      pc.style.setProperty("--rot", `${-18 + prog * 42}deg`);
+      pc.style.setProperty("--rot", `${-6 + prog * 12}deg`);
       hero?.style.setProperty("--void-scroll", clamp01(prog).toFixed(3));
     }
     // Séparateurs : 0 quand le bloc entre par le bas, 1 quand il atteint le centre/haut
@@ -1611,12 +1611,12 @@ function initHome3D() {
       const r = stage.getBoundingClientRect();
       const dx = (e.clientX - r.left) / r.width - 0.5;
       const dy = (e.clientY - r.top) / r.height - 0.5;
-      pc.style.setProperty("--tiltx", `${(-dy * 10).toFixed(1)}deg`);
-      pc.style.setProperty("--tilty", `${(dx * 16).toFixed(1)}deg`);
+      pc.style.setProperty("--tiltx", `${(-dy * 3.2).toFixed(1)}deg`);
+      pc.style.setProperty("--tilty", `${(dx * 4.6).toFixed(1)}deg`);
       hero?.style.setProperty("--void-x", `${((dx + 0.5) * 100).toFixed(1)}%`);
       hero?.style.setProperty("--void-y", `${((dy + 0.5) * 100).toFixed(1)}%`);
-      hero?.style.setProperty("--void-tilt-x", `${(-dy * 4.8).toFixed(2)}deg`);
-      hero?.style.setProperty("--void-tilt-y", `${(dx * 6.4).toFixed(2)}deg`);
+      hero?.style.setProperty("--void-tilt-x", "0deg");
+      hero?.style.setProperty("--void-tilt-y", "0deg");
     };
     onPointerLeave = () => {
       pc.style.setProperty("--tiltx", "0deg");
