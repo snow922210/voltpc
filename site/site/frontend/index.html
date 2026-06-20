@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PAGE-SEO:START (rempli par le serveur selon la page) -->
+  <title>VoltCore — Composants PC haute performance</title>
+  <meta name="description" content="VoltCore : cartes graphiques, processeurs, mémoire et composants PC. Configurateur intelligent, panier et suivi de commande.">
+  <link rel="canonical" href="https://voltcore.fr/">
+  <meta property="og:title" content="VoltCore — Composants PC haute performance">
+  <meta property="og:description" content="Cartes graphiques, processeurs, mémoire et composants PC. Configurateur intelligent, panier et suivi de commande.">
+  <meta property="og:url" content="https://voltcore.fr/">
+  <meta name="twitter:title" content="VoltCore — Composants PC haute performance">
+  <meta name="twitter:description" content="Cartes graphiques, processeurs, mémoire et composants PC. Configurateur intelligent et suivi de commande.">
+  <!-- PAGE-SEO:END -->
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#2563eb">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="VoltCore">
+  <meta property="og:locale" content="fr_FR">
+  <meta name="twitter:card" content="summary">
+  <!-- PAGE-JSONLD -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://checkout.stripe.com" crossorigin>
+  <link rel="preconnect" href="https://js.stripe.com" crossorigin>
+  <link rel="dns-prefetch" href="//checkout.stripe.com">
+  <link rel="dns-prefetch" href="//js.stripe.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=87">
+  <script>
+    /* Thème appliqué avant le rendu (évite tout flash). Préférence enregistrée,
+       sinon réglage système. */
+    (function () {
+      var t = localStorage.getItem("volt_theme");
+      if (t !== "dark" && t !== "light") t = "light";   // sunset clair par défaut
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 2 6 18h8l-2 12L24 14h-8l2-12z' fill='%232563eb'/%3E%3C/svg%3E">
+
+  <!-- Données structurées : marque + recherche interne -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://voltcore.fr/#organization",
+        "name": "VoltCore",
+        "url": "https://voltcore.fr/",
+        "description": "Le spécialiste français du composant PC haute performance.",
+        "areaServed": "FR"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://voltcore.fr/#website",
+        "url": "https://voltcore.fr/",
+        "name": "VoltCore",
+        "inLanguage": "fr-FR",
+        "publisher": { "@id": "https://voltcore.fr/#organization" },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://voltcore.fr/catalogue?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <div class="announce">
+    <span><svg class="announce-ico" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>Livraison offerte dès 50 € &nbsp;·&nbsp; Code <strong>SUMMER20</strong> : -20 % sur tout le site &nbsp;·&nbsp; Rétractation légale 14 jours</span>
+  </div>
+
+  <header class="header" id="header">
+    <a class="logo" href="/">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <defs><linearGradient id="boltg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#d9b08c"/><stop offset="1" stop-color="#8a5a36"/>
+        </linearGradient></defs>
+        <path d="M18 2 6 18h8l-2 12L24 14h-8l2-12z" fill="url(#boltg)"/>
+      </svg>
+      <span>Volt<em>Core</em></span>
+    </a>
+
+    <nav class="nav">
+      <a href="/" data-nav="">Accueil</a>
+      <div class="nav-item">
+        <a href="/catalogue" data-nav="catalogue">Composants <span class="chev">▾</span></a>
+        <div class="nav-menu nav-menu-grid" id="menuComponents"></div>
+      </div>
+      <div class="nav-item">
+        <a href="/catalogue?cat=monitor">Périphériques <span class="chev">▾</span></a>
+        <div class="nav-menu" id="menuPeriph"></div>
+      </div>
+      <a href="/configurateur" data-nav="configurateur">Configurateur</a>
+      <a href="/catalogue?promo=1" class="nav-sale">Promos</a>
+    </nav>
+
+    <div class="header-search">
+      <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" id="searchInput" placeholder="Rechercher un composant…" autocomplete="off">
+    </div>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="themeBtn" title="Changer de thème" aria-label="Changer de thème">
+        <svg class="theme-ico-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
+        <svg class="theme-ico-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button class="icon-btn" id="accountBtn" title="Mon compte">
+        <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="icon-btn-label" id="accountLabel">Compte</span>
+      </button>
+      <button class="icon-btn cart-btn" id="cartBtn" title="Panier">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 4h2l2.6 12.4a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.4-1.1L21.7 9H6.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.4" fill="currentColor"/><circle cx="17.5" cy="21" r="1.4" fill="currentColor"/></svg>
+        <span class="cart-count" id="cartCount" hidden>0</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="app" class="app"><!--SSR--></main>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="/"><span>Volt<em>Core</em></span></a>
+        <p>Catalogue de composants PC haute performance, configurateur intelligent et espace client pour suivre vos commandes.</p>
+      </div>
+      <div>
+        <h4>Composants</h4>
+        <a href="/catalogue?cat=gpu">Cartes graphiques</a>
+        <a href="/catalogue?cat=cpu">Processeurs</a>
+        <a href="/catalogue?cat=ram">Mémoire</a>
+        <a href="/catalogue?cat=storage">Stockage</a>
+        <a href="/catalogue?cat=motherboard">Cartes mères</a>
+      </div>
+      <div>
+        <h4>Périphériques</h4>
+        <a href="/catalogue?cat=monitor">Écrans</a>
+        <a href="/catalogue?cat=keyboard">Claviers</a>
+        <a href="/catalogue?cat=mouse">Souris</a>
+        <a href="/catalogue?cat=headset">Casques audio</a>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <a href="/qui-sommes-nous">Qui sommes-nous</a>
+        <a href="/configurateur">Configurateur PC</a>
+        <a href="/compte">Mon compte</a>
+        <a href="/compte">Mes commandes</a>
+      </div>
+      <div>
+        <h4>Informations</h4>
+        <a href="/mentions-legales">Mentions légales</a>
+        <a href="/cgv">CGV</a>
+        <a href="/confidentialite">Confidentialité</a>
+        <a href="/retours-remboursements">Retours & remboursement</a>
+      </div>
+      <div>
+        <h4>Garanties</h4>
+        <span class="footer-line">✓ Paiement sécurisé</span>
+        <span class="footer-line">✓ Rétractation 14 jours</span>
+        <span class="footer-line">✓ Garantie légale + constructeur</span>
+        <span class="footer-line">✓ Espace client</span>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 VoltCore. Tous droits réservés. Photos produits : <a href="/images/credits.json" style="text-decoration:underline">Wikimedia Commons</a> (licences libres).</div>
+  </footer>
+
+  <!-- Panier latéral -->
+  <div class="drawer-overlay" id="drawerOverlay" hidden></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Panier">
+    <div class="cart-drawer-head">
+      <h3>Mon panier</h3>
+      <button class="icon-btn" id="cartClose" title="Fermer">✕</button>
+    </div>
+    <div class="cart-drawer-body" id="cartBody"></div>
+    <div class="cart-drawer-foot" id="cartFoot"></div>
+  </aside>
+
+  <!-- Modale d'authentification -->
+  <div class="modal-overlay" id="authModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" id="authClose">✕</button>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Connexion</button>
+        <button class="auth-tab" data-tab="register">Inscription</button>
+      </div>
+      <form id="loginForm" class="auth-form">
+        <label>E-mail<input type="email" name="email" required placeholder="vous@exemple.fr"></label>
+        <label>Mot de passe<input type="password" name="password" required minlength="8" placeholder="••••••••"></label>
+        <button class="btn btn-primary" type="submit">Se connecter</button>
+        <p class="auth-hint"><a href="#" id="forgotLink">Mot de passe oublié ?</a></p>
+      </form>
+      <form id="forgotForm" class="auth-form" hidden>
+        <p class="auth-hint">Saisissez votre e-mail : nous vous enverrons un code pour définir un nouveau mot de passe.</p>
+        <label>E-mail<input type="email" name="email" required placeholder="vous@exemple.fr"></label>
+        <button class="btn btn-primary" type="submit">Envoyer le code</button>
+        <p class="auth-hint"><a href="#" id="forgotBack">← Retour à la connexion</a></p>
+      </form>
+      <form id="resetForm" class="auth-form" hidden>
+        <p class="auth-hint">Un code à 6 chiffres a été envoyé à <strong id="resetEmailLabel"></strong>. Saisissez-le avec votre nouveau mot de passe.</p>
+        <label>Code reçu<input type="text" name="code" required inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="123456" autocomplete="one-time-code"></label>
+        <label>Nouveau mot de passe<input type="password" name="password" required minlength="8" placeholder="8 caractères minimum"></label>
+        <button class="btn btn-primary" type="submit">Réinitialiser</button>
+        <p class="auth-hint">Pas reçu ? <a href="#" id="resetResend">Renvoyer</a> · <a href="#" id="resetBack">Retour</a></p>
+      </form>
+      <form id="registerForm" class="auth-form" hidden>
+        <label>Nom<input type="text" name="name" required minlength="2" placeholder="Jean Dupont"></label>
+        <label>E-mail<input type="email" name="email" required placeholder="vous@exemple.fr"></label>
+        <label>Mot de passe<input type="password" name="password" required minlength="8" placeholder="8 caractères minimum"></label>
+        <button class="btn btn-primary" type="submit">Créer mon compte</button>
+      </form>
+      <form id="verifyForm" class="auth-form" hidden>
+        <p class="auth-hint">Un code à 6 chiffres a été envoyé à <strong id="verifyEmailLabel"></strong>. Saisissez-le pour activer votre compte.</p>
+        <label>Code de vérification<input type="text" name="code" required inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="123456" autocomplete="one-time-code"></label>
+        <button class="btn btn-primary" type="submit">Vérifier mon compte</button>
+        <p class="auth-hint">Pas reçu ? <a href="#" id="resendCode">Renvoyer le code</a> · <a href="#" id="backToLogin">Retour</a></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+
+  <!-- Barre de comparaison flottante -->
+  <div class="compare-bar" id="compareBar" hidden></div>
+
+  <script src="/js/three.min.js?v=87"></script>
+  <script src="/js/hero-void.js?v=87"></script>
+  <script src="/js/app.js?v=87"></script>
+</body>
+</html>

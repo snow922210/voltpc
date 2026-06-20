@@ -1,0 +1,4 @@
+.env
+.secret
+voltpc.db
+__pycache__/

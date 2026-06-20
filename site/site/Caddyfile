@@ -1,0 +1,17 @@
+# Reverse proxy HTTPS pour VOLT PC.
+# DOMAIN et ACME_EMAIL sont injectés depuis docker-compose (fichier .env racine).
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	# En-têtes de sécurité complémentaires au niveau du proxy.
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		-Server
+	}
+
+	reverse_proxy app:8000
+}
