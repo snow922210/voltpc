@@ -19,6 +19,6 @@ python add_products.py
 | `download_exact_images.py` | Téléchargement direct d'images par URL. |
 | `fetch_boxes.py` | Récupère des visuels de boîtes produit. |
 
-> Les modules de **données** (`seed.py`, `seed_cpu.py`, `seed_intel.py`,
-> `seed_budget.py`, `seed_extra.py`, `perf.py`) restent dans `backend/` : ils sont
-> importés au démarrage de l'API.
+> Les modules de **données** (`seed.py`, `perf.py`) restent dans `backend/` :
+> ils sont importés au démarrage de l'API. Tout le catalogue produits est
+> désormais consolidé dans le seul fichier `seed.py`.

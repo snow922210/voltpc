@@ -1,5 +1,20 @@
 # -*- coding: utf-8 -*-
-"""Données de démarrage du catalogue VOLT PC."""
+"""Donnees de demarrage du catalogue VOLT PC — fichier unique consolide.
+
+Catalogue reconstruit a partir des gammes reellement commercialisees
+(references et tarifs indicatifs France, mi-2026). Toutes les categories
+sont couvertes : gpu, cpu, ram, storage, motherboard, psu, case, cooling,
+monitor, keyboard, mouse, headset.
+
+Cles de compat utilisees par le frontend / configurateur :
+  gpu  -> tdp_w, length_mm
+  cpu  -> socket
+  ram  -> ram_type
+  mobo -> socket, ram_type, form_factor
+  case -> max_gpu_mm
+  psu  -> watts
+  cooling -> sockets[]
+"""
 
 PROMO_CODES = {
     "VOLT10": {"percent": 10, "label": "-10% sur tout le site"},
@@ -8,599 +23,248 @@ PROMO_CODES = {
 }
 
 SEED_PRODUCTS = [
-    # ─── Cartes graphiques ───────────────────────────────────────────
+    # ═══════════════════════════════════════════════════════════════════
+    # CARTES GRAPHIQUES
+    # ═══════════════════════════════════════════════════════════════════
+    # --- NVIDIA GeForce RTX 50 (Blackwell) ---
+    {"name": "GeForce RTX 5090 SUPRIM Liquid 32G", "brand": "MSI", "category": "gpu", "price": 2799.00, "old_price": None, "stock": 2, "rating": 5.0, "featured": True, "badge": "Flagship", "description": "Le sommet absolu Blackwell : 32 Go GDDR7 et watercooling AIO pour la 4K/8K et l'IA locale.", "specs": {"GPU": "Blackwell GB202", "Mémoire": "32 Go GDDR7", "Boost": "2580 MHz", "TDP": "575 W", "Longueur": "360 mm", "tdp_w": 575, "length_mm": 360}},
+    {"name": "GeForce RTX 5090 Gaming Trio OC", "brand": "MSI", "category": "gpu", "price": 2599.00, "old_price": None, "stock": 3, "rating": 4.9, "featured": True, "badge": None, "description": "32 Go GDDR7 et triple ventilateur pour dominer la 4K avec DLSS 4 Multi-Frame Generation.", "specs": {"GPU": "Blackwell GB202", "Mémoire": "32 Go GDDR7", "Boost": "2407 MHz", "TDP": "575 W", "Longueur": "358 mm", "tdp_w": 575, "length_mm": 358}},
+    {"name": "GeForce RTX 5080 TUF Gaming OC", "brand": "ASUS", "category": "gpu", "price": 1249.00, "old_price": None, "stock": 6, "rating": 4.8, "featured": True, "badge": None, "description": "Blackwell haut de gamme : 4K native et ray tracing fluide grâce au DLSS 4.", "specs": {"GPU": "Blackwell GB203", "Mémoire": "16 Go GDDR7", "Boost": "2640 MHz", "TDP": "360 W", "Longueur": "340 mm", "tdp_w": 360, "length_mm": 340}},
+    {"name": "GeForce RTX 5080 Gaming OC", "brand": "Gigabyte", "category": "gpu", "price": 1199.00, "old_price": None, "stock": 7, "rating": 4.8, "featured": False, "badge": None, "description": "16 Go GDDR7 pour tout écraser en 4K avec un refroidissement Windforce silencieux.", "specs": {"GPU": "Blackwell GB203", "Mémoire": "16 Go GDDR7", "Boost": "2617 MHz", "TDP": "360 W", "Longueur": "342 mm", "tdp_w": 360, "length_mm": 342}},
+    {"name": "GeForce RTX 5070 Ti Gaming OC", "brand": "Gigabyte", "category": "gpu", "price": 879.00, "old_price": None, "stock": 11, "rating": 4.7, "featured": False, "badge": None, "description": "Le point d'équilibre QHD/4K de la génération : 16 Go GDDR7 et DLSS 4.", "specs": {"GPU": "Blackwell GB203", "Mémoire": "16 Go GDDR7", "Boost": "2452 MHz", "TDP": "300 W", "Longueur": "330 mm", "tdp_w": 300, "length_mm": 330}},
+    {"name": "GeForce RTX 5070 Ventus 3X OC", "brand": "MSI", "category": "gpu", "price": 599.00, "old_price": None, "stock": 18, "rating": 4.6, "featured": False, "badge": "Nouveau", "description": "Le 1440p haute fréquence devient accessible, avec la GDDR7 et le DLSS 4.", "specs": {"GPU": "Blackwell GB205", "Mémoire": "12 Go GDDR7", "Boost": "2512 MHz", "TDP": "250 W", "Longueur": "300 mm", "tdp_w": 250, "length_mm": 300}},
+    {"name": "GeForce RTX 5060 Ti 16 Go Eagle OC", "brand": "Gigabyte", "category": "gpu", "price": 459.00, "old_price": None, "stock": 16, "rating": 4.6, "featured": False, "badge": None, "description": "16 Go de VRAM pour un 1440p durable et un excellent rapport perf/prix Blackwell.", "specs": {"GPU": "Blackwell GB206", "Mémoire": "16 Go GDDR7", "Boost": "2572 MHz", "TDP": "180 W", "Longueur": "240 mm", "tdp_w": 180, "length_mm": 240}},
+    {"name": "GeForce RTX 5060 Ti 8 Go Ventus 2X", "brand": "MSI", "category": "gpu", "price": 399.00, "old_price": None, "stock": 20, "rating": 4.3, "featured": False, "badge": None, "description": "Le 1080p/1440p moderne avec DLSS 4, compacte et silencieuse.", "specs": {"GPU": "Blackwell GB206", "Mémoire": "8 Go GDDR7", "Boost": "2572 MHz", "TDP": "180 W", "Longueur": "230 mm", "tdp_w": 180, "length_mm": 230}},
+    {"name": "GeForce RTX 5060 8 Go Solo", "brand": "ASUS", "category": "gpu", "price": 319.00, "old_price": None, "stock": 24, "rating": 4.3, "featured": False, "badge": None, "description": "Le 1080p haute fréquence avec DLSS 4 Multi-Frame Generation, sobre et abordable.", "specs": {"GPU": "Blackwell GB206", "Mémoire": "8 Go GDDR7", "Boost": "2497 MHz", "TDP": "145 W", "Longueur": "200 mm", "tdp_w": 145, "length_mm": 200}},
 
-    {
-        "name": "GeForce RTX 3060 Twin Edge",
-        "brand": "Zotac", "category": "gpu", "price": 279.00, "old_price": None,
-        "stock": 14, "rating": 4.5, "featured": False, "badge": None,
-        "description": "Idéale pour le gaming en 1080p avec ses 12 Go de mémoire pour voir venir.",
-        "specs": {"GPU": "Ampere GA106", "Mémoire": "12 Go GDDR6", "Boost": "1777 MHz", "TDP": "170 W", "Longueur": "224 mm", "tdp_w": 170, "length_mm": 224},
-    },
-    {
-        "name": "GeForce RTX 3060 Ti Eagle",
-        "brand": "Gigabyte", "category": "gpu", "price": 319.00, "old_price": 349.00,
-        "stock": 9, "rating": 4.6, "featured": False, "badge": "Promo",
-        "description": "Le rapport performances/prix de l'ère Ampere pour s'essayer au 1440p.",
-        "specs": {"GPU": "Ampere GA104", "Mémoire": "8 Go GDDR6", "Boost": "1665 MHz", "TDP": "200 W", "Longueur": "242 mm", "tdp_w": 200, "length_mm": 242},
-    },
-    {
-        "name": "GeForce RTX 3070 Twin Edge",
-        "brand": "Zotac", "category": "gpu", "price": 389.00, "old_price": None,
-        "stock": 7, "rating": 4.6, "featured": False, "badge": None,
-        "description": "Une carte très équilibrée pour jouer sereinement dans d'excellentes conditions en QHD.",
-        "specs": {"GPU": "Ampere GA104", "Mémoire": "8 Go GDDR6", "Boost": "1725 MHz", "TDP": "220 W", "Longueur": "232 mm", "tdp_w": 220, "length_mm": 232},
-    },
-    {
-        "name": "GeForce RTX 3070 Ti Gaming Trio",
-        "brand": "MSI", "category": "gpu", "price": 429.00, "old_price": None,
-        "stock": 5, "rating": 4.5, "featured": False, "badge": None,
-        "description": "Version boostée de la 3070 avec de la mémoire GDDR6X plus rapide.",
-        "specs": {"GPU": "Ampere GA104", "Mémoire": "8 Go GDDR6X", "Boost": "1770 MHz", "TDP": "290 W", "Longueur": "323 mm", "tdp_w": 290, "length_mm": 323},
-    },
-    {
-        "name": "GeForce RTX 3080 Gaming Trio",
-        "brand": "MSI", "category": "gpu", "price": 499.00, "old_price": 549.00,
-        "stock": 4, "rating": 4.7, "featured": False, "badge": "Promo",
-        "description": "La reine déchue de la 4K qui conserve une puissance brute impressionnante en rasterisation.",
-        "specs": {"GPU": "Ampere GA102", "Mémoire": "10 Go GDDR6X", "Boost": "1755 MHz", "TDP": "320 W", "Longueur": "323 mm", "tdp_w": 320, "length_mm": 323},
-    },
-    {
-        "name": "GeForce RTX 3080 Ti Ventus",
-        "brand": "MSI", "category": "gpu", "price": 599.00, "old_price": None,
-        "stock": 3, "rating": 4.7, "featured": False, "badge": None,
-        "description": "Des performances quasiment identiques à une 3090 avec 12 Go de VRAM.",
-        "specs": {"GPU": "Ampere GA102", "Mémoire": "12 Go GDDR6X", "Boost": "1665 MHz", "TDP": "350 W", "Longueur": "305 mm", "tdp_w": 350, "length_mm": 305},
-    },
-    {
-        "name": "GeForce RTX 3090 ROG Strix",
-        "brand": "ASUS", "category": "gpu", "price": 749.00, "old_price": None,
-        "stock": 2, "rating": 4.8, "featured": False, "badge": None,
-        "description": "Le monstre originel et ses 24 Go de mémoire pour les créateurs de contenu exigeants.",
-        "specs": {"GPU": "Ampere GA102", "Mémoire": "24 Go GDDR6X", "Boost": "1860 MHz", "TDP": "350 W", "Longueur": "318 mm", "tdp_w": 350, "length_mm": 318},
-    },
-    {
-        "name": "GeForce RTX 3090 Ti SUPRIM",
-        "brand": "MSI", "category": "gpu", "price": 849.00, "old_price": 999.00,
-        "stock": 2, "rating": 4.8, "featured": False, "badge": "Promo",
-        "description": "L'ultime itération de l'architecture Ampere, repoussant les limites de consommation.",
-        "specs": {"GPU": "Ampere GA102", "Mémoire": "24 Go GDDR6X", "Boost": "1860 MHz", "TDP": "450 W", "Longueur": "338 mm", "tdp_w": 450, "length_mm": 338},
-    },
-    {
-        "name": "GeForce RTX 4060 Windforce",
-        "brand": "Gigabyte", "category": "gpu", "price": 319.00, "old_price": None,
-        "stock": 38, "rating": 4.4, "featured": False, "badge": None,
-        "description": "Consommation minuscule et accès au DLSS 3 Frame Generation pour transfigurer le 1080p.",
-        "specs": {"GPU": "Ada Lovelace AD107", "Mémoire": "8 Go GDDR6", "Boost": "2475 MHz", "TDP": "115 W", "Longueur": "198 mm", "tdp_w": 115, "length_mm": 198},
-    },
-    {
-        "name": "GeForce RTX 4060 Ti Dual",
-        "brand": "ASUS", "category": "gpu", "price": 419.00, "old_price": None,
-        "stock": 22, "rating": 4.4, "featured": False, "badge": None,
-        "description": "Une fluidité impeccable avec toutes les technologies modernes d'upscaling pour le format compact.",
-        "specs": {"GPU": "Ada Lovelace AD106", "Mémoire": "8 Go GDDR6", "Boost": "2535 MHz", "TDP": "160 W", "Longueur": "227 mm", "tdp_w": 160, "length_mm": 227},
-    },
-    {
-        "name": "GeForce RTX 4070 Dual",
-        "brand": "Palit", "category": "gpu", "price": 569.00, "old_price": 619.00,
-        "stock": 19, "rating": 4.7, "featured": False, "badge": "Promo",
-        "description": "Le compromis idéal de la génération 40 pour jouer confortablement en 1440p sans vider son livret A.",
-        "specs": {"GPU": "Ada Lovelace AD104", "Mémoire": "12 Go GDDR6X", "Boost": "2475 MHz", "TDP": "200 W", "Longueur": "269 mm", "tdp_w": 200, "length_mm": 269},
-    },
-    {
-        "name": "GeForce RTX 4070 Ti TUF Gaming",
-        "brand": "ASUS", "category": "gpu", "price": 769.00, "old_price": None,
-        "stock": 11, "rating": 4.7, "featured": False, "badge": None,
-        "description": "Des performances impressionnantes frôlant les anciennes vitrines de la marque avec un refroidissement de premier ordre.",
-        "specs": {"GPU": "Ada Lovelace AD104", "Mémoire": "12 Go GDDR6X", "Boost": "2610 MHz", "TDP": "285 W", "Longueur": "305 mm", "tdp_w": 285, "length_mm": 305},
-    },
-    {
-        "name": "GeForce RTX 4080 JetStream",
-        "brand": "Palit", "category": "gpu", "price": 1049.00, "old_price": None,
-        "stock": 8, "rating": 4.8, "featured": False, "badge": None,
-        "description": "Gros gap de performances ouvrant les portes du Ray Tracing en 4K native de façon stable.",
-        "specs": {"GPU": "Ada Lovelace AD103", "Mémoire": "16 Go GDDR6X", "Boost": "2505 MHz", "TDP": "320 W", "Longueur": "328 mm", "tdp_w": 320, "length_mm": 328},
-    },
-    {
-        "name": "GeForce RTX 4090 ROG Strix",
-        "brand": "ASUS", "category": "gpu", "price": 1899.00, "old_price": None,
-        "stock": 3, "rating": 5.0, "featured": True, "badge": "Flagship",
-        "description": "L'ancienne vitrine absolue, encore capable de ridiculiser la majorité du marché actuel.",
-        "specs": {"GPU": "Ada Lovelace AD102", "Mémoire": "24 Go GDDR6X", "Boost": "2610 MHz", "TDP": "450 W", "Longueur": "357 mm", "tdp_w": 450, "length_mm": 357},
-    },
-    {
-        "name": "GeForce RTX 5070 Gaming",
-        "brand": "Gigabyte", "category": "gpu", "price": 799.00, "old_price": None,
-        "stock": 25, "rating": 4.7, "featured": False, "badge": "Nouveau",
-        "description": "L'architecture Blackwell enfin accessible pour bousculer le milieu de gamme.",
-        "specs": {"GPU": "Blackwell GB205", "Mémoire": "12 Go GDDR7", "Boost": "2550 MHz", "TDP": "220 W", "Longueur": "300 mm", "tdp_w": 220, "length_mm": 300},
-    },
-    {
-        "name": "GeForce RTX 5070 Ti Gaming",
-        "brand": "Gigabyte", "category": "gpu", "price": 879.00, "old_price": None,
-        "stock": 26, "rating": 4.7, "featured": False, "badge": "Top vente",
-        "description": "Le véritable sweet spot 1440p/4K avec les performances d'une 4090 pour la moitié du prix.",
-        "specs": {"GPU": "Blackwell GB203", "Mémoire": "16 Go GDDR7", "Boost": "2482 MHz", "TDP": "300 W", "Longueur": "331 mm", "tdp_w": 300, "length_mm": 331},
-    },
-    {
-        "name": "GeForce RTX 5080 TUF Gaming",
-        "brand": "ASUS", "category": "gpu", "price": 1199.00, "old_price": 1329.00,
-        "stock": 18, "rating": 4.8, "featured": True, "badge": "Promo",
-        "description": "Le haut de gamme sans concession profitant du DLSS 4 Multi Frame Generation.",
-        "specs": {"GPU": "Blackwell GB203", "Mémoire": "16 Go GDDR7", "Boost": "2730 MHz", "TDP": "360 W", "Longueur": "348 mm", "tdp_w": 360, "length_mm": 348},
-    },
-    {
-        "name": "GeForce RTX 5090 Suprim",
-        "brand": "MSI", "category": "gpu", "price": 2399.00, "old_price": None,
-        "stock": 7, "rating": 4.9, "featured": True, "badge": "Flagship",
-        "description": "La carte graphique ultime absolue. Architecture Blackwell et 32 Go GDDR7 pour le path tracing 4K sans compromis.",
-        "specs": {"GPU": "Blackwell GB202", "Mémoire": "32 Go GDDR7", "Boost": "2625 MHz", "TDP": "575 W", "Longueur": "358 mm", "tdp_w": 575, "length_mm": 358},
-    },
+    # --- NVIDIA GeForce RTX 40 (Ada Lovelace) ---
+    {"name": "GeForce RTX 4090 ROG Strix OC", "brand": "ASUS", "category": "gpu", "price": 1999.00, "old_price": None, "stock": 3, "rating": 5.0, "featured": False, "badge": None, "description": "L'ancienne vitrine Ada, 24 Go GDDR6X encore capables de tout écraser en 4K.", "specs": {"GPU": "Ada AD102", "Mémoire": "24 Go GDDR6X", "Boost": "2640 MHz", "TDP": "450 W", "Longueur": "358 mm", "tdp_w": 450, "length_mm": 358}},
+    {"name": "GeForce RTX 4080 Super Gaming X", "brand": "MSI", "category": "gpu", "price": 1099.00, "old_price": None, "stock": 5, "rating": 4.8, "featured": False, "badge": None, "description": "Le 4K haut de gamme efficace, à deux doigts de la 4090 pour bien moins cher.", "specs": {"GPU": "Ada AD103", "Mémoire": "16 Go GDDR6X", "Boost": "2610 MHz", "TDP": "320 W", "Longueur": "337 mm", "tdp_w": 320, "length_mm": 337}},
+    {"name": "GeForce RTX 4070 Ti Super TUF", "brand": "ASUS", "category": "gpu", "price": 819.00, "old_price": None, "stock": 8, "rating": 4.7, "featured": False, "badge": None, "description": "16 Go et bus élargi : du 1440p sans compromis et du 4K très jouable.", "specs": {"GPU": "Ada AD103", "Mémoire": "16 Go GDDR6X", "Boost": "2610 MHz", "TDP": "285 W", "Longueur": "305 mm", "tdp_w": 285, "length_mm": 305}},
+    {"name": "GeForce RTX 4070 Super Dual", "brand": "ASUS", "category": "gpu", "price": 609.00, "old_price": 649.00, "stock": 12, "rating": 4.7, "featured": False, "badge": "Promo", "description": "Le sweet spot 1440p : performances en hausse face à la 4070 pour le même prix.", "specs": {"GPU": "Ada AD104", "Mémoire": "12 Go GDDR6X", "Boost": "2475 MHz", "TDP": "220 W", "Longueur": "267 mm", "tdp_w": 220, "length_mm": 267}},
+    {"name": "GeForce RTX 4060 Ti 8 Go Windforce", "brand": "Gigabyte", "category": "gpu", "price": 399.00, "old_price": None, "stock": 18, "rating": 4.4, "featured": False, "badge": None, "description": "Fluidité impeccable en 1080p/1440p avec DLSS 3 Frame Generation.", "specs": {"GPU": "Ada AD106", "Mémoire": "8 Go GDDR6", "Boost": "2535 MHz", "TDP": "160 W", "Longueur": "227 mm", "tdp_w": 160, "length_mm": 227}},
+    {"name": "GeForce RTX 4060 Low Profile OC", "brand": "Gigabyte", "category": "gpu", "price": 299.00, "old_price": None, "stock": 16, "rating": 4.3, "featured": False, "badge": None, "description": "Format ultra-compact pour boîtiers SFF et HTPC, consommation minuscule.", "specs": {"GPU": "Ada AD107", "Mémoire": "8 Go GDDR6", "Boost": "2460 MHz", "TDP": "115 W", "Longueur": "182 mm", "tdp_w": 115, "length_mm": 182}},
 
-    # ─── Processeurs ─────────────────────────────────────────────────
-    {
-        "name": "Ryzen 7 9800X3D",
-        "brand": "AMD", "category": "cpu", "price": 529.00, "old_price": None,
-        "stock": 34, "rating": 4.9, "featured": True, "badge": "Top vente",
-        "description": "Le roi du gaming. 8 cœurs Zen 5, 96 Mo de 3D V-Cache de seconde génération : imbattable en jeu, excellent partout ailleurs.",
-        "specs": {"Socket": "AM5", "Cœurs / Threads": "8 / 16", "Boost": "5.2 GHz", "Cache": "96 Mo L3", "TDP": "120 W", "socket": "AM5", "tdp_w": 120},
-    },
-    {
-        "name": "Ryzen 9 9950X3D",
-        "brand": "AMD", "category": "cpu", "price": 779.00, "old_price": None,
-        "stock": 12, "rating": 4.9, "featured": False, "badge": "Flagship",
-        "description": "16 cœurs Zen 5 + 3D V-Cache : la machine absolue pour jouer, streamer et créer sans compromis.",
-        "specs": {"Socket": "AM5", "Cœurs / Threads": "16 / 32", "Boost": "5.7 GHz", "Cache": "144 Mo L3", "TDP": "170 W", "socket": "AM5", "tdp_w": 170},
-    },
-    {
-        "name": "Core Ultra 9 285K",
-        "brand": "Intel", "category": "cpu", "price": 649.00, "old_price": 699.00,
-        "stock": 15, "rating": 4.5, "featured": False, "badge": "Promo",
-        "description": "Arrow Lake : 24 cœurs (8P+16E), NPU intégré, efficacité énergétique en net progrès. Le champion de la productivité.",
-        "specs": {"Socket": "LGA1851", "Cœurs / Threads": "24 / 24", "Boost": "5.7 GHz", "Cache": "36 Mo L3", "TDP": "125 W", "socket": "LGA1851", "tdp_w": 125},
-    },
-    {
-        "name": "Core Ultra 5 245K",
-        "brand": "Intel", "category": "cpu", "price": 329.00, "old_price": None,
-        "stock": 40, "rating": 4.4, "featured": False, "badge": None,
-        "description": "14 cœurs Arrow Lake au prix juste : parfait pour une config milieu de gamme polyvalente et évolutive.",
-        "specs": {"Socket": "LGA1851", "Cœurs / Threads": "14 / 14", "Boost": "5.2 GHz", "Cache": "24 Mo L3", "TDP": "125 W", "socket": "LGA1851", "tdp_w": 125},
-    },
-    {
-        "name": "Ryzen 5 9600X",
-        "brand": "AMD", "category": "cpu", "price": 229.00, "old_price": 279.00,
-        "stock": 52, "rating": 4.6, "featured": False, "badge": "Promo",
-        "description": "6 cœurs Zen 5 à 5.4 GHz : la porte d'entrée idéale sur AM5 pour le gaming 1080p/1440p.",
-        "specs": {"Socket": "AM5", "Cœurs / Threads": "6 / 12", "Boost": "5.4 GHz", "Cache": "32 Mo L3", "TDP": "65 W", "socket": "AM5", "tdp_w": 65},
-    },
+    # --- AMD Radeon RX 9000 (RDNA 4) ---
+    {"name": "Radeon RX 9070 XT Nitro+", "brand": "Sapphire", "category": "gpu", "price": 729.00, "old_price": None, "stock": 8, "rating": 4.8, "featured": True, "badge": None, "description": "Le fer de lance RDNA 4 : 16 Go et un ray tracing enfin convaincant en 1440p/4K.", "specs": {"GPU": "RDNA 4 Navi 48", "Mémoire": "16 Go GDDR6", "Boost": "3060 MHz", "TDP": "330 W", "Longueur": "330 mm", "tdp_w": 330, "length_mm": 330}},
+    {"name": "Radeon RX 9070 XT 16 Go", "brand": "XFX", "category": "gpu", "price": 689.00, "old_price": None, "stock": 9, "rating": 4.7, "featured": False, "badge": None, "description": "16 Go RDNA 4 musclés, le 1440p/4K haut de gamme côté AMD.", "specs": {"GPU": "RDNA 4 Navi 48", "Mémoire": "16 Go GDDR6", "Boost": "2970 MHz", "TDP": "304 W", "Longueur": "320 mm", "tdp_w": 304, "length_mm": 320}},
+    {"name": "Radeon RX 9070 16 Go", "brand": "PowerColor", "category": "gpu", "price": 599.00, "old_price": None, "stock": 10, "rating": 4.6, "featured": False, "badge": None, "description": "16 Go et efficacité remarquable pour le 1440p haut de gamme.", "specs": {"GPU": "RDNA 4 Navi 48", "Mémoire": "16 Go GDDR6", "Boost": "2520 MHz", "TDP": "220 W", "Longueur": "290 mm", "tdp_w": 220, "length_mm": 290}},
+    {"name": "Radeon RX 9060 XT 16 Go", "brand": "Sapphire", "category": "gpu", "price": 379.00, "old_price": None, "stock": 14, "rating": 4.5, "featured": False, "badge": None, "description": "16 Go en milieu de gamme : le 1080p/1440p durable et abordable signé RDNA 4.", "specs": {"GPU": "RDNA 4 Navi 44", "Mémoire": "16 Go GDDR6", "Boost": "3130 MHz", "TDP": "150 W", "Longueur": "250 mm", "tdp_w": 150, "length_mm": 250}},
 
-    # ─── Mémoire ─────────────────────────────────────────────────────
-    {
-        "name": "Dominator Titanium RGB 64 Go DDR5-6600",
-        "brand": "Corsair", "category": "ram", "price": 329.00, "old_price": None,
-        "stock": 14, "rating": 4.8, "featured": False, "badge": None,
-        "description": "2x32 Go CL32 : capacité massive, dissipateurs premium et 11 LED Capellix par barrette.",
-        "specs": {"Capacité": "64 Go (2x32)", "Type": "DDR5", "Fréquence": "6600 MT/s", "Latence": "CL32", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"},
-    },
-    {
-        "name": "Trident Z5 RGB 32 Go DDR5-6400 CL30",
-        "brand": "G.Skill", "category": "ram", "price": 149.00, "old_price": 169.00,
-        "stock": 38, "rating": 4.8, "featured": True, "badge": "Top vente",
-        "description": "Le kit de référence pour Ryzen 9000 : 2x16 Go CL30, le sweet spot absolu performance/prix.",
-        "specs": {"Capacité": "32 Go (2x16)", "Type": "DDR5", "Fréquence": "6400 MT/s", "Latence": "CL30", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"},
-    },
-    {
-        "name": "Fury Beast 32 Go DDR5-6000",
-        "brand": "Kingston", "category": "ram", "price": 109.00, "old_price": None,
-        "stock": 60, "rating": 4.6, "featured": False, "badge": None,
-        "description": "2x16 Go DDR5-6000 CL36 : fiable, sobre, efficace. La valeur sûre des configs équilibrées.",
-        "specs": {"Capacité": "32 Go (2x16)", "Type": "DDR5", "Fréquence": "6000 MT/s", "Latence": "CL36", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"},
-    },
-    {
-        "name": "Vengeance RGB 48 Go DDR5-7000",
-        "brand": "Corsair", "category": "ram", "price": 219.00, "old_price": None,
-        "stock": 19, "rating": 4.7, "featured": False, "badge": "Nouveau",
-        "description": "2x24 Go à 7000 MT/s : haute fréquence et capacité atypique pour créateurs exigeants.",
-        "specs": {"Capacité": "48 Go (2x24)", "Type": "DDR5", "Fréquence": "7000 MT/s", "Latence": "CL36", "Profils": "XMP 3.0", "ram_type": "DDR5"},
-    },
+    # --- AMD Radeon RX 7000 (RDNA 3) ---
+    {"name": "Radeon RX 7900 XTX 24 Go", "brand": "Sapphire", "category": "gpu", "price": 949.00, "old_price": None, "stock": 5, "rating": 4.8, "featured": False, "badge": None, "description": "Le haut de gamme RDNA 3 : 24 Go pour la 4K et un excellent niveau en rasterisation.", "specs": {"GPU": "RDNA 3 Navi 31", "Mémoire": "24 Go GDDR6", "Boost": "2500 MHz", "TDP": "355 W", "Longueur": "287 mm", "tdp_w": 355, "length_mm": 287}},
+    {"name": "Radeon RX 7800 XT 16 Go Hellhound", "brand": "PowerColor", "category": "gpu", "price": 519.00, "old_price": None, "stock": 9, "rating": 4.7, "featured": False, "badge": None, "description": "La reine du 1440p côté AMD : 16 Go et une rasterisation très généreuse.", "specs": {"GPU": "RDNA 3 Navi 32", "Mémoire": "16 Go GDDR6", "Boost": "2430 MHz", "TDP": "263 W", "Longueur": "267 mm", "tdp_w": 263, "length_mm": 267}},
+    {"name": "Radeon RX 7700 XT 12 Go Pulse", "brand": "Sapphire", "category": "gpu", "price": 429.00, "old_price": None, "stock": 11, "rating": 4.6, "featured": False, "badge": None, "description": "12 Go et de belles performances en 1440p, excellent rapport qualité/prix.", "specs": {"GPU": "RDNA 3 Navi 32", "Mémoire": "12 Go GDDR6", "Boost": "2599 MHz", "TDP": "245 W", "Longueur": "267 mm", "tdp_w": 245, "length_mm": 267}},
+    {"name": "Radeon RX 7600 8 Go Pulse", "brand": "Sapphire", "category": "gpu", "price": 259.00, "old_price": None, "stock": 16, "rating": 4.4, "featured": False, "badge": None, "description": "Du 1080p fluide à petit prix, sobre et silencieux.", "specs": {"GPU": "RDNA 3 Navi 33", "Mémoire": "8 Go GDDR6", "Boost": "2655 MHz", "TDP": "165 W", "Longueur": "204 mm", "tdp_w": 165, "length_mm": 204}},
 
-    # ─── Stockage ────────────────────────────────────────────────────
-    {
-        "name": "9100 Pro 2 To PCIe 5.0",
-        "brand": "Samsung", "category": "storage", "price": 249.00, "old_price": None,
-        "stock": 28, "rating": 4.8, "featured": True, "badge": "Nouveau",
-        "description": "14 800 Mo/s en lecture : le NVMe Gen5 de référence, contrôleur maison Presto gravé en 5 nm.",
-        "specs": {"Capacité": "2 To", "Interface": "PCIe 5.0 x4", "Lecture": "14 800 Mo/s", "Écriture": "13 400 Mo/s", "Endurance": "1200 TBW", "Format": "M.2 2280"},
-    },
-    {
-        "name": "WD_Black SN8100 2 To Gen5",
-        "brand": "Western Digital", "category": "storage", "price": 229.00, "old_price": 259.00,
-        "stock": 22, "rating": 4.7, "featured": False, "badge": "Promo",
-        "description": "Le SSD gaming Gen5 le plus efficient : 14 500 Mo/s sans chauffe excessive, idéal DirectStorage.",
-        "specs": {"Capacité": "2 To", "Interface": "PCIe 5.0 x4", "Lecture": "14 500 Mo/s", "Écriture": "12 700 Mo/s", "Endurance": "1200 TBW", "Format": "M.2 2280"},
-    },
-    {
-        "name": "T705 1 To PCIe 5.0",
-        "brand": "Crucial", "category": "storage", "price": 149.00, "old_price": None,
-        "stock": 35, "rating": 4.6, "featured": False, "badge": None,
-        "description": "Le Gen5 accessible : 13 600 Mo/s pour donner un coup de fouet à n'importe quelle config AM5.",
-        "specs": {"Capacité": "1 To", "Interface": "PCIe 5.0 x4", "Lecture": "13 600 Mo/s", "Écriture": "10 200 Mo/s", "Endurance": "600 TBW", "Format": "M.2 2280"},
-    },
-    {
-        "name": "990 Pro 4 To",
-        "brand": "Samsung", "category": "storage", "price": 299.00, "old_price": 349.00,
-        "stock": 17, "rating": 4.9, "featured": False, "badge": "Top vente",
-        "description": "4 To de fiabilité légendaire en PCIe 4.0 : la bibliothèque de jeux entière sur un seul M.2.",
-        "specs": {"Capacité": "4 To", "Interface": "PCIe 4.0 x4", "Lecture": "7 450 Mo/s", "Écriture": "6 900 Mo/s", "Endurance": "2400 TBW", "Format": "M.2 2280"},
-    },
+    # --- Intel Arc (Battlemage / Alchemist) & entrée ---
+    {"name": "Arc B580 12 Go", "brand": "Intel", "category": "gpu", "price": 289.00, "old_price": None, "stock": 13, "rating": 4.5, "featured": False, "badge": None, "description": "La génération Battlemage : 12 Go et un excellent rapport perf/prix en 1440p.", "specs": {"GPU": "Xe2 BMG-G21", "Mémoire": "12 Go GDDR6", "Boost": "2670 MHz", "TDP": "190 W", "Longueur": "272 mm", "tdp_w": 190, "length_mm": 272}},
+    {"name": "Arc B570 10 Go", "brand": "Intel", "category": "gpu", "price": 239.00, "old_price": None, "stock": 14, "rating": 4.3, "featured": False, "badge": "Petit prix", "description": "Battlemage d'entrée : du 1080p musclé et un encodeur AV1 au top pour le streaming.", "specs": {"GPU": "Xe2 BMG-G21", "Mémoire": "10 Go GDDR6", "Boost": "2500 MHz", "TDP": "150 W", "Longueur": "245 mm", "tdp_w": 150, "length_mm": 245}},
+    {"name": "GeForce GT 1030 2 Go", "brand": "ASUS", "category": "gpu", "price": 79.00, "old_price": None, "stock": 25, "rating": 4.1, "featured": False, "badge": "Petit prix", "description": "Carte d'affichage compacte idéale pour un PC bureautique multi-écrans.", "specs": {"GPU": "Pascal GP108", "Mémoire": "2 Go GDDR5", "Boost": "1468 MHz", "TDP": "30 W", "Longueur": "180 mm", "tdp_w": 30, "length_mm": 180}},
 
-    # ─── Cartes mères ────────────────────────────────────────────────
-    {
-        "name": "ROG Crosshair X870E Hero",
-        "brand": "ASUS", "category": "motherboard", "price": 699.00, "old_price": None,
-        "stock": 9, "rating": 4.8, "featured": False, "badge": "Flagship",
-        "description": "AM5 sans limite : VRM 18+2+2, double USB4, 5 M.2 dont 2 Gen5, PCIe 5.0 x16 renforcé.",
-        "specs": {"Socket": "AM5", "Chipset": "X870E", "Format": "ATX", "Mémoire": "4x DDR5 8000+", "M.2": "5 slots (2x Gen5)", "Réseau": "WiFi 7 + 5 GbE", "socket": "AM5", "ram_type": "DDR5", "form_factor": "ATX"},
-    },
-    {
-        "name": "MAG X870 Tomahawk WiFi",
-        "brand": "MSI", "category": "motherboard", "price": 329.00, "old_price": 359.00,
-        "stock": 24, "rating": 4.7, "featured": True, "badge": "Top vente",
-        "description": "Le meilleur choix AM5 milieu de gamme : VRM costaud, USB4, WiFi 7, sans fioritures inutiles.",
-        "specs": {"Socket": "AM5", "Chipset": "X870", "Format": "ATX", "Mémoire": "4x DDR5 8000+", "M.2": "4 slots (1x Gen5)", "Réseau": "WiFi 7 + 2.5 GbE", "socket": "AM5", "ram_type": "DDR5", "form_factor": "ATX"},
-    },
-    {
-        "name": "B850 Aorus Elite WiFi7",
-        "brand": "Gigabyte", "category": "motherboard", "price": 219.00, "old_price": None,
-        "stock": 31, "rating": 4.6, "featured": False, "badge": None,
-        "description": "L'essentiel AM5 bien exécuté : PCIe 5.0 GPU + SSD, WiFi 7, parfaite pour un 9800X3D.",
-        "specs": {"Socket": "AM5", "Chipset": "B850", "Format": "ATX", "Mémoire": "4x DDR5 8000+", "M.2": "3 slots (1x Gen5)", "Réseau": "WiFi 7 + 2.5 GbE", "socket": "AM5", "ram_type": "DDR5", "form_factor": "ATX"},
-    },
-    {
-        "name": "ROG Maximus Z890 Hero",
-        "brand": "ASUS", "category": "motherboard", "price": 729.00, "old_price": None,
-        "stock": 6, "rating": 4.7, "featured": False, "badge": None,
-        "description": "LGA1851 premium pour Core Ultra : Thunderbolt 4, 6 M.2, DDR5 9000+ en OC.",
-        "specs": {"Socket": "LGA1851", "Chipset": "Z890", "Format": "ATX", "Mémoire": "4x DDR5 9000+", "M.2": "6 slots (2x Gen5)", "Réseau": "WiFi 7 + 5 GbE", "socket": "LGA1851", "ram_type": "DDR5", "form_factor": "ATX"},
-    },
-    {
-        "name": "PRO Z890-A WiFi",
-        "brand": "MSI", "category": "motherboard", "price": 259.00, "old_price": 289.00,
-        "stock": 20, "rating": 4.5, "featured": False, "badge": "Promo",
-        "description": "Z890 sobre et complète pour Core Ultra 200 : 4 M.2, WiFi 7, VRM 14+1+1 fiable.",
-        "specs": {"Socket": "LGA1851", "Chipset": "Z890", "Format": "ATX", "Mémoire": "4x DDR5 8400+", "M.2": "4 slots (1x Gen5)", "Réseau": "WiFi 7 + 2.5 GbE", "socket": "LGA1851", "ram_type": "DDR5", "form_factor": "ATX"},
-    },
+    # ═══════════════════════════════════════════════════════════════════
+    # PROCESSEURS
+    # ═══════════════════════════════════════════════════════════════════
+    # --- AMD Ryzen 9000 (Zen 5, AM5) ---
+    {"name": "Ryzen 9 9950X3D", "brand": "AMD", "category": "cpu", "price": 699.00, "old_price": None, "stock": 7, "rating": 5.0, "featured": True, "badge": "Top gaming", "description": "16 cœurs Zen 5 avec 3D V-Cache : le roi absolu jeu + création sur une seule puce.", "specs": {"Cœurs": "16C / 32T", "Fréquence": "4,3 / 5,7 GHz", "Cache": "144 Mo", "Socket": "AM5", "TDP": "170 W", "Graphique": "RDNA 2 (2 CU)", "socket": "AM5"}},
+    {"name": "Ryzen 7 9800X3D", "brand": "AMD", "category": "cpu", "price": 479.00, "old_price": None, "stock": 9, "rating": 5.0, "featured": True, "badge": "Top gaming", "description": "Le meilleur CPU gaming du marché : 3D V-Cache 2e génération et coefficient débloqué.", "specs": {"Cœurs": "8C / 16T", "Fréquence": "4,7 / 5,2 GHz", "Cache": "104 Mo", "Socket": "AM5", "TDP": "120 W", "Graphique": "RDNA 2 (2 CU)", "socket": "AM5"}},
+    {"name": "Ryzen 9 9950X", "brand": "AMD", "category": "cpu", "price": 539.00, "old_price": None, "stock": 8, "rating": 4.8, "featured": False, "badge": None, "description": "16 cœurs Zen 5 pour la création la plus lourde et le calcul multithread extrême.", "specs": {"Cœurs": "16C / 32T", "Fréquence": "4,3 / 5,7 GHz", "Cache": "80 Mo", "Socket": "AM5", "TDP": "170 W", "Graphique": "RDNA 2 (2 CU)", "socket": "AM5"}},
+    {"name": "Ryzen 9 9900X", "brand": "AMD", "category": "cpu", "price": 419.00, "old_price": None, "stock": 11, "rating": 4.7, "featured": False, "badge": None, "description": "12 cœurs Zen 5 pour la création et le multitâche, excellent en applicatif.", "specs": {"Cœurs": "12C / 24T", "Fréquence": "4,4 / 5,6 GHz", "Cache": "76 Mo", "Socket": "AM5", "TDP": "120 W", "Graphique": "RDNA 2 (2 CU)", "socket": "AM5"}},
+    {"name": "Ryzen 7 9700X", "brand": "AMD", "category": "cpu", "price": 329.00, "old_price": None, "stock": 16, "rating": 4.7, "featured": False, "badge": None, "description": "8 cœurs Zen 5 efficaces et polyvalents, excellents en jeu comme en création.", "specs": {"Cœurs": "8C / 16T", "Fréquence": "3,8 / 5,5 GHz", "Cache": "40 Mo", "Socket": "AM5", "TDP": "65 W", "Graphique": "RDNA 2 (2 CU)", "socket": "AM5"}},
+    {"name": "Ryzen 5 9600X", "brand": "AMD", "category": "cpu", "price": 209.00, "old_price": None, "stock": 22, "rating": 4.6, "featured": False, "badge": None, "description": "6 cœurs Zen 5 : le meilleur point d'entrée gaming sur la plateforme AM5.", "specs": {"Cœurs": "6C / 12T", "Fréquence": "3,9 / 5,4 GHz", "Cache": "38 Mo", "Socket": "AM5", "TDP": "65 W", "Graphique": "RDNA 2 (2 CU)", "socket": "AM5"}},
+    {"name": "Ryzen 5 8400F", "brand": "AMD", "category": "cpu", "price": 129.00, "old_price": None, "stock": 24, "rating": 4.4, "featured": False, "badge": "Petit prix", "description": "6 cœurs Zen 4 abordables sur AM5 pour un premier PC gamer évolutif.", "specs": {"Cœurs": "6C / 12T", "Fréquence": "4,2 / 4,7 GHz", "Cache": "22 Mo", "Socket": "AM5", "TDP": "65 W", "Graphique": "Non", "socket": "AM5"}},
 
-    # ─── Alimentations ───────────────────────────────────────────────
-    {
-        "name": "RM1000x Shift ATX 3.1",
-        "brand": "Corsair", "category": "psu", "price": 199.00, "old_price": None,
-        "stock": 27, "rating": 4.8, "featured": False, "badge": "Top vente",
-        "description": "1000 W Gold avec connecteurs latéraux brevetés : le câble management enfin simple, 12V-2x6 natif.",
-        "specs": {"Puissance": "1000 W", "Certification": "80+ Gold", "Norme": "ATX 3.1", "PCIe 5.1": "1x 12V-2x6 600 W", "Modulaire": "Full", "Garantie": "10 ans", "watts": 1000},
-    },
-    {
-        "name": "Dark Power 13 1300W",
-        "brand": "be quiet!", "category": "psu", "price": 329.00, "old_price": None,
-        "stock": 8, "rating": 4.9, "featured": False, "badge": "Flagship",
-        "description": "Titanium 1300 W quasi inaudible : pour RTX 5090 et configs HEDT sans aucun compromis.",
-        "specs": {"Puissance": "1300 W", "Certification": "80+ Titanium", "Norme": "ATX 3.0", "PCIe 5.0": "2x 12VHPWR 600 W", "Modulaire": "Full", "Garantie": "10 ans", "watts": 1300},
-    },
-    {
-        "name": "Focus GX-850 ATX 3.1",
-        "brand": "Seasonic", "category": "psu", "price": 139.00, "old_price": 159.00,
-        "stock": 33, "rating": 4.7, "featured": False, "badge": "Promo",
-        "description": "La fiabilité Seasonic en 850 W Gold ATX 3.1 : le choix rationnel pour 90 % des configs.",
-        "specs": {"Puissance": "850 W", "Certification": "80+ Gold", "Norme": "ATX 3.1", "PCIe 5.1": "1x 12V-2x6 450 W", "Modulaire": "Full", "Garantie": "10 ans", "watts": 850},
-    },
-    {
-        "name": "C750 Gold",
-        "brand": "NZXT", "category": "psu", "price": 99.00, "old_price": None,
-        "stock": 41, "rating": 4.5, "featured": False, "badge": None,
-        "description": "750 W Gold full modulaire au prix plancher : parfait jusqu'à une RTX 5070 Ti.",
-        "specs": {"Puissance": "750 W", "Certification": "80+ Gold", "Norme": "ATX 3.0", "PCIe": "1x 12VHPWR 450 W", "Modulaire": "Full", "Garantie": "7 ans", "watts": 750},
-    },
+    # --- AMD Ryzen 7000 (Zen 4, AM5) ---
+    {"name": "Ryzen 7 7800X3D", "brand": "AMD", "category": "cpu", "price": 389.00, "old_price": None, "stock": 10, "rating": 4.9, "featured": False, "badge": None, "description": "L'ancien roi du gaming Zen 4, toujours redoutable grâce à son 3D V-Cache.", "specs": {"Cœurs": "8C / 16T", "Fréquence": "4,2 / 5,0 GHz", "Cache": "104 Mo", "Socket": "AM5", "TDP": "120 W", "Graphique": "RDNA 2 (2 CU)", "socket": "AM5"}},
+    {"name": "Ryzen 5 7600X", "brand": "AMD", "category": "cpu", "price": 169.00, "old_price": None, "stock": 20, "rating": 4.6, "featured": False, "badge": None, "description": "6 cœurs Zen 4 véloces, une porte d'entrée AM5 au tarif agressif.", "specs": {"Cœurs": "6C / 12T", "Fréquence": "4,7 / 5,3 GHz", "Cache": "38 Mo", "Socket": "AM5", "TDP": "105 W", "Graphique": "RDNA 2 (2 CU)", "socket": "AM5"}},
 
-    # ─── Boîtiers ────────────────────────────────────────────────────
-    {
-        "name": "O11 Dynamic EVO XL",
-        "brand": "Lian Li", "category": "case", "price": 219.00, "old_price": None,
-        "stock": 13, "rating": 4.9, "featured": True, "badge": "Top vente",
-        "description": "La vitrine ultime : double chambre, verre panoramique, jusqu'à 3 radiateurs 360 mm.",
-        "specs": {"Format": "E-ATX / ATX / mATX", "GPU max": "460 mm", "Radiateurs": "3x 360 mm", "Façade": "Verre trempé", "Baies": "4x 2.5\" + 2x 3.5\"", "max_gpu_mm": 460},
-    },
-    {
-        "name": "North XL Charcoal",
-        "brand": "Fractal Design", "category": "case", "price": 169.00, "old_price": None,
-        "stock": 19, "rating": 4.8, "featured": False, "badge": "Nouveau",
-        "description": "Façade en noyer véritable et mesh : le boîtier scandinave qui réconcilie salon et setup.",
-        "specs": {"Format": "E-ATX / ATX / mATX", "GPU max": "413 mm", "Radiateurs": "360 + 280 mm", "Façade": "Bois + mesh", "Ventilateurs inclus": "3x 140 mm", "max_gpu_mm": 413},
-    },
-    {
-        "name": "H9 Flow RGB",
-        "brand": "NZXT", "category": "case", "price": 159.00, "old_price": 189.00,
-        "stock": 25, "rating": 4.6, "featured": False, "badge": "Promo",
-        "description": "Double chambre épuré avec 3 ventilateurs RGB Core inclus et vue panoramique sans montant.",
-        "specs": {"Format": "ATX / mATX / ITX", "GPU max": "435 mm", "Radiateurs": "2x 360 mm", "Façade": "Verre + mesh", "Ventilateurs inclus": "3x 120 mm RGB", "max_gpu_mm": 435},
-    },
-    {
-        "name": "Dark Base Pro 901",
-        "brand": "be quiet!", "category": "case", "price": 269.00, "old_price": None,
-        "stock": 7, "rating": 4.7, "featured": False, "badge": None,
-        "description": "La forteresse du silence : panneaux insonorisés, façade interchangeable mesh/silence, ARGB discret.",
-        "specs": {"Format": "E-ATX / ATX / mATX", "GPU max": "430 mm", "Radiateurs": "420 + 360 mm", "Façade": "Interchangeable", "Ventilateurs inclus": "3x Silent Wings 4", "max_gpu_mm": 430},
-    },
+    # --- AMD Ryzen 5000 (Zen 3, AM4) ---
+    {"name": "Ryzen 7 5700X3D", "brand": "AMD", "category": "cpu", "price": 189.00, "old_price": None, "stock": 18, "rating": 4.8, "featured": False, "badge": "Bon plan", "description": "Le 3D V-Cache sur AM4 : le meilleur upgrade gaming pour une config existante.", "specs": {"Cœurs": "8C / 16T", "Fréquence": "3,0 / 4,1 GHz", "Cache": "100 Mo", "Socket": "AM4", "TDP": "105 W", "Graphique": "Non", "socket": "AM4"}},
+    {"name": "Ryzen 5 5600", "brand": "AMD", "category": "cpu", "price": 109.00, "old_price": None, "stock": 28, "rating": 4.7, "featured": False, "badge": "Petit prix", "description": "6 cœurs Zen 3 incontournables pour une config gaming économique en AM4.", "specs": {"Cœurs": "6C / 12T", "Fréquence": "3,5 / 4,4 GHz", "Cache": "35 Mo", "Socket": "AM4", "TDP": "65 W", "Graphique": "Non", "socket": "AM4"}},
+    {"name": "Athlon 3000G", "brand": "AMD", "category": "cpu", "price": 55.00, "old_price": None, "stock": 30, "rating": 4.2, "featured": False, "badge": "Petit prix", "description": "Dual-core avec Radeon Vega intégré, idéal PC bureautique AM4 à bas coût.", "specs": {"Cœurs": "2C / 4T", "Fréquence": "3,5 GHz", "Cache": "5 Mo", "Socket": "AM4", "TDP": "35 W", "Graphique": "Vega 3", "socket": "AM4"}},
 
-    # ─── Refroidissement ─────────────────────────────────────────────
-    {
-        "name": "Liquid Freezer III 360 A-RGB",
-        "brand": "Arctic", "category": "cooling", "price": 119.00, "old_price": 139.00,
-        "stock": 36, "rating": 4.9, "featured": True, "badge": "Top vente",
-        "description": "L'AIO 360 au rapport perf/prix imbattable : VRM fan intégré, montage AM5 à offset natif.",
-        "specs": {"Type": "AIO 360 mm", "Sockets": "AM5 / AM4 / LGA1851 / LGA1700", "Ventilateurs": "3x P12 PWM A-RGB", "Pompe": "2800 tr/min", "TDP supporté": "350 W+", "sockets": ["AM5", "LGA1851"]},
-    },
-    {
-        "name": "Kraken Elite 360 RGB LCD",
-        "brand": "NZXT", "category": "cooling", "price": 299.00, "old_price": None,
-        "stock": 11, "rating": 4.6, "featured": False, "badge": "Flagship",
-        "description": "Écran LCD 2.36\" personnalisable sur la pompe : affichez températures, GIF ou monitoring en direct.",
-        "specs": {"Type": "AIO 360 mm", "Sockets": "AM5 / AM4 / LGA1851 / LGA1700", "Ventilateurs": "3x F120 RGB Core", "Écran": "LCD 2.36\" 640x640", "TDP supporté": "330 W+", "sockets": ["AM5", "LGA1851"]},
-    },
-    {
-        "name": "NH-D15 G2",
-        "brand": "Noctua", "category": "cooling", "price": 149.00, "old_price": None,
-        "stock": 23, "rating": 4.9, "featured": False, "badge": None,
-        "description": "La légende du refroidissement à air, version 2 : 8 caloducs, deux NF-A14x25r G2, silence absolu.",
-        "specs": {"Type": "Ventirad double tour", "Sockets": "AM5 / AM4 / LGA1851 / LGA1700", "Ventilateurs": "2x NF-A14x25r G2", "Hauteur": "168 mm", "TDP supporté": "300 W", "sockets": ["AM5", "LGA1851"]},
-    },
-    {
-        "name": "iCUE Link Titan 360 RX RGB",
-        "brand": "Corsair", "category": "cooling", "price": 239.00, "old_price": 259.00,
-        "stock": 16, "rating": 4.7, "featured": False, "badge": "Promo",
-        "description": "L'écosystème iCUE Link : un seul câble pour tout l'AIO, pompe FlowDrive et RX120 RGB chaînés.",
-        "specs": {"Type": "AIO 360 mm", "Sockets": "AM5 / AM4 / LGA1851 / LGA1700", "Ventilateurs": "3x RX120 RGB", "Pompe": "FlowDrive", "TDP supporté": "350 W+", "sockets": ["AM5", "LGA1851"]},
-    },
+    # --- Intel Core Ultra 200S (Arrow Lake, LGA1851) ---
+    {"name": "Core Ultra 9 285K", "brand": "Intel", "category": "cpu", "price": 569.00, "old_price": None, "stock": 7, "rating": 4.6, "featured": False, "badge": None, "description": "Le fer de lance Arrow Lake : 24 cœurs et NPU intégré pour la création et l'IA.", "specs": {"Cœurs": "24C (8P+16E) / 24T", "Fréquence": "3,7 / 5,7 GHz", "Cache": "36 Mo", "Socket": "LGA1851", "TDP": "125 W", "Graphique": "Xe (4 cœurs)", "socket": "LGA1851"}},
+    {"name": "Core Ultra 7 265K", "brand": "Intel", "category": "cpu", "price": 319.00, "old_price": None, "stock": 12, "rating": 4.5, "featured": False, "badge": None, "description": "20 cœurs hybrides très polyvalents, excellents en applicatif et productivité.", "specs": {"Cœurs": "20C (8P+12E) / 20T", "Fréquence": "3,9 / 5,5 GHz", "Cache": "30 Mo", "Socket": "LGA1851", "TDP": "125 W", "Graphique": "Xe (4 cœurs)", "socket": "LGA1851"}},
+    {"name": "Core Ultra 5 245K", "brand": "Intel", "category": "cpu", "price": 209.00, "old_price": None, "stock": 16, "rating": 4.4, "featured": False, "badge": None, "description": "Arrow Lake efficace : 14 cœurs et NPU pour l'IA locale sur LGA1851.", "specs": {"Cœurs": "14C (6P+8E) / 14T", "Fréquence": "4,2 / 5,2 GHz", "Cache": "24 Mo", "Socket": "LGA1851", "TDP": "125 W", "Graphique": "Xe (4 cœurs)", "socket": "LGA1851"}},
 
-    # ─── Écrans ──────────────────────────────────────────────────────
-    {
-        "name": "UltraGear 27GX790A OLED 27\" 480 Hz",
-        "brand": "LG", "category": "monitor", "price": 999.00, "old_price": None,
-        "stock": 11, "rating": 4.8, "featured": True, "badge": "Nouveau",
-        "description": "OLED 1440p à 480 Hz : le summum absolu de la fluidité compétitive, temps de réponse 0,03 ms.",
-        "specs": {"Dalle": "OLED 26,5\"", "Définition": "2560 × 1440", "Fréquence": "480 Hz", "Réponse": "0,03 ms", "HDR": "DisplayHDR True Black 400", "Connectique": "DP 2.1 + 2x HDMI 2.1"},
-    },
-    {
-        "name": "Odyssey OLED G9 49\" DQHD",
-        "brand": "Samsung", "category": "monitor", "price": 1299.00, "old_price": 1499.00,
-        "stock": 6, "rating": 4.7, "featured": False, "badge": "Promo",
-        "description": "49 pouces incurvés QD-OLED 240 Hz : l'immersion totale, deux écrans 27\" sans bordure au milieu.",
-        "specs": {"Dalle": "QD-OLED 49\" 1800R", "Définition": "5120 × 1440", "Fréquence": "240 Hz", "Réponse": "0,03 ms", "HDR": "VESA TrueBlack 400", "Connectique": "DP 2.1 + HDMI 2.1"},
-    },
-    {
-        "name": "ROG Swift PG27UCDM 4K OLED",
-        "brand": "ASUS", "category": "monitor", "price": 1099.00, "old_price": None,
-        "stock": 8, "rating": 4.8, "featured": False, "badge": "Flagship",
-        "description": "27\" 4K QD-OLED 240 Hz : la netteté d'un écran pro et la réactivité d'une dalle e-sport.",
-        "specs": {"Dalle": "QD-OLED 26,5\"", "Définition": "3840 × 2160", "Fréquence": "240 Hz", "Réponse": "0,03 ms", "HDR": "DisplayHDR 400 TB", "Connectique": "DP 2.1a + USB-C 90 W"},
-    },
-    {
-        "name": "Alienware AW2725DF QD-OLED 360 Hz",
-        "brand": "Dell", "category": "monitor", "price": 649.00, "old_price": None,
-        "stock": 17, "rating": 4.8, "featured": False, "badge": "Top vente",
-        "description": "Le QD-OLED 1440p 360 Hz au prix le plus agressif du marché — le choix des joueurs compétitifs.",
-        "specs": {"Dalle": "QD-OLED 26,7\"", "Définition": "2560 × 1440", "Fréquence": "360 Hz", "Réponse": "0,03 ms", "HDR": "VESA TrueBlack 400", "Connectique": "DP 1.4 + 2x HDMI 2.1"},
-    },
-    {
-        "name": "Gaming 24G4X 24\" IPS 180 Hz",
-        "brand": "AOC", "category": "monitor", "price": 149.00, "old_price": None,
-        "stock": 42, "rating": 4.5, "featured": False, "badge": None,
-        "description": "La référence petit budget : IPS 1080p 180 Hz, couleurs justes et latence minimale pour moins de 150 €.",
-        "specs": {"Dalle": "IPS 23,8\"", "Définition": "1920 × 1080", "Fréquence": "180 Hz", "Réponse": "1 ms", "Synchro": "Adaptive-Sync", "Connectique": "DP 1.4 + 2x HDMI 2.0"},
-    },
-    {
-        "name": "MAG 274QRF QD E2 27\" 1440p",
-        "brand": "MSI", "category": "monitor", "price": 329.00, "old_price": 379.00,
-        "stock": 23, "rating": 4.6, "featured": False, "badge": "Promo",
-        "description": "Rapid IPS Quantum Dot 180 Hz : le 1440p polyvalent parfait entre jeu, travail et création.",
-        "specs": {"Dalle": "Rapid IPS QD 27\"", "Définition": "2560 × 1440", "Fréquence": "180 Hz", "Réponse": "1 ms", "Couleurs": "147 % sRGB", "Connectique": "DP 1.4a + USB-C 65 W"},
-    },
+    # --- Intel Core 14e/13e gen (LGA1700) ---
+    {"name": "Core i7-14700K", "brand": "Intel", "category": "cpu", "price": 359.00, "old_price": None, "stock": 12, "rating": 4.6, "featured": False, "badge": None, "description": "20 cœurs hybrides ultra-polyvalents pour le jeu et la création sur LGA1700.", "specs": {"Cœurs": "20C (8P+12E) / 28T", "Fréquence": "3,4 / 5,6 GHz", "Cache": "33 Mo", "Socket": "LGA1700", "TDP": "125 W", "Graphique": "UHD 770", "socket": "LGA1700"}},
+    {"name": "Core i5-14600KF", "brand": "Intel", "category": "cpu", "price": 249.00, "old_price": None, "stock": 16, "rating": 4.6, "featured": False, "badge": None, "description": "14 cœurs débloqués au superbe rapport perf/prix pour le gaming.", "specs": {"Cœurs": "14C (6P+8E) / 20T", "Fréquence": "3,5 / 5,3 GHz", "Cache": "24 Mo", "Socket": "LGA1700", "TDP": "125 W", "Graphique": "Non", "socket": "LGA1700"}},
+    {"name": "Core i5-14400F", "brand": "Intel", "category": "cpu", "price": 159.00, "old_price": None, "stock": 22, "rating": 4.5, "featured": False, "badge": None, "description": "10 cœurs hybrides polyvalents sur LGA1700, idéal config gaming équilibrée.", "specs": {"Cœurs": "10C (6P+4E) / 16T", "Fréquence": "2,5 / 4,7 GHz", "Cache": "20 Mo", "Socket": "LGA1700", "TDP": "65 W", "Graphique": "Non", "socket": "LGA1700"}},
+    {"name": "Core i3-14100F", "brand": "Intel", "category": "cpu", "price": 109.00, "old_price": None, "stock": 26, "rating": 4.4, "featured": False, "badge": "Petit prix", "description": "4 cœurs efficaces pour une config gaming d'entrée ou bureautique réactive.", "specs": {"Cœurs": "4C / 8T", "Fréquence": "3,5 / 4,7 GHz", "Cache": "12 Mo", "Socket": "LGA1700", "TDP": "58 W", "Graphique": "Non", "socket": "LGA1700"}},
 
-    # ─── Claviers ────────────────────────────────────────────────────
-    {
-        "name": "80HE analogique",
-        "brand": "Wooting", "category": "keyboard", "price": 199.00, "old_price": None,
-        "stock": 9, "rating": 4.9, "featured": True, "badge": "Flagship",
-        "description": "Touches magnétiques à effet Hall : point d'activation réglable, rapid trigger — l'arme secrète des pros.",
-        "specs": {"Format": "80 % (TKL)", "Switches": "Lekker à effet Hall", "Activation": "0,1 – 4,0 mm réglable", "Fonctions": "Rapid Trigger", "Connexion": "USB-C filaire", "Rétroéclairage": "RGB par touche"},
-    },
-    {
-        "name": "Q1 Max QMK sans fil",
-        "brand": "Keychron", "category": "keyboard", "price": 219.00, "old_price": None,
-        "stock": 14, "rating": 4.7, "featured": False, "badge": None,
-        "description": "Châssis aluminium CNC, montage gasket, QMK/VIA : le clavier custom prêt à l'emploi.",
-        "specs": {"Format": "75 %", "Switches": "Gateron Jupiter (hot-swap)", "Châssis": "Aluminium CNC", "Connexion": "2,4 GHz + BT + USB-C", "Programmation": "QMK / VIA", "Batterie": "4000 mAh"},
-    },
-    {
-        "name": "G915 X Lightspeed TKL",
-        "brand": "Logitech", "category": "keyboard", "price": 229.00, "old_price": None,
-        "stock": 18, "rating": 4.6, "featured": False, "badge": None,
-        "description": "Profil bas, switches GL V2 et triple connectivité : l'élégance productive qui sait aussi jouer.",
-        "specs": {"Format": "TKL profil bas", "Switches": "GL Tactile V2", "Connexion": "Lightspeed + BT + USB-C", "Batterie": "36 h RGB allumé", "Châssis": "Alliage brossé", "Rétroéclairage": "RGB Lightsync"},
-    },
-    {
-        "name": "Huntsman V3 Pro TKL",
-        "brand": "Razer", "category": "keyboard", "price": 179.00, "old_price": 219.00,
-        "stock": 21, "rating": 4.6, "featured": False, "badge": "Promo",
-        "description": "Switches optiques analogiques gen 2 avec rapid trigger : la réponse de Razer à l'e-sport moderne.",
-        "specs": {"Format": "TKL", "Switches": "Optiques analogiques Gen-2", "Activation": "0,1 – 4,0 mm réglable", "Fonctions": "Rapid Trigger", "Connexion": "USB-C filaire", "Repose-poignets": "Magnétique inclus"},
-    },
+    # ═══════════════════════════════════════════════════════════════════
+    # MÉMOIRE RAM
+    # ═══════════════════════════════════════════════════════════════════
+    # --- DDR5 ---
+    {"name": "Trident Z5 RGB 32 Go DDR5-6000 CL30", "brand": "G.Skill", "category": "ram", "price": 124.00, "old_price": None, "stock": 24, "rating": 4.9, "featured": True, "badge": None, "description": "Le kit DDR5 recommandé pour Ryzen 9000 : 6000 CL30 EXPO, stable du premier coup.", "specs": {"Capacité": "32 Go (2x16)", "Type": "DDR5", "Fréquence": "6000 MT/s", "Latence": "CL30", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"}},
+    {"name": "Vengeance RGB 32 Go DDR5-6000 CL30", "brand": "Corsair", "category": "ram", "price": 119.00, "old_price": None, "stock": 24, "rating": 4.8, "featured": False, "badge": None, "description": "Référence DDR5 RGB pour AM5 et Intel : 6000 CL30 EXPO/XMP, lumineux et fiable.", "specs": {"Capacité": "32 Go (2x16)", "Type": "DDR5", "Fréquence": "6000 MT/s", "Latence": "CL30", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"}},
+    {"name": "Vengeance 32 Go DDR5-5600", "brand": "Corsair", "category": "ram", "price": 94.00, "old_price": None, "stock": 28, "rating": 4.7, "featured": False, "badge": None, "description": "32 Go DDR5 sobres et fiables sans RGB, parfaits pour une config discrète.", "specs": {"Capacité": "32 Go (2x16)", "Type": "DDR5", "Fréquence": "5600 MT/s", "Latence": "CL36", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"}},
+    {"name": "Fury Beast RGB 32 Go DDR5-6000", "brand": "Kingston", "category": "ram", "price": 109.00, "old_price": None, "stock": 20, "rating": 4.7, "featured": False, "badge": None, "description": "32 Go DDR5 RGB performants et accessibles, compatibles Intel et AMD.", "specs": {"Capacité": "32 Go (2x16)", "Type": "DDR5", "Fréquence": "6000 MT/s", "Latence": "CL36", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"}},
+    {"name": "T-Force Delta RGB 32 Go DDR5-6400", "brand": "Teamgroup", "category": "ram", "price": 114.00, "old_price": None, "stock": 18, "rating": 4.6, "featured": False, "badge": None, "description": "32 Go DDR5 rapides au look RGB diffusant, pour configs modernes Intel et AMD.", "specs": {"Capacité": "32 Go (2x16)", "Type": "DDR5", "Fréquence": "6400 MT/s", "Latence": "CL32", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"}},
+    {"name": "Value 16 Go DDR5-4800", "brand": "Crucial", "category": "ram", "price": 44.00, "old_price": None, "stock": 30, "rating": 4.5, "featured": False, "badge": "Petit prix", "description": "Le ticket d'entrée DDR5 JEDEC, parfait pour démarrer sur AM5 ou LGA1700.", "specs": {"Capacité": "16 Go (2x8)", "Type": "DDR5", "Fréquence": "4800 MT/s", "Latence": "CL40", "Profils": "—", "ram_type": "DDR5"}},
+    {"name": "Vengeance 64 Go DDR5-6000", "brand": "Corsair", "category": "ram", "price": 199.00, "old_price": None, "stock": 14, "rating": 4.7, "featured": False, "badge": None, "description": "64 Go DDR5 pour la création vidéo, la 3D et la virtualisation.", "specs": {"Capacité": "64 Go (2x32)", "Type": "DDR5", "Fréquence": "6000 MT/s", "Latence": "CL30", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"}},
+    {"name": "Trident Z5 RGB 96 Go DDR5-6400", "brand": "G.Skill", "category": "ram", "price": 319.00, "old_price": None, "stock": 8, "rating": 4.8, "featured": False, "badge": None, "description": "96 Go pour stations de travail : un montage RAM monstrueux pour la 3D et la vidéo.", "specs": {"Capacité": "96 Go (2x48)", "Type": "DDR5", "Fréquence": "6400 MT/s", "Latence": "CL32", "Profils": "EXPO + XMP 3.0", "ram_type": "DDR5"}},
+    {"name": "SO-DIMM Impact 16 Go DDR5-5600", "brand": "Kingston", "category": "ram", "price": 57.00, "old_price": None, "stock": 18, "rating": 4.6, "featured": False, "badge": None, "description": "Barrettes SO-DIMM pour portables et mini-PC, mise à niveau facile.", "specs": {"Capacité": "16 Go (2x8)", "Type": "DDR5 SO-DIMM", "Fréquence": "5600 MT/s", "Latence": "CL40", "Profils": "—", "ram_type": "DDR5"}},
 
-    # ─── Souris ──────────────────────────────────────────────────────
-    {
-        "name": "G Pro X Superlight 2",
-        "brand": "Logitech", "category": "mouse", "price": 159.00, "old_price": None,
-        "stock": 31, "rating": 4.8, "featured": True, "badge": "Top vente",
-        "description": "60 grammes, capteur Hero 2 à 32 000 DPI, 95 h d'autonomie : la souris la plus titrée de l'e-sport.",
-        "specs": {"Poids": "60 g", "Capteur": "Hero 2 — 32 000 DPI", "Boutons": "5", "Connexion": "Lightspeed 2,4 GHz", "Autonomie": "95 h", "Polling": "2000 Hz (4000 via dongle)"},
-    },
-    {
-        "name": "Viper V3 Pro",
-        "brand": "Razer", "category": "mouse", "price": 169.00, "old_price": None,
-        "stock": 24, "rating": 4.8, "featured": False, "badge": None,
-        "description": "54 g, polling 8000 Hz natif et capteur Focus Pro 35K : taillée pour le tir compétitif.",
-        "specs": {"Poids": "54 g", "Capteur": "Focus Pro 35K Gen-2", "Boutons": "6", "Connexion": "HyperSpeed 2,4 GHz", "Autonomie": "95 h", "Polling": "8000 Hz"},
-    },
-    {
-        "name": "EC2-CW sans fil",
-        "brand": "Zowie", "category": "mouse", "price": 129.00, "old_price": None,
-        "stock": 16, "rating": 4.7, "featured": False, "badge": None,
-        "description": "La forme ergonomique culte de BenQ Zowie enfin sans fil — plug & play, zéro logiciel.",
-        "specs": {"Poids": "77 g", "Capteur": "3370 — 3200 DPI", "Boutons": "5", "Connexion": "2,4 GHz (récepteur renforcé)", "Autonomie": "70 h", "Philosophie": "Aucun driver requis"},
-    },
-    {
-        "name": "Aerox 5 Wireless",
-        "brand": "SteelSeries", "category": "mouse", "price": 99.00, "old_price": 139.00,
-        "stock": 27, "rating": 4.5, "featured": False, "badge": "Promo",
-        "description": "9 boutons programmables et 74 g seulement : la polyvalente ajourée pour MOBA, MMO et FPS.",
-        "specs": {"Poids": "74 g", "Capteur": "TrueMove Air — 18 000 DPI", "Boutons": "9", "Connexion": "Quantum 2.0 + BT", "Autonomie": "180 h", "Étanchéité": "AquaBarrier IP54"},
-    },
+    # --- DDR4 ---
+    {"name": "Trident Z RGB 16 Go DDR4-3600", "brand": "G.Skill", "category": "ram", "price": 52.00, "old_price": None, "stock": 24, "rating": 4.7, "featured": False, "badge": None, "description": "16 Go DDR4 rapides et lumineux, le combo idéal pour un Ryzen 5000.", "specs": {"Capacité": "16 Go (2x8)", "Type": "DDR4", "Fréquence": "3600 MT/s", "Latence": "CL18", "Profils": "XMP 2.0", "ram_type": "DDR4"}},
+    {"name": "Vengeance LPX 16 Go DDR4-3200", "brand": "Corsair", "category": "ram", "price": 34.00, "old_price": None, "stock": 32, "rating": 4.6, "featured": False, "badge": "Petit prix", "description": "16 Go DDR4 incontournables pour upgrader une config AM4 ou LGA1200.", "specs": {"Capacité": "16 Go (2x8)", "Type": "DDR4", "Fréquence": "3200 MT/s", "Latence": "CL16", "Profils": "XMP 2.0", "ram_type": "DDR4"}},
+    {"name": "Vengeance LPX 32 Go DDR4-3200", "brand": "Corsair", "category": "ram", "price": 59.00, "old_price": None, "stock": 26, "rating": 4.7, "featured": False, "badge": None, "description": "32 Go DDR4 fiables, le confort pour le jeu et le multitâche sur AM4/LGA1700.", "specs": {"Capacité": "32 Go (2x16)", "Type": "DDR4", "Fréquence": "3200 MT/s", "Latence": "CL16", "Profils": "XMP 2.0", "ram_type": "DDR4"}},
+    {"name": "Fury Beast 64 Go DDR4-3200", "brand": "Kingston", "category": "ram", "price": 109.00, "old_price": None, "stock": 16, "rating": 4.7, "featured": False, "badge": None, "description": "64 Go DDR4 pour la création lourde et la virtualisation sur plateforme AM4.", "specs": {"Capacité": "64 Go (2x32)", "Type": "DDR4", "Fréquence": "3200 MT/s", "Latence": "CL16", "Profils": "XMP 2.0", "ram_type": "DDR4"}},
 
-    # ─── Casques audio ───────────────────────────────────────────────
-    {
-        "name": "Arctis Nova Pro Wireless",
-        "brand": "SteelSeries", "category": "headset", "price": 349.00, "old_price": None,
-        "stock": 12, "rating": 4.7, "featured": True, "badge": "Flagship",
-        "description": "Double batterie échangeable à chaud, ANC, base DAC : le casque sans fil de référence absolue.",
-        "specs": {"Transducteurs": "40 mm néodyme", "Connexion": "2,4 GHz + Bluetooth simultanés", "ANC": "Active 4 micros", "Autonomie": "Infinie (2 batteries)", "Micro": "ClearCast Gen 2 rétractable", "Base": "GameDAC Hi-Res"},
-    },
-    {
-        "name": "Cloud III Wireless",
-        "brand": "HyperX", "category": "headset", "price": 129.00, "old_price": None,
-        "stock": 33, "rating": 4.6, "featured": False, "badge": "Top vente",
-        "description": "120 h d'autonomie et le confort légendaire HyperX : le sans-fil endurance au prix juste.",
-        "specs": {"Transducteurs": "53 mm inclinés", "Connexion": "2,4 GHz USB-C/A", "Autonomie": "120 h", "Micro": "10 mm antibruit amovible", "Poids": "330 g", "Compatibilité": "PC / PS5 / Switch"},
-    },
-    {
-        "name": "G Pro X 2 Lightspeed",
-        "brand": "Logitech", "category": "headset", "price": 229.00, "old_price": None,
-        "stock": 15, "rating": 4.6, "featured": False, "badge": None,
-        "description": "Transducteurs graphène 50 mm, DTS:X 2.0 et 50 h d'autonomie dans un châssis aluminium pivotant.",
-        "specs": {"Transducteurs": "Graphène 50 mm", "Connexion": "Lightspeed + BT + jack", "Autonomie": "50 h", "Micro": "6 mm cardioïde amovible", "Surround": "DTS Headphone:X 2.0", "Poids": "345 g"},
-    },
-    {
-        "name": "ATH-M50xSTS StreamSet",
-        "brand": "Audio-Technica", "category": "headset", "price": 199.00, "old_price": None,
-        "stock": 10, "rating": 4.7, "featured": False, "badge": "Nouveau",
-        "description": "Le casque studio culte M50x marié à un micro broadcast 20 series : le StreamSet des créateurs.",
-        "specs": {"Transducteurs": "45 mm studio", "Micro": "Cardioïde broadcast", "Connexion": "USB-C (DAC intégré) ou XLR/jack", "Retour": "Monitoring direct", "Poids": "315 g", "Usage": "Stream / studio / jeu"},
-    },
+    # ═══════════════════════════════════════════════════════════════════
+    # STOCKAGE
+    # ═══════════════════════════════════════════════════════════════════
+    # --- NVMe Gen5 ---
+    {"name": "990 Pro 2 To", "brand": "Samsung", "category": "storage", "price": 159.00, "old_price": None, "stock": 18, "rating": 4.9, "featured": True, "badge": None, "description": "La référence Gen4 : 2 To ultra-rapides et endurants pour gamers et créateurs.", "specs": {"Capacité": "2 To", "Interface": "PCIe 4.0 x4", "Lecture": "7450 Mo/s", "Écriture": "6900 Mo/s", "Endurance": "1200 TBW", "Format": "M.2 2280"}},
+    {"name": "T705 2 To Gen5", "brand": "Crucial", "category": "storage", "price": 259.00, "old_price": None, "stock": 10, "rating": 4.8, "featured": False, "badge": "Nouveau", "description": "Le NVMe Gen5 le plus rapide : débits records pour les créateurs et la 4K gaming.", "specs": {"Capacité": "2 To", "Interface": "PCIe 5.0 x4", "Lecture": "14500 Mo/s", "Écriture": "12700 Mo/s", "Endurance": "1200 TBW", "Format": "M.2 2280"}},
+    {"name": "990 Pro 4 To", "brand": "Samsung", "category": "storage", "price": 309.00, "old_price": None, "stock": 9, "rating": 4.9, "featured": False, "badge": None, "description": "4 To Gen4 ultra-rapides et endurants, idéal grosse logithèque et montage vidéo.", "specs": {"Capacité": "4 To", "Interface": "PCIe 4.0 x4", "Lecture": "7450 Mo/s", "Écriture": "6900 Mo/s", "Endurance": "2400 TBW", "Format": "M.2 2280"}},
+    {"name": "990 Pro 1 To", "brand": "Samsung", "category": "storage", "price": 99.00, "old_price": None, "stock": 24, "rating": 4.8, "featured": False, "badge": None, "description": "1 To Gen4 hautes performances, disque système rapide et fiable.", "specs": {"Capacité": "1 To", "Interface": "PCIe 4.0 x4", "Lecture": "7450 Mo/s", "Écriture": "6900 Mo/s", "Endurance": "600 TBW", "Format": "M.2 2280"}},
+    {"name": "WD_Black SN850X 2 To", "brand": "Western Digital", "category": "storage", "price": 169.00, "old_price": None, "stock": 16, "rating": 4.8, "featured": False, "badge": None, "description": "2 To Gen4 gaming au top : débits élevés et grosse endurance.", "specs": {"Capacité": "2 To", "Interface": "PCIe 4.0 x4", "Lecture": "7300 Mo/s", "Écriture": "6600 Mo/s", "Endurance": "1200 TBW", "Format": "M.2 2280"}},
+    {"name": "WD_Black SN850X 1 To", "brand": "Western Digital", "category": "storage", "price": 99.00, "old_price": None, "stock": 20, "rating": 4.8, "featured": False, "badge": None, "description": "Le NVMe Gen4 gaming par excellence : débits au top et latences minimes.", "specs": {"Capacité": "1 To", "Interface": "PCIe 4.0 x4", "Lecture": "7300 Mo/s", "Écriture": "6300 Mo/s", "Endurance": "600 TBW", "Format": "M.2 2280"}},
+    {"name": "FireCuda 530R 2 To Gen4", "brand": "Seagate", "category": "storage", "price": 179.00, "old_price": None, "stock": 12, "rating": 4.7, "featured": False, "badge": None, "description": "2 To Gen4 très endurants pensés pour le jeu et la création intensive.", "specs": {"Capacité": "2 To", "Interface": "PCIe 4.0 x4", "Lecture": "7300 Mo/s", "Écriture": "6900 Mo/s", "Endurance": "2550 TBW", "Format": "M.2 2280"}},
+    {"name": "P3 Plus 1 To Gen4", "brand": "Crucial", "category": "storage", "price": 64.00, "old_price": None, "stock": 26, "rating": 4.5, "featured": False, "badge": "Petit prix", "description": "1 To Gen4 abordable et frais, idéal disque secondaire jeux.", "specs": {"Capacité": "1 To", "Interface": "PCIe 4.0 x4", "Lecture": "5000 Mo/s", "Écriture": "3600 Mo/s", "Endurance": "220 TBW", "Format": "M.2 2280"}},
+    {"name": "980 1 To PCIe 3.0", "brand": "Samsung", "category": "storage", "price": 69.00, "old_price": None, "stock": 26, "rating": 4.7, "featured": False, "badge": None, "description": "NVMe Gen3 sans DRAM, sobre et efficace comme disque système.", "specs": {"Capacité": "1 To", "Interface": "PCIe 3.0 x4", "Lecture": "3500 Mo/s", "Écriture": "3000 Mo/s", "Endurance": "600 TBW", "Format": "M.2 2280"}},
 
-    # ─── Renforts composants ─────────────────────────────────────────
-    {
-        "name": "Ryzen 9 9900X",
-        "brand": "AMD", "category": "cpu", "price": 449.00, "old_price": None,
-        "stock": 19, "rating": 4.7, "featured": False, "badge": None,
-        "description": "12 cœurs Zen 5 à 120 W seulement : la puissance multi-cœur efficiente pour créer et compiler.",
-        "specs": {"Socket": "AM5", "Cœurs / Threads": "12 / 24", "Boost": "5.6 GHz", "Cache": "76 Mo", "TDP": "120 W", "socket": "AM5", "tdp_w": 120},
-    },
-    {
-        "name": "Core Ultra 7 265K",
-        "brand": "Intel", "category": "cpu", "price": 449.00, "old_price": 489.00,
-        "stock": 22, "rating": 4.5, "featured": False, "badge": "Promo",
-        "description": "20 cœurs Arrow Lake : le cœur de gamme Intel qui excelle en productivité multitâche.",
-        "specs": {"Socket": "LGA1851", "Cœurs / Threads": "20 / 20", "Boost": "5.5 GHz", "Cache": "30 Mo", "TDP": "125 W", "socket": "LGA1851", "tdp_w": 125},
-    },
-    {
-        "name": "Flare X5 64 Go DDR5-6000 CL30",
-        "brand": "G.Skill", "category": "ram", "price": 219.00, "old_price": None,
-        "stock": 20, "rating": 4.8, "featured": False, "badge": None,
-        "description": "2x32 Go optimisés AMD EXPO, profil bas compatible gros ventirads : la capacité sans compromis.",
-        "specs": {"Capacité": "64 Go (2x32)", "Type": "DDR5", "Fréquence": "6000 MT/s", "Latence": "CL30", "Profils": "EXPO", "Hauteur": "33 mm", "ram_type": "DDR5"},
-    },
-    {
-        "name": "P3 Plus 4 To PCIe 4.0",
-        "brand": "Crucial", "category": "storage", "price": 219.00, "old_price": 249.00,
-        "stock": 26, "rating": 4.5, "featured": False, "badge": "Promo",
-        "description": "4 To en NVMe à prix plancher : la solution capacité pour bibliothèques de jeux gourmandes.",
-        "specs": {"Capacité": "4 To", "Interface": "PCIe 4.0 x4", "Lecture": "4 800 Mo/s", "Écriture": "4 100 Mo/s", "Endurance": "800 TBW", "Format": "M.2 2280"},
-    },
-    {
-        "name": "WD_Black SN770 1 To",
-        "brand": "Western Digital", "category": "storage", "price": 79.00, "old_price": None,
-        "stock": 48, "rating": 4.6, "featured": False, "badge": "Top vente",
-        "description": "Le SSD gaming au meilleur rapport perf/prix : 5 150 Mo/s sans DRAM mais avec du génie.",
-        "specs": {"Capacité": "1 To", "Interface": "PCIe 4.0 x4", "Lecture": "5 150 Mo/s", "Écriture": "4 900 Mo/s", "Endurance": "600 TBW", "Format": "M.2 2280"},
-    },
-    {
-        "name": "SF750 Platinum SFX",
-        "brand": "Corsair", "category": "psu", "price": 159.00, "old_price": None,
-        "stock": 13, "rating": 4.8, "featured": False, "badge": None,
-        "description": "750 W au format SFX pour les builds compacts : Platinum, full modulaire, ventilateur semi-passif.",
-        "specs": {"Puissance": "750 W", "Certification": "80+ Platinum", "Format": "SFX", "Modulaire": "Full", "Ventilateur": "92 mm semi-passif", "Garantie": "7 ans", "watts": 750},
-    },
-    {
-        "name": "H6 Flow RGB compact",
-        "brand": "NZXT", "category": "case", "price": 119.00, "old_price": None,
-        "stock": 28, "rating": 4.6, "featured": False, "badge": None,
-        "description": "Double chambre compacte avec façade d'angle panoramique et 3 ventilateurs RGB de série.",
-        "specs": {"Format": "ATX / mATX / ITX", "GPU max": "365 mm", "Radiateurs": "360 mm latéral + 240 mm", "Façade": "Verre d'angle", "Ventilateurs inclus": "3x 120 mm RGB", "max_gpu_mm": 365},
-    },
-    {
-        "name": "Peerless Assassin 120 SE",
-        "brand": "Thermalright", "category": "cooling", "price": 45.00, "old_price": None,
-        "stock": 55, "rating": 4.8, "featured": False, "badge": "Top vente",
-        "description": "Le ventirad double tour qui a humilié des AIO trois fois plus chers — le roi du rapport perf/prix.",
-        "specs": {"Type": "Ventirad double tour", "Sockets": "AM5 / AM4 / LGA1851 / LGA1700", "Ventilateurs": "2x TL-C12C PWM", "Hauteur": "155 mm", "TDP supporté": "245 W", "sockets": ["AM5", "LGA1851"]},
-    },
+    # --- SSD SATA ---
+    {"name": "870 EVO 1 To SATA", "brand": "Samsung", "category": "storage", "price": 79.00, "old_price": None, "stock": 28, "rating": 4.8, "featured": False, "badge": None, "description": "Le SSD SATA de référence : endurant, rapide et fiable, idéal disque secondaire.", "specs": {"Capacité": "1 To", "Interface": "SATA III", "Lecture": "560 Mo/s", "Écriture": "530 Mo/s", "Endurance": "600 TBW", "Format": "2.5\""}},
+    {"name": "A400 480 Go SATA", "brand": "Kingston", "category": "storage", "price": 30.00, "old_price": None, "stock": 45, "rating": 4.5, "featured": False, "badge": "Petit prix", "description": "SSD SATA d'entrée pour booster un vieux PC ou ajouter du stockage à moindre coût.", "specs": {"Capacité": "480 Go", "Interface": "SATA III", "Lecture": "500 Mo/s", "Écriture": "450 Mo/s", "Format": "2.5\""}},
+
+    # --- Disques durs & externe ---
+    {"name": "BarraCuda 2 To 7200 tr/min", "brand": "Seagate", "category": "storage", "price": 59.00, "old_price": None, "stock": 24, "rating": 4.4, "featured": False, "badge": None, "description": "2 To de stockage de masse à petit prix pour jeux, médias et sauvegardes.", "specs": {"Capacité": "2 To", "Interface": "SATA III", "Vitesse": "7200 tr/min", "Cache": "256 Mo", "Format": "3.5\""}},
+    {"name": "WD Red Plus 4 To NAS", "brand": "Western Digital", "category": "storage", "price": 109.00, "old_price": None, "stock": 16, "rating": 4.7, "featured": False, "badge": None, "description": "Disque dur conçu pour fonctionner 24/7 en NAS, fiable et endurant.", "specs": {"Capacité": "4 To", "Interface": "SATA III", "Vitesse": "5400 tr/min", "Cache": "256 Mo", "Usage": "NAS / RAID", "Format": "3.5\""}},
+    {"name": "IronWolf 8 To NAS", "brand": "Seagate", "category": "storage", "price": 209.00, "old_price": None, "stock": 12, "rating": 4.7, "featured": False, "badge": None, "description": "8 To 7200 tr/min pensés pour le RAID 24/7, robustes et endurants.", "specs": {"Capacité": "8 To", "Interface": "SATA III", "Vitesse": "7200 tr/min", "Cache": "256 Mo", "Usage": "NAS / RAID", "Format": "3.5\""}},
+    {"name": "Portable SSD T7 1 To", "brand": "Samsung", "category": "storage", "price": 99.00, "old_price": None, "stock": 20, "rating": 4.7, "featured": False, "badge": None, "description": "SSD externe USB 3.2 ultra-compact, parfait pour transporter projets et sauvegardes.", "specs": {"Capacité": "1 To", "Interface": "USB 3.2 Gen2", "Lecture": "1050 Mo/s", "Écriture": "1000 Mo/s", "Format": "Externe"}},
+
+    # ═══════════════════════════════════════════════════════════════════
+    # CARTES MÈRES
+    # ═══════════════════════════════════════════════════════════════════
+    # --- AMD AM5 ---
+    {"name": "MAG X870 Tomahawk WiFi", "brand": "MSI", "category": "motherboard", "price": 289.00, "old_price": None, "stock": 10, "rating": 4.8, "featured": True, "badge": None, "description": "Le meilleur rapport qualité/prix AM5 haut de gamme : USB4, WiFi 7 et VRM costauds.", "specs": {"Socket": "AM5", "Chipset": "X870", "Format": "ATX", "Mémoire": "4x DDR5 8000+", "M.2": "3 slots (Gen5)", "Réseau": "2.5 GbE + WiFi 7", "socket": "AM5", "ram_type": "DDR5", "form_factor": "ATX"}},
+    {"name": "B650 Tomahawk WiFi", "brand": "MSI", "category": "motherboard", "price": 199.00, "old_price": None, "stock": 14, "rating": 4.7, "featured": False, "badge": None, "description": "La référence AM5 milieu de gamme : VRM solide, WiFi 6E et double M.2 Gen4.", "specs": {"Socket": "AM5", "Chipset": "B650", "Format": "ATX", "Mémoire": "4x DDR5 6400+", "M.2": "2 slots Gen4", "Réseau": "2.5 GbE + WiFi 6E", "socket": "AM5", "ram_type": "DDR5", "form_factor": "ATX"}},
+    {"name": "B850 Gaming Plus WiFi", "brand": "MSI", "category": "motherboard", "price": 219.00, "old_price": None, "stock": 12, "rating": 4.6, "featured": False, "badge": "Nouveau", "description": "Plateforme AM5 récente avec PCIe 5.0 pour le GPU et le SSD, WiFi 7 inclus.", "specs": {"Socket": "AM5", "Chipset": "B850", "Format": "ATX", "Mémoire": "4x DDR5 7200+", "M.2": "2 slots (Gen5)", "Réseau": "2.5 GbE + WiFi 7", "socket": "AM5", "ram_type": "DDR5", "form_factor": "ATX"}},
+    {"name": "B650M-A WiFi", "brand": "ASUS", "category": "motherboard", "price": 159.00, "old_price": None, "stock": 16, "rating": 4.5, "featured": False, "badge": None, "description": "Micro-ATX AM5 complète et fiable, idéale pour un montage compact et performant.", "specs": {"Socket": "AM5", "Chipset": "B650", "Format": "Micro-ATX", "Mémoire": "4x DDR5 6400", "M.2": "2 slots Gen4", "Réseau": "2.5 GbE + WiFi 6", "socket": "AM5", "ram_type": "DDR5", "form_factor": "mATX"}},
+    {"name": "A620M-E", "brand": "ASUS", "category": "motherboard", "price": 99.00, "old_price": None, "stock": 18, "rating": 4.3, "featured": False, "badge": "Petit prix", "description": "L'entrée de gamme AM5 pour démarrer sur Ryzen 7000/9000 sans se ruiner.", "specs": {"Socket": "AM5", "Chipset": "A620", "Format": "Micro-ATX", "Mémoire": "2x DDR5 6400", "M.2": "1 slot Gen4", "Réseau": "1 GbE", "socket": "AM5", "ram_type": "DDR5", "form_factor": "mATX"}},
+    {"name": "X670E Carbon WiFi", "brand": "MSI", "category": "motherboard", "price": 379.00, "old_price": None, "stock": 8, "rating": 4.7, "featured": False, "badge": None, "description": "Plateforme AM5 premium : PCIe 5.0 partout, connectique massive et WiFi 6E.", "specs": {"Socket": "AM5", "Chipset": "X670E", "Format": "ATX", "Mémoire": "4x DDR5 6600+", "M.2": "4 slots (Gen5)", "Réseau": "2.5 GbE + WiFi 6E", "socket": "AM5", "ram_type": "DDR5", "form_factor": "ATX"}},
+    {"name": "B650E-I ROG Strix", "brand": "ASUS", "category": "motherboard", "price": 299.00, "old_price": None, "stock": 7, "rating": 4.6, "featured": False, "badge": None, "description": "Mini-ITX AM5 premium pour un PC SFF surpuissant : PCIe 5.0 et WiFi 6E.", "specs": {"Socket": "AM5", "Chipset": "B650E", "Format": "Mini-ITX", "Mémoire": "2x DDR5 6400+", "M.2": "2 slots (Gen5)", "Réseau": "2.5 GbE + WiFi 6E", "socket": "AM5", "ram_type": "DDR5", "form_factor": "ITX"}},
+
+    # --- AMD AM4 ---
+    {"name": "B550 Aorus Elite V2", "brand": "Gigabyte", "category": "motherboard", "price": 119.00, "old_price": None, "stock": 16, "rating": 4.6, "featured": False, "badge": None, "description": "Carte AM4 fiable et abordable pour Ryzen 5000, double M.2 et VRM endurants.", "specs": {"Socket": "AM4", "Chipset": "B550", "Format": "ATX", "Mémoire": "4x DDR4 4733", "M.2": "2 slots Gen4/Gen3", "Réseau": "2.5 GbE", "socket": "AM4", "ram_type": "DDR4", "form_factor": "ATX"}},
+    {"name": "B450M DS3H V2", "brand": "Gigabyte", "category": "motherboard", "price": 69.00, "old_price": None, "stock": 20, "rating": 4.3, "featured": False, "badge": "Petit prix", "description": "Micro-ATX AM4 économique idéale pour une config Ryzen 5000 d'entrée.", "specs": {"Socket": "AM4", "Chipset": "B450", "Format": "Micro-ATX", "Mémoire": "4x DDR4 3600", "M.2": "1 slot Gen3", "Réseau": "1 GbE", "socket": "AM4", "ram_type": "DDR4", "form_factor": "mATX"}},
+
+    # --- Intel LGA1851 / LGA1700 ---
+    {"name": "Z890 Pro RS WiFi", "brand": "ASRock", "category": "motherboard", "price": 289.00, "old_price": None, "stock": 9, "rating": 4.5, "featured": False, "badge": "Nouveau", "description": "Plateforme LGA1851 pour Core Ultra : PCIe 5.0, Thunderbolt 4 et WiFi 7.", "specs": {"Socket": "LGA1851", "Chipset": "Z890", "Format": "ATX", "Mémoire": "4x DDR5 8200+", "M.2": "4 slots (Gen5)", "Réseau": "2.5 GbE + WiFi 7", "socket": "LGA1851", "ram_type": "DDR5", "form_factor": "ATX"}},
+    {"name": "Z790 AORUS Elite AX", "brand": "Gigabyte", "category": "motherboard", "price": 269.00, "old_price": None, "stock": 10, "rating": 4.6, "featured": False, "badge": None, "description": "LGA1700 haut de gamme pour overclocking DDR5 et CPU K, WiFi 6E et 4x M.2.", "specs": {"Socket": "LGA1700", "Chipset": "Z790", "Format": "ATX", "Mémoire": "4x DDR5 7600+", "M.2": "4 slots Gen4", "Réseau": "2.5 GbE + WiFi 6E", "socket": "LGA1700", "ram_type": "DDR5", "form_factor": "ATX"}},
+    {"name": "B760M DS3H DDR4", "brand": "Gigabyte", "category": "motherboard", "price": 105.00, "old_price": None, "stock": 18, "rating": 4.4, "featured": False, "badge": "Petit prix", "description": "Carte LGA1700 DDR4 abordable pour recycler ses barrettes sur un Core 12/13/14e gen.", "specs": {"Socket": "LGA1700", "Chipset": "B760", "Format": "Micro-ATX", "Mémoire": "4x DDR4 3200", "M.2": "2 slots Gen4", "Réseau": "1 GbE", "socket": "LGA1700", "ram_type": "DDR4", "form_factor": "mATX"}},
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ALIMENTATIONS
+    # ═══════════════════════════════════════════════════════════════════
+    {"name": "RM850e ATX 3.1", "brand": "Corsair", "category": "psu", "price": 129.00, "old_price": None, "stock": 18, "rating": 4.8, "featured": True, "badge": None, "description": "850 W 80+ Gold full modulaire, câble 12V-2x6 natif pour GPU récents.", "specs": {"Puissance": "850 W", "Certification": "80+ Gold", "Norme": "ATX 3.1", "Modulaire": "Full", "Garantie": "7 ans", "watts": 850}},
+    {"name": "RM750e ATX 3.1", "brand": "Corsair", "category": "psu", "price": 109.00, "old_price": None, "stock": 20, "rating": 4.8, "featured": False, "badge": None, "description": "750 W 80+ Gold full modulaire, idéale config RTX 5070/RX 9070.", "specs": {"Puissance": "750 W", "Certification": "80+ Gold", "Norme": "ATX 3.1", "Modulaire": "Full", "Garantie": "7 ans", "watts": 750}},
+    {"name": "RM1000e ATX 3.1", "brand": "Corsair", "category": "psu", "price": 169.00, "old_price": None, "stock": 12, "rating": 4.8, "featured": False, "badge": None, "description": "1000 W 80+ Gold full modulaire pour configs RTX 5080/5090 sans compromis.", "specs": {"Puissance": "1000 W", "Certification": "80+ Gold", "Norme": "ATX 3.1", "Modulaire": "Full", "Garantie": "10 ans", "watts": 1000}},
+    {"name": "Pure Power 12 M 650 W", "brand": "be quiet!", "category": "psu", "price": 89.00, "old_price": None, "stock": 18, "rating": 4.6, "featured": False, "badge": None, "description": "650 W 80+ Gold silencieuse et modulaire, parfaite pour une config milieu de gamme.", "specs": {"Puissance": "650 W", "Certification": "80+ Gold", "Norme": "ATX 3.0", "Modulaire": "Full", "Garantie": "10 ans", "watts": 650}},
+    {"name": "System Power 10 550 W Bronze", "brand": "be quiet!", "category": "psu", "price": 59.00, "old_price": None, "stock": 24, "rating": 4.5, "featured": False, "badge": "Petit prix", "description": "550 W 80+ Bronze silencieuse pour une config bureautique ou GPU d'entrée.", "specs": {"Puissance": "550 W", "Certification": "80+ Bronze", "Norme": "ATX 3.0", "Modulaire": "Non", "Garantie": "5 ans", "watts": 550}},
+    {"name": "Focus GX-850 ATX 3.1", "brand": "Seasonic", "category": "psu", "price": 139.00, "old_price": None, "stock": 14, "rating": 4.9, "featured": False, "badge": None, "description": "850 W 80+ Gold, fiabilité Seasonic, câble 12V-2x6 natif et garantie 10 ans.", "specs": {"Puissance": "850 W", "Certification": "80+ Gold", "Norme": "ATX 3.1", "Modulaire": "Full", "Garantie": "10 ans", "watts": 850}},
+    {"name": "Prime TX-1300 Titanium", "brand": "Seasonic", "category": "psu", "price": 359.00, "old_price": None, "stock": 5, "rating": 4.9, "featured": False, "badge": None, "description": "1300 W 80+ Titanium, le rendement ultime pour stations de travail et configs extrêmes.", "specs": {"Puissance": "1300 W", "Certification": "80+ Titanium", "Norme": "ATX 3.1", "Modulaire": "Full", "Garantie": "12 ans", "watts": 1300}},
+    {"name": "SF750 SFX Platinum", "brand": "Corsair", "category": "psu", "price": 179.00, "old_price": None, "stock": 9, "rating": 4.8, "featured": False, "badge": None, "description": "750 W au format SFX pour les configs SFF puissantes, full modulaire et 80+ Platinum.", "specs": {"Puissance": "750 W", "Certification": "80+ Platinum", "Norme": "SFX / ATX 3.0", "Modulaire": "Full", "Garantie": "7 ans", "watts": 750}},
+
+    # ═══════════════════════════════════════════════════════════════════
+    # BOÎTIERS
+    # ═══════════════════════════════════════════════════════════════════
+    {"name": "North", "brand": "Fractal Design", "category": "case", "price": 139.00, "old_price": None, "stock": 14, "rating": 4.8, "featured": True, "badge": None, "description": "Boîtier ATX au design bois/verre élégant, excellent flux d'air et finitions soignées.", "specs": {"Format": "ATX", "GPU max": "355 mm", "Ventilateurs": "Jusqu'à 7", "Façade": "Mesh + bois", "Baies": "2x 2.5\" + 2x 3.5\"", "max_gpu_mm": 355}},
+    {"name": "4000D Airflow", "brand": "Corsair", "category": "case", "price": 99.00, "old_price": None, "stock": 20, "rating": 4.8, "featured": False, "badge": None, "description": "Le best-seller du flux d'air : sobre, spacieux et facile à câbler.", "specs": {"Format": "ATX", "GPU max": "360 mm", "Ventilateurs": "Jusqu'à 6", "Façade": "Mesh", "Baies": "2x 2.5\" + 2x 3.5\"", "max_gpu_mm": 360}},
+    {"name": "Pop Air RGB", "brand": "Fractal Design", "category": "case", "price": 99.00, "old_price": None, "stock": 18, "rating": 4.6, "featured": False, "badge": None, "description": "ATX bien ventilé avec façade mesh et ventilateurs RGB inclus, montage facile.", "specs": {"Format": "ATX", "GPU max": "405 mm", "Ventilateurs": "Jusqu'à 6", "Façade": "Mesh", "Baies": "2x 2.5\" + 2x 3.5\"", "max_gpu_mm": 405}},
+    {"name": "H6 Flow RGB", "brand": "NZXT", "category": "case", "price": 119.00, "old_price": None, "stock": 16, "rating": 4.6, "featured": False, "badge": None, "description": "Mid-tower au look épuré, double chambre et trois ventilateurs RGB inclus.", "specs": {"Format": "ATX", "GPU max": "365 mm", "Ventilateurs": "Jusqu'à 7", "Façade": "Mesh", "Baies": "2x 2.5\" + 1x 3.5\"", "max_gpu_mm": 365}},
+    {"name": "O11 Dynamic EVO", "brand": "Lian Li", "category": "case", "price": 159.00, "old_price": None, "stock": 12, "rating": 4.8, "featured": False, "badge": None, "description": "La référence des builds vitrine : double verre, modularité folle pour le watercooling.", "specs": {"Format": "E-ATX", "GPU max": "423 mm", "Ventilateurs": "Jusqu'à 10", "Façade": "Verre + alu", "Baies": "4x 2.5\" + 2x 3.5\"", "max_gpu_mm": 423}},
+    {"name": "Y70 Touch", "brand": "Hyte", "category": "case", "price": 359.00, "old_price": None, "stock": 6, "rating": 4.7, "featured": False, "badge": "Premium", "description": "Boîtier panoramique verre avec écran tactile intégré pour un build vitrine spectaculaire.", "specs": {"Format": "E-ATX", "GPU max": "422 mm", "Ventilateurs": "Jusqu'à 10", "Façade": "Verre incurvé", "Baies": "2x 2.5\" + 2x 3.5\"", "max_gpu_mm": 422}},
+    {"name": "Versa H17 mATX", "brand": "Thermaltake", "category": "case", "price": 45.00, "old_price": None, "stock": 24, "rating": 4.2, "featured": False, "badge": "Petit prix", "description": "Boîtier mATX simple et abordable pour une première config propre.", "specs": {"Format": "Micro-ATX", "GPU max": "350 mm", "Ventilateurs": "Jusqu'à 4", "Façade": "Pleine", "Baies": "2x 2.5\" + 1x 3.5\"", "max_gpu_mm": 350}},
+    {"name": "NR200P V2 ITX", "brand": "Cooler Master", "category": "case", "price": 119.00, "old_price": None, "stock": 12, "rating": 4.7, "featured": False, "badge": None, "description": "La référence SFF Mini-ITX : compacte mais capable d'accueillir un GPU triple slot.", "specs": {"Format": "Mini-ITX", "GPU max": "330 mm", "Ventilateurs": "Jusqu'à 6", "Façade": "Pleine + verre", "Baies": "3x 2.5\" + 1x 3.5\"", "max_gpu_mm": 330}},
+
+    # ═══════════════════════════════════════════════════════════════════
+    # REFROIDISSEMENT
+    # ═══════════════════════════════════════════════════════════════════
+    {"name": "Liquid Freezer III 360 A-RGB", "brand": "Arctic", "category": "cooling", "price": 79.00, "old_price": None, "stock": 16, "rating": 4.9, "featured": True, "badge": None, "description": "L'AIO 360 mm au rapport perf/prix imbattable : refroidit un 9950X3D sans broncher.", "specs": {"Type": "Watercooling AIO 360 mm", "Sockets": "AM5 / AM4 / LGA1700 / LGA1851", "Ventilateurs": "3x 120 mm PWM", "Radiateur": "360 mm", "TDP supporté": "350 W", "sockets": ["AM5", "AM4", "LGA1700", "LGA1851"]}},
+    {"name": "Peerless Assassin 120 SE", "brand": "Thermalright", "category": "cooling", "price": 39.00, "old_price": None, "stock": 28, "rating": 4.8, "featured": False, "badge": "Petit prix", "description": "Ventirad twin-tower au rapport perf/prix imbattable, rivalise avec des modèles 3x plus chers.", "specs": {"Type": "Ventirad air", "Sockets": "AM5 / AM4 / LGA1700 / LGA1851", "Ventilateurs": "2x 120 mm PWM", "Hauteur": "155 mm", "TDP supporté": "245 W", "sockets": ["AM5", "AM4", "LGA1700", "LGA1851"]}},
+    {"name": "NH-D15 G2", "brand": "Noctua", "category": "cooling", "price": 149.00, "old_price": None, "stock": 10, "rating": 4.9, "featured": False, "badge": None, "description": "Le roi des ventirads air : dissipation et silence de référence pour les CPU haut de gamme.", "specs": {"Type": "Ventirad air", "Sockets": "AM5 / AM4 / LGA1700 / LGA1851", "Ventilateurs": "2x 140 mm PWM", "Hauteur": "168 mm", "TDP supporté": "300 W", "sockets": ["AM5", "AM4", "LGA1700", "LGA1851"]}},
+    {"name": "Dark Rock Pro 5", "brand": "be quiet!", "category": "cooling", "price": 99.00, "old_price": None, "stock": 14, "rating": 4.8, "featured": False, "badge": None, "description": "Ventirad twin-tower haut de gamme, silence absolu et dissipation massive.", "specs": {"Type": "Ventirad air", "Sockets": "AM5 / AM4 / LGA1700 / LGA1851", "Ventilateurs": "1x 135 mm + 1x 120 mm", "Hauteur": "168 mm", "TDP supporté": "270 W", "sockets": ["AM5", "AM4", "LGA1700", "LGA1851"]}},
+    {"name": "Kraken 240 RGB", "brand": "NZXT", "category": "cooling", "price": 129.00, "old_price": None, "stock": 13, "rating": 4.7, "featured": False, "badge": None, "description": "AIO 240 mm avec écran LCD et ventilateurs RGB, refroidissement et style au rendez-vous.", "specs": {"Type": "Watercooling AIO 240 mm", "Sockets": "AM5 / AM4 / LGA1700", "Ventilateurs": "2x 120 mm PWM", "Radiateur": "240 mm", "TDP supporté": "280 W", "sockets": ["AM5", "AM4", "LGA1700"]}},
+    {"name": "NH-L9i-17xx", "brand": "Noctua", "category": "cooling", "price": 49.00, "old_price": None, "stock": 16, "rating": 4.6, "featured": False, "badge": None, "description": "Ventirad bas profil ultra-compact pour boîtiers SFF et HTPC sur LGA1700.", "specs": {"Type": "Ventirad air bas profil", "Sockets": "LGA1700 / LGA1851", "Ventilateurs": "1x 92 mm PWM", "Hauteur": "37 mm", "TDP supporté": "95 W", "sockets": ["LGA1700", "LGA1851"]}},
+    {"name": "Assassin X 120 R SE", "brand": "DeepCool", "category": "cooling", "price": 25.00, "old_price": None, "stock": 30, "rating": 4.4, "featured": False, "badge": "Petit prix", "description": "Ventirad simple tour efficace et abordable pour CPU d'entrée et milieu de gamme.", "specs": {"Type": "Ventirad air", "Sockets": "AM5 / AM4 / LGA1700", "Ventilateurs": "1x 120 mm PWM", "Hauteur": "154 mm", "TDP supporté": "180 W", "sockets": ["AM5", "AM4", "LGA1700"]}},
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ÉCRANS
+    # ═══════════════════════════════════════════════════════════════════
+    {"name": "27GR75Q 27\" QHD 165 Hz IPS", "brand": "LG", "category": "monitor", "price": 219.00, "old_price": None, "stock": 18, "rating": 4.7, "featured": True, "badge": None, "description": "27\" QHD 165 Hz IPS au rapport qualité/prix imbattable pour le gaming polyvalent.", "specs": {"Dalle": "IPS 27\"", "Définition": "2560 × 1440", "Fréquence": "165 Hz", "Réponse": "1 ms", "HDR": "HDR10", "Connectique": "2x HDMI + DP"}},
+    {"name": "Odyssey OLED G6 27\" QHD 360 Hz", "brand": "Samsung", "category": "monitor", "price": 649.00, "old_price": None, "stock": 8, "rating": 4.8, "featured": False, "badge": "Premium", "description": "27\" QHD OLED 360 Hz : noirs parfaits et fluidité extrême pour l'e-sport.", "specs": {"Dalle": "QD-OLED 27\"", "Définition": "2560 × 1440", "Fréquence": "360 Hz", "Réponse": "0,03 ms", "HDR": "HDR True Black 400", "Connectique": "HDMI 2.1 + DP"}},
+    {"name": "27\" 4K 160 Hz IPS Gaming", "brand": "Gigabyte", "category": "monitor", "price": 399.00, "old_price": None, "stock": 10, "rating": 4.6, "featured": False, "badge": None, "description": "27\" 4K 160 Hz IPS, le combo netteté/fluidité idéal pour gaming et création.", "specs": {"Dalle": "IPS 27\"", "Définition": "3840 × 2160", "Fréquence": "160 Hz", "Réponse": "1 ms", "HDR": "HDR400", "Connectique": "HDMI 2.1 + DP"}},
+    {"name": "34\" UWQHD 175 Hz Incurvé", "brand": "MSI", "category": "monitor", "price": 379.00, "old_price": None, "stock": 9, "rating": 4.6, "featured": False, "badge": None, "description": "Ultrawide 34\" 21:9 incurvé 175 Hz pour une immersion totale en jeu et productivité.", "specs": {"Dalle": "VA 34\" incurvée 1500R", "Définition": "3440 × 1440", "Fréquence": "175 Hz", "Réponse": "1 ms", "HDR": "HDR400", "Connectique": "2x HDMI + DP"}},
+    {"name": "49\" Dual QHD 240 Hz OLED", "brand": "Samsung", "category": "monitor", "price": 999.00, "old_price": 1199.00, "stock": 4, "rating": 4.8, "featured": False, "badge": "Promo", "description": "Super-ultrawide 49\" 32:9 OLED 240 Hz, l'équivalent de deux écrans QHD en un.", "specs": {"Dalle": "QD-OLED 49\" incurvée 1800R", "Définition": "5120 × 1440", "Fréquence": "240 Hz", "Réponse": "0,03 ms", "HDR": "HDR True Black 400", "Connectique": "HDMI 2.1 + DP + USB-C"}},
+    {"name": "24G4 24\" FHD 180 Hz", "brand": "AOC", "category": "monitor", "price": 119.00, "old_price": None, "stock": 24, "rating": 4.5, "featured": False, "badge": "Petit prix", "description": "24\" Full HD 180 Hz IPS, l'écran e-sport abordable pour débuter dans la compétition.", "specs": {"Dalle": "IPS 23,8\"", "Définition": "1920 × 1080", "Fréquence": "180 Hz", "Réponse": "1 ms", "HDR": "Non", "Connectique": "HDMI + DP"}},
+    {"name": "ProArt 27\" 4K USB-C", "brand": "ASUS", "category": "monitor", "price": 549.00, "old_price": None, "stock": 7, "rating": 4.8, "featured": False, "badge": None, "description": "Écran 4K calibré usine 100% sRGB pour la photo, la vidéo et le graphisme pro.", "specs": {"Dalle": "IPS 27\"", "Définition": "3840 × 2160", "Fréquence": "60 Hz", "Réponse": "5 ms", "HDR": "HDR400", "Connectique": "HDMI + DP + USB-C 90 W"}},
+    {"name": "24MP400 24\" IPS 75 Hz", "brand": "LG", "category": "monitor", "price": 89.00, "old_price": None, "stock": 24, "rating": 4.4, "featured": False, "badge": "Petit prix", "description": "Écran bureautique IPS fin et élégant, idéal pour le travail et la navigation.", "specs": {"Dalle": "IPS 23,8\"", "Définition": "1920 × 1080", "Fréquence": "75 Hz", "Réponse": "5 ms", "HDR": "Non", "Connectique": "HDMI + VGA"}},
+
+    # ═══════════════════════════════════════════════════════════════════
+    # CLAVIERS
+    # ═══════════════════════════════════════════════════════════════════
+    {"name": "K8 Pro", "brand": "Keychron", "category": "keyboard", "price": 99.00, "old_price": None, "stock": 16, "rating": 4.8, "featured": True, "badge": None, "description": "Clavier mécanique TKL sans fil hot-swap, compatible QMK/VIA pour les passionnés.", "specs": {"Format": "TKL (87 touches)", "Switches": "Mécaniques hot-swap", "Connexion": "Bluetooth + USB-C", "Rétroéclairage": "RGB", "Étanchéité": "Non"}},
+    {"name": "Apex Pro TKL Gen 3", "brand": "SteelSeries", "category": "keyboard", "price": 199.00, "old_price": None, "stock": 11, "rating": 4.7, "featured": False, "badge": None, "description": "Switches magnétiques à actuation réglable, l'arme ultime des joueurs compétitifs.", "specs": {"Format": "TKL", "Switches": "Magnétiques OmniPoint 3.0", "Connexion": "USB-C", "Rétroéclairage": "RGB par touche", "Étanchéité": "Non"}},
+    {"name": "G915 TKL Lightspeed", "brand": "Logitech", "category": "keyboard", "price": 199.00, "old_price": None, "stock": 9, "rating": 4.7, "featured": False, "badge": None, "description": "Clavier low-profile sans fil Lightspeed, fin, premium et ultra-réactif.", "specs": {"Format": "TKL", "Switches": "GL low-profile", "Connexion": "Lightspeed + Bluetooth", "Rétroéclairage": "RGB par touche", "Étanchéité": "Non"}},
+    {"name": "MX Keys S", "brand": "Logitech", "category": "keyboard", "price": 109.00, "old_price": None, "stock": 14, "rating": 4.7, "featured": False, "badge": None, "description": "Clavier bureautique premium à frappe silencieuse, idéal productivité multi-appareils.", "specs": {"Format": "Full-size", "Switches": "Ciseaux", "Connexion": "Bluetooth + Logi Bolt", "Rétroéclairage": "Blanc adaptatif", "Étanchéité": "Non"}},
+    {"name": "Huntsman V3 Pro Mini", "brand": "Razer", "category": "keyboard", "price": 179.00, "old_price": None, "stock": 10, "rating": 4.6, "featured": False, "badge": None, "description": "Clavier 60% à switches analogiques optiques, actuation réglable pour le gaming.", "specs": {"Format": "60%", "Switches": "Optiques analogiques", "Connexion": "USB-C", "Rétroéclairage": "RGB Chroma", "Étanchéité": "Non"}},
+    {"name": "K65 Plus Wireless", "brand": "Corsair", "category": "keyboard", "price": 129.00, "old_price": None, "stock": 12, "rating": 4.6, "featured": False, "badge": None, "description": "Clavier 75% sans fil pré-lubrifié, frappe douce et silencieuse hors de la boîte.", "specs": {"Format": "75%", "Switches": "MLX Red pré-lubrifiés", "Connexion": "2,4 GHz + BT + USB-C", "Rétroéclairage": "RGB", "Étanchéité": "Non"}},
+    {"name": "K55 RGB Pro", "brand": "Corsair", "category": "keyboard", "price": 49.00, "old_price": None, "stock": 24, "rating": 4.4, "featured": False, "badge": None, "description": "Clavier membrane gaming silencieux avec RGB dynamique et touches macro.", "specs": {"Format": "Full-size", "Switches": "Membrane", "Connexion": "USB filaire", "Rétroéclairage": "RGB par zones", "Étanchéité": "IP42"}},
+    {"name": "MK120 Combo clavier+souris", "brand": "Logitech", "category": "keyboard", "price": 19.00, "old_price": None, "stock": 30, "rating": 4.3, "featured": False, "badge": "Petit prix", "description": "Ensemble clavier + souris filaire fiable et abordable pour la bureautique.", "specs": {"Format": "Full-size", "Switches": "Membrane", "Connexion": "USB filaire", "Rétroéclairage": "Non", "Étanchéité": "Résistant aux éclaboussures"}},
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SOURIS
+    # ═══════════════════════════════════════════════════════════════════
+    {"name": "G Pro X Superlight 2", "brand": "Logitech", "category": "mouse", "price": 149.00, "old_price": None, "stock": 14, "rating": 4.9, "featured": True, "badge": None, "description": "La souris e-sport de référence : 60 g, capteur HERO 2 et autonomie record.", "specs": {"Poids": "60 g", "Capteur": "HERO 2 (44 000 DPI)", "Boutons": "5", "Connexion": "Lightspeed sans fil", "Rétroéclairage": "Non"}},
+    {"name": "Viper V3 Pro", "brand": "Razer", "category": "mouse", "price": 159.00, "old_price": None, "stock": 12, "rating": 4.8, "featured": False, "badge": None, "description": "Souris ultra-légère 54 g avec capteur Focus Pro 35K, taillée pour la compétition.", "specs": {"Poids": "54 g", "Capteur": "Focus Pro 35K", "Boutons": "6", "Connexion": "HyperSpeed sans fil", "Rétroéclairage": "Non"}},
+    {"name": "DeathAdder V3 Pro", "brand": "Razer", "category": "mouse", "price": 139.00, "old_price": None, "stock": 13, "rating": 4.8, "featured": False, "badge": None, "description": "L'ergonomie légendaire DeathAdder en version sans fil ultra-légère et précise.", "specs": {"Poids": "63 g", "Capteur": "Focus Pro 30K", "Boutons": "5", "Connexion": "HyperSpeed sans fil", "Rétroéclairage": "Non"}},
+    {"name": "MX Master 3S", "brand": "Logitech", "category": "mouse", "price": 109.00, "old_price": None, "stock": 18, "rating": 4.8, "featured": False, "badge": None, "description": "La souris productivité ultime : molette MagSpeed, clics silencieux et multi-appareils.", "specs": {"Poids": "141 g", "Capteur": "Darkfield 8000 DPI", "Boutons": "7", "Connexion": "Bluetooth + Logi Bolt", "Rétroéclairage": "Non"}},
+    {"name": "Aerox 5 Wireless", "brand": "SteelSeries", "category": "mouse", "price": 129.00, "old_price": None, "stock": 11, "rating": 4.6, "featured": False, "badge": None, "description": "Souris ajourée ultra-légère 9 boutons pour gaming et MMO, résistante à l'eau.", "specs": {"Poids": "74 g", "Capteur": "TrueMove Air 18 000 DPI", "Boutons": "9", "Connexion": "2,4 GHz + Bluetooth", "Rétroéclairage": "RGB 3 zones"}},
+    {"name": "Rival 3", "brand": "SteelSeries", "category": "mouse", "price": 35.00, "old_price": None, "stock": 30, "rating": 4.5, "featured": False, "badge": "Petit prix", "description": "Souris gaming filaire légère et fiable, capteur précis pour pas cher.", "specs": {"Poids": "77 g", "Capteur": "TrueMove Core 8500 DPI", "Boutons": "6", "Connexion": "USB filaire", "Rétroéclairage": "RGB 3 zones"}},
+    {"name": "M650 L", "brand": "Logitech", "category": "mouse", "price": 39.00, "old_price": None, "stock": 26, "rating": 4.6, "featured": False, "badge": None, "description": "Souris sans fil silencieuse et confortable pour le quotidien, grande taille.", "specs": {"Poids": "101 g", "Capteur": "Optique 2000 DPI", "Boutons": "5", "Connexion": "Bluetooth + Logi Bolt", "Rétroéclairage": "Non"}},
+
+    # ═══════════════════════════════════════════════════════════════════
+    # CASQUES AUDIO
+    # ═══════════════════════════════════════════════════════════════════
+    {"name": "Arctis Nova Pro Wireless", "brand": "SteelSeries", "category": "headset", "price": 329.00, "old_price": None, "stock": 9, "rating": 4.8, "featured": True, "badge": "Premium", "description": "Le casque gaming sans fil ultime : double batterie hot-swap, ANC et son haute fidélité.", "specs": {"Transducteurs": "40 mm haute fidélité", "Connexion": "2,4 GHz + Bluetooth", "Surround": "360° Spatial Audio", "Micro": "ClearCast rétractable", "Poids": "338 g"}},
+    {"name": "Cloud III Wireless", "brand": "HyperX", "category": "headset", "price": 149.00, "old_price": None, "stock": 14, "rating": 4.7, "featured": False, "badge": None, "description": "Casque sans fil au confort légendaire et 120 h d'autonomie, son spatial DTS.", "specs": {"Transducteurs": "53 mm angulés", "Connexion": "2,4 GHz sans fil", "Surround": "DTS Headphone:X", "Micro": "Détachable", "Poids": "330 g"}},
+    {"name": "Cloud Alpha", "brand": "HyperX", "category": "headset", "price": 89.00, "old_price": None, "stock": 24, "rating": 4.7, "featured": False, "badge": None, "description": "Casque filaire au son équilibré et au confort légendaire, valeur sûre.", "specs": {"Transducteurs": "50 mm double chambre", "Connexion": "Jack 3,5 mm", "Surround": "Stéréo", "Micro": "Détachable", "Poids": "298 g"}},
+    {"name": "BlackShark V2 Pro", "brand": "Razer", "category": "headset", "price": 199.00, "old_price": None, "stock": 11, "rating": 4.7, "featured": False, "badge": None, "description": "Casque e-sport sans fil léger avec drivers TriForce et micro détachable haute clarté.", "specs": {"Transducteurs": "50 mm TriForce Titanium", "Connexion": "HyperSpeed sans fil", "Surround": "THX Spatial Audio", "Micro": "HyperClear détachable", "Poids": "320 g"}},
+    {"name": "Virtuoso Pro", "brand": "Corsair", "category": "headset", "price": 199.00, "old_price": None, "stock": 8, "rating": 4.6, "featured": False, "badge": None, "description": "Casque filaire ouvert audiophile pour le gaming et l'écoute critique, micro broadcast.", "specs": {"Transducteurs": "50 mm graphène", "Connexion": "Jack 3,5 mm + USB", "Surround": "Stéréo haute résolution", "Micro": "Détachable omnidirectionnel", "Poids": "366 g"}},
+    {"name": "H390 USB", "brand": "Logitech", "category": "headset", "price": 39.00, "old_price": None, "stock": 24, "rating": 4.4, "featured": False, "badge": "Petit prix", "description": "Casque USB filaire confortable avec micro antibruit, idéal visio et bureautique.", "specs": {"Transducteurs": "40 mm", "Connexion": "USB-A", "Surround": "Stéréo", "Micro": "Antibruit rotatif", "Poids": "270 g"}},
 ]
 
+# ─── Avis clients de démonstration (références à des produits du catalogue) ───
 SEED_REVIEWS = [
-    ("GeForce RTX 5090 Suprim Liquid 32G", "Maxime R.", 5, "Monstrueuse. Cyberpunk en path tracing 4K à 120 fps avec DLSS 4, et l'AIO la garde sous 60°C. Aucun regret."),
-    ("GeForce RTX 5090 Suprim Liquid 32G", "Léa D.", 5, "Pour la 3D et l'IA en local, les 32 Go changent tout. Silencieuse, énorme, parfaite."),
-    ("GeForce RTX 3060 Twin Edge", "Lucas M.", 4, "Très bonne carte pour le 1080p. Les 12 Go de VRAM rassurent pour l'avenir, même si elle commence à fatiguer sur les derniers triples A."),
-    ("GeForce RTX 3060 Ti Eagle", "Valentin G.", 5, "Le roi du rapport performances/prix de sa génération. Fait encore tourner la majorité de mes jeux en 1440p sans problème."),
-    ("GeForce RTX 3070 Twin Edge", "Thomas B.", 4, "Parfaite en 1440p. Elle chauffe un peu dans ce format compact mais les performances globales restent super stables."),
-    ("GeForce RTX 3070 Ti Gaming Trio", "Alexandre M.", 4, "Excellentes performances mais attention à la consommation. Le système à triple ventilateur de MSI fait bien son travail."),
-    ("GeForce RTX 3080 Gaming Trio", "Julien V.", 5, "Une bête de course en rasterisation brute. En 1440p ultra ou 4K avec concessions, elle encaisse encore tout très bien."),
-    ("GeForce RTX 3080 Ti Ventus", "Sébastien L.", 5, "Quasiment les performances d'une 3090 pour le jeu. Les 12 Go de VRAM sont parfaits pour le modding sur de nombreux jeux."),
-    ("GeForce RTX 3090 ROG Strix", "Nicolas P.", 5, "Achetée principalement pour du montage vidéo lourd et de la 3D, les 24 Go sont indispensables. Le refroidissement Strix est massif."),
-    ("GeForce RTX 3090 Ti SUPRIM", "Guillaume F.", 5, "Une puissance colossale pour clore la génération Ampere. Un peu bruyante à pleine charge mais aucun ralentissement."),
-    ("GeForce RTX 4060 Windforce", "Sarah K.", 4, "Consommation ridicule, elle ne chauffe pas du tout. Le DLSS 3 fait de véritables miracles sur les jeux gourmands en 1080p."),
-    ("GeForce RTX 4060 Ti Dual", "Maxime B.", 4, "Idéale pour un petit boîtier ITX. Les technologies de génération de frames sauvent la mise sur les titres récents."),
-    ("GeForce RTX 4070 Dual", "Antoine L.", 5, "Le meilleur compromis pour jouer en QHD. Silencieuse, sobre et compatible avec toutes les dernières innovations de Nvidia."),
-    ("GeForce RTX 4070 Ti TUF Gaming", "Hugo J.", 5, "La construction TUF est ultra robuste. Les températures restent extrêmement basses même après de longues sessions de jeu."),
-    ("GeForce RTX 4080 JetStream", "Mathieu G.", 5, "La 4K native avec Ray Tracing devient enfin fluide et agréable sans concession. Design sobre sans trop de RGB."),
-    ("GeForce RTX 4090 ROG Strix", "Romain D.", 5, "Une puissance brute hallucinante. C'est cher et gigantesque, mais ça encaisse absolument tout en 4K ultra sans sourciller."),
-    ("GeForce RTX 5070 Gaming", "Chloé M.", 5, "Excellente surprise pour cette architecture Blackwell. Moins gourmande et des performances très solides grâce à la GDDR7."),
-    ("GeForce RTX 5070 Ti Gaming", "Arthur P.", 5, "Le véritable point d'équilibre de cette année. Des perfs stratosphériques pour un tarif qui reste cohérent par rapport à la 5090."),
-    ("GeForce RTX 5080 TUF Gaming", "Damien R.", 5, "Le DLSS 4 est bluffant sur les moteurs récents. La carte est magnifiquement construite, lourde mais refroidie à la perfection."),
-    ("GeForce RTX 5090 Suprim", "Maxime R.", 5, "Monstrueuse. Cyberpunk en path tracing 4K à plus de 120 fps stables, la carte ne tremble jamais. Un autre monde."),
+    ("GeForce RTX 5090 SUPRIM Liquid 32G", "Maxime R.", 5, "Monstrueuse. Cyberpunk en path tracing 4K à 120 fps avec DLSS 4, et l'AIO la garde sous 60°C. Aucun regret."),
+    ("GeForce RTX 5090 SUPRIM Liquid 32G", "Léa D.", 5, "Pour la 3D et l'IA en local, les 32 Go changent tout. Silencieuse, énorme, parfaite."),
+    ("GeForce RTX 5080 TUF Gaming OC", "Damien R.", 5, "Le DLSS 4 est bluffant sur les moteurs récents. Magnifiquement construite et refroidie à la perfection."),
+    ("GeForce RTX 5070 Ventus 3X OC", "Chloé M.", 5, "Excellente surprise : moins gourmande et des performances très solides grâce à la GDDR7."),
+    ("GeForce RTX 4070 Super Dual", "Antoine L.", 5, "Le meilleur compromis pour jouer en QHD. Silencieuse, sobre et compatible avec toutes les techno Nvidia."),
+    ("Radeon RX 9070 XT Nitro+", "Karim B.", 5, "Le ray tracing est enfin au rendez-vous chez AMD. 16 Go, du 1440p ultra sans broncher."),
     ("Ryzen 7 9800X3D", "Thomas B.", 5, "Upgrade depuis un 5800X3D : +40% de fps en simu. Le meilleur CPU gaming, point."),
     ("Ryzen 7 9800X3D", "Sarah K.", 5, "Monté avec une Tomahawk X870, EXPO activé, zéro souci. Il chauffe même moins que prévu."),
-    ("Trident Z5 RGB 32 Go DDR5-6400 CL30", "Hugo M.", 5, "Le kit recommandé partout pour Ryzen 9000, et c'est mérité. EXPO stable du premier coup."),
-    ("Liquid Freezer III 360 A-RGB", "Antoine P.", 5, "Refroidit un 9950X3D sans broncher pour le prix d'un ventirad premium. Imbattable."),
-    ("O11 Dynamic EVO XL", "Julie V.", 5, "Montage d'une config full watercooling un régal. La visibilité est incroyable."),
-    ("9100 Pro 2 To PCIe 5.0", "Nicolas F.", 4, "Débits hallucinants en bench. En usage réel, ça reste un SSD, mais quel SSD."),
+    ("Ryzen 9 9950X3D", "Nicolas P.", 5, "16 cœurs + 3D V-Cache : je stream, je joue et je monte mes vidéos sans aucun compromis."),
+    ("Core Ultra 9 285K", "Julien V.", 4, "Excellent en applicatif et très sobre. Le NPU est un vrai plus pour mes outils IA."),
+    ("Ryzen 7 5700X3D", "Hugo J.", 5, "Le meilleur upgrade possible sur ma vieille carte AM4. Gains énormes en jeu pour trois fois rien."),
+    ("Trident Z5 RGB 32 Go DDR5-6000 CL30", "Hugo M.", 5, "Le kit recommandé partout pour Ryzen 9000, et c'est mérité. EXPO stable du premier coup."),
+    ("990 Pro 2 To", "Nicolas F.", 5, "Débits hallucinants et silence total. La référence pour un disque système et jeux."),
+    ("T705 2 To Gen5", "Romain D.", 4, "Vitesses records en bench. En usage réel ça reste un SSD, mais quel SSD."),
     ("MAG X870 Tomahawk WiFi", "Romain G.", 5, "BIOS clair, VRM froids, USB4 en standard. Le meilleur rapport qualité/prix AM5."),
-    ("Focus GX-850 ATX 3.1", "Camille T.", 5, "Seasonic, 10 ans de garantie, câble 12V-2x6 natif. On signe où ?"),
+    ("B650 Tomahawk WiFi", "Camille L.", 5, "Carte parfaite pour un Ryzen 7600 : robuste, complète et un BIOS aux petits oignons."),
+    ("RM850e ATX 3.1", "Camille T.", 5, "Full modulaire, silencieuse, câble 12V-2x6 natif. Parfaite pour ma RTX 5070 Ti."),
+    ("Focus GX-850 ATX 3.1", "Paul M.", 5, "Seasonic, 10 ans de garantie, rendement Gold. On signe où ?"),
+    ("Liquid Freezer III 360 A-RGB", "Antoine P.", 5, "Refroidit un 9950X3D sans broncher pour le prix d'un ventirad premium. Imbattable."),
+    ("Peerless Assassin 120 SE", "Lucas M.", 5, "Incroyable pour 40 €. Rivalise avec des AIO bien plus chers, et silencieux avec ça."),
+    ("North", "Julie V.", 5, "Le plus beau boîtier que j'ai monté. La façade bois fait son petit effet et l'airflow est top."),
+    ("O11 Dynamic EVO", "Valentin G.", 5, "Montage d'une config full watercooling un régal. La visibilité est incroyable."),
+    ("27GR75Q 27\" QHD 165 Hz IPS", "Sébastien L.", 5, "Le QHD 165 Hz parfait pour le prix. Couleurs superbes et fluidité au top en jeu."),
+    ("G Pro X Superlight 2", "Arthur P.", 5, "Légère, précise, autonomie béton. Plus rien à redire pour le FPS compétitif."),
+    ("Arctis Nova Pro Wireless", "Mathieu G.", 5, "Le combo son + micro + double batterie est imbattable. Jamais à court de jus."),
 ]
-
-# Gammes abordables (generations precedentes / entree de gamme)
-from seed_budget import BUDGET_PRODUCTS  # noqa: E402
-SEED_PRODUCTS.extend(BUDGET_PRODUCTS)
-
-# Remplacement complet de la gamme processeurs (Ryzen reels)
-from seed_cpu import CPU_PRODUCTS  # noqa: E402
-SEED_PRODUCTS[:] = [p for p in SEED_PRODUCTS if p['category'] != 'cpu'] + CPU_PRODUCTS
-
-# Gamme processeurs Intel (Core i3/i5/i7/i9 + Core Ultra)
-from seed_intel import INTEL_PRODUCTS  # noqa: E402
-SEED_PRODUCTS.extend(INTEL_PRODUCTS)
-
-# Extension massive du catalogue (toutes categories)
-from seed_extra import EXTRA_PRODUCTS  # noqa: E402
-SEED_PRODUCTS.extend(EXTRA_PRODUCTS)
-
-# Assortiment "vrai revendeur" : ajouts sur toutes les categories
-from seed_catalog_plus import CATALOG_PLUS_PRODUCTS  # noqa: E402
-SEED_PRODUCTS.extend(CATALOG_PLUS_PRODUCTS)
