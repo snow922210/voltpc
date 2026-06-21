@@ -600,3 +600,7 @@ SEED_PRODUCTS.extend(INTEL_PRODUCTS)
 # Extension massive du catalogue (toutes categories)
 from seed_extra import EXTRA_PRODUCTS  # noqa: E402
 SEED_PRODUCTS.extend(EXTRA_PRODUCTS)
+
+# Assortiment "vrai revendeur" : ajouts sur toutes les categories
+from seed_catalog_plus import CATALOG_PLUS_PRODUCTS  # noqa: E402
+SEED_PRODUCTS.extend(CATALOG_PLUS_PRODUCTS)
