@@ -49,14 +49,14 @@ def main():
     existing = {row[1]: row[0] for row in
                 conn.execute("SELECT id, name FROM products")}  # {name: id}
 
-    # Produits référencés par une commande / favori / panier : à ne pas supprimer.
+    # Produits référencés par une COMMANDE : à ne jamais supprimer (historique
+    # + contrainte FK). Les favoris / paniers / avis, eux, sont nettoyables.
     referenced = set()
-    for table in ("order_items", "favorites", "cart_items"):
-        try:
-            for row in conn.execute(f"SELECT DISTINCT product_id FROM {table}"):
-                referenced.add(row[0])
-        except Exception:
-            pass  # table absente -> ignorée
+    try:
+        for row in conn.execute("SELECT DISTINCT product_id FROM order_items"):
+            referenced.add(row[0])
+    except Exception:
+        pass  # table absente -> ignorée
 
     inserted = updated = deleted = retired = 0
 
@@ -93,6 +93,12 @@ def main():
             retired += 1
             print(f"~ rupture (lié à une commande) : {name}")
         else:
+            # Nettoie d'abord les dépendances (FK) avant de supprimer le produit.
+            for table in ("reviews", "favorites", "cart_items"):
+                try:
+                    conn.execute(f"DELETE FROM {table} WHERE product_id=?", (pid,))
+                except Exception:
+                    pass
             conn.execute("DELETE FROM products WHERE id=?", (pid,))
             deleted += 1
             print(f"- {name}")
