@@ -2137,10 +2137,17 @@ const BUILD_SLOTS = [
   { cat: "cooling", label: "Refroidissement", hint: "AIO ou ventirad" },
   { cat: "psu", label: "Alimentation", hint: "Dimensionnée selon la config" },
   { cat: "case", label: "Boîtier", hint: "Vérifiez la longueur GPU" },
+  { cat: "fan", label: "Ventilateurs", hint: "Optionnel — flux d'air du boîtier" },
+  { cat: "thermal", label: "Pâte thermique", hint: "Optionnel — souvent fournie avec le ventirad" },
   { cat: "monitor", label: "Écran", hint: "Optionnel — OLED conseillé" },
   { cat: "keyboard", label: "Clavier", hint: "Optionnel" },
   { cat: "mouse", label: "Souris", hint: "Optionnel" },
   { cat: "headset", label: "Casque", hint: "Optionnel" },
+  { cat: "webcam", label: "Webcam", hint: "Optionnel — visio et streaming" },
+  { cat: "microphone", label: "Microphone", hint: "Optionnel — streaming et podcast" },
+  { cat: "speaker", label: "Enceintes", hint: "Optionnel" },
+  { cat: "mousepad", label: "Tapis de souris", hint: "Optionnel" },
+  { cat: "chair", label: "Chaise gaming", hint: "Optionnel" },
 ];
 
 // Profils rapides : remplissent automatiquement une config compatible et équilibrée.
