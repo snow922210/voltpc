@@ -270,17 +270,22 @@ def _init_db_pg() -> None:
 def _seed_db(conn) -> None:
     """Insertion initiale (produits, avis, compte démo). Portable SQLite / PostgreSQL."""
     if conn.execute("SELECT COUNT(*) FROM products").fetchone()[0] == 0:
+        try:
+            from product_images import PRODUCT_IMAGES
+        except Exception:
+            PRODUCT_IMAGES = {}
         for p in SEED_PRODUCTS:
             conn.execute(
                 """INSERT INTO products
                    (name, brand, category, price, old_price, stock, rating,
-                    rating_count, featured, badge, description, specs)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    rating_count, featured, badge, description, specs, image_url)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (
                     p["name"], p["brand"], p["category"], p["price"],
                     p["old_price"], p["stock"], p["rating"], 0,
                     1 if p["featured"] else 0, p["badge"],
                     p["description"], json.dumps(p["specs"], ensure_ascii=False),
+                    PRODUCT_IMAGES.get(p["name"]),
                 ),
             )
         for product_name, author, rating, comment in SEED_REVIEWS:

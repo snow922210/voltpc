@@ -27,6 +27,11 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from seed import SEED_PRODUCTS, SEED_REVIEWS
 from database import IS_PG, connect as db_connect
 
+try:
+    from product_images import PRODUCT_IMAGES  # {nom: "/images/<slug>.jpg"}
+except Exception:
+    PRODUCT_IMAGES = {}
+
 DB_PATH = Path(__file__).resolve().parent / "voltpc.db"
 
 
@@ -63,6 +68,7 @@ def main():
     # 1) Insertion / mise à jour
     for name, p in seed_by_name.items():
         specs = json.dumps(p["specs"], ensure_ascii=False)
+        img = PRODUCT_IMAGES.get(name)
         if name in existing:
             conn.execute(
                 """UPDATE products SET brand=?, category=?, price=?, old_price=?,
@@ -70,16 +76,19 @@ def main():
                 (p["brand"], p["category"], p["price"], p["old_price"], p["stock"],
                  int(p["featured"]), p["badge"], p["description"], specs, name),
             )
+            # N'écrase l'image que si on en a une (préserve une URL définie en admin).
+            if img:
+                conn.execute("UPDATE products SET image_url=? WHERE name=?", (img, name))
             updated += 1
         else:
             conn.execute(
                 """INSERT INTO products
                    (name, brand, category, price, old_price, stock, rating,
-                    rating_count, featured, badge, description, specs)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    rating_count, featured, badge, description, specs, image_url)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (name, p["brand"], p["category"], p["price"], p["old_price"],
                  p["stock"], p["rating"], 0, int(p["featured"]), p["badge"],
-                 p["description"], specs),
+                 p["description"], specs, img),
             )
             inserted += 1
             print(f"+ {p['brand']} {name} ({p['category']})")

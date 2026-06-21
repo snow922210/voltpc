@@ -19,6 +19,11 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from seed import SEED_PRODUCTS
 from database import IS_PG, connect as db_connect
 
+try:
+    from product_images import PRODUCT_IMAGES
+except Exception:
+    PRODUCT_IMAGES = {}
+
 DB_PATH = Path(__file__).resolve().parent / "voltpc.db"
 
 
@@ -44,13 +49,14 @@ for p in SEED_PRODUCTS:
     conn.execute(
         """INSERT INTO products
            (name, brand, category, price, old_price, stock, rating,
-            rating_count, featured, badge, description, specs)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+            rating_count, featured, badge, description, specs, image_url)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (
             p["name"], p["brand"], p["category"], p["price"],
             p["old_price"], p["stock"], p["rating"], 0,
             int(p["featured"]), p["badge"], p["description"],
             json.dumps(p["specs"], ensure_ascii=False),
+            PRODUCT_IMAGES.get(p["name"]),
         ),
     )
     added += 1
