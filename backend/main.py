@@ -702,6 +702,18 @@ def startup() -> None:
             "Définissez DATABASE_URL (PostgreSQL) en production.", DB_PATH,
         )
     init_db()
+    # Resynchronisation optionnelle du catalogue au démarrage (utile quand le
+    # Shell n'est pas disponible, ex. plan Render gratuit). À activer via la
+    # variable d'environnement RESYNC_ON_BOOT=1, puis à retirer une fois la base
+    # à jour (sinon d'éventuelles modifs produits faites en admin seraient
+    # réécrites depuis seed.py à chaque redémarrage).
+    if os.environ.get("RESYNC_ON_BOOT", "").strip().lower() in ("1", "true", "yes", "on"):
+        try:
+            from resync_catalog import main as _resync_catalog
+            log.info("RESYNC_ON_BOOT actif — resynchronisation du catalogue…")
+            _resync_catalog()
+        except Exception as e:  # ne jamais bloquer le démarrage de l'app
+            log.error("Resync du catalogue au démarrage échoué : %s", e)
     # Purge initiale au démarrage, puis périodiquement en arrière-plan.
     purge_expired_orders()
     threading.Thread(target=_purge_loop, daemon=True).start()
