@@ -1919,6 +1919,9 @@ CAT_LABELS = {
     "storage": "Stockage SSD", "motherboard": "Cartes mères", "psu": "Alimentations",
     "case": "Boîtiers", "cooling": "Refroidissement", "monitor": "Écrans",
     "keyboard": "Claviers", "mouse": "Souris", "headset": "Casques audio",
+    "fan": "Ventilateurs", "thermal": "Pâte thermique", "webcam": "Webcams",
+    "microphone": "Microphones", "speaker": "Enceintes", "mousepad": "Tapis de souris",
+    "chair": "Chaises gaming",
 }
 
 

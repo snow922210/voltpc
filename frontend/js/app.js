@@ -314,11 +314,18 @@ const CATS = {
   keyboard: { label: "Claviers", short: "Clavier" },
   mouse: { label: "Souris", short: "Souris" },
   headset: { label: "Casques audio", short: "Casque" },
+  fan: { label: "Ventilateurs", short: "Ventilo" },
+  thermal: { label: "Pâte thermique", short: "Pâte" },
+  webcam: { label: "Webcams", short: "Webcam" },
+  microphone: { label: "Microphones", short: "Micro" },
+  speaker: { label: "Enceintes", short: "Enceinte" },
+  mousepad: { label: "Tapis de souris", short: "Tapis" },
+  chair: { label: "Chaises gaming", short: "Chaise" },
 };
 
 // Groupes pour les sous-menus de navigation
-const COMPONENT_CATS = ["gpu", "cpu", "ram", "storage", "motherboard", "psu", "case", "cooling"];
-const PERIPH_CATS = ["monitor", "keyboard", "mouse", "headset"];
+const COMPONENT_CATS = ["gpu", "cpu", "ram", "storage", "motherboard", "psu", "case", "cooling", "fan", "thermal"];
+const PERIPH_CATS = ["monitor", "keyboard", "mouse", "headset", "webcam", "microphone", "speaker", "mousepad", "chair"];
 
 let uidCounter = 0;
 function art(category, hue = 30) {
@@ -381,6 +388,34 @@ function art(category, hue = 30) {
       <rect x="86" y="62" width="18" height="30" rx="8" ${S}/>
       <path d="M95 92v6a14 14 0 0 1-14 14H64" ${S} stroke-width="2.5"/>
       <circle cx="58" cy="112" r="5" ${F}/>`,
+    fan: `<rect x="14" y="14" width="92" height="92" rx="14" ${S}/>
+      <circle cx="60" cy="60" r="34" ${S}/><circle cx="60" cy="60" r="8" ${F}/>
+      <path d="M60 52c-3-12 3-22 12-26M68 60c12-3 22 3 26 12M60 68c3 12-3 22-12 26M52 60c-12 3-22-3-26-12" ${S} stroke-width="2.5"/>
+      <path d="M22 22h0.1M98 22h0.1M22 98h0.1M98 98h0.1" ${S} stroke-width="3"/>`,
+    thermal: `<rect x="42" y="18" width="22" height="58" rx="6" ${S}/>
+      <rect x="47" y="8" width="12" height="12" rx="2" ${F}/>
+      <path d="M49 30h8M49 40h8M49 50h8" ${S} stroke-width="2" opacity="0.7"/>
+      <path d="M53 76v10" ${S} stroke-width="4"/>
+      <path d="M53 92c7 0 12 6 12 12a12 12 0 0 1-24 0c0-6 5-12 12-12Z" ${F}/>`,
+    webcam: `<circle cx="60" cy="48" r="32" ${S}/>
+      <circle cx="60" cy="48" r="13" ${S} stroke-width="2.5"/><circle cx="60" cy="48" r="4" ${F}/>
+      <circle cx="82" cy="34" r="3" ${F}/>
+      <path d="M42 78h36l-7 22H49z" ${S}/>`,
+    microphone: `<rect x="46" y="12" width="28" height="52" rx="14" ${S}/>
+      <path d="M54 24h12M54 34h12M54 44h12" ${S} stroke-width="2" opacity="0.7"/>
+      <path d="M34 54a26 26 0 0 0 52 0" ${S}/>
+      <path d="M60 80v18M44 102h32" ${S} stroke-width="2.5"/>`,
+    speaker: `<rect x="34" y="10" width="52" height="100" rx="8" ${S}/>
+      <circle cx="60" cy="38" r="13" ${S} stroke-width="2.5"/><circle cx="60" cy="38" r="4" ${F}/>
+      <circle cx="60" cy="80" r="18" ${S} stroke-width="2.5"/><circle cx="60" cy="80" r="6" ${F}/>`,
+    mousepad: `<rect x="10" y="32" width="100" height="56" rx="9" ${S}/>
+      <rect x="18" y="40" width="84" height="40" rx="5" ${S} stroke-width="1.5" opacity="0.45"/>
+      <rect x="70" y="48" width="22" height="30" rx="11" ${F} opacity="0.7"/>
+      <path d="M81 48v11" ${S} stroke-width="1.5" opacity="0.5"/>`,
+    chair: `<path d="M38 16c0-4 3-6 7-6h30c4 0 7 2 7 6v40H38z" ${S}/>
+      <rect x="32" y="54" width="56" height="16" rx="6" ${S}/>
+      <path d="M60 70v20M40 100h40" ${S} stroke-width="2.5"/>
+      <circle cx="40" cy="106" r="5" ${F}/><circle cx="80" cy="106" r="5" ${F}/><circle cx="60" cy="108" r="5" ${F}/>`,
   };
   return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${grad}${shapes[category] || shapes.cpu}</svg>`;
 }
