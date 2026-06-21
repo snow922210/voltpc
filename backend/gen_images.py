@@ -59,6 +59,15 @@ def slug(name: str) -> str:
     return s or "produit"
 
 
+def normalize_amazon(url: str) -> str:
+    """Reconstruit la pleine résolution d'une URL image Amazon (m.media-amazon).
+    Ex: .../I/71KAMVAMlPL._AC_SX679_.jpg -> .../I/71KAMVAMlPL._AC_SL1500_.jpg"""
+    m = re.match(r"(https://m\.media-amazon\.com/images/I/[A-Za-z0-9+-]+)\.", url)
+    if m:
+        return m.group(1) + "._AC_SL1500_.jpg"
+    return url
+
+
 def http_get(url: str, timeout: int = 30) -> bytes:
     for attempt in range(4):
         try:
@@ -156,6 +165,8 @@ def main():
 
         src_url = OVERRIDES.get(name)
         origin = "officielle"
+        if src_url and "m.media-amazon.com" in src_url:
+            src_url = normalize_amazon(src_url)
         if not src_url:
             origin = "Commons"
             try:
