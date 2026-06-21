@@ -1,22 +1,18 @@
 # Ne pas embarquer l'état local ni les artefacts dans l'image.
 **/__pycache__/
 **/*.pyc
-**/*.pyo
 backend/.env
 backend/.secret
 backend/voltpc.db
 backend/scripts/
 .git/
-.venv/
-.claude/
-.codex/
-.agents/
-.vscode/
-graphify-out/
 *.md
+# Fichiers de déploiement (inutiles dans l'image, et .env racine = secrets).
 .env
 docker-compose.yml
 Caddyfile
 deploy.env.example
-site/uvicorn*.log
-site/frontend/_backup_design_*/
+.claude/
+.vscode/
+graphify-out/
+frontend/_backup_design_*/
