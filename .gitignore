@@ -11,7 +11,11 @@ __pycache__/
 .venv/
 
 # Outils / éditeur
-.claude/
+# Ignorer .claude/ SAUF le skill projet run-voltcore (versionné, partagé entre machines).
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/run-voltcore/
 .vscode/
 .graphifyignore
 graphify-out/
