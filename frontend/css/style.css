@@ -629,7 +629,7 @@ img { max-width: 100%; }
 .specs-table td { padding: 12px 14px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
 .specs-table td:first-child { color: var(--text-faint); width: 42%; }
 .specs-table tr:last-child td { border-bottom: none; }
-.specs-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 6px; box-shadow: var(--shadow-xs); }
+.specs-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 6px; margin-top: 22px; box-shadow: var(--shadow-xs); }
 
 .reviews { margin-top: 56px; }
 .review-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 12px; box-shadow: var(--shadow-xs); }

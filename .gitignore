@@ -25,3 +25,4 @@ graphify-out/
 # Sauvegardes locales
 *.localbak
 frontend/_backup_design_*/
+*.py.bak
