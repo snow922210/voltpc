@@ -1412,6 +1412,8 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.022em; }
 :root[data-theme="dark"] .badge.promo { color: var(--text); }
 :root[data-theme="dark"] .badge.top { color: var(--text-dim); }
 :root[data-theme="dark"] .badge.new { color: var(--text-dim); }
+/* Compteur de résultats : --text-faint est trop sombre sur fond noir → on l'éclaircit */
+:root[data-theme="dark"] .catalog-toolbar .count { color: var(--text-dim); }
 
 /* Bouton thème : afficher l'icône pertinente selon le mode courant */
 #themeBtn .theme-ico-moon { display: none; }
