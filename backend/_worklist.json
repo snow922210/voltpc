@@ -1,0 +1,2212 @@
+[
+ {
+  "name": "GeForce RTX 5090 SUPRIM Liquid 32G",
+  "brand": "MSI",
+  "category": "gpu",
+  "q": "MSI GeForce RTX 5090 SUPRIM Liquid 32G",
+  "tokens": [
+   "32g",
+   "5090"
+  ]
+ },
+ {
+  "name": "GeForce RTX 5090 Gaming Trio OC",
+  "brand": "MSI",
+  "category": "gpu",
+  "q": "MSI GeForce RTX 5090 Gaming Trio OC",
+  "tokens": [
+   "5090"
+  ]
+ },
+ {
+  "name": "GeForce RTX 5080 TUF Gaming OC",
+  "brand": "ASUS",
+  "category": "gpu",
+  "q": "ASUS GeForce RTX 5080 TUF Gaming OC",
+  "tokens": [
+   "5080"
+  ]
+ },
+ {
+  "name": "GeForce RTX 5080 Gaming OC",
+  "brand": "Gigabyte",
+  "category": "gpu",
+  "q": "Gigabyte GeForce RTX 5080 Gaming OC",
+  "tokens": [
+   "5080"
+  ]
+ },
+ {
+  "name": "GeForce RTX 5070 Ti Gaming OC",
+  "brand": "Gigabyte",
+  "category": "gpu",
+  "q": "Gigabyte GeForce RTX 5070 Ti Gaming OC",
+  "tokens": [
+   "5070"
+  ]
+ },
+ {
+  "name": "GeForce RTX 5070 Ventus 3X OC",
+  "brand": "MSI",
+  "category": "gpu",
+  "q": "MSI GeForce RTX 5070 Ventus 3X OC",
+  "tokens": [
+   "5070"
+  ]
+ },
+ {
+  "name": "GeForce RTX 5060 Ti 16 Go Eagle OC",
+  "brand": "Gigabyte",
+  "category": "gpu",
+  "q": "Gigabyte GeForce RTX 5060 Ti 16 Go Eagle OC",
+  "tokens": [
+   "16go",
+   "5060"
+  ]
+ },
+ {
+  "name": "GeForce RTX 5060 Ti 8 Go Ventus 2X",
+  "brand": "MSI",
+  "category": "gpu",
+  "q": "MSI GeForce RTX 5060 Ti 8 Go Ventus 2X",
+  "tokens": [
+   "5060",
+   "8go"
+  ]
+ },
+ {
+  "name": "GeForce RTX 5060 8 Go Solo",
+  "brand": "ASUS",
+  "category": "gpu",
+  "q": "ASUS GeForce RTX 5060 8 Go Solo",
+  "tokens": [
+   "5060",
+   "8go"
+  ]
+ },
+ {
+  "name": "GeForce RTX 4090 ROG Strix OC",
+  "brand": "ASUS",
+  "category": "gpu",
+  "q": "ASUS GeForce RTX 4090 ROG Strix OC",
+  "tokens": [
+   "4090"
+  ]
+ },
+ {
+  "name": "GeForce RTX 4080 Super Gaming X",
+  "brand": "MSI",
+  "category": "gpu",
+  "q": "MSI GeForce RTX 4080 Super Gaming X",
+  "tokens": [
+   "4080"
+  ]
+ },
+ {
+  "name": "GeForce RTX 4070 Ti Super TUF",
+  "brand": "ASUS",
+  "category": "gpu",
+  "q": "ASUS GeForce RTX 4070 Ti Super TUF",
+  "tokens": [
+   "4070"
+  ]
+ },
+ {
+  "name": "GeForce RTX 4070 Super Dual",
+  "brand": "ASUS",
+  "category": "gpu",
+  "q": "ASUS GeForce RTX 4070 Super Dual",
+  "tokens": [
+   "4070"
+  ]
+ },
+ {
+  "name": "GeForce RTX 4060 Ti 16 Go Gaming OC",
+  "brand": "Gigabyte",
+  "category": "gpu",
+  "q": "Gigabyte GeForce RTX 4060 Ti 16 Go Gaming OC",
+  "tokens": [
+   "16go",
+   "4060"
+  ]
+ },
+ {
+  "name": "GeForce RTX 4060 Ti 8 Go Windforce",
+  "brand": "Gigabyte",
+  "category": "gpu",
+  "q": "Gigabyte GeForce RTX 4060 Ti 8 Go Windforce",
+  "tokens": [
+   "4060",
+   "8go"
+  ]
+ },
+ {
+  "name": "GeForce RTX 4060 Low Profile OC",
+  "brand": "Gigabyte",
+  "category": "gpu",
+  "q": "Gigabyte GeForce RTX 4060 Low Profile OC",
+  "tokens": [
+   "4060"
+  ]
+ },
+ {
+  "name": "Radeon RX 9070 XT Nitro+",
+  "brand": "Sapphire",
+  "category": "gpu",
+  "q": "Sapphire Radeon RX 9070 XT Nitro+",
+  "tokens": [
+   "9070"
+  ]
+ },
+ {
+  "name": "Radeon RX 9070 XT 16 Go",
+  "brand": "XFX",
+  "category": "gpu",
+  "q": "XFX Radeon RX 9070 XT 16 Go",
+  "tokens": [
+   "16go",
+   "9070"
+  ]
+ },
+ {
+  "name": "Radeon RX 9070 16 Go",
+  "brand": "PowerColor",
+  "category": "gpu",
+  "q": "PowerColor Radeon RX 9070 16 Go",
+  "tokens": [
+   "16go",
+   "9070"
+  ]
+ },
+ {
+  "name": "Radeon RX 9070 GRE 12 Go",
+  "brand": "PowerColor",
+  "category": "gpu",
+  "q": "PowerColor Radeon RX 9070 GRE 12 Go",
+  "tokens": [
+   "12go",
+   "9070"
+  ]
+ },
+ {
+  "name": "Radeon RX 9060 XT 16 Go",
+  "brand": "Sapphire",
+  "category": "gpu",
+  "q": "Sapphire Radeon RX 9060 XT 16 Go",
+  "tokens": [
+   "16go",
+   "9060"
+  ]
+ },
+ {
+  "name": "Radeon RX 9060 XT 8 Go",
+  "brand": "XFX",
+  "category": "gpu",
+  "q": "XFX Radeon RX 9060 XT 8 Go",
+  "tokens": [
+   "8go",
+   "9060"
+  ]
+ },
+ {
+  "name": "Radeon RX 7900 XTX 24 Go",
+  "brand": "Sapphire",
+  "category": "gpu",
+  "q": "Sapphire Radeon RX 7900 XTX 24 Go",
+  "tokens": [
+   "24go",
+   "7900"
+  ]
+ },
+ {
+  "name": "Radeon RX 7800 XT 16 Go Hellhound",
+  "brand": "PowerColor",
+  "category": "gpu",
+  "q": "PowerColor Radeon RX 7800 XT 16 Go Hellhound",
+  "tokens": [
+   "16go",
+   "7800"
+  ]
+ },
+ {
+  "name": "Radeon RX 7700 XT 12 Go Pulse",
+  "brand": "Sapphire",
+  "category": "gpu",
+  "q": "Sapphire Radeon RX 7700 XT 12 Go Pulse",
+  "tokens": [
+   "12go",
+   "7700"
+  ]
+ },
+ {
+  "name": "Radeon RX 7600 8 Go Pulse",
+  "brand": "Sapphire",
+  "category": "gpu",
+  "q": "Sapphire Radeon RX 7600 8 Go Pulse",
+  "tokens": [
+   "7600",
+   "8go"
+  ]
+ },
+ {
+  "name": "Radeon RX 7900 XT 20 Go",
+  "brand": "XFX",
+  "category": "gpu",
+  "q": "XFX Radeon RX 7900 XT 20 Go",
+  "tokens": [
+   "20go",
+   "7900"
+  ]
+ },
+ {
+  "name": "Radeon RX 7900 GRE 16 Go",
+  "brand": "Sapphire",
+  "category": "gpu",
+  "q": "Sapphire Radeon RX 7900 GRE 16 Go",
+  "tokens": [
+   "16go",
+   "7900"
+  ]
+ },
+ {
+  "name": "Radeon RX 7600 XT 16 Go",
+  "brand": "ASRock",
+  "category": "gpu",
+  "q": "ASRock Radeon RX 7600 XT 16 Go",
+  "tokens": [
+   "16go",
+   "7600"
+  ]
+ },
+ {
+  "name": "Radeon RX 6750 XT 12 Go",
+  "brand": "PowerColor",
+  "category": "gpu",
+  "q": "PowerColor Radeon RX 6750 XT 12 Go",
+  "tokens": [
+   "12go",
+   "6750"
+  ]
+ },
+ {
+  "name": "Radeon RX 6650 XT 8 Go",
+  "brand": "ASRock",
+  "category": "gpu",
+  "q": "ASRock Radeon RX 6650 XT 8 Go",
+  "tokens": [
+   "6650",
+   "8go"
+  ]
+ },
+ {
+  "name": "Arc B580 12 Go",
+  "brand": "Intel",
+  "category": "gpu",
+  "q": "Intel Arc B580 12 Go",
+  "tokens": [
+   "12go",
+   "b580"
+  ]
+ },
+ {
+  "name": "Arc B570 10 Go",
+  "brand": "Intel",
+  "category": "gpu",
+  "q": "Intel Arc B570 10 Go",
+  "tokens": [
+   "10go",
+   "b570"
+  ]
+ },
+ {
+  "name": "GeForce RTX 3050 6 Go",
+  "brand": "MSI",
+  "category": "gpu",
+  "q": "MSI GeForce RTX 3050 6 Go",
+  "tokens": [
+   "3050",
+   "6go"
+  ]
+ },
+ {
+  "name": "Ryzen 9 9950X3D",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 9 9950X3D",
+  "tokens": [
+   "9950x3d"
+  ]
+ },
+ {
+  "name": "Ryzen 7 9800X3D",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 7 9800X3D",
+  "tokens": [
+   "9800x3d"
+  ]
+ },
+ {
+  "name": "Ryzen 9 9950X",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 9 9950X",
+  "tokens": [
+   "9950x"
+  ]
+ },
+ {
+  "name": "Ryzen 9 9900X",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 9 9900X",
+  "tokens": [
+   "9900x"
+  ]
+ },
+ {
+  "name": "Ryzen 7 9700X",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 7 9700X",
+  "tokens": [
+   "9700x"
+  ]
+ },
+ {
+  "name": "Ryzen 5 9600X",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 5 9600X",
+  "tokens": [
+   "9600x"
+  ]
+ },
+ {
+  "name": "Ryzen 5 8400F",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 5 8400F",
+  "tokens": [
+   "8400f"
+  ]
+ },
+ {
+  "name": "Ryzen 7 7800X3D",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 7 7800X3D",
+  "tokens": [
+   "7800x3d"
+  ]
+ },
+ {
+  "name": "Ryzen 5 7600X",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 5 7600X",
+  "tokens": [
+   "7600x"
+  ]
+ },
+ {
+  "name": "Ryzen 9 7950X3D",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 9 7950X3D",
+  "tokens": [
+   "7950x3d"
+  ]
+ },
+ {
+  "name": "Ryzen 9 7900X3D",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 9 7900X3D",
+  "tokens": [
+   "7900x3d"
+  ]
+ },
+ {
+  "name": "Ryzen 9 7950X",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 9 7950X",
+  "tokens": [
+   "7950x"
+  ]
+ },
+ {
+  "name": "Ryzen 9 7900X",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 9 7900X",
+  "tokens": [
+   "7900x"
+  ]
+ },
+ {
+  "name": "Ryzen 7 7700X",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 7 7700X",
+  "tokens": [
+   "7700x"
+  ]
+ },
+ {
+  "name": "Ryzen 5 7500F",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 5 7500F",
+  "tokens": [
+   "7500f"
+  ]
+ },
+ {
+  "name": "Ryzen 7 8700G",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 7 8700G",
+  "tokens": [
+   "8700g"
+  ]
+ },
+ {
+  "name": "Ryzen 5 8600G",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 5 8600G",
+  "tokens": [
+   "8600g"
+  ]
+ },
+ {
+  "name": "Ryzen Threadripper 7960X",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen Threadripper 7960X",
+  "tokens": [
+   "7960x"
+  ]
+ },
+ {
+  "name": "Ryzen 7 5700X3D",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 7 5700X3D",
+  "tokens": [
+   "5700x3d"
+  ]
+ },
+ {
+  "name": "Ryzen 5 5600",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Ryzen 5 5600",
+  "tokens": [
+   "5600"
+  ]
+ },
+ {
+  "name": "Athlon 3000G",
+  "brand": "AMD",
+  "category": "cpu",
+  "q": "AMD Athlon 3000G",
+  "tokens": [
+   "3000g"
+  ]
+ },
+ {
+  "name": "Core Ultra 9 285K",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core Ultra 9 285K",
+  "tokens": [
+   "285k"
+  ]
+ },
+ {
+  "name": "Core Ultra 7 265K",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core Ultra 7 265K",
+  "tokens": [
+   "265k"
+  ]
+ },
+ {
+  "name": "Core Ultra 5 245K",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core Ultra 5 245K",
+  "tokens": [
+   "245k"
+  ]
+ },
+ {
+  "name": "Core i7-14700K",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core i7-14700K",
+  "tokens": [
+   "14700k",
+   "i7-14700k"
+  ]
+ },
+ {
+  "name": "Core i5-14600KF",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core i5-14600KF",
+  "tokens": [
+   "i5-14600kf"
+  ]
+ },
+ {
+  "name": "Core i5-14500",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core i5-14500",
+  "tokens": [
+   "i5-14500"
+  ]
+ },
+ {
+  "name": "Core i5-14400F",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core i5-14400F",
+  "tokens": [
+   "i5-14400f"
+  ]
+ },
+ {
+  "name": "Core i5-13400F",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core i5-13400F",
+  "tokens": [
+   "i5-13400f"
+  ]
+ },
+ {
+  "name": "Core i5-12400F",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core i5-12400F",
+  "tokens": [
+   "i5-12400f"
+  ]
+ },
+ {
+  "name": "Core i3-14100F",
+  "brand": "Intel",
+  "category": "cpu",
+  "q": "Intel Core i3-14100F",
+  "tokens": [
+   "i3-14100f"
+  ]
+ },
+ {
+  "name": "Trident Z5 RGB 32 Go DDR5-6000 CL30",
+  "brand": "G.Skill",
+  "category": "ram",
+  "q": "G.Skill Trident Z5 RGB 32 Go DDR5-6000 CL30",
+  "tokens": [
+   "32go",
+   "cl30",
+   "ddr5-6000"
+  ]
+ },
+ {
+  "name": "Vengeance RGB 32 Go DDR5-6000 CL30",
+  "brand": "Corsair",
+  "category": "ram",
+  "q": "Corsair Vengeance RGB 32 Go DDR5-6000 CL30",
+  "tokens": [
+   "32go",
+   "cl30",
+   "ddr5-6000"
+  ]
+ },
+ {
+  "name": "Vengeance 32 Go DDR5-5600",
+  "brand": "Corsair",
+  "category": "ram",
+  "q": "Corsair Vengeance 32 Go DDR5-5600",
+  "tokens": [
+   "32go",
+   "ddr5-5600"
+  ]
+ },
+ {
+  "name": "Fury Beast RGB 32 Go DDR5-6000",
+  "brand": "Kingston",
+  "category": "ram",
+  "q": "Kingston Fury Beast RGB 32 Go DDR5-6000",
+  "tokens": [
+   "32go",
+   "ddr5-6000"
+  ]
+ },
+ {
+  "name": "T-Force Delta RGB 32 Go DDR5-6400",
+  "brand": "Teamgroup",
+  "category": "ram",
+  "q": "Teamgroup T-Force Delta RGB 32 Go DDR5-6400",
+  "tokens": [
+   "32go",
+   "ddr5-6400"
+  ]
+ },
+ {
+  "name": "Value 16 Go DDR5-4800",
+  "brand": "Crucial",
+  "category": "ram",
+  "q": "Crucial Value 16 Go DDR5-4800",
+  "tokens": [
+   "16go",
+   "ddr5-4800"
+  ]
+ },
+ {
+  "name": "Vengeance 64 Go DDR5-6000",
+  "brand": "Corsair",
+  "category": "ram",
+  "q": "Corsair Vengeance 64 Go DDR5-6000",
+  "tokens": [
+   "64go",
+   "ddr5-6000"
+  ]
+ },
+ {
+  "name": "Vengeance 16 Go DDR5-6000 CL36",
+  "brand": "Corsair",
+  "category": "ram",
+  "q": "Corsair Vengeance 16 Go DDR5-6000 CL36",
+  "tokens": [
+   "16go",
+   "cl36",
+   "ddr5-6000"
+  ]
+ },
+ {
+  "name": "Trident Z5 RGB 32 Go DDR5-8000",
+  "brand": "G.Skill",
+  "category": "ram",
+  "q": "G.Skill Trident Z5 RGB 32 Go DDR5-8000",
+  "tokens": [
+   "32go",
+   "ddr5-8000"
+  ]
+ },
+ {
+  "name": "Trident Z5 RGB 96 Go DDR5-6400",
+  "brand": "G.Skill",
+  "category": "ram",
+  "q": "G.Skill Trident Z5 RGB 96 Go DDR5-6400",
+  "tokens": [
+   "96go",
+   "ddr5-6400"
+  ]
+ },
+ {
+  "name": "SO-DIMM Impact 16 Go DDR5-5600",
+  "brand": "Kingston",
+  "category": "ram",
+  "q": "Kingston SO-DIMM Impact 16 Go DDR5-5600",
+  "tokens": [
+   "16go",
+   "ddr5-5600"
+  ]
+ },
+ {
+  "name": "Trident Z RGB 16 Go DDR4-3600",
+  "brand": "G.Skill",
+  "category": "ram",
+  "q": "G.Skill Trident Z RGB 16 Go DDR4-3600",
+  "tokens": [
+   "16go",
+   "ddr4-3600"
+  ]
+ },
+ {
+  "name": "Vengeance LPX 16 Go DDR4-3200",
+  "brand": "Corsair",
+  "category": "ram",
+  "q": "Corsair Vengeance LPX 16 Go DDR4-3200",
+  "tokens": [
+   "16go",
+   "ddr4-3200"
+  ]
+ },
+ {
+  "name": "Vengeance LPX 32 Go DDR4-3200",
+  "brand": "Corsair",
+  "category": "ram",
+  "q": "Corsair Vengeance LPX 32 Go DDR4-3200",
+  "tokens": [
+   "32go",
+   "ddr4-3200"
+  ]
+ },
+ {
+  "name": "Fury Beast 64 Go DDR4-3200",
+  "brand": "Kingston",
+  "category": "ram",
+  "q": "Kingston Fury Beast 64 Go DDR4-3200",
+  "tokens": [
+   "64go",
+   "ddr4-3200"
+  ]
+ },
+ {
+  "name": "990 Pro 2 To",
+  "brand": "Samsung",
+  "category": "storage",
+  "q": "Samsung 990 Pro 2 To",
+  "tokens": [
+   "2to",
+   "990"
+  ]
+ },
+ {
+  "name": "T705 2 To Gen5",
+  "brand": "Crucial",
+  "category": "storage",
+  "q": "Crucial T705 2 To Gen5",
+  "tokens": [
+   "2to",
+   "gen5",
+   "t705"
+  ]
+ },
+ {
+  "name": "990 Pro 4 To",
+  "brand": "Samsung",
+  "category": "storage",
+  "q": "Samsung 990 Pro 4 To",
+  "tokens": [
+   "4to",
+   "990"
+  ]
+ },
+ {
+  "name": "990 Pro 1 To",
+  "brand": "Samsung",
+  "category": "storage",
+  "q": "Samsung 990 Pro 1 To",
+  "tokens": [
+   "1to",
+   "990"
+  ]
+ },
+ {
+  "name": "WD_Black SN850X 2 To",
+  "brand": "Western Digital",
+  "category": "storage",
+  "q": "Western Digital WD_Black SN850X 2 To",
+  "tokens": [
+   "2to",
+   "sn850x"
+  ]
+ },
+ {
+  "name": "WD_Black SN850X 1 To",
+  "brand": "Western Digital",
+  "category": "storage",
+  "q": "Western Digital WD_Black SN850X 1 To",
+  "tokens": [
+   "1to",
+   "sn850x"
+  ]
+ },
+ {
+  "name": "FireCuda 530R 2 To Gen4",
+  "brand": "Seagate",
+  "category": "storage",
+  "q": "Seagate FireCuda 530R 2 To Gen4",
+  "tokens": [
+   "2to",
+   "530r",
+   "gen4"
+  ]
+ },
+ {
+  "name": "P3 Plus 1 To Gen4",
+  "brand": "Crucial",
+  "category": "storage",
+  "q": "Crucial P3 Plus 1 To Gen4",
+  "tokens": [
+   "1to",
+   "gen4"
+  ]
+ },
+ {
+  "name": "980 1 To PCIe 3.0",
+  "brand": "Samsung",
+  "category": "storage",
+  "q": "Samsung 980 1 To PCIe 3.0",
+  "tokens": [
+   "1to",
+   "980"
+  ]
+ },
+ {
+  "name": "870 EVO 1 To SATA",
+  "brand": "Samsung",
+  "category": "storage",
+  "q": "Samsung 870 EVO 1 To SATA",
+  "tokens": [
+   "1to",
+   "870"
+  ]
+ },
+ {
+  "name": "A400 480 Go SATA",
+  "brand": "Kingston",
+  "category": "storage",
+  "q": "Kingston A400 480 Go SATA",
+  "tokens": [
+   "480",
+   "480go",
+   "a400"
+  ]
+ },
+ {
+  "name": "MX500 1 To SATA",
+  "brand": "Crucial",
+  "category": "storage",
+  "q": "Crucial MX500 1 To SATA",
+  "tokens": [
+   "1to",
+   "mx500"
+  ]
+ },
+ {
+  "name": "870 EVO 2 To SATA",
+  "brand": "Samsung",
+  "category": "storage",
+  "q": "Samsung 870 EVO 2 To SATA",
+  "tokens": [
+   "2to",
+   "870"
+  ]
+ },
+ {
+  "name": "T700 1 To Gen5",
+  "brand": "Crucial",
+  "category": "storage",
+  "q": "Crucial T700 1 To Gen5",
+  "tokens": [
+   "1to",
+   "gen5",
+   "t700"
+  ]
+ },
+ {
+  "name": "9100 Pro 2 To Gen5",
+  "brand": "Samsung",
+  "category": "storage",
+  "q": "Samsung 9100 Pro 2 To Gen5",
+  "tokens": [
+   "2to",
+   "9100",
+   "gen5"
+  ]
+ },
+ {
+  "name": "WD_Black SN850X 4 To",
+  "brand": "Western Digital",
+  "category": "storage",
+  "q": "Western Digital WD_Black SN850X 4 To",
+  "tokens": [
+   "4to",
+   "sn850x"
+  ]
+ },
+ {
+  "name": "KC3000 2 To Gen4",
+  "brand": "Kingston",
+  "category": "storage",
+  "q": "Kingston KC3000 2 To Gen4",
+  "tokens": [
+   "2to",
+   "gen4",
+   "kc3000"
+  ]
+ },
+ {
+  "name": "990 EVO Plus 2 To Gen4",
+  "brand": "Samsung",
+  "category": "storage",
+  "q": "Samsung 990 EVO Plus 2 To Gen4",
+  "tokens": [
+   "2to",
+   "990",
+   "gen4"
+  ]
+ },
+ {
+  "name": "WD Blue SN580 2 To Gen4",
+  "brand": "Western Digital",
+  "category": "storage",
+  "q": "Western Digital WD Blue SN580 2 To Gen4",
+  "tokens": [
+   "2to",
+   "gen4",
+   "sn580"
+  ]
+ },
+ {
+  "name": "970 EVO Plus 1 To Gen3",
+  "brand": "Samsung",
+  "category": "storage",
+  "q": "Samsung 970 EVO Plus 1 To Gen3",
+  "tokens": [
+   "1to",
+   "970",
+   "gen3"
+  ]
+ },
+ {
+  "name": "P3 2 To Gen3",
+  "brand": "Crucial",
+  "category": "storage",
+  "q": "Crucial P3 2 To Gen3",
+  "tokens": [
+   "2to",
+   "gen3"
+  ]
+ },
+ {
+  "name": "MAG X870 Tomahawk WiFi",
+  "brand": "MSI",
+  "category": "motherboard",
+  "q": "MSI MAG X870 Tomahawk WiFi",
+  "tokens": [
+   "x870"
+  ]
+ },
+ {
+  "name": "B650 Tomahawk WiFi",
+  "brand": "MSI",
+  "category": "motherboard",
+  "q": "MSI B650 Tomahawk WiFi",
+  "tokens": [
+   "b650"
+  ]
+ },
+ {
+  "name": "B850 Gaming Plus WiFi",
+  "brand": "MSI",
+  "category": "motherboard",
+  "q": "MSI B850 Gaming Plus WiFi",
+  "tokens": [
+   "b850"
+  ]
+ },
+ {
+  "name": "B650M-A WiFi",
+  "brand": "ASUS",
+  "category": "motherboard",
+  "q": "ASUS B650M-A WiFi",
+  "tokens": [
+   "b650m-a"
+  ]
+ },
+ {
+  "name": "A620M-E",
+  "brand": "ASUS",
+  "category": "motherboard",
+  "q": "ASUS A620M-E",
+  "tokens": [
+   "a620m-e"
+  ]
+ },
+ {
+  "name": "X670E Carbon WiFi",
+  "brand": "MSI",
+  "category": "motherboard",
+  "q": "MSI X670E Carbon WiFi",
+  "tokens": [
+   "x670e"
+  ]
+ },
+ {
+  "name": "B650E-I ROG Strix",
+  "brand": "ASUS",
+  "category": "motherboard",
+  "q": "ASUS B650E-I ROG Strix",
+  "tokens": [
+   "b650e-i"
+  ]
+ },
+ {
+  "name": "B550 Aorus Elite V2",
+  "brand": "Gigabyte",
+  "category": "motherboard",
+  "q": "Gigabyte B550 Aorus Elite V2",
+  "tokens": [
+   "b550"
+  ]
+ },
+ {
+  "name": "B450M DS3H V2",
+  "brand": "Gigabyte",
+  "category": "motherboard",
+  "q": "Gigabyte B450M DS3H V2",
+  "tokens": [
+   "b450m",
+   "ds3h"
+  ]
+ },
+ {
+  "name": "Z890 Pro RS WiFi",
+  "brand": "ASRock",
+  "category": "motherboard",
+  "q": "ASRock Z890 Pro RS WiFi",
+  "tokens": [
+   "z890"
+  ]
+ },
+ {
+  "name": "Z790 AORUS Elite AX",
+  "brand": "Gigabyte",
+  "category": "motherboard",
+  "q": "Gigabyte Z790 AORUS Elite AX",
+  "tokens": [
+   "z790"
+  ]
+ },
+ {
+  "name": "B760M DS3H DDR4",
+  "brand": "Gigabyte",
+  "category": "motherboard",
+  "q": "Gigabyte B760M DS3H DDR4",
+  "tokens": [
+   "b760m",
+   "ddr4",
+   "ds3h"
+  ]
+ },
+ {
+  "name": "B760 Gaming Plus WiFi DDR5",
+  "brand": "MSI",
+  "category": "motherboard",
+  "q": "MSI B760 Gaming Plus WiFi DDR5",
+  "tokens": [
+   "b760",
+   "ddr5"
+  ]
+ },
+ {
+  "name": "PRIME H610M-K DDR5",
+  "brand": "ASUS",
+  "category": "motherboard",
+  "q": "ASUS PRIME H610M-K DDR5",
+  "tokens": [
+   "ddr5",
+   "h610m-k"
+  ]
+ },
+ {
+  "name": "PRO B860-P WiFi",
+  "brand": "MSI",
+  "category": "motherboard",
+  "q": "MSI PRO B860-P WiFi",
+  "tokens": [
+   "b860-p"
+  ]
+ },
+ {
+  "name": "ROG Strix Z790-I Gaming",
+  "brand": "ASUS",
+  "category": "motherboard",
+  "q": "ASUS ROG Strix Z790-I Gaming",
+  "tokens": [
+   "z790-i"
+  ]
+ },
+ {
+  "name": "ROG Strix X870E-E Gaming WiFi",
+  "brand": "ASUS",
+  "category": "motherboard",
+  "q": "ASUS ROG Strix X870E-E Gaming WiFi",
+  "tokens": [
+   "x870e-e"
+  ]
+ },
+ {
+  "name": "MAG X570S Tomahawk MAX WiFi",
+  "brand": "MSI",
+  "category": "motherboard",
+  "q": "MSI MAG X570S Tomahawk MAX WiFi",
+  "tokens": [
+   "x570s"
+  ]
+ },
+ {
+  "name": "A520M-HDV",
+  "brand": "ASRock",
+  "category": "motherboard",
+  "q": "ASRock A520M-HDV",
+  "tokens": [
+   "a520m-hdv"
+  ]
+ },
+ {
+  "name": "RM850e ATX 3.1",
+  "brand": "Corsair",
+  "category": "psu",
+  "q": "Corsair RM850e ATX 3.1",
+  "tokens": [
+   "rm850e"
+  ]
+ },
+ {
+  "name": "RM750e ATX 3.1",
+  "brand": "Corsair",
+  "category": "psu",
+  "q": "Corsair RM750e ATX 3.1",
+  "tokens": [
+   "rm750e"
+  ]
+ },
+ {
+  "name": "RM1000e ATX 3.1",
+  "brand": "Corsair",
+  "category": "psu",
+  "q": "Corsair RM1000e ATX 3.1",
+  "tokens": [
+   "rm1000e"
+  ]
+ },
+ {
+  "name": "Pure Power 12 M 650 W",
+  "brand": "be quiet!",
+  "category": "psu",
+  "q": "be quiet! Pure Power 12 M 650 W",
+  "tokens": [
+   "650",
+   "650w"
+  ]
+ },
+ {
+  "name": "System Power 10 550 W Bronze",
+  "brand": "be quiet!",
+  "category": "psu",
+  "q": "be quiet! System Power 10 550 W Bronze",
+  "tokens": [
+   "550",
+   "550w"
+  ]
+ },
+ {
+  "name": "Focus GX-850 ATX 3.1",
+  "brand": "Seasonic",
+  "category": "psu",
+  "q": "Seasonic Focus GX-850 ATX 3.1",
+  "tokens": [
+   "850"
+  ]
+ },
+ {
+  "name": "Prime TX-1300 Titanium",
+  "brand": "Seasonic",
+  "category": "psu",
+  "q": "Seasonic Prime TX-1300 Titanium",
+  "tokens": [
+   "1300"
+  ]
+ },
+ {
+  "name": "SF750 SFX Platinum",
+  "brand": "Corsair",
+  "category": "psu",
+  "q": "Corsair SF750 SFX Platinum",
+  "tokens": [
+   "sf750"
+  ]
+ },
+ {
+  "name": "CX550F RGB 550 W Bronze",
+  "brand": "Corsair",
+  "category": "psu",
+  "q": "Corsair CX550F RGB 550 W Bronze",
+  "tokens": [
+   "550",
+   "550w",
+   "cx550f"
+  ]
+ },
+ {
+  "name": "RM650x ATX 3.1",
+  "brand": "Corsair",
+  "category": "psu",
+  "q": "Corsair RM650x ATX 3.1",
+  "tokens": [
+   "rm650x"
+  ]
+ },
+ {
+  "name": "HX1000i ATX 3.1",
+  "brand": "Corsair",
+  "category": "psu",
+  "q": "Corsair HX1000i ATX 3.1",
+  "tokens": [
+   "hx1000i"
+  ]
+ },
+ {
+  "name": "RM1200x SHIFT ATX 3.1",
+  "brand": "Corsair",
+  "category": "psu",
+  "q": "Corsair RM1200x SHIFT ATX 3.1",
+  "tokens": [
+   "rm1200x"
+  ]
+ },
+ {
+  "name": "SF1000 SFX Platinum",
+  "brand": "Corsair",
+  "category": "psu",
+  "q": "Corsair SF1000 SFX Platinum",
+  "tokens": [
+   "sf1000"
+  ]
+ },
+ {
+  "name": "North",
+  "brand": "Fractal Design",
+  "category": "case",
+  "q": "Fractal Design North",
+  "tokens": []
+ },
+ {
+  "name": "4000D Airflow",
+  "brand": "Corsair",
+  "category": "case",
+  "q": "Corsair 4000D Airflow",
+  "tokens": [
+   "4000d"
+  ]
+ },
+ {
+  "name": "Pop Air RGB",
+  "brand": "Fractal Design",
+  "category": "case",
+  "q": "Fractal Design Pop Air RGB",
+  "tokens": []
+ },
+ {
+  "name": "H6 Flow RGB",
+  "brand": "NZXT",
+  "category": "case",
+  "q": "NZXT H6 Flow RGB",
+  "tokens": []
+ },
+ {
+  "name": "O11 Dynamic EVO",
+  "brand": "Lian Li",
+  "category": "case",
+  "q": "Lian Li O11 Dynamic EVO",
+  "tokens": [
+   "o11"
+  ]
+ },
+ {
+  "name": "Y70 Touch",
+  "brand": "Hyte",
+  "category": "case",
+  "q": "Hyte Y70 Touch",
+  "tokens": [
+   "y70"
+  ]
+ },
+ {
+  "name": "Versa H17 mATX",
+  "brand": "Thermaltake",
+  "category": "case",
+  "q": "Thermaltake Versa H17 mATX",
+  "tokens": [
+   "h17"
+  ]
+ },
+ {
+  "name": "NR200P V2 ITX",
+  "brand": "Cooler Master",
+  "category": "case",
+  "q": "Cooler Master NR200P V2 ITX",
+  "tokens": [
+   "nr200p"
+  ]
+ },
+ {
+  "name": "O11 Vision",
+  "brand": "Lian Li",
+  "category": "case",
+  "q": "Lian Li O11 Vision",
+  "tokens": [
+   "o11"
+  ]
+ },
+ {
+  "name": "Meshify 2 Compact",
+  "brand": "Fractal Design",
+  "category": "case",
+  "q": "Fractal Design Meshify 2 Compact",
+  "tokens": []
+ },
+ {
+  "name": "Pure Base 500DX",
+  "brand": "be quiet!",
+  "category": "case",
+  "q": "be quiet! Pure Base 500DX",
+  "tokens": [
+   "500dx"
+  ]
+ },
+ {
+  "name": "AIR 903 MAX",
+  "brand": "Montech",
+  "category": "case",
+  "q": "Montech AIR 903 MAX",
+  "tokens": [
+   "903"
+  ]
+ },
+ {
+  "name": "H9 Flow",
+  "brand": "NZXT",
+  "category": "case",
+  "q": "NZXT H9 Flow",
+  "tokens": []
+ },
+ {
+  "name": "Liquid Freezer III 360 A-RGB",
+  "brand": "Arctic",
+  "category": "cooling",
+  "q": "Arctic Liquid Freezer III 360 A-RGB",
+  "tokens": [
+   "360"
+  ]
+ },
+ {
+  "name": "Peerless Assassin 120 SE",
+  "brand": "Thermalright",
+  "category": "cooling",
+  "q": "Thermalright Peerless Assassin 120 SE",
+  "tokens": [
+   "120"
+  ]
+ },
+ {
+  "name": "NH-D15 G2",
+  "brand": "Noctua",
+  "category": "cooling",
+  "q": "Noctua NH-D15 G2",
+  "tokens": [
+   "d15"
+  ]
+ },
+ {
+  "name": "Dark Rock Pro 5",
+  "brand": "be quiet!",
+  "category": "cooling",
+  "q": "be quiet! Dark Rock Pro 5",
+  "tokens": []
+ },
+ {
+  "name": "Kraken 240 RGB",
+  "brand": "NZXT",
+  "category": "cooling",
+  "q": "NZXT Kraken 240 RGB",
+  "tokens": [
+   "240"
+  ]
+ },
+ {
+  "name": "NH-L9i-17xx",
+  "brand": "Noctua",
+  "category": "cooling",
+  "q": "Noctua NH-L9i-17xx",
+  "tokens": [
+   "l9i-17xx"
+  ]
+ },
+ {
+  "name": "Assassin X 120 R SE",
+  "brand": "DeepCool",
+  "category": "cooling",
+  "q": "DeepCool Assassin X 120 R SE",
+  "tokens": [
+   "120"
+  ]
+ },
+ {
+  "name": "Hyper 212 Black Edition",
+  "brand": "Cooler Master",
+  "category": "cooling",
+  "q": "Cooler Master Hyper 212 Black Edition",
+  "tokens": [
+   "212"
+  ]
+ },
+ {
+  "name": "Phantom Spirit 120 SE",
+  "brand": "Thermalright",
+  "category": "cooling",
+  "q": "Thermalright Phantom Spirit 120 SE",
+  "tokens": [
+   "120"
+  ]
+ },
+ {
+  "name": "AK620 Digital",
+  "brand": "DeepCool",
+  "category": "cooling",
+  "q": "DeepCool AK620 Digital",
+  "tokens": [
+   "ak620"
+  ]
+ },
+ {
+  "name": "Liquid Freezer III 280 A-RGB",
+  "brand": "Arctic",
+  "category": "cooling",
+  "q": "Arctic Liquid Freezer III 280 A-RGB",
+  "tokens": [
+   "280"
+  ]
+ },
+ {
+  "name": "iCUE Link H150i RGB",
+  "brand": "Corsair",
+  "category": "cooling",
+  "q": "Corsair iCUE Link H150i RGB",
+  "tokens": [
+   "h150i"
+  ]
+ },
+ {
+  "name": "Galahad II LCD 360",
+  "brand": "Lian Li",
+  "category": "cooling",
+  "q": "Lian Li Galahad II LCD 360",
+  "tokens": [
+   "360"
+  ]
+ },
+ {
+  "name": "27GR75Q 27\" QHD 165 Hz IPS",
+  "brand": "LG",
+  "category": "monitor",
+  "q": "LG 27GR75Q 27\" QHD 165 Hz IPS",
+  "tokens": [
+   "165",
+   "165hz",
+   "27gr75q"
+  ]
+ },
+ {
+  "name": "Odyssey OLED G6 27\" QHD 360 Hz",
+  "brand": "Samsung",
+  "category": "monitor",
+  "q": "Samsung Odyssey OLED G6 27\" QHD 360 Hz",
+  "tokens": [
+   "360",
+   "360hz"
+  ]
+ },
+ {
+  "name": "27\" 4K 160 Hz IPS Gaming",
+  "brand": "Gigabyte",
+  "category": "monitor",
+  "q": "Gigabyte 27\" 4K 160 Hz IPS Gaming",
+  "tokens": [
+   "160",
+   "160hz",
+   "4k"
+  ]
+ },
+ {
+  "name": "34\" UWQHD 175 Hz Incurvé",
+  "brand": "MSI",
+  "category": "monitor",
+  "q": "MSI 34\" UWQHD 175 Hz Incurvé",
+  "tokens": [
+   "175",
+   "175hz"
+  ]
+ },
+ {
+  "name": "49\" Dual QHD 240 Hz OLED",
+  "brand": "Samsung",
+  "category": "monitor",
+  "q": "Samsung 49\" Dual QHD 240 Hz OLED",
+  "tokens": [
+   "240",
+   "240hz"
+  ]
+ },
+ {
+  "name": "24G4 24\" FHD 180 Hz",
+  "brand": "AOC",
+  "category": "monitor",
+  "q": "AOC 24G4 24\" FHD 180 Hz",
+  "tokens": [
+   "180",
+   "180hz",
+   "24g4"
+  ]
+ },
+ {
+  "name": "ProArt 27\" 4K USB-C",
+  "brand": "ASUS",
+  "category": "monitor",
+  "q": "ASUS ProArt 27\" 4K USB-C",
+  "tokens": [
+   "4k"
+  ]
+ },
+ {
+  "name": "24MP400 24\" IPS 75 Hz",
+  "brand": "LG",
+  "category": "monitor",
+  "q": "LG 24MP400 24\" IPS 75 Hz",
+  "tokens": [
+   "24mp400",
+   "75hz"
+  ]
+ },
+ {
+  "name": "UltraGear OLED 32\" 4K 240 Hz",
+  "brand": "LG",
+  "category": "monitor",
+  "q": "LG UltraGear OLED 32\" 4K 240 Hz",
+  "tokens": [
+   "240",
+   "240hz",
+   "4k"
+  ]
+ },
+ {
+  "name": "ROG Swift 27\" QHD 360 Hz",
+  "brand": "ASUS",
+  "category": "monitor",
+  "q": "ASUS ROG Swift 27\" QHD 360 Hz",
+  "tokens": [
+   "360",
+   "360hz"
+  ]
+ },
+ {
+  "name": "MAG 27\" QHD 180 Hz",
+  "brand": "MSI",
+  "category": "monitor",
+  "q": "MSI MAG 27\" QHD 180 Hz",
+  "tokens": [
+   "180",
+   "180hz"
+  ]
+ },
+ {
+  "name": "Q27G3 27\" QHD 165 Hz",
+  "brand": "AOC",
+  "category": "monitor",
+  "q": "AOC Q27G3 27\" QHD 165 Hz",
+  "tokens": [
+   "165",
+   "165hz",
+   "q27g3"
+  ]
+ },
+ {
+  "name": "UltraGear 34\" UWQHD 160 Hz",
+  "brand": "LG",
+  "category": "monitor",
+  "q": "LG UltraGear 34\" UWQHD 160 Hz",
+  "tokens": [
+   "160",
+   "160hz"
+  ]
+ },
+ {
+  "name": "P2425H 24\" FHD Pro",
+  "brand": "Dell",
+  "category": "monitor",
+  "q": "Dell P2425H 24\" FHD Pro",
+  "tokens": [
+   "p2425h"
+  ]
+ },
+ {
+  "name": "K8 Pro",
+  "brand": "Keychron",
+  "category": "keyboard",
+  "q": "Keychron K8 Pro",
+  "tokens": []
+ },
+ {
+  "name": "Apex Pro TKL Gen 3",
+  "brand": "SteelSeries",
+  "category": "keyboard",
+  "q": "SteelSeries Apex Pro TKL Gen 3",
+  "tokens": []
+ },
+ {
+  "name": "G915 TKL Lightspeed",
+  "brand": "Logitech",
+  "category": "keyboard",
+  "q": "Logitech G915 TKL Lightspeed",
+  "tokens": [
+   "g915"
+  ]
+ },
+ {
+  "name": "MX Keys S",
+  "brand": "Logitech",
+  "category": "keyboard",
+  "q": "Logitech MX Keys S",
+  "tokens": []
+ },
+ {
+  "name": "Huntsman V3 Pro Mini",
+  "brand": "Razer",
+  "category": "keyboard",
+  "q": "Razer Huntsman V3 Pro Mini",
+  "tokens": []
+ },
+ {
+  "name": "K65 Plus Wireless",
+  "brand": "Corsair",
+  "category": "keyboard",
+  "q": "Corsair K65 Plus Wireless",
+  "tokens": [
+   "k65"
+  ]
+ },
+ {
+  "name": "K55 RGB Pro",
+  "brand": "Corsair",
+  "category": "keyboard",
+  "q": "Corsair K55 RGB Pro",
+  "tokens": [
+   "k55"
+  ]
+ },
+ {
+  "name": "MK120 Combo clavier+souris",
+  "brand": "Logitech",
+  "category": "keyboard",
+  "q": "Logitech MK120 Combo clavier+souris",
+  "tokens": [
+   "mk120"
+  ]
+ },
+ {
+  "name": "K70 RGB Pro",
+  "brand": "Corsair",
+  "category": "keyboard",
+  "q": "Corsair K70 RGB Pro",
+  "tokens": [
+   "k70"
+  ]
+ },
+ {
+  "name": "K6 Pro",
+  "brand": "Keychron",
+  "category": "keyboard",
+  "q": "Keychron K6 Pro",
+  "tokens": []
+ },
+ {
+  "name": "G413 SE",
+  "brand": "Logitech",
+  "category": "keyboard",
+  "q": "Logitech G413 SE",
+  "tokens": [
+   "g413"
+  ]
+ },
+ {
+  "name": "G Pro X Superlight 2",
+  "brand": "Logitech",
+  "category": "mouse",
+  "q": "Logitech G Pro X Superlight 2",
+  "tokens": []
+ },
+ {
+  "name": "Viper V3 Pro",
+  "brand": "Razer",
+  "category": "mouse",
+  "q": "Razer Viper V3 Pro",
+  "tokens": []
+ },
+ {
+  "name": "DeathAdder V3 Pro",
+  "brand": "Razer",
+  "category": "mouse",
+  "q": "Razer DeathAdder V3 Pro",
+  "tokens": []
+ },
+ {
+  "name": "MX Master 3S",
+  "brand": "Logitech",
+  "category": "mouse",
+  "q": "Logitech MX Master 3S",
+  "tokens": []
+ },
+ {
+  "name": "Aerox 5 Wireless",
+  "brand": "SteelSeries",
+  "category": "mouse",
+  "q": "SteelSeries Aerox 5 Wireless",
+  "tokens": []
+ },
+ {
+  "name": "Rival 3",
+  "brand": "SteelSeries",
+  "category": "mouse",
+  "q": "SteelSeries Rival 3",
+  "tokens": []
+ },
+ {
+  "name": "M650 L",
+  "brand": "Logitech",
+  "category": "mouse",
+  "q": "Logitech M650 L",
+  "tokens": [
+   "m650"
+  ]
+ },
+ {
+  "name": "G305 Lightspeed",
+  "brand": "Logitech",
+  "category": "mouse",
+  "q": "Logitech G305 Lightspeed",
+  "tokens": [
+   "g305"
+  ]
+ },
+ {
+  "name": "Basilisk V3",
+  "brand": "Razer",
+  "category": "mouse",
+  "q": "Razer Basilisk V3",
+  "tokens": []
+ },
+ {
+  "name": "Arctis Nova Pro Wireless",
+  "brand": "SteelSeries",
+  "category": "headset",
+  "q": "SteelSeries Arctis Nova Pro Wireless",
+  "tokens": []
+ },
+ {
+  "name": "Cloud III Wireless",
+  "brand": "HyperX",
+  "category": "headset",
+  "q": "HyperX Cloud III Wireless",
+  "tokens": []
+ },
+ {
+  "name": "Cloud Alpha",
+  "brand": "HyperX",
+  "category": "headset",
+  "q": "HyperX Cloud Alpha",
+  "tokens": []
+ },
+ {
+  "name": "BlackShark V2 Pro",
+  "brand": "Razer",
+  "category": "headset",
+  "q": "Razer BlackShark V2 Pro",
+  "tokens": []
+ },
+ {
+  "name": "Virtuoso Pro",
+  "brand": "Corsair",
+  "category": "headset",
+  "q": "Corsair Virtuoso Pro",
+  "tokens": []
+ },
+ {
+  "name": "H390 USB",
+  "brand": "Logitech",
+  "category": "headset",
+  "q": "Logitech H390 USB",
+  "tokens": [
+   "h390"
+  ]
+ },
+ {
+  "name": "G Pro X 2 Lightspeed",
+  "brand": "Logitech",
+  "category": "headset",
+  "q": "Logitech G Pro X 2 Lightspeed",
+  "tokens": []
+ },
+ {
+  "name": "Cloud Stinger 2 Wireless",
+  "brand": "HyperX",
+  "category": "headset",
+  "q": "HyperX Cloud Stinger 2 Wireless",
+  "tokens": []
+ },
+ {
+  "name": "Maxwell Wireless",
+  "brand": "Audeze",
+  "category": "headset",
+  "q": "Audeze Maxwell Wireless",
+  "tokens": []
+ },
+ {
+  "name": "NF-A12x25 PWM",
+  "brand": "Noctua",
+  "category": "fan",
+  "q": "Noctua NF-A12x25 PWM",
+  "tokens": [
+   "a12x25"
+  ]
+ },
+ {
+  "name": "P12 PWM PST (pack de 5)",
+  "brand": "Arctic",
+  "category": "fan",
+  "q": "Arctic P12 PWM PST (pack de 5)",
+  "tokens": [
+   "p12"
+  ]
+ },
+ {
+  "name": "Pure Wings 3 140 mm",
+  "brand": "be quiet!",
+  "category": "fan",
+  "q": "be quiet! Pure Wings 3 140 mm",
+  "tokens": [
+   "140",
+   "140mm"
+  ]
+ },
+ {
+  "name": "SickleFlow 120 ARGB (pack de 3)",
+  "brand": "Cooler Master",
+  "category": "fan",
+  "q": "Cooler Master SickleFlow 120 ARGB (pack de 3)",
+  "tokens": [
+   "120"
+  ]
+ },
+ {
+  "name": "iCUE Link RX120 RGB (pack de 3)",
+  "brand": "Corsair",
+  "category": "fan",
+  "q": "Corsair iCUE Link RX120 RGB (pack de 3)",
+  "tokens": [
+   "rx120"
+  ]
+ },
+ {
+  "name": "Uni Fan SL120 V2 (pack de 3)",
+  "brand": "Lian Li",
+  "category": "fan",
+  "q": "Lian Li Uni Fan SL120 V2 (pack de 3)",
+  "tokens": [
+   "sl120"
+  ]
+ },
+ {
+  "name": "TL-C12C (pack de 3)",
+  "brand": "Thermalright",
+  "category": "fan",
+  "q": "Thermalright TL-C12C (pack de 3)",
+  "tokens": [
+   "c12c"
+  ]
+ },
+ {
+  "name": "MX-6 (4 g)",
+  "brand": "Arctic",
+  "category": "thermal",
+  "q": "Arctic MX-6 (4 g)",
+  "tokens": []
+ },
+ {
+  "name": "MX-4 (4 g)",
+  "brand": "Arctic",
+  "category": "thermal",
+  "q": "Arctic MX-4 (4 g)",
+  "tokens": []
+ },
+ {
+  "name": "Kryonaut (1 g)",
+  "brand": "Thermal Grizzly",
+  "category": "thermal",
+  "q": "Thermal Grizzly Kryonaut (1 g)",
+  "tokens": []
+ },
+ {
+  "name": "NT-H2 (3,5 g)",
+  "brand": "Noctua",
+  "category": "thermal",
+  "q": "Noctua NT-H2 (3,5 g)",
+  "tokens": []
+ },
+ {
+  "name": "MasterGel Pro V2",
+  "brand": "Cooler Master",
+  "category": "thermal",
+  "q": "Cooler Master MasterGel Pro V2",
+  "tokens": []
+ },
+ {
+  "name": "Conductonaut (1 g)",
+  "brand": "Thermal Grizzly",
+  "category": "thermal",
+  "q": "Thermal Grizzly Conductonaut (1 g)",
+  "tokens": []
+ },
+ {
+  "name": "Brio 4K",
+  "brand": "Logitech",
+  "category": "webcam",
+  "q": "Logitech Brio 4K",
+  "tokens": [
+   "4k"
+  ]
+ },
+ {
+  "name": "C920 HD Pro",
+  "brand": "Logitech",
+  "category": "webcam",
+  "q": "Logitech C920 HD Pro",
+  "tokens": [
+   "c920"
+  ]
+ },
+ {
+  "name": "StreamCam",
+  "brand": "Logitech",
+  "category": "webcam",
+  "q": "Logitech StreamCam",
+  "tokens": []
+ },
+ {
+  "name": "Kiyo Pro",
+  "brand": "Razer",
+  "category": "webcam",
+  "q": "Razer Kiyo Pro",
+  "tokens": []
+ },
+ {
+  "name": "Facecam MK.2",
+  "brand": "Elgato",
+  "category": "webcam",
+  "q": "Elgato Facecam MK.2",
+  "tokens": []
+ },
+ {
+  "name": "Trino HD 720p",
+  "brand": "Trust",
+  "category": "webcam",
+  "q": "Trust Trino HD 720p",
+  "tokens": [
+   "720p"
+  ]
+ },
+ {
+  "name": "QuadCast S",
+  "brand": "HyperX",
+  "category": "microphone",
+  "q": "HyperX QuadCast S",
+  "tokens": []
+ },
+ {
+  "name": "Yeti USB",
+  "brand": "Blue",
+  "category": "microphone",
+  "q": "Blue Yeti USB",
+  "tokens": []
+ },
+ {
+  "name": "Wave:3",
+  "brand": "Elgato",
+  "category": "microphone",
+  "q": "Elgato Wave:3",
+  "tokens": []
+ },
+ {
+  "name": "MV7+",
+  "brand": "Shure",
+  "category": "microphone",
+  "q": "Shure MV7+",
+  "tokens": [
+   "mv7"
+  ]
+ },
+ {
+  "name": "Seiren Mini",
+  "brand": "Razer",
+  "category": "microphone",
+  "q": "Razer Seiren Mini",
+  "tokens": []
+ },
+ {
+  "name": "GXT 232 Mantis",
+  "brand": "Trust",
+  "category": "microphone",
+  "q": "Trust GXT 232 Mantis",
+  "tokens": [
+   "232"
+  ]
+ },
+ {
+  "name": "Z407 2.1 Bluetooth",
+  "brand": "Logitech",
+  "category": "speaker",
+  "q": "Logitech Z407 2.1 Bluetooth",
+  "tokens": [
+   "z407"
+  ]
+ },
+ {
+  "name": "Z313 2.1",
+  "brand": "Logitech",
+  "category": "speaker",
+  "q": "Logitech Z313 2.1",
+  "tokens": [
+   "z313"
+  ]
+ },
+ {
+  "name": "Pebble V3",
+  "brand": "Creative",
+  "category": "speaker",
+  "q": "Creative Pebble V3",
+  "tokens": []
+ },
+ {
+  "name": "R1280T",
+  "brand": "Edifier",
+  "category": "speaker",
+  "q": "Edifier R1280T",
+  "tokens": [
+   "r1280t"
+  ]
+ },
+ {
+  "name": "Z625 THX 2.1",
+  "brand": "Logitech",
+  "category": "speaker",
+  "q": "Logitech Z625 THX 2.1",
+  "tokens": [
+   "z625"
+  ]
+ },
+ {
+  "name": "Nommo V2",
+  "brand": "Razer",
+  "category": "speaker",
+  "q": "Razer Nommo V2",
+  "tokens": []
+ },
+ {
+  "name": "QcK Large",
+  "brand": "SteelSeries",
+  "category": "mousepad",
+  "q": "SteelSeries QcK Large",
+  "tokens": []
+ },
+ {
+  "name": "G840 XL",
+  "brand": "Logitech",
+  "category": "mousepad",
+  "q": "Logitech G840 XL",
+  "tokens": [
+   "g840"
+  ]
+ },
+ {
+  "name": "Goliathus Extended Chroma",
+  "brand": "Razer",
+  "category": "mousepad",
+  "q": "Razer Goliathus Extended Chroma",
+  "tokens": []
+ },
+ {
+  "name": "MM300 Extended",
+  "brand": "Corsair",
+  "category": "mousepad",
+  "q": "Corsair MM300 Extended",
+  "tokens": [
+   "mm300"
+  ]
+ },
+ {
+  "name": "QcK Prism XL",
+  "brand": "SteelSeries",
+  "category": "mousepad",
+  "q": "SteelSeries QcK Prism XL",
+  "tokens": []
+ },
+ {
+  "name": "3XL Stealth",
+  "brand": "Glorious",
+  "category": "mousepad",
+  "q": "Glorious 3XL Stealth",
+  "tokens": [
+   "3xl"
+  ]
+ },
+ {
+  "name": "Titan Evo 2024",
+  "brand": "Secretlab",
+  "category": "chair",
+  "q": "Secretlab Titan Evo 2024",
+  "tokens": [
+   "2024"
+  ]
+ },
+ {
+  "name": "Iskur V2",
+  "brand": "Razer",
+  "category": "chair",
+  "q": "Razer Iskur V2",
+  "tokens": []
+ },
+ {
+  "name": "Hero",
+  "brand": "Noblechairs",
+  "category": "chair",
+  "q": "Noblechairs Hero",
+  "tokens": []
+ },
+ {
+  "name": "Formula Series",
+  "brand": "DXRacer",
+  "category": "chair",
+  "q": "DXRacer Formula Series",
+  "tokens": []
+ },
+ {
+  "name": "TC100 Relaxed",
+  "brand": "Corsair",
+  "category": "chair",
+  "q": "Corsair TC100 Relaxed",
+  "tokens": [
+   "tc100"
+  ]
+ },
+ {
+  "name": "GXT 714 Ruya",
+  "brand": "Trust",
+  "category": "chair",
+  "q": "Trust GXT 714 Ruya",
+  "tokens": [
+   "714"
+  ]
+ }
+]

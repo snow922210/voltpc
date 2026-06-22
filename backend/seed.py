@@ -417,3 +417,13 @@ SEED_REVIEWS = [
     ("Titan Evo 2024", "Florian B.", 5, "Confortable même après 8h. Le maintien lombaire intégré change vraiment la donne."),
     ("R1280T", "Antoine V.", 5, "Un son chaud et propre pour mon bureau, bien au-dessus de mon attente à ce prix."),
 ]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Enrichissement des descriptions : on garde l'accroche écrite à la main et on
+# ajoute 1-2 phrases construites depuis les specs réelles de chaque produit.
+# Source unique : modifier l'accroche ci-dessus suffit, l'enrichi suit.
+# ─────────────────────────────────────────────────────────────────────────────
+from enrich_descriptions import enrich as _enrich_description
+
+for _p in SEED_PRODUCTS:
+    _p["description"] = _enrich_description(_p)
