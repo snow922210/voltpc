@@ -541,7 +541,7 @@ function gpuTier(p) {
 // Niveau d'un CPU (0–100) : threads + boost + bonus jeu (X3D).
 function cpuTier(p) {
   const s = p.specs || {};
-  const threads = specNum(String(s["Cœurs / Threads"] || "").split("/").pop());
+  const threads = specNum(String(s["Cœurs"] || "").split("/").pop());
   const boost = specNum(s["Boost"]);
   const x3d = /x3d/i.test(p.name) ? 12 : 0;
   return Math.max(15, Math.min(100, threads * 2.3 + boost * 5 + x3d));
@@ -582,7 +582,7 @@ function usageScores(b) {
   const cpu = b.cpu ? cpuTier(b.cpu) : 0;
   const cpuGame = b.cpu ? cpuGameTier(b.cpu) : 0;
   const ramCap = b.ram ? specNum(b.ram.specs["Capacité"]) : 0;
-  const threads = b.cpu ? specNum(String(b.cpu.specs["Cœurs / Threads"] || "").split("/").pop()) : 0;
+  const threads = b.cpu ? specNum(String(b.cpu.specs["Cœurs"] || "").split("/").pop()) : 0;
   if (!gpu && !cpu) return [];
 
   // Goulot CPU en jeu : un GPU bien au-dessus du CPU plafonne les FPS.
@@ -1677,7 +1677,7 @@ const SPEC_FILTERS = {
   ],
   cpu: [
     { key: "socket", label: "Socket", fn: (p) => p.specs.socket || p.specs["Socket"] || null },
-    { key: "cores", label: "Cœurs", fn: (p) => { const c = specNum(p.specs["Cœurs / Threads"]); return !c ? null : c <= 6 ? "6 ou moins" : c <= 8 ? "8 cœurs" : c <= 12 ? "12 cœurs" : "16 cœurs +"; } },
+    { key: "cores", label: "Cœurs", fn: (p) => { const c = specNum(p.specs["Cœurs"]); return !c ? null : c <= 6 ? "6 ou moins" : c <= 8 ? "8 cœurs" : c <= 12 ? "12 cœurs" : "16 cœurs +"; } },
     { key: "tdp", label: "Enveloppe (TDP)", fn: (p) => { const w = p.specs.tdp_w || specNum(p.specs["TDP"]); return !w ? null : w <= 65 ? "≤ 65 W" : w <= 105 ? "65–105 W" : "105 W +"; } },
   ],
   ram: [
@@ -2249,10 +2249,10 @@ async function viewBuilder(app) {
     // CPU : jeu (le X3D prime, cœurs plafonnés à 8) ou multicœur (streaming/création),
     // borné par le budget du profil.
     const gameValue = (p) => specNum(p.specs["Boost"]) * 6
-      + Math.min(specNum(p.specs["Cœurs / Threads"]), 8) * 4
+      + Math.min(specNum(p.specs["Cœurs"]), 8) * 4
       + (/x3d/i.test(p.name) ? 40 : 0);
     const cpuRanked = inStock("cpu").sort((a, c) => preset.cpu === "threads"
-      ? specNum(c.specs["Cœurs / Threads"]) - specNum(a.specs["Cœurs / Threads"])
+      ? specNum(c.specs["Cœurs"]) - specNum(a.specs["Cœurs"])
       : gameValue(c) - gameValue(a));
     const cpuCeil = preset.budget === "low" ? 300 : preset.budget === "mid" ? 480 : Infinity;
     b.cpu = cpuRanked.find((p) => p.price <= cpuCeil) || cpuRanked[0];
