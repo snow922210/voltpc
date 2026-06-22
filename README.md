@@ -12,9 +12,23 @@ uvicorn main:app --reload
 
 Puis ouvrir **http://127.0.0.1:8000** — le frontend est servi par le backend, aucune autre étape n'est nécessaire. La base SQLite (`voltpc.db`) est créée et remplie automatiquement au premier démarrage (280+ produits, avis, compte démo).
 
-> Déploiement en production : voir **[DEPLOYMENT.md](DEPLOYMENT.md)** (Docker, HTTPS, Stripe live).
+> Déploiement en production : voir **[docs/deploiement.md](docs/deploiement.md)** (Docker, HTTPS, Stripe live).
 
 Ou simplement : double-cliquer sur `start.bat`.
+
+## 📚 Documentation
+
+Toute la doc projet est regroupée dans **[`docs/`](docs/INDEX.md)** :
+
+| Document | Contenu |
+|---|---|
+| [docs/INDEX.md](docs/INDEX.md) | Sommaire de la documentation |
+| [docs/deploiement.md](docs/deploiement.md) | Mise en production (Docker, HTTPS, Stripe live) |
+| [docs/roadmap.md](docs/roadmap.md) | Feuille de route et suivi |
+| [docs/a-faire.md](docs/a-faire.md) | Améliorations à venir, par priorité |
+| [docs/campagne-images.md](docs/campagne-images.md) | Pipeline images/descriptions produit + état d'avancement |
+
+> Fichiers d'outillage (ne pas déplacer) : `CLAUDE.md`, `AGENTS.md`, et le skill `.claude/skills/run-voltcore/`.
 
 ## Paiement Stripe
 
@@ -153,7 +167,7 @@ voltpc/
 │   ├── index.html
 │   ├── css/style.css   # Design system dark néon
 │   └── js/app.js       # SPA : routeur, panier, auth, favoris, comparateur, admin
+├── docs/               # 📚 Documentation projet (voir docs/INDEX.md)
 ├── Dockerfile · .dockerignore
-├── DEPLOYMENT.md       # Guide de mise en production
 └── start.bat
 ```

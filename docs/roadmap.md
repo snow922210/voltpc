@@ -204,7 +204,7 @@ Les pages existent deja, mais elles contiennent encore des textes a personnalise
 | Compte demo | `demo@voltpc.fr` / `demo1234` |
 | Lancer en local | double-clic sur `start.bat` puis http://127.0.0.1:8000 |
 | Publier une modif | `git add -A && git commit -m "..." && git push` |
-| Guide deploiement | voir `DEPLOYMENT.md` |
+| Guide deploiement | voir `deploiement.md` (dossier docs/) |
 
 ### Rappels
 
