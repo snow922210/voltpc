@@ -195,7 +195,7 @@ def _case(s):
                        f"façade {faç}" if faç else "") if x]
     if seg:
         out.append(_cap(seg[0]) + (", " + ", ".join(seg[1:]) if len(seg) > 1 else "") + ".")
-    vent, baies = _g(s, "Ventilateurs"), _g(s, "Baies")
+    vent, baies = _g(s, "Ventilateurs"), _g(s, "Stockage")
     tail = [x for x in (f"{vent} préinstallés" if vent else "", baies) if x]
     if tail:
         out.append("Refroidissement et stockage : " + ", ".join(tail) + ".")
