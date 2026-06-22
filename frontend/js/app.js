@@ -427,7 +427,16 @@ const tintOf = (p) => `hsla(${hueOf(p) + 205}, 60%, 60%, 0.12)`;
 // local images/{id}.jpg. Si rien ne charge, l'img se retire et le visuel SVG
 // situé dessous reste affiché.
 const imgTag = (p) =>
-  `<img class="pimg" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.remove()">`;
+  `<img class="pimg" src="${esc(p.image_url || `/images/${slugify(p.name)}-1.jpg`)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.remove()">`;
+
+// Slug stable du nom (identique à backend/gen_images.py) pour retrouver les
+// fichiers galerie /images/<slug>-N.jpg.
+function slugify(name) {
+  return (name || "")
+    .normalize("NFKD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+    .toLowerCase() || "produit";
+}
 
 function cleanupProductThumbs() {
   const thumbs = $("#ppThumbs");
@@ -1848,13 +1857,13 @@ async function viewProduct(app, id) {
     <div class="product-gallery">
       <div class="product-page-visual" style="--tint:${tintOf(p)}">
         ${art(p.category, hueOf(p))}
-        <img class="pimg" id="ppMain" src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="${esc(p.name)}" onerror="this.remove(); cleanupProductThumbs()">
+        <img class="pimg" id="ppMain" src="${esc(p.image_url || `/images/${slugify(p.name)}-1.jpg`)}" alt="${esc(p.name)}" onerror="this.remove(); cleanupProductThumbs()">
         ${badgeHtml(usefulBadge(p) || p.badge)}
       </div>
       <div class="pp-thumbs" id="ppThumbs">
-        ${[1,2,3].map((n) => `
-          <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="/images/${p.id}-${n}.jpg">
-            <img src="/images/${p.id}-${n}.jpg" alt="" loading="lazy" onerror="this.closest('.pp-thumb').remove(); cleanupProductThumbs()">
+        ${[1,2,3,4,5].map((n) => `
+          <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="/images/${slugify(p.name)}-${n}.jpg">
+            <img src="/images/${slugify(p.name)}-${n}.jpg" alt="" loading="lazy" onerror="this.closest('.pp-thumb').remove(); cleanupProductThumbs()">
           </button>`).join("")}
       </div>
     </div>
