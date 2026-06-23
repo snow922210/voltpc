@@ -990,17 +990,16 @@ img { max-width: 100%; }
 .picker-list { display: flex; flex-direction: column; gap: 9px; max-height: 56vh; overflow-y: auto; overflow-x: hidden; padding: 0 10px 2px 0; }
 .picker-group { position: sticky; top: 0; z-index: 2; background: var(--surface); margin: 6px 0 -2px; padding: 7px 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); }
 .picker-group:first-child { margin-top: 0; }
-.picker-row { display: grid; grid-template-columns: minmax(0, 1fr) 88px; align-items: center; gap: 10px; }
+.picker-row { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; }
 .picker-row .picker-item { min-width: 0; }
-.picker-detail { min-height: 42px; display: flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2); color: var(--text-dim); font-size: 0.82rem; font-weight: 700; white-space: nowrap; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s; }
-.picker-detail:hover, .picker-detail.on { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); transform: translateY(-1px); }
 .pp-back { margin-bottom: 14px; }
 .picker-item {
  display: flex; align-items: center; gap: 14px; text-align: left;
  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
  padding: 13px 16px; color: var(--text); transition: border-color 0.15s, background 0.15s, transform 0.15s;
 }
-.picker-item:hover { border-color: var(--accent); background: var(--accent-wash); }
+.picker-item:hover, .picker-item.on { border-color: var(--accent); background: var(--accent-wash); }
+.picker-item.on { box-shadow: inset 0 0 0 1px var(--accent); }
 .picker-item.incompatible { opacity: 0.45; }
 .picker-item .picker-visual { width: 46px; height: 46px; flex-shrink: 0; display: grid; place-items: center; background: #fff; border-radius: 10px; border: 1px solid var(--border); }
 .picker-item .picker-visual svg { width: 86%; }
@@ -1045,10 +1044,8 @@ img { max-width: 100%; }
 }
 @media (max-width: 620px) {
  .modal.wide { width: 100%; }
- .picker-row { grid-template-columns: minmax(0, 1fr) 76px; gap: 7px; }
  .picker-list { padding-right: 4px; }
  .picker-preview-top { grid-template-columns: 96px minmax(0, 1fr); }
- .picker-detail { min-height: 40px; padding: 0 10px; font-size: 0.78rem; }
 }
 
 /* ─── Toasts ─── */
