@@ -74,7 +74,7 @@ body {
  background: var(--bg);
  color: var(--text);
  min-height: 100vh;
- overflow-x: hidden;
+ overflow-x: clip;        /* clip (et non hidden) : évite que body devienne un conteneur de défilement et casse position:sticky */
  font-size: 17px;         /* pace de lecture Apple (pas 16) */
  -webkit-font-smoothing: antialiased;
  text-rendering: optimizeLegibility;
