@@ -1869,8 +1869,6 @@ async function viewProduct(app, id) {
   const p = await api("/products/" + id);
   const discount = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
   const specEntries = Object.entries(p.specs).filter(([k]) => /^[A-ZÀ-Ü]/.test(k));
-  let qty = 1;
-
   app.innerHTML = `
   <button class="btn btn-ghost btn-sm pp-back" id="ppBack" type="button">← Retour</button>
   <nav class="breadcrumb">
@@ -1902,9 +1900,6 @@ async function viewProduct(app, id) {
       </div>
       ${stockHtml(p.stock)}
       <div class="buy-row">
-        <div class="qty-picker">
-          <button id="qtyMinus">−</button><span id="qtyVal">1</span><button id="qtyPlus">+</button>
-        </div>
         <button class="btn btn-primary" id="buyBtn" style="flex:1" ${p.stock <= 0 ? "disabled" : ""}>
           ${p.stock <= 0 ? "Indisponible" : "Ajouter au panier"}
         </button>
@@ -1936,9 +1931,7 @@ async function viewProduct(app, id) {
     </div>
   </section>`;
 
-  $("#qtyPlus").onclick = () => { if (qty < p.stock) { qty++; $("#qtyVal").textContent = qty; } };
-  $("#qtyMinus").onclick = () => { if (qty > 1) { qty--; $("#qtyVal").textContent = qty; } };
-  $("#buyBtn").onclick = () => addToCart(p, qty);
+  $("#buyBtn").onclick = () => addToCart(p, 1);
   $("#ppBack").onclick = () => { if (history.length > 1) history.back(); else go("/catalogue"); };
 
   // Galerie : clic sur une miniature → change l'image principale.
