@@ -2492,7 +2492,7 @@ async function viewBuilder(app) {
                   <div class="picker-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
                   <div class="picker-item-info">
                     <strong>${esc(p.brand)} ${esc(p.name)}</strong>
-                    <span>${stockHtml(p.stock).replace(/<[^>]+>/g, "")}</span>
+                    ${stockHtml(p.stock)}
                   </div>
                   <span class="price" style="font-size:.95rem">${fmt(p.price)}</span>
                 </button>

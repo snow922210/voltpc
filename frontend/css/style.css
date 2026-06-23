@@ -479,9 +479,9 @@ img { max-width: 100%; }
 .product-bottom { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding-top: 8px; }
 .price { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--text); }
 .price-old { display: block; color: var(--text-faint); font-size: 0.8rem; text-decoration: line-through; font-weight: 400; }
-.stock-dot { font-size: 0.76rem; color: var(--green); font-weight: 500; }
-.stock-dot.low { color: var(--amber); }
-.stock-dot.out { color: var(--red); }
+.stock-dot { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 4px 9px; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.28); background: rgba(34, 197, 94, 0.12); color: var(--green); font-size: 0.74rem; font-weight: 750; line-height: 1.1; }
+.stock-dot.low { border-color: rgba(245, 158, 11, 0.34); background: rgba(245, 158, 11, 0.13); color: var(--amber); }
+.stock-dot.out { border-color: rgba(220, 38, 38, 0.30); background: rgba(220, 38, 38, 0.12); color: var(--red); }
 
 .add-btn {
  display: grid;
@@ -1875,20 +1875,23 @@ input[type="radio"],
  }
 }
 
-/* Clean text status: no grey strip behind stock labels. */
+/* Stock badges. */
 .stock-dot,
 .void-home .stock-dot,
 body.void-home-active .stock-dot {
  display: inline-flex;
  align-items: center;
- gap: 7px;
+ gap: 6px;
  width: fit-content;
  min-width: 0;
- padding: 0 !important;
- background: transparent !important;
- border: 0 !important;
- box-shadow: none !important;
- line-height: 1.25;
+ padding: 4px 9px !important;
+ border: 1px solid rgba(34, 197, 94, 0.28) !important;
+ border-radius: 999px;
+ background: rgba(34, 197, 94, 0.12) !important;
+ box-shadow: none;
+ line-height: 1.1;
+ font-size: 0.74rem;
+ font-weight: 750;
  color: var(--green) !important;
 }
 
@@ -1902,10 +1905,14 @@ body.void-home-active .stock-dot {
 }
 
 .stock-dot.low {
+ border-color: rgba(245, 158, 11, 0.34) !important;
+ background: rgba(245, 158, 11, 0.13) !important;
  color: var(--amber) !important;
 }
 
 .stock-dot.out {
+ border-color: rgba(220, 38, 38, 0.30) !important;
+ background: rgba(220, 38, 38, 0.12) !important;
  color: var(--red) !important;
 }
 
