@@ -958,41 +958,17 @@ img { max-width: 100%; }
 .builder-slot-icon { flex-shrink: 0; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; background: var(--accent-wash); color: var(--accent); }
 .builder-slot-main { flex: 1; min-width: 0; }
 .builder-slot-main h3 { font-size: 0.95rem; margin-bottom: 3px; }
-.builder-slot-main p { font-size: 0.84rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.builder-slot-main p { font-size: 0.84rem; color: var(--text-dim); line-height: 1.45; }
+.builder-slot.filled .builder-slot-main p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .builder-slot .price { font-size: 1rem; }
 
 .builder-summary { margin-top: 22px; max-width: 560px; }
 .builder-progress { margin-top: 22px; }
 .builder-progress .row { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 12px; }
 .builder-progress-hint { font-size: 0.84rem; color: var(--text-dim); line-height: 1.5; margin-top: 12px; }
-/* ── Bascule Débutant / Expert ── */
-.builder-mode-switch { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; margin-bottom: 22px; }
-.builder-mode-switch button { border: none; background: none; color: var(--text-dim); font: inherit; font-size: 0.9rem; font-weight: 600; padding: 8px 16px; border-radius: 999px; cursor: pointer; transition: all 0.15s; }
-.builder-mode-switch button.on { background: var(--gradient); color: var(--on-primary); }
-.builder-intro { color: var(--text-dim); margin-bottom: 18px; }
-/* ── Assistant débutant ── */
-.beginner-wizard { max-width: 640px; }
-.beginner-wizard > h2 { font-size: 1.3rem; margin-bottom: 6px; }
-.beginner-wizard .muted { color: var(--text-faint); font-size: 0.9rem; }
-.wiz-q { margin-top: 22px; }
-.wiz-q h3 { font-size: 1rem; margin-bottom: 10px; }
-.wiz-opts { display: flex; flex-wrap: wrap; gap: 8px; }
-.wiz-opt { font-size: 0.9rem; padding: 9px 15px; border-radius: 12px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-dim); cursor: pointer; transition: all 0.15s; }
-.wiz-opt:hover { border-color: var(--accent); color: var(--text); }
-.wiz-opt.on { background: var(--gradient); color: var(--on-primary); border-color: var(--gradient); }
-#wizGo { margin-top: 26px; }
-.wiz-result { margin-top: 26px; border-top: 1px solid var(--border); padding-top: 20px; }
-.wiz-result h3 { font-size: 1.05rem; margin-bottom: 14px; }
-.wiz-parts { display: flex; flex-direction: column; gap: 10px; }
-.wiz-part { display: flex; align-items: center; gap: 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
-.wiz-part-icon { flex-shrink: 0; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: var(--accent-wash); color: var(--accent); }
-.wiz-part-info { flex: 1; min-width: 0; }
-.wiz-part-info strong { display: block; font-size: 0.9rem; }
-.wiz-part-info span { font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; }
-.wiz-part .price { font-size: 0.95rem; white-space: nowrap; }
-.wiz-total { display: flex; justify-content: space-between; align-items: center; margin: 18px 0; font-size: 1.05rem; }
-.wiz-total strong { font-size: 1.25rem; }
-.wiz-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.builder-intro { color: var(--text-dim); margin-bottom: 18px; max-width: 640px; line-height: 1.55; }
+/* Astuce en haut du sélecteur « Choisir » */
+.picker-tip { font-size: 0.84rem; color: var(--text-dim); background: var(--accent-wash); border-radius: 10px; padding: 9px 12px; margin: 4px 0 14px; line-height: 1.5; }
 .compat { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
 .compat-item { display: flex; gap: 9px; align-items: flex-start; font-size: 0.84rem; line-height: 1.45; }
 .compat-item.ok { color: var(--green); }
