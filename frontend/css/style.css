@@ -281,7 +281,7 @@ img { max-width: 100%; }
   display: grid;
   place-items: center;
   background: var(--gradient);
-  color: #fff;
+  color: var(--on-primary);
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
