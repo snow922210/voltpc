@@ -86,46 +86,58 @@ def _build_message(cfg: dict, order: dict, items: list[dict]) -> EmailMessage:
 
     texte = f"""Bonjour {order['customer_name']},
 
-Merci pour votre commande chez {shop} ! Votre paiement a bien été reçu.
+Merci pour votre commande chez {shop}. Votre paiement a bien été reçu et
+votre commande est en cours de préparation.
 
-──────────────────────────────────────────
 Commande n°{oid}
-──────────────────────────────────────────
-{lignes_txt}
-{remise_txt}
+------------------------------------------
+{lignes_txt}{remise_txt}
 Livraison : {port_txt}
-TOTAL réglé : {_eur(order['total'])}
+Total réglé : {_eur(order['total'])}
 
 Adresse de livraison :
 {order['ship_name']}
 {order['ship_address']}
 {order['ship_zip']} {order['ship_city']}
 
-Votre commande sera expédiée sous 24 h. Vous pouvez suivre son statut
-dans votre espace « Mon compte ».
+Vous pouvez suivre votre commande depuis votre espace « Mon compte ».
 
-À bientôt,
-L'équipe {shop} ⚡
+Cordialement,
+L'équipe {shop}
 """
 
-    html = f"""<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;background:#f4f4f7;color:#1f2430;margin:0;padding:24px">
-  <div style="max-width:560px;margin:auto;background:#ffffff;border-radius:14px;padding:28px;border:1px solid #e3e3ea">
-    <h1 style="margin:0 0 4px;font-size:22px;color:#16161d">⚡ {shop}</h1>
-    <p style="color:#e0700f;font-weight:bold;margin:0 0 20px">Confirmation de commande</p>
-    <p style="color:#333a48">Bonjour <strong>{order['customer_name']}</strong>,<br>
-    Merci pour votre commande ! Votre paiement a bien été reçu. 🎉</p>
-    <h2 style="font-size:16px;color:#16161d;border-bottom:2px solid #f0f0f4;padding-bottom:8px">Commande n°{oid}</h2>
-    <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333a48">{lignes_html}
-      {f"<tr><td style='padding:6px 0;color:#1a9d63'>Remise ({order['promo_code']})</td><td style='padding:6px 0;text-align:right;color:#1a9d63'>-{_eur(order['discount'])}</td></tr>" if order.get('discount') else ""}
-      <tr><td style="padding:6px 0">Livraison</td><td style="padding:6px 0;text-align:right">{port_txt}</td></tr>
-      <tr><td style="padding:10px 0;font-weight:bold;color:#16161d;border-top:2px solid #f0f0f4">Total réglé</td>
-          <td style="padding:10px 0;text-align:right;font-weight:bold;color:#16161d;border-top:2px solid #f0f0f4">{_eur(order['total'])}</td></tr>
-    </table>
-    <h2 style="font-size:16px;color:#16161d;border-bottom:2px solid #f0f0f4;padding-bottom:8px;margin-top:24px">📦 Livraison</h2>
-    <p style="font-size:14px;line-height:1.6;margin:0;color:#333a48">
-      {order['ship_name']}<br>{order['ship_address']}<br>{order['ship_zip']} {order['ship_city']}</p>
-    <p style="color:#6b7280;font-size:13px;margin-top:24px">Expédition sous 24 h. Suivi disponible dans « Mon compte ».</p>
-    <p style="margin-top:18px;color:#333a48">À bientôt,<br>L'équipe {shop} ⚡</p>
+    remise_row = (
+        f"<tr><td style='padding:6px 0;color:#1a9d63'>Remise ({order['promo_code']})</td>"
+        f"<td style='padding:6px 0;text-align:right;color:#1a9d63'>-{_eur(order['discount'])}</td></tr>"
+        if order.get("discount") else ""
+    )
+
+    html = f"""<!doctype html><html><body style="font-family:'Segoe UI',Arial,Helvetica,sans-serif;background:#f4f4f7;color:#1f2430;margin:0;padding:32px 16px">
+  <div style="max-width:560px;margin:auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e3e3ea">
+    <div style="height:4px;background:#e0700f"></div>
+    <div style="padding:34px 34px 28px">
+      <div style="font-size:22px;font-weight:800;letter-spacing:3px;color:#16161d">{shop.upper()}</div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#e0700f;margin-top:5px">Confirmation de commande</div>
+
+      <p style="color:#333a48;font-size:15px;line-height:1.6;margin:26px 0 0">Bonjour <strong>{order['customer_name']}</strong>,</p>
+      <p style="color:#333a48;font-size:15px;line-height:1.6;margin:6px 0 26px">Merci pour votre commande. Votre paiement a bien été reçu et votre commande est en cours de préparation.</p>
+
+      <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9aa0ab;margin-bottom:8px">Commande n°{oid}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333a48">{lignes_html}
+        {remise_row}
+        <tr><td style="padding:10px 0 0;color:#6b7280">Livraison</td><td style="padding:10px 0 0;text-align:right;color:#6b7280">{port_txt}</td></tr>
+        <tr><td style="padding:14px 0 0;font-weight:700;font-size:16px;color:#16161d;border-top:1px solid #ebebf0">Total réglé</td>
+            <td style="padding:14px 0 0;text-align:right;font-weight:700;font-size:16px;color:#16161d;border-top:1px solid #ebebf0">{_eur(order['total'])}</td></tr>
+      </table>
+
+      <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9aa0ab;margin:30px 0 8px">Adresse de livraison</div>
+      <p style="font-size:14px;line-height:1.6;margin:0;color:#333a48">
+        {order['ship_name']}<br>{order['ship_address']}<br>{order['ship_zip']} {order['ship_city']}</p>
+
+      <p style="color:#6b7280;font-size:13px;line-height:1.6;margin:26px 0 0">Vous pouvez suivre votre commande depuis votre espace « Mon compte ».</p>
+      <p style="margin:22px 0 0;color:#333a48;font-size:14px">Cordialement,<br>L'équipe {shop}</p>
+    </div>
+    <div style="padding:18px 34px;background:#fafafb;border-top:1px solid #ebebf0;color:#9aa0ab;font-size:12px;text-align:center">{shop} — Merci de votre confiance</div>
   </div>
 </body></html>"""
 
