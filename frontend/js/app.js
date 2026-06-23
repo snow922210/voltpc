@@ -1492,6 +1492,11 @@ function initVoidField(stage, canvas) {
 
   const pointer = { x: 0.62, y: 0.44, hot: false };
   let raf = 0;
+  let inView = true;
+  const io = ("IntersectionObserver" in window)
+    ? new IntersectionObserver((entries) => { inView = entries[0].isIntersecting; }, { threshold: 0 })
+    : null;
+  if (io) io.observe(stage);
   let dpr = 1;
   let w = 0;
   let h = 0;
@@ -1526,6 +1531,7 @@ function initVoidField(stage, canvas) {
   const frame = (now) => {
     if (!canvas.isConnected) return;
     raf = requestAnimationFrame(frame);
+    if (!inView) { last = now; return; } // pause hors écran
     if (Math.floor(canvas.clientWidth * dpr) !== w || Math.floor(canvas.clientHeight * dpr) !== h) resize();
     const dt = Math.min(36, now - last);
     last = now;
@@ -1605,6 +1611,7 @@ function initVoidField(stage, canvas) {
 
   return () => {
     cancelAnimationFrame(raf);
+    if (io) io.disconnect();
     stage.removeEventListener("pointermove", onMove);
     stage.removeEventListener("pointerleave", onLeave);
   };
