@@ -1030,6 +1030,8 @@ img { max-width: 100%; }
 .picker-gallery-arrow.next { right: 6px; }
 .picker-preview-head span { display: block; margin-bottom: 4px; color: var(--text-faint); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
 .picker-preview-head h3 { font-size: 1.08rem; line-height: 1.25; }
+.picker-full-detail { display: inline-flex; align-items: center; justify-content: center; width: fit-content; margin-top: 10px; padding: 7px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-dim); font-size: 0.78rem; font-weight: 750; transition: border-color 0.15s, color 0.15s, background 0.15s; }
+.picker-full-detail:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
 .picker-preview-buy { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
 .picker-preview-buy span { display: block; margin-bottom: 2px; color: var(--text-faint); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
 .picker-preview-buy strong { font-family: var(--font-display); font-size: 1.3rem; }

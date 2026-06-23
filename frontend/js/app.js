@@ -2521,6 +2521,7 @@ async function viewBuilder(app) {
             <div class="picker-preview-head">
               <span>${esc(p.brand)}</span>
               <h3>${esc(p.name)}</h3>
+              <a class="picker-full-detail" href="/produit/${p.id}">Détail</a>
             </div>
           </div>
           <div class="picker-preview-buy">
@@ -2569,6 +2570,7 @@ async function viewBuilder(app) {
         const p = compatList.find((x) => x.id === Number(e.currentTarget.dataset.previewPick));
         pickProduct(p);
       });
+      $(".picker-full-detail", overlay)?.addEventListener("click", () => close());
       $$("[data-gallery-step]", overlay).forEach((btn) => btn.onclick = (e) => {
         e.stopPropagation();
         if (!detailProduct) return;
