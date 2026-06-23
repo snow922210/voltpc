@@ -986,7 +986,7 @@ img { max-width: 100%; }
 .watt-bar > div { height: 100%; background: var(--gradient); border-radius: 99px; transition: width 0.4s; }
 .watt-label { font-size: 0.8rem; color: var(--text-dim); }
 
-.picker-body { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 16px; align-items: start; border-top: 1px solid var(--border); margin-top: 2px; padding-top: 16px; }
+.picker-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 0.62fr); gap: 18px; align-items: start; border-top: 1px solid var(--border); margin-top: 2px; padding-top: 16px; }
 .picker-list { display: flex; flex-direction: column; gap: 9px; max-height: 56vh; overflow-y: auto; overflow-x: hidden; padding: 0 10px 2px 0; }
 .picker-group { position: sticky; top: 0; z-index: 2; background: var(--surface); margin: 6px 0 -2px; padding: 7px 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); }
 .picker-group:first-child { margin-top: 0; }
@@ -1007,7 +1007,7 @@ img { max-width: 100%; }
 .picker-item-info { flex: 1; min-width: 0; }
 .picker-item-info strong { display: block; font-size: 0.88rem; }
 .picker-item-info span { font-size: 0.78rem; color: var(--text-faint); }
-.modal.wide { width: min(980px, 100%); }
+.modal.wide { width: min(1180px, 100%); }
 .picker-filters { display: grid; grid-template-columns: max-content 1fr; gap: 13px 18px; align-items: center; margin: 2px 0; padding: 16px 0 2px; border-top: 1px solid var(--border); }
 .picker-filter { display: contents; }
 .picker-filter > span { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
@@ -1016,26 +1016,33 @@ img { max-width: 100%; }
 .picker-chip:hover { border-color: var(--accent); color: var(--text); transform: translateY(-1px); }
 .picker-chip.on { background: var(--gradient); color: var(--on-primary); border-color: var(--gradient); box-shadow: var(--shadow-accent); }
 .picker-empty { text-align: center; color: var(--text-faint); padding: 32px 16px; font-size: 0.9rem; }
-.picker-preview { position: sticky; top: 0; display: flex; flex-direction: column; gap: 12px; max-height: 56vh; overflow: auto; padding: 14px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface-2); box-shadow: var(--shadow-xs); }
+.picker-preview { position: sticky; top: 0; display: flex; flex-direction: column; gap: 14px; max-height: 56vh; overflow: auto; padding: 16px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface-2); box-shadow: var(--shadow-xs); }
 .picker-preview.empty { min-height: 180px; justify-content: center; color: var(--text-faint); font-size: 0.86rem; line-height: 1.45; text-align: center; }
-.picker-preview-visual { width: 100%; aspect-ratio: 4 / 3; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
-.picker-preview-visual svg { width: 54%; }
+.picker-preview-top { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; align-items: center; }
+.picker-preview-visual { width: 100%; aspect-ratio: 1 / 1; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
+.picker-preview-visual svg { width: 58%; }
 .picker-preview-visual .pimg { padding: 10px; }
 .picker-preview-head span { display: block; margin-bottom: 4px; color: var(--text-faint); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
-.picker-preview-head h3 { font-size: 0.98rem; line-height: 1.25; }
-.picker-preview-price { font-family: var(--font-display); font-size: 1.22rem; font-weight: 700; }
-.picker-preview-stock .stock { display: inline-flex; width: fit-content; }
-.picker-preview-desc { color: var(--text-dim); font-size: 0.82rem; line-height: 1.45; }
-.picker-preview-specs { display: grid; gap: 7px; margin: 0; }
-.picker-preview-specs div { display: grid; grid-template-columns: minmax(78px, 0.85fr) minmax(0, 1fr); gap: 8px; padding-top: 7px; border-top: 1px solid var(--border); }
+.picker-preview-head h3 { font-size: 1.08rem; line-height: 1.25; }
+.picker-preview-buy { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.picker-preview-buy span { display: block; margin-bottom: 2px; color: var(--text-faint); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
+.picker-preview-buy strong { font-family: var(--font-display); font-size: 1.3rem; }
+.picker-preview-buy .stock { display: inline-flex; width: fit-content; }
+.picker-preview-section { display: grid; gap: 8px; }
+.picker-preview-section h4 { font-size: 0.86rem; }
+.picker-preview-desc { color: var(--text-dim); font-size: 0.86rem; line-height: 1.5; }
+.picker-preview-specs { display: grid; gap: 0; margin: 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.picker-preview-specs div { display: grid; grid-template-columns: minmax(96px, 0.9fr) minmax(0, 1fr); gap: 10px; padding: 9px 10px; border-top: 1px solid var(--border); background: var(--surface); }
+.picker-preview-specs div:first-child { border-top: 0; }
 .picker-preview-specs dt { color: var(--text-faint); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
-.picker-preview-specs dd { margin: 0; color: var(--text); font-size: 0.78rem; font-weight: 650; min-width: 0; overflow-wrap: anywhere; }
+.picker-preview-specs dd { margin: 0; color: var(--text); font-size: 0.8rem; font-weight: 650; min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 620px) {
  .modal.wide { width: 100%; }
  .picker-body { grid-template-columns: 1fr; }
  .picker-row { grid-template-columns: minmax(0, 1fr) 76px; gap: 7px; }
  .picker-list { padding-right: 4px; }
  .picker-preview { position: static; order: -1; max-height: none; }
+ .picker-preview-top { grid-template-columns: 96px minmax(0, 1fr); }
  .picker-detail { min-height: 40px; padding: 0 10px; font-size: 0.78rem; }
 }
 

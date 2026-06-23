@@ -2504,19 +2504,31 @@ async function viewBuilder(app) {
         if (!p) return `<aside class="picker-preview empty"><p>Sélectionnez un composant pour voir ses détails.</p></aside>`;
         const specs = Object.entries(p.specs || {})
           .filter(([k, v]) => /^[A-ZÀ-Ü]/.test(k) && v !== undefined && v !== "")
-          .slice(0, 6);
-        return `<aside class="picker-preview">
-          <div class="picker-preview-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
-          <div class="picker-preview-head">
-            <span>${esc(p.brand)}</span>
-            <h3>${esc(p.name)}</h3>
+        return `<aside class="picker-preview picker-preview-full">
+          <div class="picker-preview-top">
+            <div class="picker-preview-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
+            <div class="picker-preview-head">
+              <span>${esc(p.brand)}</span>
+              <h3>${esc(p.name)}</h3>
+            </div>
           </div>
-          <div class="picker-preview-price">${fmt(p.price)}</div>
-          <div class="picker-preview-stock">${stockHtml(p.stock)}</div>
-          ${p.description ? `<p class="picker-preview-desc">${esc(p.description)}</p>` : ""}
-          ${specs.length ? `<dl class="picker-preview-specs">
-            ${specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}
-          </dl>` : ""}
+          <div class="picker-preview-buy">
+            <div>
+              <span>Prix</span>
+              <strong>${fmt(p.price)}</strong>
+            </div>
+            ${stockHtml(p.stock)}
+          </div>
+          ${p.description ? `<section class="picker-preview-section">
+            <h4>Description</h4>
+            <p class="picker-preview-desc">${esc(p.description)}</p>
+          </section>` : ""}
+          ${specs.length ? `<section class="picker-preview-section">
+            <h4>Caractéristiques</h4>
+            <dl class="picker-preview-specs">
+              ${specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}
+            </dl>
+          </section>` : ""}
           <button class="btn btn-primary btn-block btn-sm" data-preview-pick="${p.id}">Choisir</button>
         </aside>`;
       };
