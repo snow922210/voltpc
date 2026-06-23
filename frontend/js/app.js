@@ -2457,8 +2457,19 @@ async function viewBuilder(app) {
       // au plus bas de gamme (prix décroissant ; à prix égal, n° de modèle
       // décroissant — ex. Intel → i9, i7, i5 14400 puis 12400). Les marques sont
       // ordonnées par leur modèle le plus haut de gamme.
+      // Clé de regroupement : pour les GPU, le fabricant de puce (NVIDIA / AMD /
+      // Intel) déduit du nom ; pour le reste, la marque (assembleur / fabricant).
+      const groupOf = (p) => {
+        if (cat === "gpu") {
+          const t = String(p.name).toLowerCase();
+          if (/geforce|\brtx\b|\bgtx\b/.test(t)) return "NVIDIA";
+          if (/radeon|\brx\b/.test(t)) return "AMD";
+          if (/\barc\b/.test(t)) return "Intel";
+        }
+        return p.brand || "Autres";
+      };
       const groups = {};
-      for (const p of list) (groups[p.brand || "Autres"] ??= []).push(p);
+      for (const p of list) (groups[groupOf(p)] ??= []).push(p);
       for (const g of Object.values(groups)) {
         g.sort((a, b) => b.price - a.price || String(b.name).localeCompare(String(a.name), "fr", { numeric: true }));
       }
