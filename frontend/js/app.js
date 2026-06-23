@@ -2450,8 +2450,32 @@ async function viewBuilder(app) {
         </div></div>`;
       }).join("");
 
-      // Application des filtres actifs.
+      // Application des filtres techniques actifs.
       const list = compatList.filter((p) => filters.every((f) => !active[f.key] || f.fn(p) === active[f.key]));
+
+      // Tri automatique pour se repérer : regroupé par marque, puis du plus haut
+      // au plus bas de gamme (prix décroissant ; à prix égal, n° de modèle
+      // décroissant — ex. Intel → i9, i7, i5 14400 puis 12400). Les marques sont
+      // ordonnées par leur modèle le plus haut de gamme.
+      const groups = {};
+      for (const p of list) (groups[p.brand || "Autres"] ??= []).push(p);
+      for (const g of Object.values(groups)) {
+        g.sort((a, b) => b.price - a.price || String(b.name).localeCompare(String(a.name), "fr", { numeric: true }));
+      }
+      const brandOrder = Object.keys(groups).sort((a, b) =>
+        Math.max(...groups[b].map((p) => p.price)) - Math.max(...groups[a].map((p) => p.price)) || a.localeCompare(b, "fr"));
+
+      const itemHtml = (p) => `
+              <button class="picker-item" data-id="${p.id}">
+                <div class="picker-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
+                <div class="picker-item-info">
+                  <strong>${esc(p.brand)} ${esc(p.name)}</strong>
+                  <span>${stockHtml(p.stock).replace(/<[^>]+>/g, "")}</span>
+                </div>
+                <span class="price" style="font-size:.95rem">${fmt(p.price)}</span>
+              </button>`;
+      const listHtml = brandOrder.map((b) =>
+        `<div class="picker-group">${esc(b)}</div>${groups[b].map(itemHtml).join("")}`).join("");
 
       overlay.innerHTML = `
         <div class="modal wide">
@@ -2460,21 +2484,13 @@ async function viewBuilder(app) {
           ${CATEGORY_TIP[cat] ? `<p class="picker-tip"><b>Conseil.</b> ${CATEGORY_TIP[cat]}</p>` : ""}
           ${chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
           <div class="picker-list">
-            ${list.length ? list.map((p) => `
-              <button class="picker-item" data-id="${p.id}">
-                <div class="picker-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
-                <div class="picker-item-info">
-                  <strong>${esc(p.brand)} ${esc(p.name)}</strong>
-                  <span>${stockHtml(p.stock).replace(/<[^>]+>/g, "")}</span>
-                </div>
-                <span class="price" style="font-size:.95rem">${fmt(p.price)}</span>
-              </button>`).join("")
+            ${list.length ? listHtml
             : `<p class="picker-empty">${compatList.length ? "Aucun résultat avec ces filtres — élargissez votre choix." : "Aucun composant compatible avec votre sélection actuelle."}</p>`}
           </div>
         </div>`;
 
       $(".modal-close", overlay).onclick = close;
-      $$(".picker-chip", overlay).forEach((chip) => chip.onclick = () => {
+      $$("[data-fk]", overlay).forEach((chip) => chip.onclick = () => {
         const k = chip.dataset.fk, v = chip.dataset.fv;
         active[k] = active[k] === v ? undefined : v; // re-clic = désélection
         render();
