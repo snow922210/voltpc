@@ -2503,7 +2503,7 @@ async function viewBuilder(app) {
       const detailHtml = (p) => {
         if (!p) return `<aside class="picker-preview empty"><p>Sélectionnez un composant pour voir ses détails.</p></aside>`;
         const specs = Object.entries(p.specs || {})
-          .filter(([k, v]) => /^[A-ZÀ-Ü]/.test(k) && v !== undefined && v !== "")
+          .filter(([k, v]) => /^[A-ZÀ-Ü]/.test(k) && v !== undefined && v !== "");
         return `<aside class="picker-preview picker-preview-full">
           <div class="picker-preview-top">
             <div class="picker-preview-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
