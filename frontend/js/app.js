@@ -2438,6 +2438,7 @@ async function viewBuilder(app) {
     const active = {}; // { filterKey: valeur sélectionnée }
     let detailProduct = compatList[0] || null;
     const galleryIndex = {}; // { productId: image number }
+    const galleryImages = {}; // { productId: valid image URLs }
 
     const overlay = document.createElement("div");
     overlay.className = "modal-overlay";
@@ -2504,15 +2505,17 @@ async function viewBuilder(app) {
         if (!p) return `<aside class="picker-preview empty"><p>Sélectionnez un composant pour voir ses détails.</p></aside>`;
         const specs = Object.entries(p.specs || {})
           .filter(([k, v]) => /^[A-ZÀ-Ü]/.test(k) && v !== undefined && v !== "");
-        const imgN = galleryIndex[p.id] || 1;
-        const imgSrc = imgN === 1 && p.image_url ? p.image_url : `/images/${slugify(p.name)}-${imgN}.jpg`;
+        const imgs = galleryImages[p.id] || [p.image_url || `/images/${slugify(p.name)}-1.jpg`];
+        const imgI = Math.min(galleryIndex[p.id] || 0, imgs.length - 1);
+        const imgSrc = imgs[imgI];
+        const hasGallery = imgs.length > 1;
         return `<aside class="picker-preview picker-preview-full">
           <div class="picker-preview-top">
             <div class="picker-preview-visual">
               ${art(p.category, hueOf(p))}
               <img class="pimg" src="${esc(imgSrc)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.remove()">
-              <button class="picker-gallery-arrow prev" data-gallery-step="-1" type="button" title="Image précédente" aria-label="Image précédente">‹</button>
-              <button class="picker-gallery-arrow next" data-gallery-step="1" type="button" title="Image suivante" aria-label="Image suivante">›</button>
+              ${hasGallery ? `<button class="picker-gallery-arrow prev" data-gallery-step="-1" type="button" title="Image précédente" aria-label="Image précédente">‹</button>
+              <button class="picker-gallery-arrow next" data-gallery-step="1" type="button" title="Image suivante" aria-label="Image suivante">›</button>` : ""}
             </div>
             <div class="picker-preview-head">
               <span>${esc(p.brand)}</span>
@@ -2568,8 +2571,10 @@ async function viewBuilder(app) {
       $$("[data-gallery-step]", overlay).forEach((btn) => btn.onclick = (e) => {
         e.stopPropagation();
         if (!detailProduct) return;
-        const current = galleryIndex[detailProduct.id] || 1;
-        galleryIndex[detailProduct.id] = ((current - 1 + Number(btn.dataset.galleryStep) + 5) % 5) + 1;
+        const imgs = galleryImages[detailProduct.id] || [];
+        if (imgs.length < 2) return;
+        const current = galleryIndex[detailProduct.id] || 0;
+        galleryIndex[detailProduct.id] = (current + Number(btn.dataset.galleryStep) + imgs.length) % imgs.length;
         render();
       });
       $$(".picker-item", overlay).forEach((item) => item.onclick = () => {
@@ -2579,6 +2584,24 @@ async function viewBuilder(app) {
         detailProduct = p || detailProduct;
         render();
       });
+      if (detailProduct && !galleryImages[detailProduct.id]) {
+        const product = detailProduct;
+        const candidates = [
+          product.image_url || `/images/${slugify(product.name)}-1.jpg`,
+          ...[2, 3, 4, 5].map((n) => `/images/${slugify(product.name)}-${n}.jpg`),
+        ];
+        Promise.all(candidates.map((src) => new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(src);
+          img.onerror = () => resolve(null);
+          img.src = src;
+        }))).then((valid) => {
+          if (!overlay.isConnected || detailProduct?.id !== product.id) return;
+          galleryImages[product.id] = valid.filter(Boolean);
+          galleryIndex[product.id] = 0;
+          render();
+        });
+      }
     };
 
     overlay.onclick = (e) => { if (e.target === overlay) close(); };
