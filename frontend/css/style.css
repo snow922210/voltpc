@@ -989,6 +989,11 @@ img { max-width: 100%; }
 .picker-list { display: flex; flex-direction: column; gap: 9px; max-height: 56vh; overflow-y: auto; overflow-x: hidden; padding: 16px 3px 2px; margin-top: 2px; border-top: 1px solid var(--border); }
 .picker-group { position: sticky; top: 0; z-index: 2; background: var(--surface); margin: 6px 0 -2px; padding: 7px 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); }
 .picker-group:first-child { margin-top: 0; }
+.picker-row { display: flex; align-items: stretch; gap: 8px; }
+.picker-row .picker-item { flex: 1; min-width: 0; }
+.picker-detail { flex-shrink: 0; display: flex; align-items: center; padding: 0 15px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-dim); font-size: 0.82rem; font-weight: 600; white-space: nowrap; transition: border-color 0.15s, color 0.15s, background 0.15s; }
+.picker-detail:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.pp-back { margin-bottom: 14px; }
 .picker-item {
  display: flex; align-items: center; gap: 14px; text-align: left;
  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);

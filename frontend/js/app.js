@@ -1872,6 +1872,7 @@ async function viewProduct(app, id) {
   let qty = 1;
 
   app.innerHTML = `
+  <button class="btn btn-ghost btn-sm pp-back" id="ppBack" type="button">← Retour</button>
   <nav class="breadcrumb">
     <a href="/">Accueil</a> / <a href="/catalogue">Catalogue</a> /
     <a href="/catalogue?cat=${p.category}">${CATS[p.category]?.label ?? p.category}</a> / <span>${esc(p.name)}</span>
@@ -1938,6 +1939,7 @@ async function viewProduct(app, id) {
   $("#qtyPlus").onclick = () => { if (qty < p.stock) { qty++; $("#qtyVal").textContent = qty; } };
   $("#qtyMinus").onclick = () => { if (qty > 1) { qty--; $("#qtyVal").textContent = qty; } };
   $("#buyBtn").onclick = () => addToCart(p, qty);
+  $("#ppBack").onclick = () => { if (history.length > 1) history.back(); else go("/catalogue"); };
 
   // Galerie : clic sur une miniature → change l'image principale.
   $$("#ppThumbs .pp-thumb").forEach((btn) => btn.onclick = () => {
@@ -2477,14 +2479,17 @@ async function viewBuilder(app) {
         Math.max(...groups[b].map((p) => p.price)) - Math.max(...groups[a].map((p) => p.price)) || a.localeCompare(b, "fr"));
 
       const itemHtml = (p) => `
-              <button class="picker-item" data-id="${p.id}">
-                <div class="picker-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
-                <div class="picker-item-info">
-                  <strong>${esc(p.brand)} ${esc(p.name)}</strong>
-                  <span>${stockHtml(p.stock).replace(/<[^>]+>/g, "")}</span>
-                </div>
-                <span class="price" style="font-size:.95rem">${fmt(p.price)}</span>
-              </button>`;
+              <div class="picker-row">
+                <button class="picker-item" data-id="${p.id}">
+                  <div class="picker-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
+                  <div class="picker-item-info">
+                    <strong>${esc(p.brand)} ${esc(p.name)}</strong>
+                    <span>${stockHtml(p.stock).replace(/<[^>]+>/g, "")}</span>
+                  </div>
+                  <span class="price" style="font-size:.95rem">${fmt(p.price)}</span>
+                </button>
+                <a class="picker-detail" href="/produit/${p.id}" title="Voir la fiche complète">Détail</a>
+              </div>`;
       const listHtml = brandOrder.map((b) =>
         `<div class="picker-group">${esc(b)}</div>${groups[b].map(itemHtml).join("")}`).join("");
 
@@ -2506,6 +2511,8 @@ async function viewBuilder(app) {
         active[k] = active[k] === v ? undefined : v; // re-clic = désélection
         render();
       });
+      // « Détail » → ferme le picker ; le routeur SPA gère la navigation du lien.
+      $$(".picker-detail", overlay).forEach((a) => a.onclick = () => close());
       $$(".picker-item", overlay).forEach((item) => item.onclick = () => {
         const p = compatList.find((x) => x.id === Number(item.dataset.id));
         state.build[cat] = p;
