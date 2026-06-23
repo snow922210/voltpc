@@ -2436,11 +2436,18 @@ async function viewBuilder(app) {
     const compatList = (byCat[cat] || []).filter((p) => isCompatible(cat, p));
     const filters = SPEC_FILTERS[cat] || [];
     const active = {}; // { filterKey: valeur sélectionnée }
+    let detailProduct = compatList[0] || null;
 
     const overlay = document.createElement("div");
     overlay.className = "modal-overlay";
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
+    const pickProduct = (p) => {
+      if (!p) return;
+      state.build[cat] = p;
+      close();
+      renderSlots();
+    };
 
     const render = () => {
       // Options de chaque filtre, calculées sur la liste compatible.
@@ -2454,6 +2461,7 @@ async function viewBuilder(app) {
 
       // Application des filtres techniques actifs.
       const list = compatList.filter((p) => filters.every((f) => !active[f.key] || f.fn(p) === active[f.key]));
+      if (!list.some((p) => p.id === detailProduct?.id)) detailProduct = list[0] || null;
 
       // Tri automatique pour se repérer : regroupé par marque, puis du plus haut
       // au plus bas de gamme (prix décroissant ; à prix égal, n° de modèle
@@ -2488,10 +2496,30 @@ async function viewBuilder(app) {
                   </div>
                   <span class="price" style="font-size:.95rem">${fmt(p.price)}</span>
                 </button>
-                <a class="picker-detail" href="/produit/${p.id}" title="Voir la fiche complète">Détail</a>
+                <button class="picker-detail ${detailProduct?.id === p.id ? "on" : ""}" data-detail="${p.id}" title="Afficher les détails ici">Détail</button>
               </div>`;
       const listHtml = brandOrder.map((b) =>
         `<div class="picker-group">${esc(b)}</div>${groups[b].map(itemHtml).join("")}`).join("");
+      const detailHtml = (p) => {
+        if (!p) return `<aside class="picker-preview empty"><p>Sélectionnez un composant pour voir ses détails.</p></aside>`;
+        const specs = Object.entries(p.specs || {})
+          .filter(([k, v]) => /^[A-ZÀ-Ü]/.test(k) && v !== undefined && v !== "")
+          .slice(0, 6);
+        return `<aside class="picker-preview">
+          <div class="picker-preview-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
+          <div class="picker-preview-head">
+            <span>${esc(p.brand)}</span>
+            <h3>${esc(p.name)}</h3>
+          </div>
+          <div class="picker-preview-price">${fmt(p.price)}</div>
+          <div class="picker-preview-stock">${stockHtml(p.stock)}</div>
+          ${p.description ? `<p class="picker-preview-desc">${esc(p.description)}</p>` : ""}
+          ${specs.length ? `<dl class="picker-preview-specs">
+            ${specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}
+          </dl>` : ""}
+          <button class="btn btn-primary btn-block btn-sm" data-preview-pick="${p.id}">Choisir</button>
+        </aside>`;
+      };
 
       overlay.innerHTML = `
         <div class="modal wide">
@@ -2499,9 +2527,12 @@ async function viewBuilder(app) {
           <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}<span class="picker-count">${list.length} dispo${list.length > 1 ? "s" : ""}</span></h2>
           ${CATEGORY_TIP[cat] ? `<p class="picker-tip"><b>Conseil.</b> ${CATEGORY_TIP[cat]}</p>` : ""}
           ${chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
-          <div class="picker-list">
-            ${list.length ? listHtml
-            : `<p class="picker-empty">${compatList.length ? "Aucun résultat avec ces filtres — élargissez votre choix." : "Aucun composant compatible avec votre sélection actuelle."}</p>`}
+          <div class="picker-body">
+            <div class="picker-list">
+              ${list.length ? listHtml
+              : `<p class="picker-empty">${compatList.length ? "Aucun résultat avec ces filtres — élargissez votre choix." : "Aucun composant compatible avec votre sélection actuelle."}</p>`}
+            </div>
+            ${detailHtml(detailProduct)}
           </div>
         </div>`;
 
@@ -2511,13 +2542,18 @@ async function viewBuilder(app) {
         active[k] = active[k] === v ? undefined : v; // re-clic = désélection
         render();
       });
-      // « Détail » → ferme le picker ; le routeur SPA gère la navigation du lien.
-      $$(".picker-detail", overlay).forEach((a) => a.onclick = () => close());
+      $$(".picker-detail", overlay).forEach((btn) => btn.onclick = (e) => {
+        e.preventDefault();
+        detailProduct = compatList.find((x) => x.id === Number(btn.dataset.detail)) || detailProduct;
+        render();
+      });
+      $("[data-preview-pick]", overlay)?.addEventListener("click", (e) => {
+        const p = compatList.find((x) => x.id === Number(e.currentTarget.dataset.previewPick));
+        pickProduct(p);
+      });
       $$(".picker-item", overlay).forEach((item) => item.onclick = () => {
         const p = compatList.find((x) => x.id === Number(item.dataset.id));
-        state.build[cat] = p;
-        close();
-        renderSlots();
+        pickProduct(p);
       });
     };
 
