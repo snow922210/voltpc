@@ -2437,6 +2437,7 @@ async function viewBuilder(app) {
     const filters = SPEC_FILTERS[cat] || [];
     const active = {}; // { filterKey: valeur sélectionnée }
     let detailProduct = compatList[0] || null;
+    const galleryIndex = {}; // { productId: image number }
 
     const overlay = document.createElement("div");
     overlay.className = "modal-overlay";
@@ -2503,9 +2504,16 @@ async function viewBuilder(app) {
         if (!p) return `<aside class="picker-preview empty"><p>Sélectionnez un composant pour voir ses détails.</p></aside>`;
         const specs = Object.entries(p.specs || {})
           .filter(([k, v]) => /^[A-ZÀ-Ü]/.test(k) && v !== undefined && v !== "");
+        const imgN = galleryIndex[p.id] || 1;
+        const imgSrc = imgN === 1 && p.image_url ? p.image_url : `/images/${slugify(p.name)}-${imgN}.jpg`;
         return `<aside class="picker-preview picker-preview-full">
           <div class="picker-preview-top">
-            <div class="picker-preview-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
+            <div class="picker-preview-visual">
+              ${art(p.category, hueOf(p))}
+              <img class="pimg" src="${esc(imgSrc)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.remove()">
+              <button class="picker-gallery-arrow prev" data-gallery-step="-1" type="button" title="Image précédente" aria-label="Image précédente">‹</button>
+              <button class="picker-gallery-arrow next" data-gallery-step="1" type="button" title="Image suivante" aria-label="Image suivante">›</button>
+            </div>
             <div class="picker-preview-head">
               <span>${esc(p.brand)}</span>
               <h3>${esc(p.name)}</h3>
@@ -2557,9 +2565,17 @@ async function viewBuilder(app) {
         const p = compatList.find((x) => x.id === Number(e.currentTarget.dataset.previewPick));
         pickProduct(p);
       });
+      $$("[data-gallery-step]", overlay).forEach((btn) => btn.onclick = (e) => {
+        e.stopPropagation();
+        if (!detailProduct) return;
+        const current = galleryIndex[detailProduct.id] || 1;
+        galleryIndex[detailProduct.id] = ((current - 1 + Number(btn.dataset.galleryStep) + 5) % 5) + 1;
+        render();
+      });
       $$(".picker-item", overlay).forEach((item) => item.onclick = () => {
         const p = compatList.find((x) => x.id === Number(item.dataset.id));
         if (!p || p.stock <= 0) return;
+        galleryIndex[p.id] ??= 1;
         detailProduct = p || detailProduct;
         render();
       });

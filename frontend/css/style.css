@@ -1024,6 +1024,10 @@ img { max-width: 100%; }
 .picker-preview-visual { position: relative; width: 100%; aspect-ratio: 1 / 1; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
 .picker-preview-visual svg { width: 58%; }
 .picker-preview-visual .pimg { padding: 12px; border-radius: 14px; }
+.picker-gallery-arrow { position: absolute; top: 50%; z-index: 3; display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid rgba(0,0,0,0.10); border-radius: 999px; background: rgba(255,255,255,0.86); color: #111; font-size: 1.35rem; line-height: 1; transform: translateY(-50%); box-shadow: 0 8px 20px rgba(0,0,0,0.14); transition: background 0.15s, transform 0.15s, border-color 0.15s; }
+.picker-gallery-arrow:hover { background: #fff; border-color: rgba(0,0,0,0.22); transform: translateY(-50%) scale(1.05); }
+.picker-gallery-arrow.prev { left: 8px; }
+.picker-gallery-arrow.next { right: 8px; }
 .picker-preview-head span { display: block; margin-bottom: 4px; color: var(--text-faint); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
 .picker-preview-head h3 { font-size: 1.08rem; line-height: 1.25; }
 .picker-preview-buy { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
