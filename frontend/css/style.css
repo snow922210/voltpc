@@ -1000,6 +1000,8 @@ img { max-width: 100%; }
 }
 .picker-item:hover, .picker-item.on { border-color: var(--accent); background: var(--accent-wash); }
 .picker-item.on { box-shadow: inset 0 0 0 1px var(--accent); }
+.picker-item:disabled, .picker-item.unavailable { opacity: 0.5; cursor: not-allowed; }
+.picker-item:disabled:hover, .picker-item.unavailable:hover { border-color: var(--border); background: var(--surface); }
 .picker-item.incompatible { opacity: 0.45; }
 .picker-item .picker-visual { width: 46px; height: 46px; flex-shrink: 0; display: grid; place-items: center; background: #fff; border-radius: 10px; border: 1px solid var(--border); }
 .picker-item .picker-visual svg { width: 86%; }

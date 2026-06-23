@@ -2488,7 +2488,7 @@ async function viewBuilder(app) {
 
       const itemHtml = (p) => `
               <div class="picker-row">
-                <button class="picker-item ${detailProduct?.id === p.id ? "on" : ""}" data-id="${p.id}">
+                <button class="picker-item ${detailProduct?.id === p.id ? "on" : ""} ${p.stock <= 0 ? "unavailable" : ""}" data-id="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>
                   <div class="picker-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
                   <div class="picker-item-info">
                     <strong>${esc(p.brand)} ${esc(p.name)}</strong>
@@ -2528,7 +2528,7 @@ async function viewBuilder(app) {
               ${specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}
             </dl>
           </section>` : ""}
-          <button class="btn btn-primary btn-block btn-sm" data-preview-pick="${p.id}">Choisir</button>
+          <button class="btn btn-primary btn-block btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>${p.stock <= 0 ? "Indisponible" : "Choisir"}</button>
         </aside>`;
       };
 
@@ -2559,6 +2559,7 @@ async function viewBuilder(app) {
       });
       $$(".picker-item", overlay).forEach((item) => item.onclick = () => {
         const p = compatList.find((x) => x.id === Number(item.dataset.id));
+        if (!p || p.stock <= 0) return;
         detailProduct = p || detailProduct;
         render();
       });
