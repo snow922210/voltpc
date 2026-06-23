@@ -1007,6 +1007,7 @@ img { max-width: 100%; }
 .picker-item-info strong { display: block; font-size: 0.88rem; line-height: 1.25; }
 .picker-item-info span { font-size: 0.78rem; color: var(--text-faint); }
 .modal.wide { width: min(1180px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: hidden; }
+.picker-modal { animation: none; }
 .picker-filters { display: grid; grid-template-columns: max-content 1fr; gap: 13px 18px; align-items: center; margin: 2px 0; padding: 16px 0 2px; border-top: 1px solid var(--border); }
 .picker-filter { display: contents; }
 .picker-filter > span { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
