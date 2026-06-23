@@ -2526,6 +2526,10 @@ async function viewBuilder(app) {
               ${stockHtml(p.stock)}
             </div>
             <button class="btn btn-primary btn-block btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>${p.stock <= 0 ? "Indisponible" : "Choisir"}</button>
+            <div class="picker-preview-actions">
+              <button class="btn btn-ghost btn-sm ${state.favorites.has(p.id) ? "on" : ""}" data-fav="${p.id}" type="button">♡ Ajouter aux favoris</button>
+              <button class="btn btn-ghost btn-sm ${inCompare(p.id) ? "on" : ""}" data-cmp="${p.id}" type="button">⇄ Comparer</button>
+            </div>
             ${specs.length ? `<section class="picker-preview-section">
               <h4>Caractéristiques</h4>
               <dl class="picker-preview-specs">
