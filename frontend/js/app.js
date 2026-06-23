@@ -2511,37 +2511,35 @@ async function viewBuilder(app) {
         const imgSrc = imgs[imgI];
         const hasGallery = galleryReady && imgs.length > 1;
         return `<aside class="picker-preview picker-preview-full">
-          <div class="picker-preview-top">
+          <div class="picker-preview-gallery">
             <div class="picker-preview-visual">
               ${art(p.category, hueOf(p))}
               <img class="pimg" src="${esc(imgSrc)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.remove()">
               ${hasGallery ? `<button class="picker-gallery-arrow prev" data-gallery-step="-1" type="button" title="Image précédente" aria-label="Image précédente">‹</button>
               <button class="picker-gallery-arrow next" data-gallery-step="1" type="button" title="Image suivante" aria-label="Image suivante">›</button>` : ""}
             </div>
+            ${hasGallery ? `<div class="picker-preview-thumbs">
+              ${imgs.map((src, i) => `<button class="picker-preview-thumb ${i === imgI ? "active" : ""}" data-gallery-index="${i}" type="button"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join("")}
+            </div>` : ""}
+          </div>
+          <div class="picker-preview-content">
             <div class="picker-preview-head">
-              <span>${esc(p.brand)}</span>
+              <span>${esc(p.brand)} · ${esc(CATS[p.category]?.label || p.category)}</span>
               <h3>${esc(p.name)}</h3>
-              <a class="picker-full-detail" href="/produit/${p.id}">Détail</a>
             </div>
-          </div>
-          <div class="picker-preview-buy">
-            <div>
-              <span>Prix</span>
+            ${p.description ? `<p class="picker-preview-desc">${esc(p.description)}</p>` : ""}
+            <div class="picker-preview-price-row">
               <strong>${fmt(p.price)}</strong>
+              ${stockHtml(p.stock)}
             </div>
-            ${stockHtml(p.stock)}
+            <button class="btn btn-primary btn-block btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>${p.stock <= 0 ? "Indisponible" : "Choisir"}</button>
+            ${specs.length ? `<section class="picker-preview-section">
+              <h4>Caractéristiques</h4>
+              <dl class="picker-preview-specs">
+                ${specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}
+              </dl>
+            </section>` : ""}
           </div>
-          ${p.description ? `<section class="picker-preview-section">
-            <h4>Description</h4>
-            <p class="picker-preview-desc">${esc(p.description)}</p>
-          </section>` : ""}
-          ${specs.length ? `<section class="picker-preview-section">
-            <h4>Caractéristiques</h4>
-            <dl class="picker-preview-specs">
-              ${specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}
-            </dl>
-          </section>` : ""}
-          <button class="btn btn-primary btn-block btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>${p.stock <= 0 ? "Indisponible" : "Choisir"}</button>
         </aside>`;
       };
 
@@ -2570,7 +2568,6 @@ async function viewBuilder(app) {
         const p = compatList.find((x) => x.id === Number(e.currentTarget.dataset.previewPick));
         pickProduct(p);
       });
-      $(".picker-full-detail", overlay)?.addEventListener("click", () => close());
       $$("[data-gallery-step]", overlay).forEach((btn) => btn.onclick = (e) => {
         e.stopPropagation();
         if (!detailProduct) return;
@@ -2578,6 +2575,12 @@ async function viewBuilder(app) {
         if (imgs.length < 2) return;
         const current = galleryIndex[detailProduct.id] || 0;
         galleryIndex[detailProduct.id] = (current + Number(btn.dataset.galleryStep) + imgs.length) % imgs.length;
+        render();
+      });
+      $$("[data-gallery-index]", overlay).forEach((btn) => btn.onclick = (e) => {
+        e.stopPropagation();
+        if (!detailProduct) return;
+        galleryIndex[detailProduct.id] = Number(btn.dataset.galleryIndex) || 0;
         render();
       });
       $$(".picker-item", overlay).forEach((item) => item.onclick = () => {
