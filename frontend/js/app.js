@@ -2246,8 +2246,10 @@ async function viewBuilder(app) {
     ${PRESETS.map((p) => `<button class="preset-btn" data-preset="${p.id}">${esc(p.label)}</button>`).join("")}
     <button class="preset-btn preset-reset" data-preset="reset">Vider</button>
   </div>
-  <div id="slots"></div>
-  <div id="buildSummary"></div>`;
+  <div class="builder-grid">
+    <div id="slots"></div>
+    <aside id="buildSummary"></aside>
+  </div>`;
 
   const products = await api("/products");
   const byCat = {};
@@ -2357,11 +2359,17 @@ async function viewBuilder(app) {
 
     // Récapitulatif complet UNIQUEMENT quand tous les composants essentiels sont choisis.
     if (filledReq < required.length) {
-      sumEl.className = "builder-progress panel";
+      const pct = Math.round(filledReq / required.length * 100);
+      sumEl.className = "builder-summary panel";
       sumEl.innerHTML = `
-        <div class="row"><span><strong>${filledReq}</strong> / ${required.length} composants essentiels</span><span>${fmt(total)}</span></div>
-        <div class="watt-bar"><div style="width:${Math.round(filledReq / required.length * 100)}%"></div></div>
-        <p class="builder-progress-hint">Choisissez les composants essentiels (processeur, carte mère, RAM, carte graphique, stockage, refroidissement, alimentation, boîtier) pour afficher le récapitulatif : compatibilité, scores par usage et ajout au panier.</p>`;
+        <h2>Ma configuration</h2>
+        <div class="cart-totals"><div class="row total"><span>Total</span><span>${fmt(total)}</span></div></div>
+        <div class="build-steps">
+          <div class="row"><span><strong>${filledReq}</strong> / ${required.length} composants essentiels</span><span>${pct} %</span></div>
+          <div class="watt-bar"><div style="width:${pct}%"></div></div>
+        </div>
+        <p class="builder-progress-hint">Encore ${required.length - filledReq} à choisir, puis vous pourrez ajouter la configuration au panier.</p>
+        <button class="btn btn-primary btn-block" disabled>Sélectionnez les essentiels</button>`;
       return;
     }
 

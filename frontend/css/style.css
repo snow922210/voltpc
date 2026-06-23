@@ -962,10 +962,16 @@ img { max-width: 100%; }
 .builder-slot.filled .builder-slot-main p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .builder-slot .price { font-size: 1rem; }
 
-.builder-summary { margin-top: 22px; max-width: 560px; }
-.builder-progress { margin-top: 22px; }
-.builder-progress .row { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 12px; }
-.builder-progress-hint { font-size: 0.84rem; color: var(--text-dim); line-height: 1.5; margin-top: 12px; }
+.builder-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
+.builder-summary { position: sticky; top: 96px; }
+.builder-summary h2 { font-size: 1.15rem; margin-bottom: 14px; }
+.build-steps { margin: 8px 0 10px; }
+.build-steps .row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; margin-bottom: 9px; color: var(--text-dim); }
+.builder-progress-hint { font-size: 0.84rem; color: var(--text-dim); line-height: 1.5; margin: 4px 0 16px; }
+@media (max-width: 980px) {
+ .builder-grid { grid-template-columns: 1fr; }
+ .builder-summary { position: static; margin-top: 22px; }
+}
 .builder-intro { color: var(--text-dim); margin-bottom: 18px; max-width: 640px; line-height: 1.55; }
 /* Astuce en haut du sélecteur « Choisir » */
 .picker-tip { font-size: 0.83rem; color: var(--text-dim); line-height: 1.55; padding: 1px 0 1px 14px; margin: 6px 0 18px; border-left: 2px solid var(--accent); }
