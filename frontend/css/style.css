@@ -986,12 +986,12 @@ img { max-width: 100%; }
 .watt-bar > div { height: 100%; background: var(--gradient); border-radius: 99px; transition: width 0.4s; }
 .watt-label { font-size: 0.8rem; color: var(--text-dim); }
 
-.picker-list { display: flex; flex-direction: column; gap: 9px; max-height: 56vh; overflow-y: auto; overflow-x: hidden; padding: 16px 3px 2px; margin-top: 2px; border-top: 1px solid var(--border); }
+.picker-list { display: flex; flex-direction: column; gap: 9px; max-height: 56vh; overflow-y: auto; overflow-x: hidden; padding: 16px 12px 2px 0; margin-top: 2px; border-top: 1px solid var(--border); }
 .picker-group { position: sticky; top: 0; z-index: 2; background: var(--surface); margin: 6px 0 -2px; padding: 7px 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); }
 .picker-group:first-child { margin-top: 0; }
 .picker-row { display: flex; align-items: stretch; gap: 8px; }
 .picker-row .picker-item { flex: 1; min-width: 0; }
-.picker-detail { flex: 0 0 92px; display: flex; align-items: center; justify-content: center; padding: 0 18px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-dim); font-size: 0.82rem; font-weight: 600; white-space: nowrap; transition: border-color 0.15s, color 0.15s, background 0.15s; }
+.picker-detail { flex: 0 0 104px; align-self: center; min-height: 46px; display: flex; align-items: center; justify-content: center; padding: 0 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--text-dim); font-size: 0.82rem; font-weight: 600; white-space: nowrap; transition: border-color 0.15s, color 0.15s, background 0.15s; }
 .picker-detail:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
 .pp-back { margin-bottom: 14px; }
 .picker-item {
@@ -1006,7 +1006,7 @@ img { max-width: 100%; }
 .picker-item-info { flex: 1; min-width: 0; }
 .picker-item-info strong { display: block; font-size: 0.88rem; }
 .picker-item-info span { font-size: 0.78rem; color: var(--text-faint); }
-.modal.wide { width: min(660px, 100%); }
+.modal.wide { width: min(760px, 100%); }
 .picker-filters { display: grid; grid-template-columns: max-content 1fr; gap: 13px 18px; align-items: center; margin: 2px 0; padding: 16px 0 2px; border-top: 1px solid var(--border); }
 .picker-filter { display: contents; }
 .picker-filter > span { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
@@ -1018,7 +1018,8 @@ img { max-width: 100%; }
 @media (max-width: 620px) {
  .modal.wide { width: 100%; }
  .picker-row { gap: 6px; }
- .picker-detail { flex-basis: 74px; padding: 0 12px; }
+ .picker-list { padding-right: 4px; }
+ .picker-detail { flex-basis: 78px; min-height: 42px; padding: 0 12px; border-radius: 12px; }
 }
 
 /* ─── Toasts ─── */
