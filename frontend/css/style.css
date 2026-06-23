@@ -753,6 +753,7 @@ img { max-width: 100%; }
 
 /* ─── Modales ─── */
 .modal-overlay { display: grid; place-items: center; padding: 20px; }
+body.picker-open { overflow: hidden; }
 .modal {
  position: relative;
  width: min(420px, 100%);
@@ -1038,8 +1039,8 @@ img { max-width: 100%; }
 .picker-preview-head h3 { font-size: 1.55rem; line-height: 1.12; }
 .picker-preview-price-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .picker-preview-price-row strong { font-family: var(--font-display); font-size: 2rem; }
-.picker-preview-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.picker-preview-actions .btn { flex: 0 1 auto; }
+.picker-preview-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.picker-preview-actions .btn { min-height: 40px; justify-content: center; padding-inline: 12px; font-size: 0.82rem; white-space: nowrap; }
 .picker-preview-actions .btn.on { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-wash); }
 .picker-preview-section { display: grid; gap: 8px; }
 .picker-preview-section h4 { font-size: 0.86rem; }
@@ -1064,6 +1065,7 @@ img { max-width: 100%; }
  .picker-preview-visual { max-width: none; }
  .picker-preview-head h3 { font-size: 1.25rem; }
  .picker-preview-price-row strong { font-size: 1.55rem; }
+ .picker-preview-actions { grid-template-columns: 1fr; }
 }
 
 /* ─── Toasts ─── */

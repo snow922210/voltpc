@@ -2434,9 +2434,13 @@ async function viewBuilder(app) {
     const galleryImages = {}; // { productId: valid image URLs }
 
     const overlay = document.createElement("div");
-    overlay.className = "modal-overlay";
+    overlay.className = "modal-overlay picker-overlay";
     document.body.appendChild(overlay);
-    const close = () => overlay.remove();
+    document.body.classList.add("picker-open");
+    const close = () => {
+      overlay.remove();
+      document.body.classList.remove("picker-open");
+    };
     const pickProduct = (p) => {
       if (!p) return;
       state.build[cat] = p;
@@ -3606,7 +3610,11 @@ function init() {
     }
   };
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { closeCart(); closeAuth(); $$(".modal-overlay:not(#authModal)").forEach((m) => m.remove()); }
+    if (e.key === "Escape") {
+      closeCart(); closeAuth();
+      $$(".modal-overlay:not(#authModal)").forEach((m) => m.remove());
+      document.body.classList.remove("picker-open");
+    }
   });
 
   // Gestion des quantités du panier (délégation)
