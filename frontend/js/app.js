@@ -726,7 +726,7 @@ function renderCartDrawer() {
   const body = $("#cartBody");
   const foot = $("#cartFoot");
   if (!state.user) {
-    body.innerHTML = `<div class="empty-state"><div class="big">🔐</div><p>Connectez-vous pour retrouver votre panier lié à votre compte.</p><br>
+    body.innerHTML = `<div class="empty-state"><p>Connectez-vous pour retrouver votre panier lié à votre compte.</p><br>
       <button class="btn btn-primary btn-sm" id="cartLoginBtn">Se connecter</button></div>`;
     foot.innerHTML = "";
     const btn = $("#cartLoginBtn");
@@ -734,7 +734,7 @@ function renderCartDrawer() {
     return;
   }
   if (state.cart.length === 0) {
-    body.innerHTML = `<div class="empty-state"><div class="big">🛒</div><p>Votre panier est vide.</p><br>
+    body.innerHTML = `<div class="empty-state"><p>Votre panier est vide.</p><br>
       <a class="btn btn-primary btn-sm" href="/catalogue" onclick="closeCart()">Voir le catalogue</a></div>`;
     foot.innerHTML = "";
     return;
@@ -864,7 +864,7 @@ async function finishLogin(data) {
   saveAuth();
   resetAuthView();
   closeAuth();
-  toast(`Bienvenue, ${state.user.name} ⚡`);
+  toast(`Bienvenue, ${state.user.name}`);
   await loadFavorites();
   await syncCartOnLogin();   // charge le panier lié au compte
   if (state.afterLogin) { const fn = state.afterLogin; state.afterLogin = null; fn(); }
@@ -905,7 +905,7 @@ function setupAuth() {
       if (data.verification_required) {
         showVerifyStep(data.email);
         if (data.dev_code) showDevCode(data.dev_code, "code");
-        else toast("Un code de vérification vous a été envoyé par email ✉️");
+        else toast("Un code de vérification vous a été envoyé par email️");
         return;
       }
       finishLogin(data);
@@ -945,7 +945,7 @@ function setupAuth() {
         body: JSON.stringify({ email: state.pendingEmail }),
       });
       if (data.dev_code) showDevCode(data.dev_code, "code");
-      else toast("Nouveau code envoyé ✉️");
+      else toast("Nouveau code envoyé️");
     } catch (err) {
       toast(err.message, "error");
     }
@@ -970,7 +970,7 @@ function setupAuth() {
       $("#resetForm").reset();
       showAuthStep("#resetForm");
       if (data.dev_code) showDevCode(data.dev_code, "code");
-      else toast("Si ce compte existe, un code vient d'être envoyé ✉️", "info");
+      else toast("Si ce compte existe, un code vient d'être envoyé️", "info");
     } catch (err) { toast(err.message, "error"); }
     finally { btn.disabled = false; }
   };
@@ -980,7 +980,7 @@ function setupAuth() {
     try {
       const data = await api("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email: state.resetEmail }) });
       if (data.dev_code) showDevCode(data.dev_code, "code");
-      else toast("Nouveau code envoyé ✉️");
+      else toast("Nouveau code envoyé️");
     } catch (err) { toast(err.message, "error"); }
   };
 
@@ -1105,10 +1105,10 @@ async function render() {
     else if (path === "admin/produits") await viewAdminProducts(app, renderToken);
     else if (path === "admin/stats") await viewAdminStats(app, renderToken);
     else if (path === "admin") await viewAdmin(app, params, renderToken);
-    else app.innerHTML = `<div class="empty-state"><div class="big">🧭</div><h2>Page introuvable</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
+    else app.innerHTML = `<div class="empty-state"><h2>Page introuvable</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
   } catch (e) {
     if (isStaleRender(renderToken, app)) return;
-    app.innerHTML = `<div class="empty-state"><div class="big">⚡</div><h2>Oups, une erreur</h2><p>${esc(e.message)}</p><br>
+    app.innerHTML = `<div class="empty-state"><h2>Oups, une erreur</h2><p>${esc(e.message)}</p><br>
       <p style="color:var(--text-faint);font-size:.85rem">Le serveur est-il lancé ? <code>uvicorn main:app</code> dans voltpc/backend</p></div>`;
   }
 }
@@ -1258,14 +1258,14 @@ function addPrebuiltToCart(b, byId) {
     if (product.stock > 0) { addToCart(product, 1, true); n++; }
   });
   fireVoltBurst();
-  toast(`${b.name} ajouté : ${n} composants 🛒`, "success");
+  toast(`${b.name} ajouté : ${n} composants`, "success");
   openCart();
 }
 
 async function viewPrebuilt(app, key) {
   const b = findPrebuilt(key);
   if (!b) {
-    app.innerHTML = `<div class="empty-state"><div class="big">🧭</div><h2>Configuration introuvable</h2><br><a class="btn btn-primary" href="/#prebuilts">Voir les PC prémontés</a></div>`;
+    app.innerHTML = `<div class="empty-state"><h2>Configuration introuvable</h2><br><a class="btn btn-primary" href="/#prebuilts">Voir les PC prémontés</a></div>`;
     return;
   }
 
@@ -1800,7 +1800,7 @@ async function viewCatalog(app, params) {
 
   $("#catalogGrid").innerHTML = products.length
     ? `<div class="product-grid">${pageItems.map(productCard).join("")}</div>${pagerHtml(page, pageCount)}`
-    : `<div class="empty-state"><div class="big">🔍</div><p>Aucun produit ne correspond à vos critères.</p></div>`;
+    : `<div class="empty-state"><p>Aucun produit ne correspond à vos critères.</p></div>`;
   bindProductCards(app, pageItems);
   $$("[data-page]", app).forEach((b) => b.onclick = () => { navigate({ page: Number(b.dataset.page) }); window.scrollTo({ top: 0 }); });
 
@@ -2326,7 +2326,7 @@ async function viewBuilder(app) {
     state.build = generateBuild(preset);
     renderSlots();
     window.scrollTo({ top: 0, behavior: "smooth" });
-    toast(`Profil « ${preset.label} » chargé — ajustez à votre guise ⚡`);
+    toast(`Profil « ${preset.label} » chargé — ajustez à votre guise`);
   };
 
   const renderSlots = () => {
@@ -2437,7 +2437,7 @@ async function viewBuilder(app) {
         <div class="modal wide">
           <button class="modal-close">✕</button>
           <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}</h2>
-          ${CATEGORY_TIP[cat] ? `<p class="picker-tip">💡 ${CATEGORY_TIP[cat]}</p>` : ""}
+          ${CATEGORY_TIP[cat] ? `<p class="picker-tip">${CATEGORY_TIP[cat]}</p>` : ""}
           ${chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
           <div class="picker-list">
             ${list.length ? list.map((p) => `
@@ -2485,7 +2485,7 @@ async function viewBuilder(app) {
     }
     saveCart();
     renderCartDrawer();
-    toast("Configuration ajoutée au panier ⚡");
+    toast("Configuration ajoutée au panier");
     openCart();
   };
 
@@ -2544,7 +2544,7 @@ async function viewBuilder(app) {
 async function viewCheckout(app) {
   if (!state.user) { go("/"); openAuth(); return; }
   if (state.cart.length === 0) {
-    app.innerHTML = `<div class="empty-state"><div class="big">🛒</div><h2>Votre panier est vide</h2><br><a class="btn btn-primary" href="/catalogue">Voir le catalogue</a></div>`;
+    app.innerHTML = `<div class="empty-state"><h2>Votre panier est vide</h2><br><a class="btn btn-primary" href="/catalogue">Voir le catalogue</a></div>`;
     return;
   }
   const t = cartTotals();
@@ -2580,7 +2580,7 @@ async function viewCheckout(app) {
       <br>
       <h2>Paiement</h2>
       <p style="color:var(--text-dim);font-size:.85rem;margin:4px 0 12px">
-        🔒 Vous serez redirigé vers la page de paiement sécurisée <strong>Stripe</strong>.
+        Vous serez redirigé vers la page de paiement sécurisée <strong>Stripe</strong>.
         Vos coordonnées bancaires ne transitent jamais par nos serveurs.</p>
       <p style="color:var(--text-faint);font-size:.78rem">Carte de test : <code>4242 4242 4242 4242</code> · date future · CVC libre.</p>
       <label class="legal-consent">
@@ -2700,7 +2700,6 @@ async function viewPaymentSuccess(app, params) {
     refreshCartDrawer();
     app.innerHTML = `
       <div class="empty-state">
-        <div class="big">🎉</div>
         <h2>Commande n°${res.order_id} confirmée !</h2>
         <p style="margin-top:10px">Paiement reçu — total réglé : <strong>${fmt(res.amount_total)}</strong>.<br>Redirection vers vos commandes...</p>
         <br>
@@ -2729,7 +2728,6 @@ async function viewPaymentSuccess(app, params) {
 function viewPaymentCancelled(app) {
   app.innerHTML = `
     <div class="empty-state">
-      <div class="big">🛑</div>
       <h2>Paiement annulé</h2>
       <p style="margin-top:10px">Aucun montant n'a été débité. Votre panier est toujours disponible.</p>
       <br>
@@ -2750,7 +2748,6 @@ async function viewAccount(app, params) {
       openAuth();
       app.innerHTML = `
         <div class="empty-state">
-          <div class="big">🔐</div>
           <h2>Connectez-vous pour voir votre compte</h2>
           <br><button class="btn btn-primary" id="accountLoginBtn">Se connecter</button>
         </div>`;
@@ -2767,11 +2764,11 @@ async function viewAccount(app, params) {
   } catch { /* token invalide : géré par api() */ }
 
   const adminLink = state.user.is_admin
-    ? `<a class="btn btn-primary btn-sm" style="color:var(--on-primary)" href="/admin">🛠️ Espace admin</a>` : "";
+    ? `<a class="btn btn-primary btn-sm" style="color:var(--on-primary)" href="/admin">️ Espace admin</a>` : "";
 
   app.innerHTML = `
   <div class="section-head" style="margin-top:0">
-    <h1>Bonjour, ${esc(state.user.name)} 👋</h1>
+    <h1>Bonjour, ${esc(state.user.name)}</h1>
     <div style="display:flex;gap:8px">${adminLink}<button class="btn btn-ghost btn-sm" id="logoutBtn">Se déconnecter</button></div>
   </div>
   <p style="color:var(--text-dim);margin-bottom:22px">${esc(state.user.email)}</p>
@@ -2837,11 +2834,11 @@ async function renderAccountOrders(panel) {
         <div class="order-total">Total : ${fmt(o.total)}${o.discount ? ` <small style="color:var(--green);font-weight:400">(dont −${fmt(o.discount)} de remise)</small>` : ""}</div>
         ${orderProgress(o)}
         <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-          ${o.status !== "en attente de paiement" ? `<button class="btn btn-ghost btn-sm" onclick="downloadInvoice(${o.id})">🧾 Télécharger la facture</button>` : ""}
+          ${o.status !== "en attente de paiement" ? `<button class="btn btn-ghost btn-sm" onclick="downloadInvoice(${o.id})">Télécharger la facture</button>` : ""}
           ${cancellable.has(o.status) ? `<button class="btn btn-ghost btn-sm order-cancel" data-cancel="${o.id}" style="color:var(--red)">Annuler la commande</button>` : ""}
         </div>
       </div>`).join("")
-    : `<div class="empty-state"><div class="big">📦</div><p>Aucune commande pour le moment.</p><br><a class="btn btn-primary" href="/catalogue">Découvrir le catalogue</a></div>`;
+    : `<div class="empty-state"><p>Aucune commande pour le moment.</p><br><a class="btn btn-primary" href="/catalogue">Découvrir le catalogue</a></div>`;
 
   $$("[data-cancel]", panel).forEach((btn) => btn.onclick = async () => {
     if (!confirm("Annuler cette commande ? Le stock sera restitué.")) return;
@@ -2883,7 +2880,7 @@ async function renderAccountAddresses(panel) {
         <button class="btn btn-ghost btn-sm" data-addr-del="${a.id}" style="color:var(--red)">Supprimer</button>
       </div>`).join("") : `<p style="color:var(--text-dim);margin-bottom:16px">Aucune adresse enregistrée.</p>`}
     <details class="panel" style="margin-top:16px">
-      <summary style="cursor:pointer;font-weight:600">➕ Ajouter une adresse</summary>
+      <summary style="cursor:pointer;font-weight:600">+ Ajouter une adresse</summary>
       <form id="addrForm" class="form-grid" style="margin-top:16px">
         <label class="full">Libellé (optionnel)<input name="label" placeholder="Domicile, Bureau…"></label>
         <label class="full">Nom complet<input name="ship_name" required minlength="2" value="${esc(state.user.name)}"></label>
@@ -2971,7 +2968,7 @@ function adminNav(active) {
   const tab = (key, href, label) =>
     `<a class="btn btn-sm ${active === key ? "btn-primary" : "btn-ghost"}" ${active === key ? 'style="color:var(--on-primary)"' : ""} href="${href}">${label}</a>`;
   return `<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-    ${tab("stats", "/admin/stats", "📊 Tableau de bord")}
+    ${tab("stats", "/admin/stats", "Tableau de bord")}
     ${tab("orders", "/admin", "Commandes")}
     ${tab("products", "/admin/produits", "Produits")}
   </div>`;
@@ -2983,11 +2980,11 @@ async function viewAdminStats(app, renderToken = currentRenderToken) {
   try { const me = await api("/auth/me"); state.user = { ...state.user, ...me }; saveAuth(); } catch { /* géré par api() */ }
   if (isStaleRender(renderToken, app)) return;
   if (!state.user?.is_admin) {
-    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Accueil</a></div>`;
+    app.innerHTML = `<div class="empty-state"><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Accueil</a></div>`;
     return;
   }
   app.innerHTML = `
-  <div class="section-head" style="margin-top:0"><h1>📊 Tableau de bord — Admin</h1>
+  <div class="section-head" style="margin-top:0"><h1>Tableau de bord — Admin</h1>
     <a class="btn btn-ghost btn-sm" href="/compte">← Mon compte</a></div>
   ${adminNav("stats")}
   <div id="statsBody"><div class="skeleton" style="min-height:140px"></div></div>`;
@@ -2998,7 +2995,7 @@ async function viewAdminStats(app, renderToken = currentRenderToken) {
     if (isStaleRender(renderToken, app)) return;
     const statsBody = $("#statsBody");
     if (!statsBody) return;
-    statsBody.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="/">Accueil</a></div>`;
+    statsBody.innerHTML = `<div class="empty-state"><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="/">Accueil</a></div>`;
     return;
   }
   if (isStaleRender(renderToken, app)) return;
@@ -3021,7 +3018,7 @@ async function viewAdminStats(app, renderToken = currentRenderToken) {
 
     <div class="admin-cols">
       <div class="panel">
-        <h2 style="margin-bottom:14px">🏆 Meilleures ventes</h2>
+        <h2 style="margin-bottom:14px">Meilleures ventes</h2>
         ${s.top_products.length ? `<table class="mini-table">
           <thead><tr><th>Produit</th><th>Qté</th><th>CA</th></tr></thead>
           <tbody>${s.top_products.map((p) => `<tr><td>${esc(p.product_name)}</td><td>${p.qty}</td><td>${fmt(p.revenue)}</td></tr>`).join("")}</tbody>
@@ -3033,7 +3030,7 @@ async function viewAdminStats(app, renderToken = currentRenderToken) {
         ${s.low_stock.length ? `<table class="mini-table">
           <thead><tr><th>Produit</th><th>Catégorie</th><th>Stock</th></tr></thead>
           <tbody>${s.low_stock.map((p) => `<tr><td>${esc(p.name)}</td><td>${esc(CATS[p.category]?.label || p.category)}</td><td><span style="color:${p.stock === 0 ? "var(--red)" : "var(--amber)"};font-weight:700">${p.stock}</span></td></tr>`).join("")}</tbody>
-        </table>` : `<p style="color:var(--text-dim)">Tous les stocks sont confortables 👍</p>`}
+        </table>` : `<p style="color:var(--text-dim)">Tous les stocks sont confortables</p>`}
       </div>
     </div>
 
@@ -3061,7 +3058,7 @@ async function viewAdmin(app, params, renderToken = currentRenderToken) {
   try { const me = await api("/auth/me"); state.user = { ...state.user, ...me }; saveAuth(); } catch { /* géré par api() */ }
   if (isStaleRender(renderToken, app)) return;
   if (!state.user?.is_admin) {
-    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
+    app.innerHTML = `<div class="empty-state"><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
     return;
   }
 
@@ -3084,7 +3081,7 @@ async function viewAdmin(app, params, renderToken = currentRenderToken) {
 
   app.innerHTML = `
   <div class="section-head" style="margin-top:0">
-    <h1>🛠️ Commandes — Admin</h1>
+    <h1>️ Commandes — Admin</h1>
     <a class="btn btn-ghost btn-sm" href="/compte">← Mon compte</a>
   </div>
   ${adminNav("orders")}
@@ -3119,7 +3116,7 @@ async function viewAdmin(app, params, renderToken = currentRenderToken) {
   } catch (err) {
     if (isStaleRender(renderToken, app)) return;
     // 403 = compte non administrateur
-    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
+    app.innerHTML = `<div class="empty-state"><h2>Accès réservé</h2><p style="margin-top:10px">${esc(err.message)}</p><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
     return;
   }
   if (isStaleRender(renderToken, app)) return;
@@ -3157,7 +3154,7 @@ async function viewAdmin(app, params, renderToken = currentRenderToken) {
             <a href="mailto:${esc(o.customer_email)}" style="color:var(--accent)">${esc(o.customer_email)}</a>
           </div>
           <div>
-            <strong style="color:var(--text-dim);font-size:.8rem;text-transform:uppercase">📦 Livraison</strong><br>
+            <strong style="color:var(--text-dim);font-size:.8rem;text-transform:uppercase">Livraison</strong><br>
             ${esc(o.ship_name)}<br>
             ${esc(o.ship_address)}<br>
             ${esc(o.ship_zip)} ${esc(o.ship_city)}
@@ -3167,10 +3164,10 @@ async function viewAdmin(app, params, renderToken = currentRenderToken) {
           ${o.items.map((i) => `${i.quantity} × ${esc(i.product_name)} — ${fmt(i.unit_price * i.quantity)}`).join("<br>")}
         </div>
         <div class="order-total">Total : ${fmt(o.total)}${o.promo_code ? ` <small style="color:var(--green);font-weight:400">(code ${esc(o.promo_code)}, −${fmt(o.discount)})</small>` : ""}${o.shipping ? ` · port ${fmt(o.shipping)}` : " · port offert"}</div>
-        ${o.status !== "en attente de paiement" ? `<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" onclick="downloadInvoice(${o.id})">🧾 Facture</button></div>` : ""}
+        ${o.status !== "en attente de paiement" ? `<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" onclick="downloadInvoice(${o.id})">Facture</button></div>` : ""}
         ${statusControls(o)}
       </div>`).join("")
-    : `<div class="empty-state"><div class="big">📭</div><p>Aucune commande${current ? " pour ce statut" : ""}.</p></div>`;
+    : `<div class="empty-state"><p>Aucune commande${current ? " pour ce statut" : ""}.</p></div>`;
 
   // Enregistrement du statut + suivi pour chaque commande.
   $$(".ad-save").forEach((btn) => {
@@ -3224,7 +3221,7 @@ function orderProgress(o) {
     </div>`;
   }).join('<div style="width:6px"></div>');
   const track = o.tracking_number
-    ? `<div style="margin-top:10px;font-size:.85rem;color:var(--text-dim)">📦 ${o.carrier ? esc(o.carrier) + " — " : ""}suivi : <strong style="color:var(--text)">${esc(o.tracking_number)}</strong></div>`
+    ? `<div style="margin-top:10px;font-size:.85rem;color:var(--text-dim)">${o.carrier ? esc(o.carrier) + " — " : ""}suivi : <strong style="color:var(--text)">${esc(o.tracking_number)}</strong></div>`
     : "";
   return `<div style="margin-top:14px"><div style="display:flex;align-items:flex-end">${bar}</div>${track}</div>`;
 }
@@ -3236,19 +3233,19 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
   try { const me = await api("/auth/me"); state.user = { ...state.user, ...me }; saveAuth(); } catch { /* géré par api() */ }
   if (isStaleRender(renderToken, app)) return;
   if (!state.user.is_admin) {
-    app.innerHTML = `<div class="empty-state"><div class="big">🔒</div><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
+    app.innerHTML = `<div class="empty-state"><h2>Accès réservé</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
     return;
   }
 
   const catOptions = Object.entries(CATS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join("");
   app.innerHTML = `
   <div class="section-head" style="margin-top:0">
-    <h1>🛠️ Produits — Admin</h1>
+    <h1>️ Produits — Admin</h1>
     <a class="btn btn-ghost btn-sm" href="/compte">← Mon compte</a>
   </div>
   ${adminNav("products")}
   <details class="panel" style="margin-bottom:20px">
-    <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">➕ Ajouter un produit</summary>
+    <summary style="cursor:pointer;font-weight:600;font-size:1.05rem">+ Ajouter un produit</summary>
     <form id="addProductForm" class="form-grid" style="margin-top:16px">
       <label>Nom<input name="name" required></label>
       <label>Marque<input name="brand" required></label>
@@ -3288,8 +3285,8 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
           <label style="font-size:.75rem;color:var(--text-dim)">Prix €<br><input class="pp-price" data-pid="${p.id}" type="number" step="0.01" min="0" value="${p.price}" style="${inp};width:90px"></label>
           <label style="font-size:.75rem;color:var(--text-dim)">Stock<br><input class="pp-stock" data-pid="${p.id}" type="number" min="0" value="${p.stock}" style="${inp};width:70px"></label>
           <label style="font-size:.75rem;color:var(--text-dim)">URL d'image<br><input class="pp-img" data-pid="${p.id}" value="${esc(p.image_url || "")}" placeholder="https://…" style="${inp};width:220px"></label>
-          <button class="btn btn-primary btn-sm pp-save" data-pid="${p.id}" style="color:var(--on-primary)">💾 Enregistrer</button>
-          <button class="btn btn-ghost btn-sm pp-del" data-pid="${p.id}">🗑</button>
+          <button class="btn btn-primary btn-sm pp-save" data-pid="${p.id}" style="color:var(--on-primary)">Enregistrer</button>
+          <button class="btn btn-ghost btn-sm pp-del" data-pid="${p.id}"></button>
         </div>
       </div>`).join("");
 
