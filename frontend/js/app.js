@@ -2436,8 +2436,8 @@ async function viewBuilder(app) {
       overlay.innerHTML = `
         <div class="modal wide">
           <button class="modal-close">✕</button>
-          <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}</h2>
-          ${CATEGORY_TIP[cat] ? `<p class="picker-tip">${CATEGORY_TIP[cat]}</p>` : ""}
+          <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}<span class="picker-count">${list.length} dispo${list.length > 1 ? "s" : ""}</span></h2>
+          ${CATEGORY_TIP[cat] ? `<p class="picker-tip"><b>Conseil.</b> ${CATEGORY_TIP[cat]}</p>` : ""}
           ${chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
           <div class="picker-list">
             ${list.length ? list.map((p) => `
