@@ -985,6 +985,15 @@ img { max-width: 100%; }
 .picker-item-info strong { display: block; font-size: 0.88rem; }
 .picker-item-info span { font-size: 0.78rem; color: var(--text-faint); }
 .modal.wide { width: min(560px, 100%); }
+.picker-note { font-size: 0.82rem; color: var(--text-dim); background: var(--accent-wash); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin: 4px 0 12px; }
+.picker-filters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.picker-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.picker-filter > span { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); min-width: 84px; }
+.picker-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.picker-chip { font-size: 0.8rem; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-dim); cursor: pointer; transition: all 0.15s; }
+.picker-chip:hover { border-color: var(--accent); color: var(--text); }
+.picker-chip.on { background: var(--gradient); color: var(--on-primary); border-color: var(--gradient); }
+.picker-empty { text-align: center; color: var(--text-faint); padding: 32px 16px; font-size: 0.9rem; }
 
 /* ─── Toasts ─── */
 .toasts { position: fixed; bottom: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 10px; }

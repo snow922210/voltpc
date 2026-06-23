@@ -1694,6 +1694,22 @@ const SPEC_FILTERS = {
     { key: "watts", label: "Puissance", fn: (p) => { const w = p.specs.watts || specNum(p.specs["Puissance"]); return !w ? null : w < 650 ? "< 650 W" : w < 850 ? "650–850 W" : w < 1000 ? "850–1000 W" : "1000 W +"; } },
     { key: "cert", label: "Certification", fn: (p) => { const m = String(p.specs["Certification"] || "").match(/bronze|silver|gold|platinum|titanium/i); return m ? "80+ " + m[0][0].toUpperCase() + m[0].slice(1).toLowerCase() : null; } },
   ],
+  storage: [
+    { key: "cap", label: "Capacité", fn: (p) => { const c = specNum(p.specs["Capacité"]); return !c ? null : c <= 1 ? "1 To" : c <= 2 ? "2 To" : c <= 4 ? "4 To" : "4 To +"; } },
+    { key: "iface", label: "Interface", fn: (p) => { const m = String(p.specs["Interface"] || "").match(/PCIe\s*\d(\.\d)?/i); return m ? m[0].replace(/\s+/, " ") : (/2[.,]5|sata/i.test(String(p.specs["Interface"] || p.specs["Format"] || "")) ? "SATA" : null); } },
+    { key: "form", label: "Format", fn: (p) => { const f = String(p.specs["Format"] || ""); return /m\.?2/i.test(f) ? "M.2" : /2[.,]5/.test(f) ? '2,5"' : null; } },
+  ],
+  cooling: [
+    { key: "type", label: "Type", fn: (p) => { const t = String(p.specs["Type"] || ""); return /aio|watercooling|liquid/i.test(t) ? "Watercooling (AIO)" : "Ventirad (air)"; } },
+    { key: "rad", label: "Radiateur", fn: (p) => { const r = specNum(p.specs["Radiateur"]); return !r ? null : r <= 240 ? "≤ 240 mm" : r <= 280 ? "280 mm" : "360 mm"; } },
+  ],
+  case: [
+    { key: "format", label: "Format", fn: (p) => p.specs["Format"] || null },
+    { key: "gpumax", label: "GPU max", fn: (p) => { const g = p.specs.max_gpu_mm || specNum(p.specs["GPU max"]); return !g ? null : g < 360 ? "< 360 mm" : g < 420 ? "360–420 mm" : "420 mm +"; } },
+  ],
+  fan: [
+    { key: "size", label: "Taille", fn: (p) => p.specs["Taille"] || null },
+  ],
 };
 const specOptSort = (a, b) => (specNum(a) - specNum(b)) || String(a).localeCompare(String(b), "fr");
 
@@ -2391,39 +2407,80 @@ async function viewBuilder(app) {
     return true;
   };
 
+  // Raison lisible du filtre de compatibilité actif (pour expliquer la liste réduite).
+  const compatReason = (cat) => {
+    const b = state.build;
+    if (cat === "motherboard" && b.cpu) return `socket ${b.cpu.specs.socket} (imposé par le ${b.cpu.name})`;
+    if (cat === "cpu" && b.motherboard) return `socket ${b.motherboard.specs.socket} (imposé par la ${b.motherboard.name})`;
+    if (cat === "cooling" && b.cpu) return `compatibles avec le socket ${b.cpu.specs.socket}`;
+    if (cat === "case" && b.gpu) return `assez grands pour le GPU (${b.gpu.specs.length_mm || "?"} mm)`;
+    if (cat === "gpu" && b.case) return `tenant dans le boîtier (max ${b.case.specs.max_gpu_mm || "?"} mm)`;
+    if (cat === "psu") return `≥ ${estimateWatts()} W (besoin estimé de la config)`;
+    return null;
+  };
+
   const openPicker = (cat) => {
+    // On n'affiche QUE les composants compatibles avec la sélection actuelle.
+    const compatList = (byCat[cat] || []).filter((p) => isCompatible(cat, p));
+    const filters = SPEC_FILTERS[cat] || [];
+    const active = {}; // { filterKey: valeur sélectionnée }
+
     const overlay = document.createElement("div");
     overlay.className = "modal-overlay";
-    overlay.innerHTML = `
-      <div class="modal wide">
-        <button class="modal-close">✕</button>
-        <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}</h2>
-        <div class="picker-list">
-          ${(byCat[cat] || []).map((p) => {
-            const compat = isCompatible(cat, p);
-            return `
-            <button class="picker-item ${compat ? "" : "incompatible"}" data-id="${p.id}">
-              <div class="picker-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
-              <div class="picker-item-info">
-                <strong>${esc(p.brand)} ${esc(p.name)}</strong>
-                <span>${compat ? stockHtml(p.stock).replace(/<[^>]+>/g, "") : "⚠ Incompatible avec votre sélection"}</span>
-              </div>
-              <span class="price" style="font-size:.95rem">${fmt(p.price)}</span>
-            </button>`;
-          }).join("")}
-        </div>
-      </div>`;
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
+
+    const reason = compatReason(cat);
+
+    const render = () => {
+      // Options de chaque filtre, calculées sur la liste compatible.
+      const chipBar = filters.map((f) => {
+        const opts = [...new Set(compatList.map(f.fn).filter(Boolean))].sort(specOptSort);
+        if (opts.length < 2) return ""; // un seul choix → pas de filtre utile
+        return `<div class="picker-filter"><span>${f.label}</span><div class="picker-chips">
+          ${opts.map((o) => `<button class="picker-chip ${active[f.key] === o ? "on" : ""}" data-fk="${f.key}" data-fv="${esc(o)}">${esc(o)}</button>`).join("")}
+        </div></div>`;
+      }).join("");
+
+      // Application des filtres actifs.
+      const list = compatList.filter((p) => filters.every((f) => !active[f.key] || f.fn(p) === active[f.key]));
+
+      overlay.innerHTML = `
+        <div class="modal wide">
+          <button class="modal-close">✕</button>
+          <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}</h2>
+          ${reason ? `<p class="picker-note">🔧 Affichage filtré : seuls les ${CATS[cat].label.toLowerCase()} ${reason} sont proposés.</p>` : ""}
+          ${chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
+          <div class="picker-list">
+            ${list.length ? list.map((p) => `
+              <button class="picker-item" data-id="${p.id}">
+                <div class="picker-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
+                <div class="picker-item-info">
+                  <strong>${esc(p.brand)} ${esc(p.name)}</strong>
+                  <span>${stockHtml(p.stock).replace(/<[^>]+>/g, "")}</span>
+                </div>
+                <span class="price" style="font-size:.95rem">${fmt(p.price)}</span>
+              </button>`).join("")
+            : `<p class="picker-empty">${compatList.length ? "Aucun résultat avec ces filtres — élargissez votre choix." : "Aucun composant compatible avec votre sélection actuelle."}</p>`}
+          </div>
+        </div>`;
+
+      $(".modal-close", overlay).onclick = close;
+      $$(".picker-chip", overlay).forEach((chip) => chip.onclick = () => {
+        const k = chip.dataset.fk, v = chip.dataset.fv;
+        active[k] = active[k] === v ? undefined : v; // re-clic = désélection
+        render();
+      });
+      $$(".picker-item", overlay).forEach((item) => item.onclick = () => {
+        const p = compatList.find((x) => x.id === Number(item.dataset.id));
+        state.build[cat] = p;
+        close();
+        renderSlots();
+      });
+    };
+
     overlay.onclick = (e) => { if (e.target === overlay) close(); };
-    $(".modal-close", overlay).onclick = close;
-    $$(".picker-item", overlay).forEach((item) => item.onclick = () => {
-      const p = (byCat[cat] || []).find((x) => x.id === Number(item.dataset.id));
-      if (!isCompatible(cat, p)) { toast("Ce composant est incompatible avec votre sélection actuelle", "error"); return; }
-      state.build[cat] = p;
-      close();
-      renderSlots();
-    });
+    render();
   };
 
   $$("[data-preset]").forEach((btn) => btn.onclick = () => {
