@@ -2240,23 +2240,18 @@ async function viewBuilder(app) {
   <div class="section-head" style="margin-top:0">
     <h1>Configurateur PC</h1>
   </div>
-  <p style="color:var(--text-dim);margin-bottom:18px">Composez votre machine pièce par pièce — la compatibilité est vérifiée automatiquement à chaque étape.</p>
-  <div class="presets" id="presetBar">
-    <span class="presets-label">Profils rapides</span>
-    ${PRESETS.map((p) => `<button class="preset-btn" data-preset="${p.id}">${esc(p.label)}</button>`).join("")}
-    <button class="preset-btn preset-reset" data-preset="reset">Vider</button>
+  <div class="builder-mode-switch" id="modeSwitch">
+    <button data-mode="beginner">🧭 Assistant débutant</button>
+    <button data-mode="expert">🔧 Mode expert</button>
   </div>
-  <div class="builder-layout">
-    <div id="slots"></div>
-    <div class="builder-summary panel" id="buildSummary"></div>
-  </div>`;
+  <div id="builderBody"></div>`;
 
   const products = await api("/products");
   const byCat = {};
   for (const p of products) (byCat[p.category] ??= []).push(p);
 
   // Remplissage automatique d'une configuration compatible selon un profil.
-  const applyPreset = (preset) => {
+  const generateBuild = (preset) => {
     const inStock = (cat) => (byCat[cat] || []).filter((p) => p.stock > 0);
     const closest = (list, val, key) => list.length
       ? list.reduce((best, p) => Math.abs(key(p) - val) < Math.abs(key(best) - val) ? p : best) : null;
@@ -2321,8 +2316,12 @@ async function viewBuilder(app) {
 
     // Retire les emplacements non pourvus.
     for (const k of Object.keys(b)) if (!b[k]) delete b[k];
-    state.build = b;
-    renderSlots();
+    return b;
+  };
+
+  const applyPreset = (preset) => {
+    state.build = generateBuild(preset);
+    setMode("expert");
     window.scrollTo({ top: 0, behavior: "smooth" });
     toast(`Profil « ${preset.label} » chargé — ajustez à votre guise ⚡`);
   };
@@ -2343,7 +2342,26 @@ async function viewBuilder(app) {
       </div>`;
     }).join("");
 
+    // Câblage des emplacements (toujours présents).
+    $$("[data-pick]").forEach((b) => b.onclick = () => openPicker(b.dataset.pick));
+    $$("[data-unpick]").forEach((b) => b.onclick = () => { delete state.build[b.dataset.unpick]; renderSlots(); });
+
     const total = Object.values(state.build).reduce((s, p) => s + p.price, 0);
+    const required = BUILD_SLOTS.filter((s) => !/Optionnel/i.test(s.hint)).map((s) => s.cat);
+    const filledReq = required.filter((c) => state.build[c]).length;
+    const sumEl = $("#buildSummary");
+    if (!sumEl) return;
+
+    // Récapitulatif complet UNIQUEMENT quand tous les composants essentiels sont choisis.
+    if (filledReq < required.length) {
+      sumEl.className = "builder-progress panel";
+      sumEl.innerHTML = `
+        <div class="row"><span><strong>${filledReq}</strong> / ${required.length} composants essentiels</span><span>${fmt(total)}</span></div>
+        <div class="watt-bar"><div style="width:${Math.round(filledReq / required.length * 100)}%"></div></div>
+        <p class="builder-progress-hint">Choisissez les composants essentiels (processeur, carte mère, RAM, carte graphique, stockage, refroidissement, alimentation, boîtier) pour afficher le récapitulatif : compatibilité, scores par usage et ajout au panier.</p>`;
+      return;
+    }
+
     const count = Object.keys(state.build).length;
     const checks = buildChecks();
     const watts = estimateWatts();
@@ -2352,7 +2370,8 @@ async function viewBuilder(app) {
     const scores = usageScores(state.build);
     const imbalances = buildImbalances(state.build);
 
-    $("#buildSummary").innerHTML = `
+    sumEl.className = "builder-summary panel";
+    sumEl.innerHTML = `
       <h2>Ma configuration</h2>
       <div class="cart-totals">
         <div class="row"><span>${count} / ${BUILD_SLOTS.length} composants</span><span></span></div>
@@ -2364,36 +2383,16 @@ async function viewBuilder(app) {
       </div>` : ""}
       ${imbalances.length ? `<div class="compat">${imbalances.map((t) => `<div class="compat-item warn"><span>⚠</span><span>${t}</span></div>`).join("")}</div>` : ""}
       <div class="compat">
-        ${checks.length ? checks.map((c) => `<div class="compat-item ${c.level}"><span>${c.level === "ok" ? "✓" : c.level === "warn" ? "⚠" : "✕"}</span><span>${c.text}</span></div>`).join("")
-          : `<div class="compat-item" style="color:var(--text-faint)">Sélectionnez des composants pour lancer les vérifications.</div>`}
+        ${checks.map((c) => `<div class="compat-item ${c.level}"><span>${c.level === "ok" ? "✓" : c.level === "warn" ? "⚠" : "✕"}</span><span>${c.text}</span></div>`).join("")}
       </div>
-      ${count ? `
-        <div class="watt-label">Consommation estimée : <strong>${watts} W</strong>${psuW ? ` / ${psuW} W` : ""}</div>
-        <div class="watt-bar"><div style="width:${psuW ? Math.min(100, watts / psuW * 100) : Math.min(100, watts / 10)}%"></div></div>` : ""}
+      <div class="watt-label">Consommation estimée : <strong>${watts} W</strong>${psuW ? ` / ${psuW} W` : ""}</div>
+      <div class="watt-bar"><div style="width:${psuW ? Math.min(100, watts / psuW * 100) : Math.min(100, watts / 10)}%"></div></div>
       <br>
-      <button class="btn btn-primary btn-block" id="buildToCart" ${count === 0 || hasError ? "disabled" : ""}>
+      <button class="btn btn-primary btn-block" id="buildToCart" ${hasError ? "disabled" : ""}>
         ${hasError ? "Corrigez les incompatibilités" : "Ajouter la config au panier"}
       </button>`;
-
-    $$("[data-pick]").forEach((b) => b.onclick = () => openPicker(b.dataset.pick));
-    $$("[data-unpick]").forEach((b) => b.onclick = () => { delete state.build[b.dataset.unpick]; renderSlots(); });
     const toCart = $("#buildToCart");
-    if (toCart) toCart.onclick = () => {
-      if (!state.user) {
-        requireAuth(() => toCart.click());
-        toast("Connectez-vous pour enregistrer cette configuration sur votre compte", "info");
-        return;
-      }
-      for (const p of Object.values(state.build)) {
-        const line = state.cart.find((i) => i.id === p.id);
-        if (line) line.qty += 1;
-        else state.cart.push({ id: p.id, name: p.name, brand: p.brand, category: p.category, price: p.price, stock: p.stock, qty: 1 });
-      }
-      saveCart();
-      renderCartDrawer();
-      toast("Configuration ajoutée au panier ⚡");
-      openCart();
-    };
+    if (toCart) toCart.onclick = commitBuildToCart;
   };
 
   const isCompatible = (cat, p) => {
@@ -2407,18 +2406,6 @@ async function viewBuilder(app) {
     return true;
   };
 
-  // Raison lisible du filtre de compatibilité actif (pour expliquer la liste réduite).
-  const compatReason = (cat) => {
-    const b = state.build;
-    if (cat === "motherboard" && b.cpu) return `socket ${b.cpu.specs.socket} (imposé par le ${b.cpu.name})`;
-    if (cat === "cpu" && b.motherboard) return `socket ${b.motherboard.specs.socket} (imposé par la ${b.motherboard.name})`;
-    if (cat === "cooling" && b.cpu) return `compatibles avec le socket ${b.cpu.specs.socket}`;
-    if (cat === "case" && b.gpu) return `assez grands pour le GPU (${b.gpu.specs.length_mm || "?"} mm)`;
-    if (cat === "gpu" && b.case) return `tenant dans le boîtier (max ${b.case.specs.max_gpu_mm || "?"} mm)`;
-    if (cat === "psu") return `≥ ${estimateWatts()} W (besoin estimé de la config)`;
-    return null;
-  };
-
   const openPicker = (cat) => {
     // On n'affiche QUE les composants compatibles avec la sélection actuelle.
     const compatList = (byCat[cat] || []).filter((p) => isCompatible(cat, p));
@@ -2429,8 +2416,6 @@ async function viewBuilder(app) {
     overlay.className = "modal-overlay";
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
-
-    const reason = compatReason(cat);
 
     const render = () => {
       // Options de chaque filtre, calculées sur la liste compatible.
@@ -2449,7 +2434,6 @@ async function viewBuilder(app) {
         <div class="modal wide">
           <button class="modal-close">✕</button>
           <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}</h2>
-          ${reason ? `<p class="picker-note">🔧 Affichage filtré : seuls les ${CATS[cat].label.toLowerCase()} ${reason} sont proposés.</p>` : ""}
           ${chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
           <div class="picker-list">
             ${list.length ? list.map((p) => `
@@ -2483,12 +2467,148 @@ async function viewBuilder(app) {
     render();
   };
 
-  $$("[data-preset]").forEach((btn) => btn.onclick = () => {
-    if (btn.dataset.preset === "reset") { state.build = {}; renderSlots(); return; }
-    applyPreset(PRESETS.find((p) => p.id === btn.dataset.preset));
-  });
+  // Ajoute toute la configuration courante au panier (mode expert ET assistant).
+  const commitBuildToCart = () => {
+    if (!state.user) {
+      requireAuth(() => commitBuildToCart());
+      toast("Connectez-vous pour enregistrer cette configuration sur votre compte", "info");
+      return;
+    }
+    for (const p of Object.values(state.build)) {
+      const line = state.cart.find((i) => i.id === p.id);
+      if (line) line.qty += 1;
+      else state.cart.push({ id: p.id, name: p.name, brand: p.brand, category: p.category, price: p.price, stock: p.stock, qty: 1 });
+    }
+    saveCart();
+    renderCartDrawer();
+    toast("Configuration ajoutée au panier ⚡");
+    openCart();
+  };
 
-  renderSlots();
+  // Explications en langage clair, pour l'assistant débutant.
+  const ROLE_EXPLAIN = {
+    cpu: "Le processeur : le cerveau qui exécute tout.",
+    motherboard: "La carte mère : relie et alimente tous les composants.",
+    ram: "La mémoire vive : pour faire tourner plusieurs choses à la fois sans ralentir.",
+    gpu: "La carte graphique : calcule les images des jeux et de la 3D.",
+    storage: "Le stockage SSD : Windows, jeux et fichiers — démarrage et chargements rapides.",
+    cooling: "Le refroidissement : garde le processeur au frais et silencieux.",
+    psu: "L'alimentation : fournit un courant stable et sûr à toute la machine.",
+    case: "Le boîtier : la tour qui accueille et ventile les composants.",
+  };
+
+  // Traduit les réponses de l'assistant en profil pour generateBuild().
+  const answersToPreset = (usage, budget, style) => {
+    const gpuByBudget = { low: 55, mid: 78, high: 92, ultra: 100 };
+    let gpu = gpuByBudget[budget] ?? 78;
+    if (usage === "office") gpu = Math.min(gpu, 35);
+    const cpu = usage === "stream" ? "threads" : "game";
+    const ram = usage === "stream" ? (budget === "low" ? 32 : 64) : (budget === "low" ? 16 : 32);
+    const budgetKey = budget === "ultra" ? "high" : budget;
+    return { gpu, cpu, ram, budget: budgetKey, quiet: style === "quiet", white: style === "white", label: "Assistant" };
+  };
+
+  let mode = "beginner";
+  const setMode = (m) => { mode = m; renderMode(); };
+
+  function renderMode() {
+    $$("#modeSwitch button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
+    if (mode === "beginner") renderBeginner(); else renderExpert();
+  }
+
+  function renderExpert() {
+    $("#builderBody").innerHTML = `
+      <p class="builder-intro">Composez votre machine pièce par pièce — la compatibilité est vérifiée automatiquement à chaque étape.</p>
+      <div class="presets" id="presetBar">
+        <span class="presets-label">Profils rapides</span>
+        ${PRESETS.map((p) => `<button class="preset-btn" data-preset="${p.id}">${esc(p.label)}</button>`).join("")}
+        <button class="preset-btn preset-reset" data-preset="reset">Vider</button>
+      </div>
+      <div id="slots"></div>
+      <div id="buildSummary"></div>`;
+    $$("[data-preset]").forEach((btn) => btn.onclick = () => {
+      if (btn.dataset.preset === "reset") { state.build = {}; renderSlots(); return; }
+      applyPreset(PRESETS.find((p) => p.id === btn.dataset.preset));
+    });
+    renderSlots();
+  }
+
+  function renderBeginner() {
+    const ans = state.builderWizard || (state.builderWizard = {});
+    const optBtn = (group, v, label) => `<button class="wiz-opt ${ans[group] === v ? "on" : ""}" data-group="${group}" data-v="${v}">${label}</button>`;
+    $("#builderBody").innerHTML = `
+      <div class="beginner-wizard panel">
+        <h2>On compose votre PC ensemble</h2>
+        <p class="muted">Répondez à quelques questions : on choisit des pièces compatibles et on vous explique chacune en clair. Vous pourrez tout ajuster ensuite.</p>
+        <div class="wiz-q">
+          <h3>1. Pour quoi faire ?</h3>
+          <div class="wiz-opts">
+            ${optBtn("usage", "game", "🎮 Jouer")}
+            ${optBtn("usage", "stream", "🎬 Création / Streaming")}
+            ${optBtn("usage", "office", "💻 Bureautique / Études")}
+            ${optBtn("usage", "versatile", "⚡ Polyvalent")}
+          </div>
+        </div>
+        <div class="wiz-q">
+          <h3>2. Quel budget ?</h3>
+          <div class="wiz-opts">
+            ${optBtn("budget", "low", "~ 800 €")}
+            ${optBtn("budget", "mid", "~ 1200 €")}
+            ${optBtn("budget", "high", "~ 1800 €")}
+            ${optBtn("budget", "ultra", "2500 € +")}
+          </div>
+        </div>
+        <div class="wiz-q">
+          <h3>3. Une préférence ? <span class="muted">(optionnel)</span></h3>
+          <div class="wiz-opts">
+            ${optBtn("style", "quiet", "🔇 Silencieux")}
+            ${optBtn("style", "white", "🤍 Blanc / RGB")}
+            ${optBtn("style", "none", "Peu importe")}
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" id="wizGo" ${ans.usage && ans.budget ? "" : "disabled"}>Composer ma configuration ⚡</button>
+        <div id="wizResult"></div>
+      </div>`;
+
+    $$(".wiz-opt").forEach((btn) => btn.onclick = () => {
+      const g = btn.dataset.group;
+      ans[g] = ans[g] === btn.dataset.v ? undefined : btn.dataset.v;
+      renderBeginner();
+    });
+
+    const go = $("#wizGo");
+    if (go) go.onclick = () => {
+      state.build = generateBuild(answersToPreset(ans.usage, ans.budget, ans.style));
+      const b = state.build;
+      const order = ["cpu", "motherboard", "ram", "gpu", "storage", "cooling", "psu", "case"];
+      const rows = order.filter((c) => b[c]).map((c) => `
+        <div class="wiz-part">
+          <div class="wiz-part-icon">${art(c, 26)}</div>
+          <div class="wiz-part-info">
+            <strong>${esc(b[c].brand)} ${esc(b[c].name)}</strong>
+            <span>${ROLE_EXPLAIN[c] || ""}</span>
+          </div>
+          <span class="price">${fmt(b[c].price)}</span>
+        </div>`).join("");
+      const total = Object.values(b).reduce((s, p) => s + p.price, 0);
+      $("#wizResult").innerHTML = `
+        <div class="wiz-result">
+          <h3>Votre configuration sur mesure</h3>
+          <div class="wiz-parts">${rows}</div>
+          <div class="wiz-total"><span>Total</span><strong>${fmt(total)}</strong></div>
+          <div class="wiz-actions">
+            <button class="btn btn-primary" id="wizCart">Ajouter au panier</button>
+            <button class="btn btn-ghost" id="wizTune">Personnaliser (mode expert)</button>
+          </div>
+        </div>`;
+      $("#wizCart").onclick = commitBuildToCart;
+      $("#wizTune").onclick = () => setMode("expert");
+      $("#wizResult").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    };
+  }
+
+  $$("#modeSwitch button").forEach((b) => b.onclick = () => setMode(b.dataset.mode));
+  renderMode();
 }
 
 /* ─── Vue : checkout ─── */
