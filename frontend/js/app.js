@@ -2415,8 +2415,13 @@ async function viewBuilder(app) {
 
   const isCompatible = (cat, p) => {
     const b = state.build;
-    if (cat === "motherboard" && b.cpu) return p.specs.socket === b.cpu.specs.socket;
+    if (cat === "motherboard") {
+      if (b.cpu && p.specs.socket !== b.cpu.specs.socket) return false;
+      if (b.ram && p.specs.ram_type !== b.ram.specs.ram_type) return false;
+      return true;
+    }
     if (cat === "cpu" && b.motherboard) return p.specs.socket === b.motherboard.specs.socket;
+    if (cat === "ram" && b.motherboard) return p.specs.ram_type === b.motherboard.specs.ram_type;
     if (cat === "cooling" && b.cpu) return (p.specs.sockets || []).includes(b.cpu.specs.socket);
     if (cat === "case" && b.gpu) return (b.gpu.specs.length_mm || 0) <= (p.specs.max_gpu_mm || 999);
     if (cat === "gpu" && b.case) return (p.specs.length_mm || 0) <= (b.case.specs.max_gpu_mm || 999);
