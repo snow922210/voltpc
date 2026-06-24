@@ -1064,13 +1064,18 @@ body.picker-open .compare-bar { display: none; }
 .picker-cmp-wrap { max-height: min(700px, calc(100vh - 300px)); overflow: auto; background: var(--surface); }
 .picker-modal-compare .picker-cmp-wrap { max-height: calc(100vh - 210px); }
 .picker-cmp-table { min-width: 980px; }
-.picker-modal-compare .picker-cmp-table { min-width: 1180px; }
+.picker-modal-compare .picker-cmp-table { table-layout: fixed; width: 100%; min-width: 1180px; }
 .picker-modal-compare .cmp-table th,
 .picker-modal-compare .cmp-table td { padding: 8px 10px; font-size: 0.82rem; }
 .picker-modal-compare .cmp-label { width: 130px; }
-.picker-modal-compare .cmp-col { min-width: 188px; }
+.picker-modal-compare .cmp-col { width: calc((100% - 130px) / 6); min-width: 0; }
 .picker-cmp-table .cmp-visual { width: 78px; height: 78px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 12px; background: #fff; overflow: hidden; }
 .picker-modal-compare .picker-cmp-table .cmp-visual { width: 58px; height: 58px; margin-bottom: 6px; }
+.picker-cmp-table .cmp-name { overflow-wrap: anywhere; }
+.cmp-slot-head { color: var(--text-faint); }
+.cmp-slot-head small { display: block; margin-top: 4px; color: var(--text-faint); font-size: 0.72rem; font-weight: 700; }
+.cmp-slot-plus { width: 58px; height: 58px; display: grid; place-items: center; margin-bottom: 6px; border: 1px dashed var(--border-strong); border-radius: 12px; color: var(--text-faint); font-size: 1.35rem; font-weight: 700; background: color-mix(in srgb, var(--surface-2) 72%, transparent); }
+.picker-cmp-table td.cmp-slot-empty { color: var(--text-faint); background: color-mix(in srgb, var(--surface-2) 42%, transparent); }
 .picker-cmp-table .cmp-visual svg { width: 70%; height: 70%; }
 .picker-cmp-table .cmp-visual .pimg { padding: 6px; }
 .picker-cmp-table td.cmp-best { background: transparent; color: inherit; font-weight: inherit; }

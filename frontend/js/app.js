@@ -2490,6 +2490,8 @@ async function viewBuilder(app) {
 
     const compareHtml = () => {
       const compared = pickerCompareProducts();
+      const slots = [...compared];
+      while (slots.length < COMPARE_MAX) slots.push(null);
       const specKeys = [];
       for (const p of compared) {
         for (const k of Object.keys(p.specs || {})) {
@@ -2497,11 +2499,15 @@ async function viewBuilder(app) {
         }
       }
       const row = (label, fn) =>
-        `<tr><td class="cmp-label">${esc(label)}</td>${compared.map((p) => `<td>${fn(p)}</td>`).join("")}</tr>`;
-      const cell = (p) => `<th class="cmp-col">
+        `<tr><td class="cmp-label">${esc(label)}</td>${slots.map((p) => `<td class="${p ? "" : "cmp-slot-empty"}">${p ? fn(p) : "—"}</td>`).join("")}</tr>`;
+      const cell = (p, i) => p ? `<th class="cmp-col">
         <div class="cmp-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
         <div class="cmp-name">${esc(p.brand)} ${esc(p.name)}</div>
         <button class="cmp-remove" data-picker-cmp-rm="${p.id}" type="button" title="Retirer">× retirer</button>
+      </th>` : `<th class="cmp-col cmp-slot-head">
+        <div class="cmp-slot-plus">+</div>
+        <div class="cmp-name">Place disponible</div>
+        <small>${i + 1}/${COMPARE_MAX}</small>
       </th>`;
       return `<div class="picker-compare">
         <div class="picker-compare-head">
@@ -2516,7 +2522,7 @@ async function viewBuilder(app) {
         </div>
         ${compared.length ? `<div class="cmp-wrap picker-cmp-wrap">
           <table class="cmp-table picker-cmp-table">
-            <thead><tr><th class="cmp-label"></th>${compared.map(cell).join("")}</tr></thead>
+            <thead><tr><th class="cmp-label"></th>${slots.map(cell).join("")}</tr></thead>
             <tbody>
               ${row("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`)}
               ${row("Performance estimée", (p) => `<span class="perf-pill ${ratingWord(perfScore(p)).cls}">${ratingWord(perfScore(p)).word}</span>`)}
