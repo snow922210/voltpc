@@ -534,6 +534,10 @@ function specNum(v) {
   const m = String(v ?? "").replace(",", ".").match(/\d[\d\s.]*/);
   return m ? parseFloat(m[0].replace(/\s/g, "").replace(/\.$/, "")) : 0;
 }
+function specNumMax(v) {
+  const nums = String(v ?? "").replace(/,/g, ".").match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
+  return nums.length ? Math.max(...nums) : 0;
+}
 
 // Niveau de performance d'un GPU (0–100), par modèle puis repli sur le prix.
 const GPU_TIERS = [
@@ -555,9 +559,9 @@ function gpuTier(p) {
 function cpuTier(p) {
   const s = p.specs || {};
   const threads = specNum(String(s["Cœurs"] || "").split("/").pop());
-  const boost = specNum(s["Boost"]);
+  const boost = specNumMax(s["Boost"] || s["Fréquence"]);
   const x3d = /x3d/i.test(p.name) ? 12 : 0;
-  return Math.max(15, Math.min(100, threads * 2.3 + boost * 5 + x3d));
+  return Math.max(30, Math.min(100, threads * 2.1 + boost * 8 + x3d));
 }
 function cpuGameTier(p) { return Math.min(100, cpuTier(p) + (/x3d/i.test(p.name) ? 18 : 0)); }
 
@@ -2568,7 +2572,7 @@ async function viewBuilder(app) {
               ${row("Catégorie", (p) => esc(CATS[p.category]?.label || p.category))}
               ${row("Marque", (p) => esc(p.brand))}
               ${rankedRow("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`, (p) => p.rating, "max")}
-              ${rankedRow("Disponibilité", (p) => p.stock > 0 ? `<span class="green">En stock</span>` : `<span style="color:var(--red)">Rupture</span>`, (p) => p.stock, "max")}
+              ${row("Disponibilité", (p) => p.stock > 0 ? "En stock" : "Rupture")}
               ${specKeys.map((k) => rankedRow(k, (p) => esc(p.specs[k] ?? "—"), (p) => specMetric(p.specs[k]), specDir(k))).join("")}
               ${row("", (p) => `<button class="btn btn-primary btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>Choisir</button>`)}
             </tbody>
