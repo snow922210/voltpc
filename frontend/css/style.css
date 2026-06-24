@@ -754,6 +754,7 @@ img { max-width: 100%; }
 /* ─── Modales ─── */
 .modal-overlay { display: grid; place-items: center; padding: 20px; }
 body.picker-open { overflow: hidden; }
+body.picker-open .compare-bar { display: none; }
 .modal {
  position: relative;
  width: min(420px, 100%);
@@ -1050,6 +1051,18 @@ body.picker-open { overflow: hidden; }
 .picker-preview-specs div:first-child { border-top: 0; }
 .picker-preview-specs dt { color: var(--text-faint); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
 .picker-preview-specs dd { margin: 0; color: var(--text); font-size: 0.8rem; font-weight: 650; min-width: 0; overflow-wrap: anywhere; }
+.picker-compare { display: grid; gap: 16px; border-top: 1px solid var(--border); margin-top: 2px; padding-top: 16px; min-height: min(680px, calc(100vh - 270px)); }
+.picker-compare-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.picker-compare-head span { display: block; margin-bottom: 4px; color: var(--text-faint); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
+.picker-compare-head h3 { font-size: 1.35rem; line-height: 1.15; }
+.picker-compare-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.picker-cmp-wrap { max-height: min(600px, calc(100vh - 350px)); overflow: auto; background: var(--surface); }
+.picker-cmp-table { min-width: 760px; }
+.picker-cmp-table .cmp-visual { width: 78px; height: 78px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 12px; background: #fff; overflow: hidden; }
+.picker-cmp-table .cmp-visual svg { width: 70%; height: 70%; }
+.picker-cmp-table .cmp-visual .pimg { padding: 6px; }
+.picker-compare-empty { min-height: 300px; display: grid; place-content: center; gap: 8px; text-align: center; color: var(--text-dim); border: 1px dashed var(--border); border-radius: 16px; background: var(--surface-2); }
+.picker-compare-empty strong { color: var(--text); }
 @media (max-width: 1280px) {
  .modal.wide { width: min(760px, calc(100vw - 32px)); overflow: auto; }
  .picker-body { --picker-panel-h: auto; }
@@ -1058,6 +1071,8 @@ body.picker-open { overflow: hidden; }
  .picker-preview { position: static; order: -1; height: auto; max-height: none; }
  .picker-preview-full { grid-template-columns: 1fr; }
  .picker-preview-visual { max-width: 280px; }
+ .picker-compare { min-height: 520px; }
+ .picker-cmp-wrap { max-height: none; }
 }
 @media (max-width: 620px) {
  .modal.wide { width: 100%; }
@@ -1066,6 +1081,9 @@ body.picker-open { overflow: hidden; }
  .picker-preview-head h3 { font-size: 1.25rem; }
  .picker-preview-price-row strong { font-size: 1.55rem; }
  .picker-preview-actions { grid-template-columns: 1fr; }
+ .picker-compare-head { align-items: flex-start; flex-direction: column; }
+ .picker-compare-actions { width: 100%; justify-content: stretch; }
+ .picker-compare-actions .btn { flex: 1; }
 }
 
 /* ─── Toasts ─── */

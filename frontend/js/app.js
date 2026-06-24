@@ -2430,6 +2430,7 @@ async function viewBuilder(app) {
     const filters = SPEC_FILTERS[cat] || [];
     const active = {}; // { filterKey: valeur sélectionnée }
     let detailProduct = compatList[0] || null;
+    let pickerMode = "select";
     const galleryIndex = {}; // { productId: image number }
     const galleryImages = {}; // { productId: valid image URLs }
 
@@ -2446,6 +2447,66 @@ async function viewBuilder(app) {
       state.build[cat] = p;
       close();
       renderSlots();
+    };
+
+    const pickerCompareProducts = () => state.compare
+      .map((id) => products.find((p) => p.id === id && p.category === cat))
+      .filter(Boolean);
+
+    const compareHtml = () => {
+      const compared = pickerCompareProducts();
+      const specKeys = [];
+      for (const p of compared) {
+        for (const k of Object.keys(p.specs || {})) {
+          if (/^[A-ZÀ-Ü]/.test(k) && !specKeys.includes(k)) specKeys.push(k);
+        }
+      }
+      const row = (label, fn) =>
+        `<tr><td class="cmp-label">${esc(label)}</td>${compared.map((p) => `<td>${fn(p)}</td>`).join("")}</tr>`;
+      const bestRow = (label, fn, metric, dir = "max") => {
+        const vals = compared.map(metric);
+        const finite = vals.filter((v) => Number.isFinite(v) && v > 0);
+        const best = finite.length ? (dir === "max" ? Math.max(...finite) : Math.min(...finite)) : null;
+        return `<tr><td class="cmp-label">${esc(label)}</td>${compared.map((p, i) => {
+          const win = best !== null && vals[i] === best && finite.length > 1;
+          return `<td class="${win ? "cmp-best" : ""}">${fn(p)}${win ? ` <span class="cmp-tag">★</span>` : ""}</td>`;
+        }).join("")}</tr>`;
+      };
+      const cell = (p) => `<th class="cmp-col">
+        <div class="cmp-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
+        <div class="cmp-name">${esc(p.brand)} ${esc(p.name)}</div>
+        <button class="cmp-remove" data-picker-cmp-rm="${p.id}" type="button" title="Retirer">× retirer</button>
+      </th>`;
+      return `<div class="picker-compare">
+        <div class="picker-compare-head">
+          <div>
+            <span>Comparaison dans la sélection</span>
+            <h3>Comparer les composants</h3>
+          </div>
+          <div class="picker-compare-actions">
+            <button class="btn btn-ghost btn-sm" data-picker-back type="button">Retour à la sélection</button>
+            ${compared.length ? `<button class="btn btn-ghost btn-sm" data-picker-compare-clear type="button">Tout vider</button>` : ""}
+          </div>
+        </div>
+        ${compared.length ? `<div class="cmp-wrap picker-cmp-wrap">
+          <table class="cmp-table picker-cmp-table">
+            <thead><tr><th class="cmp-label"></th>${compared.map(cell).join("")}</tr></thead>
+            <tbody>
+              ${bestRow("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`, (p) => p.price, "min")}
+              ${bestRow("Performance estimée", (p) => `<span class="perf-pill ${ratingWord(perfScore(p)).cls}">${ratingWord(perfScore(p)).word}</span>`, (p) => perfScore(p), "max")}
+              ${row("Catégorie", (p) => esc(CATS[p.category]?.label || p.category))}
+              ${row("Marque", (p) => esc(p.brand))}
+              ${bestRow("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`, (p) => p.rating, "max")}
+              ${bestRow("Disponibilité", (p) => p.stock > 0 ? `<span class="green">En stock</span>` : `<span style="color:var(--red)">Rupture</span>`, (p) => p.stock, "max")}
+              ${specKeys.map((k) => row(k, (p) => esc(p.specs[k] ?? "—"))).join("")}
+              ${row("", (p) => `<button class="btn btn-primary btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>Choisir</button>`)}
+            </tbody>
+          </table>
+        </div>` : `<div class="picker-compare-empty">
+          <strong>Aucun produit à comparer.</strong>
+          <p>Retournez à la sélection et cliquez sur Comparer depuis un produit.</p>
+        </div>`}
+      </div>`;
     };
 
     const render = () => {
@@ -2532,7 +2593,7 @@ async function viewBuilder(app) {
             <button class="btn btn-primary btn-block btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>${p.stock <= 0 ? "Indisponible" : "Choisir"}</button>
             <div class="picker-preview-actions">
               <button class="btn btn-ghost btn-sm ${state.favorites.has(p.id) ? "on" : ""}" data-fav="${p.id}" type="button">♡ Ajouter aux favoris</button>
-              <button class="btn btn-ghost btn-sm ${inCompare(p.id) ? "on" : ""}" data-cmp="${p.id}" type="button">⇄ Comparer</button>
+              <button class="btn btn-ghost btn-sm ${inCompare(p.id) ? "on" : ""}" data-picker-compare-open="${p.id}" type="button">⇄ Comparer</button>
             </div>
             ${specs.length ? `<section class="picker-preview-section">
               <h4>Caractéristiques</h4>
@@ -2549,25 +2610,48 @@ async function viewBuilder(app) {
           <button class="modal-close">✕</button>
           <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}<span class="picker-count">${list.length} dispo${list.length > 1 ? "s" : ""}</span></h2>
           ${CATEGORY_TIP[cat] ? `<p class="picker-tip"><b>Conseil.</b> ${CATEGORY_TIP[cat]}</p>` : ""}
-          ${chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
-          <div class="picker-body">
+          ${pickerMode === "select" && chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
+          ${pickerMode === "compare" ? compareHtml() : `<div class="picker-body">
             <div class="picker-list">
               ${list.length ? listHtml
               : `<p class="picker-empty">${compatList.length ? "Aucun résultat avec ces filtres — élargissez votre choix." : "Aucun composant compatible avec votre sélection actuelle."}</p>`}
             </div>
             ${detailHtml(detailProduct)}
-          </div>
+          </div>`}
         </div>`;
 
       $(".modal-close", overlay).onclick = close;
+      $("[data-picker-back]", overlay)?.addEventListener("click", () => {
+        pickerMode = "select";
+        render();
+      });
+      $("[data-picker-compare-clear]", overlay)?.addEventListener("click", () => {
+        const currentIds = new Set(pickerCompareProducts().map((p) => p.id));
+        state.compare = state.compare.filter((id) => !currentIds.has(id));
+        saveCompare();
+        renderCompareBar();
+        render();
+      });
+      $$("[data-picker-cmp-rm]", overlay).forEach((btn) => btn.onclick = () => {
+        toggleCompare(Number(btn.dataset.pickerCmpRm));
+        render();
+      });
       $$("[data-fk]", overlay).forEach((chip) => chip.onclick = () => {
         const k = chip.dataset.fk, v = chip.dataset.fv;
         active[k] = active[k] === v ? undefined : v; // re-clic = désélection
         render();
       });
-      $("[data-preview-pick]", overlay)?.addEventListener("click", (e) => {
+      $$("[data-preview-pick]", overlay).forEach((btn) => btn.onclick = (e) => {
         const p = compatList.find((x) => x.id === Number(e.currentTarget.dataset.previewPick));
         pickProduct(p);
+      });
+      $$("[data-picker-compare-open]", overlay).forEach((btn) => btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = Number(btn.dataset.pickerCompareOpen);
+        if (!inCompare(id)) toggleCompare(id);
+        pickerMode = "compare";
+        render();
       });
       $$("[data-gallery-step]", overlay).forEach((btn) => btn.onclick = (e) => {
         e.stopPropagation();
