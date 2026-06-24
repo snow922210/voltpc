@@ -71,8 +71,20 @@ que naviguer page par page. NE PAS naviguer (window.AMZ se perd) — tout via fe
       A520M-HDV n'a que 3 images (1 photo + 1 diagramme + 1 tableau) → 1 seul secondaire.
       SKIP : B450M DS3H V2 (absent d'amazon.fr, que B550M/A520M DS3H).
 
-- [ ] Reprendre à : catégorie PSU (13), puis case, cooling, monitor, keyboard, mouse, headset,
-      fan, thermal, webcam, microphone, speaker, mousepad, chair. Méthode window.AMZ same-origin.
+- [x] ===== CATÉGORIE PSU TERMINÉE (6 enrichies, 4 conservées 1 image, 3 skips) =====
+      Les alims sont TRÈS chargées en bannières A+. Corsair RM-series : 1 photo (index 0) +
+      4-5 bannières, PUIS box (index 6) + angle (index 7) en fin de galerie principale — MAIS
+      attention le widget comparatif réinjecte les images des AUTRES modèles (RM750e/1000e ont
+      l'angle du RM850e à l'index 7, à exclure). be quiet! Pure Power = plusieurs vraies photos.
+      Enrichies : RM850e [6,7], RM750e [6], RM1000e [6], RM650x [1,4], RM1200x SHIFT [7,9],
+      Pure Power 12 M 650W [1,2,4].
+      Que bannières (gardées en 1 image, PAS dans _gallery_ids.json) : HX1000i, SF750, SF1000,
+      Prime TX-1300.
+      SKIPS : System Power 10 (que SP11 sur amazon.fr), CX550F RGB (que CX550 non-RGB),
+      Focus GX-850 (unité blanche / renommée Core, titre mangé → ambigu).
+
+- [ ] Reprendre à : catégorie CASE/boîtiers (13), puis cooling, monitor, keyboard, mouse,
+      headset, fan, thermal, webcam, microphone, speaker, mousepad, chair. window.AMZ same-origin.
       THROTTLE : amazon.fr rate-limite le fetch same-origin après ~80 requêtes (pages vides ~2 Ko,
       0 résultat, titre vide). Solution : espacer (delay 800ms+), faire des pauses entre catégories,
       ou attendre ~15-20 min que ça se réinitialise. Re-vérifier avec un fetch /s?k=test (len>1Mo = OK).
