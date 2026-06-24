@@ -2521,7 +2521,7 @@ async function viewBuilder(app) {
         <div class="cmp-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
         <div class="cmp-name">${esc(p.brand)} ${esc(p.name)}</div>
         <button class="cmp-remove" data-picker-cmp-rm="${p.id}" type="button" title="Retirer">× retirer</button>
-      </th>` : `<th class="cmp-col cmp-slot-head">
+      </th>` : `<th class="cmp-col cmp-slot-head" data-picker-back title="Retour à la sélection">
         <div class="cmp-slot-plus">+</div>
         <div class="cmp-name">Place disponible</div>
         <small>${i + 1}/${COMPARE_MAX}</small>
@@ -2670,10 +2670,10 @@ async function viewBuilder(app) {
         </div>`;
 
       $(".modal-close", overlay).onclick = close;
-      $("[data-picker-back]", overlay)?.addEventListener("click", () => {
+      $$("[data-picker-back]", overlay).forEach((btn) => btn.addEventListener("click", () => {
         pickerMode = "select";
         render();
-      });
+      }));
       $("[data-picker-compare-clear]", overlay)?.addEventListener("click", () => {
         const currentIds = new Set(pickerCompareProducts().map((p) => p.id));
         state.compare = state.compare.filter((id) => !currentIds.has(id));

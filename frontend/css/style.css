@@ -1072,7 +1072,8 @@ body.picker-open .compare-bar { display: none; }
 .picker-cmp-table .cmp-visual { width: 78px; height: 78px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 12px; background: #fff; overflow: hidden; }
 .picker-modal-compare .picker-cmp-table .cmp-visual { width: 58px; height: 58px; margin-bottom: 6px; }
 .picker-cmp-table .cmp-name { overflow-wrap: anywhere; }
-.cmp-slot-head { color: var(--text-faint); }
+.cmp-slot-head { color: var(--text-faint); cursor: pointer; transition: color 0.15s, background 0.15s; }
+.cmp-slot-head:hover { color: var(--text); background: color-mix(in srgb, var(--accent-wash) 45%, transparent); }
 .cmp-slot-head small { display: block; margin-top: 4px; color: var(--text-faint); font-size: 0.72rem; font-weight: 700; }
 .cmp-slot-plus { width: 58px; height: 58px; display: grid; place-items: center; margin-bottom: 6px; border: 1px dashed var(--border-strong); border-radius: 12px; color: var(--text-faint); font-size: 1.35rem; font-weight: 700; background: color-mix(in srgb, var(--surface-2) 72%, transparent); }
 .picker-cmp-table td.cmp-slot-empty { color: var(--text-faint); background: color-mix(in srgb, var(--surface-2) 42%, transparent); }
