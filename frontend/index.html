@@ -18,7 +18,13 @@
  <meta property="og:type" content="website">
  <meta property="og:site_name" content="VoltCore">
  <meta property="og:locale" content="fr_FR">
- <meta name="twitter:card" content="summary">
+ <!-- Image sociale par défaut (les fiches produit injectent la leur, prioritaire). -->
+ <meta property="og:image" content="https://voltcore.fr/images/og-default.jpg">
+ <meta property="og:image:width" content="1200">
+ <meta property="og:image:height" content="630">
+ <meta property="og:image:alt" content="VoltCore — Composants PC haute performance">
+ <meta name="twitter:card" content="summary_large_image">
+ <meta name="twitter:image" content="https://voltcore.fr/images/og-default.jpg">
  <!-- PAGE-JSONLD -->
 
  <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -228,8 +234,8 @@
  <!-- Barre de comparaison flottante -->
  <div class="compare-bar" id="compareBar" hidden></div>
 
- <script src="/js/three.min.js?v=104"></script>
- <script src="/js/hero-void.js?v=104"></script>
- <script src="/js/app.js?v=108"></script>
+ <!-- three.min.js (589 Ko) + hero-void.js : chargés à la demande par app.js,
+      uniquement sur l'accueil (gros gain CWV/LCP sur les autres pages). -->
+ <script src="/js/app.js?v=109"></script>
 </body>
 </html>

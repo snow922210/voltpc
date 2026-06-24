@@ -1617,6 +1617,25 @@ function initVoidField(stage, canvas) {
   };
 }
 
+/* Charge three.min.js + hero-void.js à la demande (une seule fois). Le modèle
+   WebGL du hero ne sert que sur l'accueil → inutile de payer 589 Ko ailleurs.
+   Renvoie une promesse résolue à true si la lib est prête, false sinon. */
+let _heroLibPromise = null;
+function ensureHeroLib() {
+  if (typeof THREE !== "undefined" && window.initVoltVoidModel) return Promise.resolve(true);
+  if (_heroLibPromise) return _heroLibPromise;
+  const load = (src) => new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = src; s.async = true; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  _heroLibPromise = load("/js/three.min.js?v=104")
+    .then(() => load("/js/hero-void.js?v=104"))
+    .then(() => true)
+    .catch(() => { _heroLibPromise = null; return false; });
+  return _heroLibPromise;
+}
+
 function initHome3D() {
   cleanupHome3D();
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1628,10 +1647,14 @@ function initHome3D() {
   if (reduce) {                              // accessibilité : état final figé, zéro mouvement
     seps.forEach((s) => s.style.setProperty("--p", "1"));
     // La tour reste visible (une seule image figée), mais plus aucune animation.
-    const stopStatic = (stage && modelCanvas && window.initVoltVoidModel)
-      ? window.initVoltVoidModel(stage, modelCanvas, { reducedMotion: true })
-      : null;
-    home3DCleanup = () => { if (stopStatic) stopStatic(); };
+    let stopStatic = null, cancelled = false;
+    if (stage && modelCanvas) {
+      ensureHeroLib().then((ok) => {
+        if (cancelled || !ok || !window.initVoltVoidModel) return;
+        stopStatic = window.initVoltVoidModel(stage, modelCanvas, { reducedMotion: true });
+      });
+    }
+    home3DCleanup = () => { cancelled = true; if (stopStatic) stopStatic(); };
     return;
   }
 
@@ -1662,11 +1685,16 @@ function initHome3D() {
     return host ? initVoidField(host, canvas) : null;
   }).filter(Boolean);
 
-  const stopModel = (stage && modelCanvas && window.initVoltVoidModel)
-    ? window.initVoltVoidModel(stage, modelCanvas)
-    : null;
+  let stopModel = null, modelCancelled = false;
+  if (stage && modelCanvas) {
+    ensureHeroLib().then((ok) => {
+      if (modelCancelled || !ok || !window.initVoltVoidModel) return;
+      stopModel = window.initVoltVoidModel(stage, modelCanvas);
+    });
+  }
 
   home3DCleanup = () => {
+    modelCancelled = true;
     window.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onScroll);
     stopVoidFields.forEach((stop) => stop());

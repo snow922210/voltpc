@@ -1960,6 +1960,8 @@ def sitemap_xml():
     urls = [(f"{SITE_URL}/", "1.0"), (f"{SITE_URL}/catalogue", "0.9"),
             (f"{SITE_URL}/configurateur", "0.5")]
     urls += [(f"{SITE_URL}/catalogue?cat={c}", "0.7") for c in CAT_LABELS]
+    # Pages éditoriales / légales (indexables, contenu pré-rendu).
+    urls += [(f"{SITE_URL}/{seg}", "0.3") for seg in STATIC_PAGES]
     with db() as conn:
         for r in conn.execute("SELECT id FROM products ORDER BY id").fetchall():
             urls.append((f"{SITE_URL}/produit/{r['id']}", "0.8"))
@@ -2073,8 +2075,38 @@ def _product_ssr(p) -> str:
     )
 
 
+def _shipping_details(price) -> dict:
+    """Livraison FR : offerte dès 50 € (cf. bandeau), sinon 4,99 € forfait."""
+    rate = "0" if price >= 50 else "4.99"
+    return {
+        "@type": "OfferShippingDetails",
+        "shippingRate": {"@type": "MonetaryAmount", "value": rate, "currency": "EUR"},
+        "shippingDestination": {"@type": "DefinedRegion", "addressCountry": "FR"},
+        "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": {"@type": "QuantitativeValue", "minValue": 0,
+                             "maxValue": 1, "unitCode": "DAY"},
+            "transitTime": {"@type": "QuantitativeValue", "minValue": 1,
+                            "maxValue": 2, "unitCode": "DAY"},
+        },
+    }
+
+
+# Rétractation légale 14 jours (cf. bandeau et page Retours).
+_RETURN_POLICY = {
+    "@type": "MerchantReturnPolicy",
+    "applicableCountry": "FR",
+    "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+    "merchantReturnDays": 14,
+    "returnMethod": "https://schema.org/ReturnByMail",
+    "returnFees": "https://schema.org/FreeReturn",
+}
+
+
 def _product_jsonld(p) -> str:
     cat_label = CAT_LABELS.get(p["category"], p["category"])
+    # Prix valable jusqu'à fin de l'année prochaine (évite l'avertissement GSC).
+    price_valid = f"{int(time.strftime('%Y')) + 1}-12-31"
     product = {
         "@context": "https://schema.org", "@type": "Product",
         "name": p["name"], "image": _abs_img(p), "description": _clip(p["description"], 300),
@@ -2083,8 +2115,12 @@ def _product_jsonld(p) -> str:
         "offers": {
             "@type": "Offer", "url": f"{SITE_URL}/produit/{p['id']}",
             "priceCurrency": "EUR", "price": f'{p["price"]:.2f}',
+            "priceValidUntil": price_valid,
+            "itemCondition": "https://schema.org/NewCondition",
             "availability": "https://schema.org/InStock" if p["stock"] > 0
             else "https://schema.org/OutOfStock",
+            "shippingDetails": _shipping_details(p["price"]),
+            "hasMerchantReturnPolicy": _RETURN_POLICY,
         },
     }
     if p["rating_count"]:
@@ -2291,6 +2327,10 @@ def spa_fallback(full_path: str, request: Request):
     if seg == "":
         return _html(_render(tpl, main=_home_ssr()))
 
-    # Autres routes applicatives (configurateur, compte, admin…) :
-    # pas d'enjeu SEO → on sert l'app sans contenu pré-rendu.
-    return _html(_render(tpl))
+    # Autres routes applicatives. Le configurateur reste indexable (page
+    # fonctionnelle, présente au sitemap) ; les routes privées ou
+    # transactionnelles passent en noindex (aucune valeur SEO, données perso).
+    _NOINDEX_ROUTES = {"compte", "admin", "panier", "checkout", "commande",
+                       "paiement", "connexion", "inscription"}
+    robots = "noindex, follow" if seg.split("/")[0] in _NOINDEX_ROUTES else None
+    return _html(_render(tpl, robots=robots))
