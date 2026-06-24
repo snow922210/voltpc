@@ -2517,6 +2517,22 @@ async function viewBuilder(app) {
       }
       const row = (label, fn) =>
         `<tr><td class="cmp-label">${esc(label)}</td>${slots.map((p) => `<td class="${p ? "" : "cmp-slot-empty"}">${p ? fn(p) : "—"}</td>`).join("")}</tr>`;
+      const rankedRow = (label, fn, metric, dir = "max") => {
+        const vals = compared.map(metric);
+        const finite = vals.filter((v) => Number.isFinite(v));
+        const best = finite.length ? (dir === "min" ? Math.min(...finite) : Math.max(...finite)) : null;
+        const worst = finite.length ? (dir === "min" ? Math.max(...finite) : Math.min(...finite)) : null;
+        const hasRank = best !== null && worst !== null && best !== worst;
+        return `<tr><td class="cmp-label">${esc(label)}</td>${slots.map((p) => {
+          if (!p) return `<td class="cmp-slot-empty">—</td>`;
+          const val = metric(p);
+          const rank = hasRank && val === best ? "best" : hasRank && val === worst ? "worst" : "";
+          return `<td class="${rank ? `cmp-rank-${rank}` : ""}">
+            <span class="cmp-value">${fn(p)}</span>
+            ${rank === "best" ? `<span class="cmp-badge good">Meilleur</span>` : rank === "worst" ? `<span class="cmp-badge bad">Moins bon</span>` : ""}
+          </td>`;
+        }).join("")}</tr>`;
+      };
       const cell = (p, i) => p ? `<th class="cmp-col">
         <div class="cmp-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
         <div class="cmp-name">${esc(p.brand)} ${esc(p.name)}</div>
@@ -2541,12 +2557,12 @@ async function viewBuilder(app) {
           <table class="cmp-table picker-cmp-table">
             <thead><tr><th class="cmp-label"></th>${slots.map(cell).join("")}</tr></thead>
             <tbody>
-              ${row("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`)}
-              ${row("Performance estimée", (p) => `<span class="perf-pill ${ratingWord(perfScore(p)).cls}">${ratingWord(perfScore(p)).word}</span>`)}
+              ${rankedRow("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`, (p) => p.price, "min")}
+              ${rankedRow("Performance estimée", (p) => `<span class="perf-pill ${ratingWord(perfScore(p)).cls}">${ratingWord(perfScore(p)).word}</span>`, (p) => perfScore(p), "max")}
               ${row("Catégorie", (p) => esc(CATS[p.category]?.label || p.category))}
               ${row("Marque", (p) => esc(p.brand))}
-              ${row("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`)}
-              ${row("Disponibilité", (p) => p.stock > 0 ? `<span class="green">En stock</span>` : `<span style="color:var(--red)">Rupture</span>`)}
+              ${rankedRow("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`, (p) => p.rating, "max")}
+              ${rankedRow("Disponibilité", (p) => p.stock > 0 ? `<span class="green">En stock</span>` : `<span style="color:var(--red)">Rupture</span>`, (p) => p.stock, "max")}
               ${specKeys.map((k) => row(k, (p) => esc(p.specs[k] ?? "—"))).join("")}
               ${row("", (p) => `<button class="btn btn-primary btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>Choisir</button>`)}
             </tbody>
