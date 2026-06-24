@@ -2449,9 +2449,16 @@ async function viewBuilder(app) {
       renderSlots();
     };
 
-    const pickerCompareProducts = () => state.compare
-      .map((id) => products.find((p) => p.id === id && p.category === cat))
-      .filter(Boolean);
+    const pickerCompareProducts = () => {
+      const seen = new Set();
+      return state.compare
+        .map((id) => products.find((p) => p.id === id && p.category === cat))
+        .filter((p) => {
+          if (!p || seen.has(p.id)) return false;
+          seen.add(p.id);
+          return true;
+        });
+    };
 
     const compareHtml = () => {
       const compared = pickerCompareProducts();
@@ -2463,15 +2470,6 @@ async function viewBuilder(app) {
       }
       const row = (label, fn) =>
         `<tr><td class="cmp-label">${esc(label)}</td>${compared.map((p) => `<td>${fn(p)}</td>`).join("")}</tr>`;
-      const bestRow = (label, fn, metric, dir = "max") => {
-        const vals = compared.map(metric);
-        const finite = vals.filter((v) => Number.isFinite(v) && v > 0);
-        const best = finite.length ? (dir === "max" ? Math.max(...finite) : Math.min(...finite)) : null;
-        return `<tr><td class="cmp-label">${esc(label)}</td>${compared.map((p, i) => {
-          const win = best !== null && vals[i] === best && finite.length > 1;
-          return `<td class="${win ? "cmp-best" : ""}">${fn(p)}${win ? ` <span class="cmp-tag">★</span>` : ""}</td>`;
-        }).join("")}</tr>`;
-      };
       const cell = (p) => `<th class="cmp-col">
         <div class="cmp-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
         <div class="cmp-name">${esc(p.brand)} ${esc(p.name)}</div>
@@ -2492,12 +2490,12 @@ async function viewBuilder(app) {
           <table class="cmp-table picker-cmp-table">
             <thead><tr><th class="cmp-label"></th>${compared.map(cell).join("")}</tr></thead>
             <tbody>
-              ${bestRow("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`, (p) => p.price, "min")}
-              ${bestRow("Performance estimée", (p) => `<span class="perf-pill ${ratingWord(perfScore(p)).cls}">${ratingWord(perfScore(p)).word}</span>`, (p) => perfScore(p), "max")}
+              ${row("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`)}
+              ${row("Performance estimée", (p) => `<span class="perf-pill ${ratingWord(perfScore(p)).cls}">${ratingWord(perfScore(p)).word}</span>`)}
               ${row("Catégorie", (p) => esc(CATS[p.category]?.label || p.category))}
               ${row("Marque", (p) => esc(p.brand))}
-              ${bestRow("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`, (p) => p.rating, "max")}
-              ${bestRow("Disponibilité", (p) => p.stock > 0 ? `<span class="green">En stock</span>` : `<span style="color:var(--red)">Rupture</span>`, (p) => p.stock, "max")}
+              ${row("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`)}
+              ${row("Disponibilité", (p) => p.stock > 0 ? `<span class="green">En stock</span>` : `<span style="color:var(--red)">Rupture</span>`)}
               ${specKeys.map((k) => row(k, (p) => esc(p.specs[k] ?? "—"))).join("")}
               ${row("", (p) => `<button class="btn btn-primary btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>Choisir</button>`)}
             </tbody>
@@ -2650,6 +2648,12 @@ async function viewBuilder(app) {
         e.stopPropagation();
         const id = Number(btn.dataset.pickerCompareOpen);
         if (!inCompare(id)) toggleCompare(id);
+        if (pickerCompareProducts().length < 2) {
+          toast("Ajoutez un deuxième composant pour comparer", "info");
+          pickerMode = "select";
+          render();
+          return;
+        }
         pickerMode = "compare";
         render();
       });

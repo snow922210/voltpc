@@ -1061,6 +1061,8 @@ body.picker-open .compare-bar { display: none; }
 .picker-cmp-table .cmp-visual { width: 78px; height: 78px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 12px; background: #fff; overflow: hidden; }
 .picker-cmp-table .cmp-visual svg { width: 70%; height: 70%; }
 .picker-cmp-table .cmp-visual .pimg { padding: 6px; }
+.picker-cmp-table td.cmp-best { background: transparent; color: inherit; font-weight: inherit; }
+.picker-cmp-table .cmp-tag { display: none; }
 .picker-compare-empty { min-height: 300px; display: grid; place-content: center; gap: 8px; text-align: center; color: var(--text-dim); border: 1px dashed var(--border); border-radius: 16px; background: var(--surface-2); }
 .picker-compare-empty strong { color: var(--text); }
 @media (max-width: 1280px) {
