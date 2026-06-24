@@ -323,6 +323,19 @@ const CATS = {
   chair: { label: "Chaises gaming", short: "Chaise" },
 };
 
+// Slugs FR des URLs de catégorie (/categorie/<slug>). Miroir du backend (main.py).
+const CAT_SLUG = {
+  gpu: "cartes-graphiques", cpu: "processeurs", ram: "memoire-ram",
+  storage: "stockage-ssd", motherboard: "cartes-meres", psu: "alimentations",
+  case: "boitiers", cooling: "refroidissement", monitor: "ecrans",
+  keyboard: "claviers", mouse: "souris", headset: "casques-audio",
+  fan: "ventilateurs", thermal: "pate-thermique", webcam: "webcams",
+  microphone: "microphones", speaker: "enceintes", mousepad: "tapis-de-souris",
+  chair: "chaises-gaming",
+};
+const SLUG_CAT = Object.fromEntries(Object.entries(CAT_SLUG).map(([k, v]) => [v, k]));
+const catUrl = (k) => CAT_SLUG[k] ? `/categorie/${CAT_SLUG[k]}` : `/catalogue?cat=${k}`;
+
 // Groupes pour les sous-menus de navigation
 const COMPONENT_CATS = ["gpu", "cpu", "ram", "storage", "motherboard", "psu", "case", "cooling", "fan", "thermal"];
 const PERIPH_CATS = ["monitor", "keyboard", "mouse", "headset", "webcam", "microphone", "speaker", "mousepad", "chair"];
@@ -1088,6 +1101,10 @@ async function render() {
 
   try {
     if (isHome) await viewHome(app);
+    else if (path.startsWith("categorie/")) {
+      const cat = SLUG_CAT[path.split("/")[1]];
+      await viewCatalog(app, new URLSearchParams(cat ? { cat } : {}));
+    }
     else if (path === "catalogue") await viewCatalog(app, params);
     else if (path.startsWith("produit/")) await viewProduct(app, Number(path.split("/")[1]));
     else if (path.startsWith("prebuilt/")) await viewPrebuilt(app, path.split("/")[1]);
@@ -1206,7 +1223,7 @@ async function viewHome(app) {
   const statEl = $("#statCount");
   if (statEl && total) statEl.textContent = `${Math.floor(total / 10) * 10}+`;
   $("#catGrid").innerHTML = Object.entries(CATS).map(([key, c]) => `
-    <a class="cat-card" href="/catalogue?cat=${key}">
+    <a class="cat-card" href="${catUrl(key)}">
       <div class="cat-icon" style="width:54px;height:54px">${art(key, 30)}</div>
       <h3>${c.label}</h3>
       <span>${catCount[key]?.count ?? 0} produits · dès ${fmt(catCount[key]?.min_price ?? 0)}</span>
@@ -1901,7 +1918,7 @@ async function viewProduct(app, id) {
   <button class="btn btn-ghost btn-sm pp-back" id="ppBack" type="button">← Retour</button>
   <nav class="breadcrumb">
     <a href="/">Accueil</a> / <a href="/catalogue">Catalogue</a> /
-    <a href="/catalogue?cat=${p.category}">${CATS[p.category]?.label ?? p.category}</a> / <span>${esc(p.name)}</span>
+    <a href="${catUrl(p.category)}">${CATS[p.category]?.label ?? p.category}</a> / <span>${esc(p.name)}</span>
   </nav>
   <div class="product-page">
     <div class="product-gallery">
@@ -3665,7 +3682,7 @@ function setupDelegatedProductClicks() {
 
 function fillNavMenus() {
   const link = (k) => `
-    <a class="nav-menu-link" href="/catalogue?cat=${k}">
+    <a class="nav-menu-link" href="${catUrl(k)}">
       <span class="nav-menu-ico">${art(k, 30)}</span>${CATS[k].label}
     </a>`;
   const comp = $("#menuComponents");

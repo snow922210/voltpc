@@ -1941,6 +1941,26 @@ CAT_LABELS = {
     "chair": "Chaises gaming",
 }
 
+# Slugs FR lisibles pour les URLs de catégorie (/categorie/<slug>), plus propres
+# et meilleurs pour le SEO que /catalogue?cat=gpu. Miroir côté frontend (app.js).
+CAT_SLUGS = {
+    "gpu": "cartes-graphiques", "cpu": "processeurs", "ram": "memoire-ram",
+    "storage": "stockage-ssd", "motherboard": "cartes-meres", "psu": "alimentations",
+    "case": "boitiers", "cooling": "refroidissement", "monitor": "ecrans",
+    "keyboard": "claviers", "mouse": "souris", "headset": "casques-audio",
+    "fan": "ventilateurs", "thermal": "pate-thermique", "webcam": "webcams",
+    "microphone": "microphones", "speaker": "enceintes", "mousepad": "tapis-de-souris",
+    "chair": "chaises-gaming",
+}
+SLUG_TO_CAT = {v: k for k, v in CAT_SLUGS.items()}
+
+
+def _cat_url(cat: str) -> str:
+    """URL canonique d'une catégorie : /categorie/<slug> si connue, sinon
+    repli sur l'ancienne forme ?cat= (robustesse)."""
+    slug = CAT_SLUGS.get(cat)
+    return f"{SITE_URL}/categorie/{slug}" if slug else f"{SITE_URL}/catalogue?cat={cat}"
+
 
 @app.get("/robots.txt", include_in_schema=False)
 def robots_txt():
@@ -1953,13 +1973,43 @@ def robots_txt():
     return Response(content=body, media_type="text/plain")
 
 
+@app.get("/llms.txt", include_in_schema=False)
+def llms_txt():
+    """Fichier llms.txt : résumé du site pour les moteurs IA (ChatGPT,
+    Perplexity, etc.) avec les points d'entrée canoniques."""
+    cats = "\n".join(f"- [{lbl}]({_cat_url(c)})" for c, lbl in CAT_LABELS.items())
+    body = (
+        "# VoltCore\n\n"
+        "> VoltCore est une boutique française de composants PC haute performance : "
+        "cartes graphiques, processeurs, mémoire, stockage, cartes mères et "
+        "périphériques gaming. Configurateur intelligent, compatibilité vérifiée, "
+        "paiement sécurisé et livraison en 24 h.\n\n"
+        "## Catégories\n"
+        f"{cats}\n\n"
+        "## Pages principales\n"
+        f"- [Catalogue complet]({SITE_URL}/catalogue)\n"
+        f"- [Configurateur PC]({SITE_URL}/configurateur)\n"
+        f"- [Qui sommes-nous]({SITE_URL}/qui-sommes-nous)\n\n"
+        "## Informations\n"
+        f"- [Conditions générales de vente]({SITE_URL}/cgv)\n"
+        f"- [Politique de confidentialité]({SITE_URL}/confidentialite)\n"
+        f"- [Retours et remboursement]({SITE_URL}/retours-remboursements)\n"
+        f"- [Mentions légales]({SITE_URL}/mentions-legales)\n\n"
+        "## Notes\n"
+        f"- Plan du site : {SITE_URL}/sitemap.xml\n"
+        f"- Chaque fiche produit ({SITE_URL}/produit/<id>) expose des données "
+        "structurées Schema.org (Product, Offer, AggregateRating, BreadcrumbList).\n"
+    )
+    return Response(content=body, media_type="text/plain; charset=utf-8")
+
+
 @app.get("/sitemap.xml", include_in_schema=False)
 def sitemap_xml():
     """Sitemap complet : accueil, catalogue, catégories et toutes les fiches
     produit (URL réelles depuis le Lot 1)."""
     urls = [(f"{SITE_URL}/", "1.0"), (f"{SITE_URL}/catalogue", "0.9"),
             (f"{SITE_URL}/configurateur", "0.5")]
-    urls += [(f"{SITE_URL}/catalogue?cat={c}", "0.7") for c in CAT_LABELS]
+    urls += [(_cat_url(c), "0.7") for c in CAT_LABELS]
     # Pages éditoriales / légales (indexables, contenu pré-rendu).
     urls += [(f"{SITE_URL}/{seg}", "0.3") for seg in STATIC_PAGES]
     with db() as conn:
@@ -2063,7 +2113,7 @@ def _product_ssr(p) -> str:
     return (
         '<article class="product-page">'
         f'<nav class="breadcrumb"><a href="/">Accueil</a> / '
-        f'<a href="/catalogue?cat={cat}">{_E(label)}</a> / {_E(p["name"])}</nav>'
+        f'<a href="{_E(_cat_url(cat).replace(SITE_URL, ""))}">{_E(label)}</a> / {_E(p["name"])}</nav>'
         f'<img class="pimg" src="{_E(_abs_img(p))}" alt="{_E(p["name"])}" width="600" height="600">'
         '<div class="product-page-info">'
         f'<span class="product-brand">{_E(p["brand"])}</span>'
@@ -2133,7 +2183,7 @@ def _product_jsonld(p) -> str:
         "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "Accueil", "item": f"{SITE_URL}/"},
             {"@type": "ListItem", "position": 2, "name": cat_label,
-             "item": f"{SITE_URL}/catalogue?cat={p['category']}"},
+             "item": _cat_url(p["category"])},
             {"@type": "ListItem", "position": 3, "name": p["name"],
              "item": f"{SITE_URL}/produit/{p['id']}"},
         ],
@@ -2162,7 +2212,7 @@ def _catalog_render(tpl, params) -> Response:
 
     if cat:
         heading = CAT_LABELS.get(cat, "Catalogue")
-        canonical = f"{SITE_URL}/catalogue?cat={cat}"
+        canonical = _cat_url(cat)
     elif promo:
         heading, canonical = "Promotions", f"{SITE_URL}/catalogue?promo=1"
     elif new:
@@ -2253,6 +2303,23 @@ def _static_page_ssr(heading: str, text: str) -> str:
         f'<p>{_E(text)}</p>'
         '</section>'
     )
+
+
+@app.get("/categorie/{slug}", include_in_schema=False)
+def category_page(slug: str):
+    """URL propre d'une catégorie. Rend la même vue catalogue (cat seule),
+    avec le canonical /categorie/<slug>."""
+    tpl = INDEX_FILE.read_text(encoding="utf-8")
+    cat = SLUG_TO_CAT.get(slug)
+    if not cat:
+        return _html(_render(
+            tpl, title="Catégorie introuvable — VoltCore",
+            desc="Cette catégorie n'existe pas.", canonical=f"{SITE_URL}/catalogue",
+            og_title="Catégorie introuvable", og_desc="", robots="noindex, follow",
+            main='<section class="empty-state"><h1>Catégorie introuvable</h1>'
+                 '<p><a href="/catalogue">Voir le catalogue</a></p></section>',
+        ), status=404)
+    return _catalog_render(tpl, {"cat": cat})
 
 
 @app.get("/{full_path:path}", include_in_schema=False)
