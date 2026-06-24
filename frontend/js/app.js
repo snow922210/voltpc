@@ -234,7 +234,7 @@ const heartBtn = (p) => `
   </button>`;
 
 /* ─── Comparateur ─── */
-const COMPARE_MAX = 4;
+const COMPARE_MAX = 6;
 function inCompare(id) { return state.compare.includes(id); }
 function toggleCompare(id) {
   if (inCompare(id)) {
