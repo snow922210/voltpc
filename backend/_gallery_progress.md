@@ -45,16 +45,37 @@
 - [NOTE] Beaucoup de -1 RAM pré-existants sont FAUX (mauvais modèle/marque/variante) →
       pour la RAM, TOUJOURS réécrire la galerie complète via set_full_gallery.py (couleur standard = noir/gris).
 - [x] ===== CATÉGORIE RAM TERMINÉE (15/15) — toutes les -1 corrigées via set_full_gallery.py =====
-- [ ] Reprendre à : catégorie STOCKAGE (storage, 21 produits). Capacité imprimée sur l'étiquette
-      → vetting visuel recommandé. NB : pour le stockage, le -1 existant est souvent correct
-      (cf. 990 Pro déjà fait) → privilégier add_gallery_images.py (-2..) ; ne réécrire -1 que si faux.
-      Attention capacité (ex. 1TB vs 2TB) ET format (M.2 NVMe vs 2.5" SATA).
-      Liste : python -c "import json;wl=json.load(open('_worklist.json',encoding='utf-8'));done=set(json.load(open('_gallery_ids.json',encoding='utf-8')));print([p['q'] for p in wl if p['category']=='storage' and p['name'] not in done])"
-  (72 entrées — 72 galeries en ligne)
-      Vengeance 16Go 6000 CL36, Trident Z5 RGB 32Go 8000, Trident Z5 RGB 96Go 6400,
-      Kingston SO-DIMM Impact 16Go 5600, Trident Z RGB 16Go DDR4-3600,
-      Vengeance LPX 16Go DDR4-3200, Vengeance LPX 32Go DDR4-3200, Fury Beast 64Go DDR4-3200.
-  (59 entrées — 59 galeries en ligne)
+- [x] ===== CATÉGORIE STOCKAGE TERMINÉE (18/21, 3 skips) =====
+      Faits via fetch same-origin (window.AMZ dans Chrome) + vetting montage : 990 Pro 1/4 To,
+      WD_Black SN850X 1/2/4 To, FireCuda 530R 2 To, T705/T700 1-2 To, 980 1 To, 870 EVO 1/2 To,
+      A400 480 Go, 9100 Pro 2 To, KC3000 2 To, SN580 2 To (que 2 secondaires, reste = bannières),
+      970 EVO Plus 1 To, 990 EVO Plus 2 To.
+      ATTENTION pièges détectés : Crucial T700/T705 et WD SN850X ont 3-4 BANNIÈRES marketing
+      ("Blistering speeds", "NEW LOOK", "POWERED BY SANDISK/RADXORK") en index 1-4 → vetting
+      obligatoire, prendre les vraies photos plus loin dans la liste. Samsung = 100% propre.
+      SKIPS storage : P3 Plus 1 To (que 500 Go sur amazon.fr), MX500 1 To (que 4 To), P3 2 To Gen3
+      (remplacé par P310, P3 gen3 absent).
+
+## MÉTHODE RAPIDE (depuis 2026-06-24) — fetch same-origin
+Sur une page amazon.fr ouverte (Chrome MCP), définir window.AMZ avec getHtml(fetch),
+pickAsins(DOMParser sur /s?k=), imgIds(regex sur "large":"...images/I/<ID>" du HTML /dp/<asin>?th=1),
+run(query,tokens)→cands triés par tokens. Puis ids[1:5] = secondaires (index0=image principale).
+Vetting = injecter un montage <img SL300> dans document.body + screenshot. ~10x plus rapide
+que naviguer page par page. NE PAS naviguer (window.AMZ se perd) — tout via fetch.
+
+- [x] ===== CATÉGORIE MOTHERBOARD TERMINÉE (18/19, 1 skip) =====
+      Pièges : ASUS ROG/Prime haut de gamme (B650M-A, B650E-I, Z790-I, X870E-E) et ASRock Z890
+      mettent 4-5 BANNIÈRES A+ ("Built For Speed", "Exclusive AI Intelligence"...) en index 1-5 →
+      vraies photos en FIN de liste (index 6+). MSI = petits badges coin (tolérables, board visible,
+      éviter l'index "feature icons" le plus chargé). Gigabyte + ASUS PRIME H610M-K = 100% propres.
+      A520M-HDV n'a que 3 images (1 photo + 1 diagramme + 1 tableau) → 1 seul secondaire.
+      SKIP : B450M DS3H V2 (absent d'amazon.fr, que B550M/A520M DS3H).
+
+- [ ] Reprendre à : catégorie PSU (13), puis case, cooling, monitor, keyboard, mouse, headset,
+      fan, thermal, webcam, microphone, speaker, mousepad, chair. Méthode window.AMZ same-origin.
+      THROTTLE : amazon.fr rate-limite le fetch same-origin après ~80 requêtes (pages vides ~2 Ko,
+      0 résultat, titre vide). Solution : espacer (delay 800ms+), faire des pauses entre catégories,
+      ou attendre ~15-20 min que ça se réinitialise. Re-vérifier avec un fetch /s?k=test (len>1Mo = OK).
 
 RÈGLES RAM (important) :
 - Vérifier la COULEUR sur l'image -1 existante AVANT de chercher (match exact).
