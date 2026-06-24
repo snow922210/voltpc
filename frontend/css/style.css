@@ -1024,7 +1024,7 @@ body.picker-open .compare-bar { display: none; }
 .picker-preview.empty { min-height: 180px; justify-content: center; color: var(--text-faint); font-size: 0.86rem; line-height: 1.45; text-align: center; }
 .picker-preview-full { display: grid; grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1fr); gap: 26px; align-items: stretch; }
 .picker-preview-gallery { display: grid; align-content: start; gap: 14px; min-width: 0; }
-.picker-preview-content { display: grid; grid-template-rows: auto auto auto auto 1fr; gap: 18px; min-width: 0; min-height: 0; }
+.picker-preview-content { display: grid; grid-template-rows: auto auto auto auto auto minmax(0, 1fr); gap: 18px; min-width: 0; min-height: 0; }
 .picker-preview-visual { position: relative; width: 100%; aspect-ratio: 1 / 1; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
 .picker-preview-visual svg { width: 58%; }
 .picker-preview-visual .pimg { padding: 18px; border-radius: 14px; }
@@ -1040,8 +1040,8 @@ body.picker-open .compare-bar { display: none; }
 .picker-preview-head h3 { font-size: 1.55rem; line-height: 1.12; }
 .picker-preview-price-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .picker-preview-price-row strong { font-family: var(--font-display); font-size: 2rem; }
-.picker-preview-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.picker-preview-actions .btn { min-height: 40px; justify-content: center; padding-inline: 12px; font-size: 0.82rem; white-space: nowrap; }
+.picker-preview-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-self: start; }
+.picker-preview-actions .btn { height: 40px; min-height: 40px; justify-content: center; padding-inline: 12px; font-size: 0.82rem; white-space: nowrap; }
 .picker-preview-actions .btn.on { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-wash); }
 .picker-preview-section { display: grid; gap: 8px; }
 .picker-preview-section h4 { font-size: 0.86rem; }
