@@ -2154,48 +2154,68 @@ async function viewCompare(app) {
     for (const k of Object.keys(p.specs))
       if (/^[A-ZÀ-Ü]/.test(k) && !specKeys.includes(k)) specKeys.push(k);
 
-  const cell = (p) => `<th class="cmp-col">
+  const slots = [...products];
+  while (slots.length < COMPARE_MAX) slots.push(null);
+
+  const cell = (p, i) => p ? `<th class="cmp-col">
       <div class="cmp-visual">${art(p.category, hueOf(p))}${imgTag(p)}</div>
       <div class="cmp-name">${esc(p.brand)} ${esc(p.name)}</div>
       <button class="cmp-remove" data-cmp-rm="${p.id}" title="Retirer">✕ retirer</button>
+    </th>` : `<th class="cmp-col cmp-slot-head">
+      <a class="cmp-slot-plus" href="/catalogue" title="Ajouter un produit" aria-label="Ajouter un produit">+</a>
+      <div class="cmp-name">Place disponible</div>
+      <small>${i + 1}/${COMPARE_MAX}</small>
     </th>`;
 
   const row = (label, fn) =>
-    `<tr><td class="cmp-label">${esc(label)}</td>${products.map((p) => `<td>${fn(p)}</td>`).join("")}</tr>`;
+    `<tr><td class="cmp-label">${esc(label)}</td>${slots.map((p) => `<td class="${p ? "" : "cmp-slot-empty"}">${p ? fn(p) : "—"}</td>`).join("")}</tr>`;
 
-  // Rangée avec surbrillance de la (des) meilleure(s) valeur(s).
-  // `metric(p)` → nombre comparable ; `dir` = "max" (plus grand = mieux) ou "min".
-  const bestRow = (label, fn, metric, dir = "max") => {
+  const rankedRow = (label, fn, metric, dir = "max") => {
     const vals = products.map(metric);
-    const finite = vals.filter((v) => Number.isFinite(v) && v > 0);
-    const best = finite.length ? (dir === "max" ? Math.max(...finite) : Math.min(...finite)) : null;
-    return `<tr><td class="cmp-label">${esc(label)}</td>${products.map((p, i) => {
-      const win = best !== null && vals[i] === best && finite.length > 1;
-      return `<td class="${win ? "cmp-best" : ""}">${fn(p)}${win ? ` <span class="cmp-tag">★</span>` : ""}</td>`;
+    const finite = vals.filter((v) => Number.isFinite(v));
+    const best = finite.length ? (dir === "min" ? Math.min(...finite) : Math.max(...finite)) : null;
+    const hasRank = best !== null && finite.some((v) => v !== best);
+    return `<tr><td class="cmp-label">${esc(label)}</td>${slots.map((p) => {
+      if (!p) return `<td class="cmp-slot-empty">—</td>`;
+      const val = metric(p);
+      const rank = hasRank && val === best ? "best" : hasRank && Number.isFinite(val) ? "worst" : "";
+      return `<td class="${rank ? `cmp-rank-${rank}` : ""}">
+        <span class="cmp-value">${fn(p)}</span>
+        ${rank === "best" ? `<span class="cmp-badge good">Meilleur</span>` : rank === "worst" ? `<span class="cmp-badge bad">Moins bon</span>` : ""}
+      </td>`;
     }).join("")}</tr>`;
   };
+  const specMetric = (v) => {
+    if (typeof v === "number") return v;
+    const nums = String(v ?? "").replace(/,/g, ".").match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
+    if (!nums.length) return NaN;
+    return nums.reduce((a, b) => a + b, 0);
+  };
+  const specDir = (k) => /tdp|latence|latency|cas/i.test(k) ? "min" : "max";
 
   const allCompatible = products.length > 1 && products.every((p) => p.category === products[0].category);
 
   app.innerHTML = `
+  <div class="compare-page">
   <div class="section-head" style="margin-top:0"><h1>Comparateur</h1>
     <button class="btn btn-ghost btn-sm" id="cmpClearAll">Tout vider</button></div>
-  <p style="color:var(--text-dim);margin:-8px 0 18px">Les <span class="cmp-best" style="padding:1px 7px;border-radius:6px">meilleures valeurs</span> de chaque ligne sont mises en avant.</p>
-  <div class="cmp-wrap">
-    <table class="cmp-table">
-      <thead><tr><th class="cmp-label"></th>${products.map(cell).join("")}</tr></thead>
+  <p style="color:var(--text-dim);margin:-8px 0 18px">Les meilleures valeurs sont signalées par des badges, sans modifier les lignes neutres.</p>
+  <div class="cmp-wrap cmp-page-wrap">
+    <table class="cmp-table cmp-table-global">
+      <thead><tr><th class="cmp-label"></th>${slots.map(cell).join("")}</tr></thead>
       <tbody>
-        ${bestRow("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`, (p) => p.price, "min")}
-        ${bestRow("Performance estimée", (p) => `<span class="perf-pill ${ratingWord(perfScore(p)).cls}">${ratingWord(perfScore(p)).word}</span>`, (p) => perfScore(p), "max")}
+        ${rankedRow("Prix", (p) => `<strong>${fmt(p.price)}</strong>${p.old_price ? ` <small class="cmp-old">${fmt(p.old_price)}</small>` : ""}`, (p) => p.price, "min")}
+        ${rankedRow("Performance estimée", (p) => `<span class="perf-pill ${ratingWord(perfScore(p)).cls}">${ratingWord(perfScore(p)).word}</span>`, (p) => perfScore(p), "max")}
         ${row("Catégorie", (p) => esc(CATS[p.category]?.label || p.category))}
         ${row("Marque", (p) => esc(p.brand))}
-        ${bestRow("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`, (p) => p.rating, "max")}
-        ${bestRow("Disponibilité", (p) => p.stock > 0 ? `<span class="green">En stock</span>` : `<span style="color:var(--red)">Rupture</span>`, (p) => p.stock, "max")}
-        ${allCompatible ? `<tr><td class="cmp-label">Compatibilité</td><td colspan="${products.length}" style="color:var(--text-dim)">Même catégorie (${esc(CATS[products[0].category]?.label || products[0].category)}) — interchangeables dans une configuration.</td></tr>` : ""}
-        ${specKeys.map((k) => row(k, (p) => esc(p.specs[k] ?? "—"))).join("")}
+        ${rankedRow("Note", (p) => `${stars(p.rating)} <small>${p.rating.toFixed(1)} (${p.rating_count})</small>`, (p) => p.rating, "max")}
+        ${row("Disponibilité", (p) => p.stock > 0 ? "En stock" : "Rupture")}
+        ${allCompatible ? `<tr><td class="cmp-label">Compatibilité</td><td colspan="${COMPARE_MAX}" style="color:var(--text-dim)">Même catégorie (${esc(CATS[products[0].category]?.label || products[0].category)}) — interchangeables dans une configuration.</td></tr>` : ""}
+        ${specKeys.map((k) => rankedRow(k, (p) => esc(p.specs[k] ?? "—"), (p) => specMetric(p.specs[k]), specDir(k))).join("")}
         ${row("", (p) => `<button class="btn btn-primary btn-sm" data-add="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>Ajouter au panier</button>`)}
       </tbody>
     </table>
+  </div>
   </div>`;
 
   indexProducts(products);
