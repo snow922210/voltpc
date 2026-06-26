@@ -2613,3 +2613,422 @@ body {
   padding-inline: 12px;
  }
 }
+
+/* Accessibility responsive pass: small devices, touch targets and overflow safety. */
+button,
+.btn,
+.icon-btn,
+.pager-btn,
+.auth-tab,
+.account-tab,
+.filter-option,
+.picker-chip,
+.compare-chip,
+a.btn {
+ touch-action: manipulation;
+}
+
+button,
+.btn,
+.icon-btn,
+.pager-btn,
+.auth-tab,
+.account-tab,
+.picker-chip {
+ min-height: 44px;
+}
+
+input,
+select,
+textarea,
+.select {
+ font-size: max(16px, 1rem);
+}
+
+.nav,
+.picker-preview-thumbs,
+.cmp-wrap,
+.picker-cmp-wrap {
+ overscroll-behavior-inline: contain;
+}
+
+.cmp-wrap,
+.picker-cmp-wrap {
+ -webkit-overflow-scrolling: touch;
+}
+
+.product-card,
+.cat-card,
+.perk,
+.pb-card,
+.panel,
+.order-card,
+.filters,
+.builder-slot,
+.prebuilt-component {
+ overflow-wrap: anywhere;
+}
+
+.product-info,
+.panel,
+.order-card,
+.filters,
+.cart-drawer,
+.modal,
+.compare-bar,
+.cookie-banner {
+ min-width: 0;
+}
+
+.card-actions button,
+.fav-btn,
+.cmp-btn,
+.add-btn,
+.cart-item-qty button,
+.modal-close,
+.cmp-remove {
+ min-width: 44px;
+ min-height: 44px;
+}
+
+.cart-item-qty {
+ gap: 8px;
+}
+
+.cart-item-qty span {
+ min-width: 32px;
+ text-align: center;
+}
+
+.cmp-remove,
+.cart-item-remove {
+ min-height: 36px;
+ padding-inline: 4px;
+}
+
+.compare-bar {
+ max-height: min(42vh, 260px);
+ overflow: auto;
+}
+
+.compare-bar-items {
+ min-width: 0;
+}
+
+.cookie-actions .btn {
+ flex: 1 1 130px;
+}
+
+@media (max-width: 920px) {
+ .header {
+  max-height: calc(100dvh - 12px);
+  overflow: hidden;
+ }
+
+ .nav {
+  scroll-padding-inline: 14px;
+ }
+}
+
+@media (max-width: 820px) {
+ .panel,
+ .order-card,
+ .filters,
+ .review-card,
+ .specs-card,
+ .store-utility-card {
+  border-radius: 16px;
+  padding: clamp(16px, 4.5vw, 22px);
+ }
+
+ .form-grid {
+  grid-template-columns: 1fr;
+ }
+
+ .form-grid label {
+  min-width: 0;
+ }
+
+ .promo-row,
+ .admin-search,
+ .picker-preview-price-row,
+ .pb-detail-total {
+  align-items: stretch;
+  flex-direction: column;
+ }
+
+ .promo-row .btn,
+ .admin-search .btn,
+ .picker-preview-price-row .btn,
+ .pb-detail-total .btn {
+  width: 100%;
+ }
+
+ .mini-table,
+ .specs-table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+ }
+
+ .content-hero {
+  padding-top: 28px;
+ }
+}
+
+@media (max-width: 640px) {
+ :root {
+  --page-pad: clamp(12px, 4.4vw, 18px);
+ }
+
+ .header {
+  gap: 8px;
+ }
+
+ .logo span {
+  max-width: 38vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+ }
+
+ .header-search input {
+  width: 100%;
+ }
+
+ .nav {
+  margin-inline: calc(var(--page-pad) * -1);
+  padding-inline: var(--page-pad);
+  mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+ }
+
+ .nav a {
+  min-height: 42px;
+ }
+
+ .section-head a,
+ .catalog-toolbar .select {
+  width: 100%;
+ }
+
+ .product-card {
+  border-radius: 16px;
+ }
+
+ .product-info {
+  padding: 14px;
+ }
+
+ .product-bottom {
+  gap: 12px;
+ }
+
+ .product-bottom .price {
+  max-width: calc(100% - 56px);
+ }
+
+ .add-btn {
+  flex: 0 0 44px;
+  border-radius: 12px;
+ }
+
+ .cart-drawer {
+  top: var(--announce-h);
+  height: calc(100dvh - var(--announce-h));
+  border-left: 0;
+ }
+
+ .cart-drawer-body {
+  padding-bottom: max(18px, env(safe-area-inset-bottom));
+ }
+
+ .cart-drawer-foot {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+ }
+
+ .cart-trust {
+  grid-template-columns: 1fr;
+ }
+
+ .promo-row {
+  display: grid;
+  grid-template-columns: 1fr;
+ }
+
+ .modal-overlay {
+  padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+  place-items: end center;
+ }
+
+ .modal {
+  width: min(100%, 520px);
+  max-height: calc(100dvh - 20px);
+  border-radius: 18px 18px 0 0;
+  padding: 24px 18px 18px;
+ }
+
+ .auth-tabs {
+  border-radius: 14px;
+ }
+
+ .auth-tab {
+  border-radius: 11px;
+ }
+
+ .picker-overlay {
+  place-items: stretch;
+ }
+
+ .modal.wide,
+ .modal.wide.picker-modal-compare {
+  width: 100%;
+  height: calc(100dvh - 12px);
+  max-height: calc(100dvh - 12px);
+  border-radius: 16px;
+ }
+
+ .picker-list {
+  max-height: 34vh;
+ }
+
+ .picker-item {
+  padding: 10px 12px;
+ }
+
+ .picker-item .picker-visual {
+  width: 42px;
+  height: 42px;
+ }
+
+ .picker-preview {
+  padding: 14px;
+ }
+
+ .picker-preview-specs div {
+  grid-template-columns: 1fr;
+  gap: 4px;
+ }
+
+ .picker-cmp-table,
+ .picker-modal-compare .picker-cmp-table,
+ .cmp-table-global {
+  min-width: 760px;
+ }
+
+ .cmp-table th,
+ .cmp-table td,
+ .cmp-table-global th,
+ .cmp-table-global td {
+  padding: 9px 10px;
+ }
+
+ .compare-bar {
+  max-height: calc(48dvh - env(safe-area-inset-bottom));
+  padding: 10px;
+  border-radius: 14px;
+ }
+
+ .compare-bar-label,
+ .compare-bar-items {
+  flex: 1 1 100%;
+ }
+
+ .compare-chip {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+ }
+
+ .cookie-banner {
+  left: 10px;
+  right: 10px;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  max-height: min(58vh, 360px);
+  overflow: auto;
+  padding: 14px;
+  border-radius: 16px;
+ }
+
+ .cookie-actions {
+  justify-content: stretch;
+ }
+
+ .footer {
+  padding-bottom: max(34px, env(safe-area-inset-bottom));
+ }
+}
+
+@media (max-width: 420px) {
+ :root {
+  --announce-h: 54px;
+  --fixed-header-h: 196px;
+ }
+
+ .announce {
+  font-size: 0.7rem;
+ }
+
+ .logo span {
+  max-width: 44vw;
+ }
+
+ .header-actions {
+  gap: 4px;
+ }
+
+ .icon-btn {
+  width: 40px;
+  min-width: 40px;
+ }
+
+ .nav a {
+  padding-inline: 8px;
+  font-size: 0.8rem;
+ }
+
+ .app {
+  padding-top: calc(14px + var(--announce-h) + var(--fixed-header-h));
+ }
+
+ .void-hero {
+  padding-top: calc(var(--announce-h) + var(--fixed-header-h) + 18px);
+ }
+
+ .product-bottom {
+  align-items: stretch;
+  flex-direction: column;
+ }
+
+ .product-bottom .price {
+  max-width: none;
+ }
+
+ .add-btn {
+  width: 100%;
+ }
+
+ .pb-specs li,
+ .prebuilt-component,
+ .builder-slot {
+  align-items: flex-start;
+ }
+
+ .builder-slot {
+  gap: 12px;
+  padding: 14px;
+ }
+}
+
+@media (prefers-reduced-motion: reduce) {
+ html {
+  scroll-behavior: auto;
+ }
+
+ *,
+ *::before,
+ *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.001ms !important;
+ }
+}

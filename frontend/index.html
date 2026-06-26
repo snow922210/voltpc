@@ -34,7 +34,7 @@
  <link rel="dns-prefetch" href="//checkout.stripe.com">
  <link rel="dns-prefetch" href="//js.stripe.com">
  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
- <link rel="stylesheet" href="/css/style.css?v=139">
+ <link rel="stylesheet" href="/css/style.css?v=140">
  <script>
   /* Thème appliqué avant le rendu (évite tout flash). Préférence enregistrée,
     sinon réglage système. */
@@ -117,11 +117,11 @@
     <svg class="theme-ico-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
     <svg class="theme-ico-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8z"/></svg>
    </button>
-   <button class="icon-btn" id="accountBtn" title="Mon compte">
+   <button class="icon-btn" id="accountBtn" title="Mon compte" aria-label="Mon compte">
     <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     <span class="icon-btn-label" id="accountLabel">Compte</span>
    </button>
-   <button class="icon-btn cart-btn" id="cartBtn" title="Panier">
+   <button class="icon-btn cart-btn" id="cartBtn" title="Panier" aria-label="Ouvrir le panier">
     <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 4h2l2.6 12.4a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.4-1.1L21.7 9H6.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.4" fill="currentColor"/><circle cx="17.5" cy="21" r="1.4" fill="currentColor"/></svg>
     <span class="cart-count" id="cartCount" hidden>0</span>
    </button>
@@ -178,10 +178,10 @@
 
  <!-- Panier latéral -->
  <div class="drawer-overlay" id="drawerOverlay" hidden></div>
- <aside class="cart-drawer" id="cartDrawer" aria-label="Panier">
+ <aside class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Panier" aria-modal="true">
   <div class="cart-drawer-head">
    <h3>Mon panier</h3>
-   <button class="icon-btn" id="cartClose" title="Fermer">✕</button>
+   <button class="icon-btn" id="cartClose" title="Fermer" aria-label="Fermer le panier">✕</button>
   </div>
   <div class="cart-drawer-body" id="cartBody"></div>
   <div class="cart-drawer-foot" id="cartFoot"></div>
@@ -190,7 +190,7 @@
  <!-- Modale d'authentification -->
  <div class="modal-overlay" id="authModal" hidden>
   <div class="modal" role="dialog" aria-modal="true">
-   <button class="modal-close" id="authClose">✕</button>
+   <button class="modal-close" id="authClose" aria-label="Fermer la fenêtre de connexion">✕</button>
    <div class="auth-tabs">
     <button class="auth-tab active" data-tab="login">Connexion</button>
     <button class="auth-tab" data-tab="register">Inscription</button>
@@ -236,6 +236,6 @@
 
  <!-- three.min.js (589 Ko) + hero-void.js : chargés à la demande par app.js,
       uniquement sur l'accueil (gros gain CWV/LCP sur les autres pages). -->
- <script src="/js/app.js?v=114"></script>
+ <script src="/js/app.js?v=115"></script>
 </body>
 </html>

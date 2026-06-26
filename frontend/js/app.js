@@ -650,7 +650,7 @@ function productCard(p) {
       ${badgeHtml(usefulBadge(p) || p.badge)}
       <div class="card-actions">
         ${heartBtn(p)}
-        <button class="cmp-btn ${inCompare(p.id) ? "on" : ""}" data-cmp="${p.id}" title="Comparer" aria-label="Comparer">⇄</button>
+        <button class="cmp-btn ${inCompare(p.id) ? "on" : ""}" data-cmp="${p.id}" title="Comparer" aria-label="Comparer ${esc(p.name)}">⇄</button>
       </div>
     </div>
     <div class="product-info">
@@ -663,7 +663,7 @@ function productCard(p) {
           ${p.old_price ? `<span class="price-old">${fmt(p.old_price)}</span>` : ""}
           ${fmt(p.price)}${discount ? ` <small style="color:var(--red);font-size:.75rem">-${discount}%</small>` : ""}
         </div>
-        <button class="add-btn" data-add="${p.id}" title="Ajouter au panier" ${p.stock <= 0 ? "disabled" : ""}>
+        <button class="add-btn" data-add="${p.id}" title="Ajouter au panier" aria-label="Ajouter ${esc(p.name)} au panier" ${p.stock <= 0 ? "disabled" : ""}>
           <svg viewBox="0 0 24 24" width="19" height="19"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
         </button>
       </div>
@@ -763,9 +763,9 @@ function renderCartDrawer() {
         <h4>${esc(i.name)}</h4>
         <span class="price">${fmt(i.price)}</span>
         <div class="cart-item-qty">
-          <button data-qty="${i.id}|-1">−</button><span>${i.qty}</span><button data-qty="${i.id}|1">+</button>
+          <button data-qty="${i.id}|-1" aria-label="Retirer une unité de ${esc(i.name)}">−</button><span aria-label="Quantité ${i.qty}">${i.qty}</span><button data-qty="${i.id}|1" aria-label="Ajouter une unité de ${esc(i.name)}">+</button>
         </div>
-        <button class="cart-item-remove" data-remove="${i.id}">Retirer</button>
+        <button class="cart-item-remove" data-remove="${i.id}" aria-label="Retirer ${esc(i.name)} du panier">Retirer</button>
       </div>
     </div>`).join("");
 
@@ -2702,7 +2702,7 @@ async function viewBuilder(app) {
 
       overlay.innerHTML = `
         <div class="modal wide picker-modal ${pickerMode === "compare" ? "picker-modal-compare" : ""}">
-          <button class="modal-close">✕</button>
+          <button class="modal-close" aria-label="Fermer la sélection">✕</button>
           <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}<span class="picker-count">${list.length} dispo${list.length > 1 ? "s" : ""}</span></h2>
           ${CATEGORY_TIP[cat] ? `<p class="picker-tip"><b>Conseil.</b> ${CATEGORY_TIP[cat]}</p>` : ""}
           ${pickerMode === "select" && chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
