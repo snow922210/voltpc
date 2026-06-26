@@ -2312,14 +2312,15 @@ async function viewBuilder(app) {
     <h1>Configurateur PC</h1>
   </div>
   <p class="builder-intro">Composez votre PC vous-même — chaque étape vous explique à quoi sert la pièce et ce qui doit être compatible. Tout est vérifié automatiquement.</p>
+  <a class="builder-summary-skip btn btn-ghost btn-sm" href="#buildSummary">Voir le récapitulatif</a>
   <div class="presets" id="presetBar">
     <span class="presets-label">Pour démarrer vite (puis ajustez)</span>
     ${PRESETS.map((p) => `<button class="preset-btn" data-preset="${p.id}">${esc(p.label)}</button>`).join("")}
     <button class="preset-btn preset-reset" data-preset="reset">Vider</button>
   </div>
   <div class="builder-grid">
-    <div id="slots"></div>
-    <aside id="buildSummary"></aside>
+    <div id="slots" class="builder-slots" aria-label="Étapes du configurateur"></div>
+    <aside id="buildSummary" aria-live="polite"></aside>
   </div>`;
 
   const products = await api("/products");
@@ -2406,15 +2407,17 @@ async function viewBuilder(app) {
     $("#slots").innerHTML = BUILD_SLOTS.map((slot) => {
       const sel = state.build[slot.cat];
       return `
-      <div class="builder-slot ${sel ? "filled" : ""}">
-        <div class="builder-slot-icon" style="width:52px;height:52px">${art(slot.cat, 30)}</div>
+      <div class="builder-slot ${sel ? "filled" : ""}" data-slot="${slot.cat}">
+        <div class="builder-slot-icon">${art(slot.cat, 30)}</div>
         <div class="builder-slot-main">
           <h3>${slot.label}</h3>
           <p>${sel ? `${esc(sel.brand)} ${esc(sel.name)}` : esc(slotGuide(slot.cat))}</p>
         </div>
         ${sel ? `<span class="price">${fmt(sel.price)}</span>` : ""}
-        <button class="btn ${sel ? "btn-ghost" : "btn-primary"} btn-sm" data-pick="${slot.cat}">${sel ? "Changer" : "Choisir"}</button>
-        ${sel ? `<button class="icon-btn" data-unpick="${slot.cat}" title="Retirer" style="padding:8px 11px">✕</button>` : ""}
+        <div class="builder-slot-actions">
+          <button class="btn ${sel ? "btn-ghost" : "btn-primary"} btn-sm" data-pick="${slot.cat}" aria-label="${sel ? "Changer" : "Choisir"} ${esc(slot.label)}">${sel ? "Changer" : "Choisir"}</button>
+          ${sel ? `<button class="icon-btn" data-unpick="${slot.cat}" title="Retirer" aria-label="Retirer ${esc(slot.label)}">✕</button>` : ""}
+        </div>
       </div>`;
     }).join("");
 
@@ -2440,7 +2443,7 @@ async function viewBuilder(app) {
           <div class="watt-bar"><div style="width:${pct}%"></div></div>
         </div>
         <p class="builder-progress-hint">Encore ${required.length - filledReq} à choisir, puis vous pourrez ajouter la configuration au panier.</p>
-        <button class="btn btn-primary btn-block" disabled>Sélectionnez les essentiels</button>`;
+        <a class="btn btn-ghost btn-block builder-next-missing" href="#slots">Continuer la sélection</a>`;
       return;
     }
 
@@ -2703,7 +2706,7 @@ async function viewBuilder(app) {
       overlay.innerHTML = `
         <div class="modal wide picker-modal ${pickerMode === "compare" ? "picker-modal-compare" : ""}">
           <button class="modal-close" aria-label="Fermer la sélection">✕</button>
-          <h2 style="font-size:1.2rem">Choisir : ${CATS[cat].label}<span class="picker-count">${list.length} dispo${list.length > 1 ? "s" : ""}</span></h2>
+          <h2 class="picker-title">Choisir : ${CATS[cat].label}<span class="picker-count">${list.length} dispo${list.length > 1 ? "s" : ""}</span></h2>
           ${CATEGORY_TIP[cat] ? `<p class="picker-tip"><b>Conseil.</b> ${CATEGORY_TIP[cat]}</p>` : ""}
           ${pickerMode === "select" && chipBar ? `<div class="picker-filters">${chipBar}</div>` : ""}
           ${pickerMode === "compare" ? compareHtml() : `<div class="picker-body">
