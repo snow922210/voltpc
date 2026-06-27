@@ -980,6 +980,11 @@ a.contact-card:hover { border-color: var(--accent); transform: translateY(-3px);
 .brand-pick label { font-size: .8rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-faint); flex: none; }
 .brand-pick .select { flex: 1; min-width: 0; }
 
+/* Boîtier sans ventilateur : option ventilateur obligatoire */
+.fan-required { margin: 14px 0; padding: 14px 16px; border-radius: var(--radius-sm); background: var(--amber-wash, rgba(245,158,11,.1)); border: 1px solid rgba(245,158,11,.35); }
+.fan-required p { margin: 0 0 10px; font-size: .9rem; color: var(--text); line-height: 1.5; }
+.fan-required .select { width: 100%; }
+
 /* Rectangles « marques disponibles » sur la fiche produit */
 .variant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 12px; }
 .variant-card {

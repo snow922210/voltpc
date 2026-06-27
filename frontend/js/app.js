@@ -698,6 +698,10 @@ function manufacturer(p) {
   return p.brand;
 }
 
+// Boîtiers vendus SANS ventilateur : l'achat impose alors le choix d'un pack.
+const CASES_WITHOUT_FANS = new Set(["O11 Dynamic EVO", "O11 Vision", "H9 Flow", "Y70 Touch"]);
+const caseNeedsFans = (p) => p.category === "case" && CASES_WITHOUT_FANS.has(p.name);
+
 function productModel(p) {
   if (p.category === "gpu") { const g = gpuModel(p.name); if (g) return g; }
   if (p.category === "ram") {
@@ -2259,6 +2263,14 @@ async function viewProduct(app, id) {
     if (same.length > 1 && brandCount > 1) variants = same.sort((a, b) => a.price - b.price);
   } catch { /* sélecteur ignoré si le chargement échoue */ }
   const multi = variants.length > 1;
+  // Boîtier sans ventilateur → on charge les packs de ventilateurs (option obligatoire).
+  let fanOptions = [];
+  if (caseNeedsFans(p)) {
+    try {
+      fanOptions = (await api("/products?category=fan")).filter((f) => f.stock > 0).sort((a, b) => a.price - b.price);
+    } catch { /* si échec, on n'impose pas */ }
+  }
+  const needFans = fanOptions.length > 0;
   const discount = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
   const specEntries = Object.entries(p.specs).filter(([k]) => /^[A-ZÀ-Ü]/.test(k));
   app.innerHTML = `
@@ -2298,9 +2310,16 @@ async function viewProduct(app, id) {
         ${p.old_price ? `<span class="price-old">${fmt(p.old_price)}</span><span class="discount-chip">-${discount}%</span>` : ""}
       </div>
       ${stockHtml(p.stock)}
+      ${needFans ? `
+      <div class="fan-required">
+        <p>⚠️ Ce boîtier est livré <strong>sans ventilateur</strong>. Choisissez un pack de ventilateurs (obligatoire) :</p>
+        <select class="select" id="fanPick">
+          ${fanOptions.map((f) => `<option value="${f.id}">${esc(f.name)} · +${fmt(f.price)}</option>`).join("")}
+        </select>
+      </div>` : ""}
       <div class="buy-row">
         <button class="btn btn-primary" id="buyBtn" style="flex:1" ${p.stock <= 0 ? "disabled" : ""}>
-          ${p.stock <= 0 ? "Indisponible" : "Ajouter au panier"}
+          ${p.stock <= 0 ? "Indisponible" : needFans ? "Ajouter le boîtier + ventilateurs" : "Ajouter au panier"}
         </button>
       </div>
       <div class="pp-actions">
@@ -2330,7 +2349,16 @@ async function viewProduct(app, id) {
     </div>
   </section>`;
 
-  $("#buyBtn").onclick = () => addToCart(p, 1);
+  $("#buyBtn").onclick = () => {
+    if (needFans) {
+      const fan = fanOptions.find((f) => f.id === +$("#fanPick").value) || fanOptions[0];
+      addToCart(fan, 1, true);
+      addToCart(p, 1, true);
+      toast(`Boîtier + ${fan.name} ajoutés`, "success");
+    } else {
+      addToCart(p, 1);
+    }
+  };
   $("#ppBack").onclick = () => { if (history.length > 1) history.back(); else go("/catalogue"); };
   const brandPick = $("#brandPick");
   if (brandPick) brandPick.onchange = (e) => go("/produit/" + e.target.value);
