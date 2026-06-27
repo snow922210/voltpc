@@ -1531,8 +1531,11 @@ async function renderBudgetBuilder() {
         </div>
         <button class="btn void-btn void-btn-primary" id="bbAdd"><span>Ajouter au panier</span><b aria-hidden="true">+</b></button>
       </div>
-      <input type="range" id="bbRange" class="bb-range" min="${MIN}" max="${MAX}" step="${STEP}" value="${def}"
-        aria-label="Budget de la configuration">
+      <div class="bb-slider">
+        <div class="bb-track"><div class="bb-fill" id="bbFill"></div></div>
+        <input type="range" id="bbRange" class="bb-range" min="${MIN}" max="${MAX}" step="${STEP}" value="${def}"
+          aria-label="Budget de la configuration">
+      </div>
       <div class="bb-ticks"><span>${fmt(MIN)}</span><span>${fmt(MAX)}</span></div>
       <ul class="bb-parts" id="bbParts"></ul>
       <div class="bb-total"><span>Total estimé</span><strong id="bbTotal"></strong></div>
@@ -1542,10 +1545,11 @@ async function renderBudgetBuilder() {
   let current = [];
   const update = () => {
     const budget = +range.value;
+    const fill = `${(budget - MIN) / (MAX - MIN) * 100}%`;
     // Le curseur compose une TOUR (composants seuls) ; les 4 configs sont des bundles.
     current = composeForBudget(budget, byCat, PREBUILT_CORE_ROLES);
     const total = prebuiltTotal(current);
-    range.style.setProperty("--bb-fill", `${(budget - MIN) / (MAX - MIN) * 100}%`);
+    range.closest(".bb-slider").style.setProperty("--bb-fill", fill);
     $("#bbAmount", host).textContent = fmt(budget);
     $("#bbPower", host).innerHTML = budgetPowerLabel(budget);
     $("#bbTotal", host).textContent = fmt(total);
