@@ -888,6 +888,34 @@ async function finishLogin(data) {
   else render();
 }
 
+// Ajoute un bouton « œil » à chaque champ mot de passe de la modale d'auth pour
+// afficher/masquer la saisie. Idempotent (peut être rappelé sans dupliquer).
+const EYE_SHOW = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const EYE_HIDE = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.2 4.1M6.5 6.5A18 18 0 0 0 2 12s3.5 7 10 7a10.9 10.9 0 0 0 4.4-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`;
+
+function setupPasswordToggles() {
+  $$("#authModal input[type=password]").forEach((input) => {
+    if (input.dataset.pwEnhanced) return;
+    input.dataset.pwEnhanced = "1";
+    const wrap = document.createElement("span");
+    wrap.className = "pw-field";
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "pw-toggle";
+    btn.setAttribute("aria-label", "Afficher le mot de passe");
+    btn.innerHTML = EYE_SHOW;
+    btn.onclick = () => {
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      btn.innerHTML = show ? EYE_HIDE : EYE_SHOW;
+      btn.setAttribute("aria-label", show ? "Masquer le mot de passe" : "Afficher le mot de passe");
+    };
+    wrap.appendChild(btn);
+  });
+}
+
 function setupAuth() {
   $("#authClose").onclick = () => { resetAuthView(); closeAuth(); };
   // Fermeture sur clic en dehors — mais SEULEMENT si le clic a aussi COMMENCÉ
@@ -909,10 +937,12 @@ function setupAuth() {
     };
   });
 
-  const handle = (endpoint) => async (e) => {
+  const handle = (endpoint, prep) => async (e) => {
     e.preventDefault();
     const form = e.target;
     const body = Object.fromEntries(new FormData(form));
+    // Validation/transformation optionnelle avant envoi (renvoyer false = abandon).
+    if (prep && prep(body, form) === false) return;
     const btn = $("button[type=submit]", form);
     btn.disabled = true;
     try {
@@ -933,7 +963,14 @@ function setupAuth() {
     }
   };
   $("#loginForm").onsubmit = handle("/auth/login");
-  $("#registerForm").onsubmit = handle("/auth/register");
+  $("#registerForm").onsubmit = handle("/auth/register", (body) => {
+    if (body.password !== body.password_confirm) {
+      toast("Les mots de passe ne correspondent pas", "error");
+      return false;
+    }
+    delete body.password_confirm;   // champ de confirmation : non attendu côté API
+  });
+  setupPasswordToggles();
 
   // Étape de vérification : saisie du code reçu par email.
   $("#verifyForm").onsubmit = async (e) => {
@@ -1115,6 +1152,7 @@ async function render() {
     else if (path === "configurateur") await viewBuilder(app);
     else if (path === "comparer") await viewCompare(app);
     else if (path === "qui-sommes-nous") viewAbout(app);
+    else if (path === "contact") viewContact(app);
     else if (path === "mentions-legales") viewLegal(app, "mentions");
     else if (path === "cgv") viewLegal(app, "cgv");
     else if (path === "confidentialite") viewLegal(app, "privacy");
@@ -1155,7 +1193,6 @@ async function viewHome(app) {
         <div class="void-readout">
           <div><strong id="statCount">280+</strong><span>pieces en stock</span></div>
           <div><strong>3</strong><span>machines pretes</span></div>
-          <div><strong>0</strong><span>distraction</span></div>
         </div>
       </div>
 
@@ -1178,16 +1215,6 @@ async function viewHome(app) {
       <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton void-skeleton' style='min-height:420px'></div>".repeat(3)}</div>
     </section>
 
-    <section class="void-console" data-void-sep>
-      <div>
-        <span>Control room</span>
-        <h2>Le vide autour. Les choix devant.</h2>
-      </div>
-      <div class="void-console-lines" aria-hidden="true">
-        <i></i><i></i><i></i><i></i><i></i>
-      </div>
-    </section>
-
     <section class="section void-section">
       <div class="section-head"><h2>Entr&eacute;es du catalogue</h2><a href="/catalogue">Tout voir &rarr;</a></div>
       <div class="cat-grid" id="catGrid">${"<div class='skeleton void-skeleton' style='min-height:130px'></div>".repeat(12)}</div>
@@ -1196,16 +1223,6 @@ async function viewHome(app) {
     <section class="section void-section">
       <div class="section-head"><h2>S&eacute;lection VoltCore</h2><a href="/catalogue">Tout le catalogue &rarr;</a></div>
       <div id="featuredGrid">${skeletons(4)}</div>
-    </section>
-
-    <section class="section void-section">
-      <div class="promo-banner void-promo">
-        <div>
-          <h3>SUMMER20 : -20 % sur le site</h3>
-          <p>Un code simple, une interface plus tranchante, et le catalogue complet en quelques secondes.</p>
-        </div>
-        <a class="btn void-btn void-btn-primary" href="/catalogue"><span>Voir le catalogue</span><b aria-hidden="true">&rarr;</b></a>
-      </div>
     </section>
 
     <section class="section void-section">
@@ -1423,13 +1440,49 @@ function viewAbout(app) {
   </section>`;
 }
 
+function viewContact(app) {
+  app.innerHTML = `
+  <section class="content-page contact-page">
+    <nav class="breadcrumb"><a href="/">Accueil</a> / Nous contacter</nav>
+    <div class="content-hero compact">
+      <span class="eyebrow">Support VoltCore</span>
+      <h1>Une question ? Nous sommes là pour vous aider.</h1>
+      <p>Notre équipe répond aux questions sur les produits, les commandes, le suivi de livraison et le service après-vente.</p>
+    </div>
+    <div class="contact-grid">
+      <a class="contact-card" href="mailto:support@voltcore.fr">
+        <div class="contact-ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
+        <h2>Par e-mail</h2>
+        <p>Écrivez-nous à tout moment, nous répondons sous 24&nbsp;h ouvrées.</p>
+        <strong>support@voltcore.fr</strong>
+      </a>
+      <div class="contact-card">
+        <div class="contact-ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <h2>Horaires</h2>
+        <p>Du lundi au vendredi, de 9&nbsp;h à 18&nbsp;h.</p>
+        <strong>Réponse sous 24&nbsp;h ouvrées</strong>
+      </div>
+      <div class="contact-card">
+        <div class="contact-ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h2>Suivi de commande</h2>
+        <p>Précisez votre numéro de commande et l'e-mail utilisé lors de l'achat.</p>
+        <strong>Espace « Mon compte »</strong>
+      </div>
+    </div>
+    <div class="content-actions">
+      <a class="btn btn-primary" href="mailto:support@voltcore.fr">Envoyer un e-mail</a>
+      <a class="btn btn-ghost" href="/compte">Mon compte</a>
+    </div>
+  </section>`;
+}
+
 const LEGAL_PAGES = {
   mentions: {
     title: "Mentions légales",
     intro: "Informations d'identification, de contact et de responsabilité de la boutique VoltCore.",
     sections: [
       ["Éditeur du site", "VoltCore, boutique française de composants PC. Avant mise en production, compléter la raison sociale, la forme juridique, le capital, l'adresse du siège, le SIRET/RCS, le numéro de TVA si applicable et le responsable de publication."],
-      ["Contact", "Pour toute question ou réclamation : support@voltpc.fr. Les demandes liées aux commandes doivent préciser le numéro de commande et l'adresse e-mail utilisée lors de l'achat."],
+      ["Contact", "Pour toute question ou réclamation : support@voltcore.fr. Les demandes liées aux commandes doivent préciser le numéro de commande et l'adresse e-mail utilisée lors de l'achat."],
       ["Hébergement", "Site hébergé sur Render pour la démonstration, avec service applicatif FastAPI et base de données de développement. Remplacer par les informations exactes de l'hébergeur en production."],
       ["Facturation", "Une facture PDF est générée après paiement et reste disponible depuis l'espace client. Les mentions société des factures doivent être renseignées dans la configuration de production."],
       ["Propriété intellectuelle", "Les textes, interfaces et éléments de marque VoltCore sont protégés. Les photos produits référencées indiquent leurs crédits dans le fichier dédié."],
@@ -1460,7 +1513,7 @@ const LEGAL_PAGES = {
       ["Cookies", "Les cookies strictement nécessaires permettent le panier, la session et la sécurité. Les cookies de mesure d'audience ou de marketing ne doivent être utilisés qu'après consentement."],
       ["Sécurité", "Les accès sensibles sont protégés par authentification. Les données clients doivent être limitées aux personnes qui en ont besoin pour traiter les commandes et le support."],
       ["Durées de conservation", "Les données de compte sont conservées tant que le compte reste actif. Les données de commande et de facturation sont conservées selon les obligations comptables et légales applicables."],
-      ["Vos droits", "Vous pouvez demander l'accès, la rectification, l'effacement, la limitation, l'opposition ou la portabilité de vos données via support@voltpc.fr."],
+      ["Vos droits", "Vous pouvez demander l'accès, la rectification, l'effacement, la limitation, l'opposition ou la portabilité de vos données via support@voltcore.fr."],
     ],
   },
   returns: {
@@ -3032,7 +3085,7 @@ async function viewPaymentSuccess(app, params) {
     refreshCartDrawer();
     app.innerHTML = `
       <div class="empty-state">
-        <h2>Commande n°${res.order_id} confirmée !</h2>
+        <h2>Commande n°${res.order_seq || res.order_id} confirmée !</h2>
         <p style="margin-top:10px">Paiement reçu — total réglé : <strong>${fmt(res.amount_total)}</strong>.<br>Redirection vers vos commandes...</p>
         <br>
         <a class="btn btn-primary" href="${ordersUrl}">Voir mes commandes</a>
@@ -3157,7 +3210,7 @@ async function renderAccountOrders(panel) {
     ? orders.map((o) => `
       <div class="order-card">
         <div class="order-head">
-          <h3>Commande n°${o.id} — ${new Date(o.created_at * 1000).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</h3>
+          <h3>Commande n°${o.user_seq || o.id} — ${new Date(o.created_at * 1000).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</h3>
           ${statusBadge(o.status)}
         </div>
         <div class="order-items">

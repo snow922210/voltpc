@@ -161,6 +161,8 @@ img { max-width: 100%; }
 .nav .chev { font-size: 0.55rem; opacity: 0.6; vertical-align: 2px; }
 .nav-sale { color: var(--accent); font-weight: 600; }
 .nav-sale:hover { color: var(--accent-ink); background: var(--accent-wash); }
+.nav-contact { font-weight: 600; }
+.nav-contact:hover { color: var(--accent); background: var(--accent-wash); }
 
 /* ─── Sous-menus déroulants ─── */
 .nav-item { position: relative; }
@@ -797,6 +799,27 @@ body.picker-open .compare-bar { display: none; }
 .auth-hint a:hover { color: var(--accent-ink); text-decoration: underline; }
 .auth-hint code { color: var(--accent); }
 
+/* Champ mot de passe avec bouton « œil » afficher/masquer */
+.pw-field { position: relative; display: block; }
+.pw-field input { padding-right: 46px; }
+.pw-toggle {
+ position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+ display: grid; place-items: center; width: 34px; height: 34px;
+ background: none; border: none; border-radius: 9px;
+ color: var(--text-faint); cursor: pointer; transition: color 0.2s, background 0.2s;
+}
+.pw-toggle:hover { color: var(--text); background: var(--surface); }
+.pw-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* En-tête de la modale connexion/inscription */
+.auth-head { text-align: center; margin-bottom: 18px; }
+.auth-brand {
+ font-family: "Bricolage Grotesque", sans-serif;
+ font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; color: var(--text);
+}
+.auth-brand em { font-style: normal; color: var(--accent); }
+.auth-sub { margin-top: 4px; font-size: 0.85rem; color: var(--text-faint); }
+
 /* ─── Checkout ─── */
 .checkout-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px; align-items: start; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-xs); }
@@ -878,6 +901,32 @@ body.picker-open .compare-bar { display: none; }
  flex-wrap: wrap;
  margin-top: 26px;
 }
+
+/* Page « Nous contacter » */
+.contact-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 16px;
+ margin-top: 22px;
+}
+.contact-card {
+ display: block;
+ background: var(--surface);
+ border: 1px solid var(--border);
+ border-radius: var(--radius);
+ padding: 26px 24px;
+ transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+a.contact-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.contact-ico {
+ display: grid; place-items: center;
+ width: 48px; height: 48px; margin-bottom: 14px;
+ border-radius: 14px; color: var(--accent);
+ background: var(--accent-wash);
+}
+.contact-card h2 { font-size: 1.05rem; margin-bottom: 8px; }
+.contact-card p { color: var(--text-dim); font-size: 0.92rem; line-height: 1.6; margin-bottom: 12px; }
+.contact-card strong { color: var(--accent); font-size: 0.98rem; }
 
 .legal-consent {
  display: flex;

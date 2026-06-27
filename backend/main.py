@@ -218,6 +218,20 @@ def init_db() -> None:
             conn.execute("ALTER TABLE orders ADD COLUMN stock_restored INTEGER NOT NULL DEFAULT 0")
         if "checkout_return_token" not in order_cols:
             conn.execute("ALTER TABLE orders ADD COLUMN checkout_return_token TEXT")
+        # ─ Migration : numéro de commande PROPRE au client ─
+        # Chaque client voit ses commandes numérotées 1, 2, 3… (et non l'id
+        # global partagé par tous). Fixé à la création, donc stable même si une
+        # commande est ensuite annulée. Backfill des commandes existantes par
+        # ordre chronologique, client par client.
+        if "user_seq" not in order_cols:
+            conn.execute("ALTER TABLE orders ADD COLUMN user_seq INTEGER")
+            for u in conn.execute("SELECT DISTINCT user_id FROM orders").fetchall():
+                rows = conn.execute(
+                    "SELECT id FROM orders WHERE user_id = ? ORDER BY created_at, id",
+                    (u["user_id"],),
+                ).fetchall()
+                for n, r in enumerate(rows, start=1):
+                    conn.execute("UPDATE orders SET user_seq = ? WHERE id = ?", (n, r["id"]))
         # ─ Migration : URL d'image personnalisée par produit ─
         product_cols = {r["name"] for r in conn.execute("PRAGMA table_info(products)")}
         if "image_url" not in product_cols:
@@ -264,6 +278,7 @@ def _init_db_pg() -> None:
         for stmt in PG_SCHEMA:
             conn.execute(stmt)
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS checkout_return_token TEXT")
+        conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_seq INTEGER")
         _seed_db(conn)
 
 
@@ -1440,16 +1455,21 @@ def create_pending_order(conn: sqlite3.Connection, user: sqlite3.Row,
     sans paiement — voir cancel_order() et purge_expired_orders().
     """
     return_token = secrets.token_urlsafe(32)
+    # Numéro de commande propre au client (1, 2, 3…) : nombre de commandes déjà
+    # passées par ce client + 1. Indépendant de l'id global partagé.
+    user_seq = conn.execute(
+        "SELECT COUNT(*) FROM orders WHERE user_id = ?", (user["id"],)
+    ).fetchone()[0] + 1
     cur = conn.execute(
         """INSERT INTO orders (user_id, subtotal, discount, shipping, total,
            promo_code, ship_name, ship_address, ship_city, ship_zip, status,
-           created_at, stock_reserved, checkout_return_token)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1,?)""",
+           created_at, stock_reserved, checkout_return_token, user_seq)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1,?,?)""",
         (user["id"], computed["subtotal"], computed["discount"],
          computed["shipping"], computed["total"],
          body.promo_code.strip().upper() if computed["promo"] else None,
          body.ship_name, body.ship_address, body.ship_city, body.ship_zip,
-         "en attente de paiement", time.time(), return_token),
+         "en attente de paiement", time.time(), return_token, user_seq),
     )
     order_id = cur.lastrowid
     for p, qty in computed["lines"]:
@@ -1584,6 +1604,7 @@ def finalize_order_paid(order_id: int, session_id: Optional[str] = None) -> bool
     # peut pas faire échouer la finalisation (mailer ne lève jamais).
     email_order = {
         "id": order_id,
+        "user_seq": order["user_seq"],
         "customer_name": customer["name"] if customer else order["ship_name"],
         "customer_email": customer["email"] if customer else None,
         "ship_name": order["ship_name"], "ship_address": order["ship_address"],
@@ -1597,12 +1618,14 @@ def finalize_order_paid(order_id: int, session_id: Optional[str] = None) -> bool
     threading.Thread(
         target=_confirmation_with_invoice, args=(email_order, email_items), daemon=True
     ).start()
-    # …et notification au(x) gérant(s) (emails listés dans ADMIN_EMAILS).
-    admins = list(admin_emails())
-    if admins:
+    # …et notification de commande au gérant. Les emails de commandes ne sont
+    # envoyés qu'à une seule adresse (réglable via ORDER_NOTIFY_EMAIL, défaut
+    # yohannlemire@gmail.com) — indépendamment de la liste ADMIN_EMAILS.
+    notify = os.environ.get("ORDER_NOTIFY_EMAIL", "yohannlemire@gmail.com").strip()
+    if notify:
         threading.Thread(
             target=send_admin_notification,
-            args=(email_order, email_items, admins), daemon=True,
+            args=(email_order, email_items, [notify]), daemon=True,
         ).start()
     return True
 

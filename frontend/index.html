@@ -34,7 +34,7 @@
  <link rel="dns-prefetch" href="//checkout.stripe.com">
  <link rel="dns-prefetch" href="//js.stripe.com">
  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
- <link rel="stylesheet" href="/css/style.css?v=142">
+ <link rel="stylesheet" href="/css/style.css?v=143">
  <script>
   /* Thème appliqué avant le rendu (évite tout flash). Préférence enregistrée,
     sinon réglage système. */
@@ -104,7 +104,7 @@
     <div class="nav-menu" id="menuPeriph"></div>
    </div>
    <a href="/configurateur" data-nav="configurateur">Configurateur</a>
-   <a href="/catalogue?promo=1" class="nav-sale">Promos</a>
+   <a href="/contact" data-nav="contact" class="nav-contact">Nous contacter</a>
   </nav>
 
   <div class="header-search">
@@ -173,7 +173,7 @@
     <span class="footer-line">✓ Espace client</span>
    </div>
   </div>
-  <div class="footer-bottom">© 2026 VoltCore. Tous droits réservés. Photos produits : <a href="/images/credits.json" style="text-decoration:underline">Wikimedia Commons</a> (licences libres).</div>
+  <div class="footer-bottom">© 2026 VoltCore. Tous droits réservés.</div>
  </footer>
 
  <!-- Panier latéral -->
@@ -191,6 +191,10 @@
  <div class="modal-overlay" id="authModal" hidden>
   <div class="modal" role="dialog" aria-modal="true">
    <button class="modal-close" id="authClose" aria-label="Fermer la fenêtre de connexion">✕</button>
+   <div class="auth-head">
+    <span class="auth-brand">Volt<em>Core</em></span>
+    <p class="auth-sub">Accédez à votre espace client</p>
+   </div>
    <div class="auth-tabs">
     <button class="auth-tab active" data-tab="login">Connexion</button>
     <button class="auth-tab" data-tab="register">Inscription</button>
@@ -218,6 +222,7 @@
     <label>Nom<input type="text" name="name" required minlength="2" placeholder="Jean Dupont"></label>
     <label>E-mail<input type="email" name="email" required placeholder="vous@exemple.fr"></label>
     <label>Mot de passe<input type="password" name="password" required minlength="8" placeholder="8 caractères minimum"></label>
+    <label>Confirmer le mot de passe<input type="password" name="password_confirm" required minlength="8" placeholder="Saisissez à nouveau"></label>
     <button class="btn btn-primary" type="submit">Créer mon compte</button>
    </form>
    <form id="verifyForm" class="auth-form" hidden>
@@ -236,6 +241,6 @@
 
  <!-- three.min.js (589 Ko) + hero-void.js : chargés à la demande par app.js,
       uniquement sur l'accueil (gros gain CWV/LCP sur les autres pages). -->
- <script src="/js/app.js?v=116"></script>
+ <script src="/js/app.js?v=118"></script>
 </body>
 </html>

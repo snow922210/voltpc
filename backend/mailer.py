@@ -69,7 +69,8 @@ def _eur(n: float) -> str:
 
 def _build_message(cfg: dict, order: dict, items: list[dict]) -> EmailMessage:
     shop = cfg["shop"]
-    oid = order["id"]
+    # Numéro affiché au client : son propre compteur (1, 2, 3…), pas l'id global.
+    oid = order.get("user_seq") or order["id"]
 
     lignes_txt = "\n".join(
         f"  - {i['quantity']} × {i['product_name']} : {_eur(i['unit_price'] * i['quantity'])}"

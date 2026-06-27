@@ -339,8 +339,18 @@ def checkout_status(response: Response, session_id: str, return_token: str = "")
                         (int(order_id),),
                     )
 
+    # Numéro propre au client (1, 2, 3…) pour l'affichage de confirmation.
+    user_seq = None
+    if order_id:
+        with db() as conn:
+            row = conn.execute(
+                "SELECT user_seq FROM orders WHERE id = ?", (int(order_id),)
+            ).fetchone()
+            if row:
+                user_seq = row["user_seq"]
     return {
         "order_id": int(order_id) if order_id else None,
+        "order_seq": user_seq,
         "payment_status": payment_status,
         "amount_total": (_field(session, "amount_total") or 0) / 100,
     }
