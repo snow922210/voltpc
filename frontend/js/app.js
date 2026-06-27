@@ -1270,17 +1270,39 @@ const PREBUILT_CATEGORIES = {
 };
 const PREBUILT_ROLES = Object.keys(PREBUILT_CATEGORIES);
 
-// Machines composées DYNAMIQUEMENT depuis le catalogue. `level` = position
-// cible (0 = entrée de gamme … 1 = haut de gamme) dans chaque catégorie, triée
-// par prix. Plus aucune référence produit figée : les configurations restent
-// cohérentes même après un reseed/réorganisation du catalogue (corrige le bug
-// où les ids pointaient vers de mauvaises catégories — GPU = écran, etc.).
+// Machines composées DYNAMIQUEMENT depuis le catalogue, PAR TRANCHE DE BUDGET.
+// Chaque config vise un budget total ; le budget est réparti par poste puis on
+// retient, dans chaque catégorie, le composant le plus performant qui tient dans
+// son enveloppe → des configs équilibrées et rentables (meilleur rapport
+// perf/prix). Aucune référence produit figée : insensible aux reseed du catalogue.
 const PREBUILTS = [
-  { key: "pulse", tier: "Essentiel", name: "VoltCore Pulse", tag: "Bureautique & e-sport 1080p", featured: false, level: 0.10, ids: {} },
-  { key: "spark", tier: "Entrée gaming", name: "VoltCore Spark", tag: "Gaming 1080p haute fréquence", featured: false, level: 0.38, ids: {} },
-  { key: "surge", tier: "Performance", name: "VoltCore Surge", tag: "1440p haut niveau & création", featured: true, level: 0.66, ids: {} },
-  { key: "apex", tier: "Ultra haut de gamme", name: "VoltCore Apex", tag: "4K ultra & IA", featured: false, level: 0.94, ids: {} },
+  { key: "pulse", tier: "Essentiel", name: "VoltCore Pulse", tag: "Bureautique & e-sport 1080p", featured: false, budget: 750, ids: {} },
+  { key: "spark", tier: "Entrée gaming", name: "VoltCore Spark", tag: "Gaming 1080p haute fréquence", featured: false, budget: 1300, ids: {} },
+  { key: "surge", tier: "Performance", name: "VoltCore Surge", tag: "1440p haut niveau & création", featured: true, budget: 2200, ids: {} },
+  { key: "apex", tier: "Ultra haut de gamme", name: "VoltCore Apex", tag: "4K ultra & IA", featured: false, budget: 4200, ids: {} },
 ];
+
+// Répartition indicative du budget par poste (somme ≈ 1). On concentre sur le
+// GPU puis le CPU (postes qui portent les perfs), on économise sur boîtier / RAM
+// / stockage, sans rogner sur l'alimentation ni le refroidissement (stabilité).
+const BUDGET_SPLIT = {
+  "Carte graphique": 0.36,
+  "Processeur": 0.18,
+  "Carte mère": 0.10,
+  "Mémoire": 0.07,
+  "Stockage": 0.08,
+  "Refroidissement": 0.06,
+  "Alimentation": 0.08,
+  "Boîtier": 0.07,
+};
+
+// Dans une liste triée par prix croissant, retient le composant le plus cher
+// qui tient dans l'enveloppe ; à défaut (tout est plus cher), le moins cher.
+function pickForBudget(list, alloc) {
+  let chosen = list[0];
+  for (const p of list) { if (p.price <= alloc) chosen = p; else break; }
+  return chosen;
+}
 
 const prebuiltRoleLabel = (role) => ({
   "Carte graphique": "GPU",
@@ -1310,8 +1332,8 @@ async function loadPrebuiltProducts() {
     for (const role of PREBUILT_ROLES) {
       const list = byCat.get(PREBUILT_CATEGORIES[role]);
       if (!list || !list.length) continue;
-      const idx = Math.min(list.length - 1, Math.round(b.level * (list.length - 1)));
-      const p = list[idx];
+      const alloc = b.budget * (BUDGET_SPLIT[role] || 0.1);
+      const p = pickForBudget(list, alloc);
       b.ids[role] = p.id;
       byId.set(p.id, p);
     }

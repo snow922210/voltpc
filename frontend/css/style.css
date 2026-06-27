@@ -2359,7 +2359,10 @@ body {
 }
 
 .product-grid {
- grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+ /* auto-fill (et non auto-fit) : avec peu d'articles (favoris, 1 résultat de
+    recherche) les cartes gardent leur largeur au lieu de s'étirer sur toute la
+    ligne — sinon le visuel 4/3 devient gigantesque. */
+ grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
  gap: var(--card-gap);
 }
 
