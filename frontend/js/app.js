@@ -1532,7 +1532,8 @@ async function renderBudgetBuilder() {
         <button class="btn void-btn void-btn-primary" id="bbAdd"><span>Ajouter au panier</span><b aria-hidden="true">+</b></button>
       </div>
       <div class="bb-slider">
-        <div class="bb-track"><div class="bb-fill" id="bbFill"></div></div>
+        <div class="bb-track" aria-hidden="true"><div class="bb-fill"><i class="bb-flow"></i></div></div>
+        <output class="bb-budget-pop" id="bbBudgetPop" for="bbRange"></output>
         <input type="range" id="bbRange" class="bb-range" min="${MIN}" max="${MAX}" step="${STEP}" value="${def}"
           aria-label="Budget de la configuration">
       </div>
@@ -1542,6 +1543,7 @@ async function renderBudgetBuilder() {
     </div>`;
 
   const range = $("#bbRange", host);
+  const slider = range.closest(".bb-slider");
   let current = [];
   const update = () => {
     const budget = +range.value;
@@ -1549,7 +1551,9 @@ async function renderBudgetBuilder() {
     // Le curseur compose une TOUR (composants seuls) ; les 4 configs sont des bundles.
     current = composeForBudget(budget, byCat, PREBUILT_CORE_ROLES);
     const total = prebuiltTotal(current);
-    range.closest(".bb-slider").style.setProperty("--bb-fill", fill);
+    slider.style.setProperty("--bb-fill", fill);
+    range.setAttribute("aria-valuetext", fmt(budget));
+    $("#bbBudgetPop", host).textContent = fmt(budget);
     $("#bbAmount", host).textContent = fmt(budget);
     $("#bbPower", host).innerHTML = budgetPowerLabel(budget);
     $("#bbTotal", host).textContent = fmt(total);
@@ -1558,6 +1562,18 @@ async function renderBudgetBuilder() {
     ).join("");
   };
   range.oninput = update;
+  const startDrag = () => slider.classList.add("is-dragging");
+  const stopDrag = () => {
+    slider.classList.remove("is-dragging");
+    slider.classList.remove("is-settling");
+    void slider.offsetWidth;
+    slider.classList.add("is-settling");
+    window.setTimeout(() => slider.classList.remove("is-settling"), 520);
+  };
+  range.addEventListener("pointerdown", startDrag);
+  range.addEventListener("pointerup", stopDrag);
+  range.addEventListener("pointercancel", stopDrag);
+  range.addEventListener("change", stopDrag);
   $("#bbAdd", host).onclick = () => addPartsToCart(current, "Configuration sur mesure");
   update();
 }
