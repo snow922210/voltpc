@@ -258,6 +258,38 @@ img { max-width: 100%; }
 
 .header-actions { display: flex; align-items: center; gap: 8px; }
 .header-search svg, .icon-btn svg { display: block; flex-shrink: 0; }
+
+/* Bouton hamburger : masqué sur desktop, affiché quand la nav passe en menu.
+   (.header .menu-btn pour passer devant .icon-btn dans la cascade) */
+.header .menu-btn { display: none; }
+
+/* Menu mobile (tiroir latéral gauche) */
+.mobile-menu {
+ position: fixed; inset: 0 auto 0 0; width: min(330px, 86vw);
+ z-index: 70; background: var(--surface); border-right: 1px solid var(--border);
+ box-shadow: var(--shadow-lg);
+ display: flex; flex-direction: column; overflow-y: auto;
+ transform: translateX(-100%); visibility: hidden;
+ transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.28s;
+}
+.mobile-menu.open { transform: none; visibility: visible; }
+.mobile-menu-head {
+ position: sticky; top: 0; z-index: 1; background: var(--surface);
+ display: flex; align-items: center; justify-content: space-between;
+ padding: 16px 18px; border-bottom: 1px solid var(--border);
+}
+.mobile-menu-body { padding: 14px 14px 32px; display: flex; flex-direction: column; gap: 2px; }
+.mm-link { padding: 12px; border-radius: 12px; font-weight: 600; font-size: 1rem; color: var(--text); }
+.mm-link:hover, .mm-link:active { background: var(--surface-2); }
+.mm-section { margin: 16px 12px 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); }
+.mm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.mm-cat { display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: 10px; font-size: 0.86rem; color: var(--text-dim); }
+.mm-cat:hover, .mm-cat:active { background: var(--accent-wash); color: var(--accent-ink); }
+.mm-ico { width: 22px; height: 22px; flex: none; display: grid; place-items: center; }
+.mm-ico svg { width: 100%; height: 100%; }
+.mm-all { padding: 10px 12px; font-weight: 600; color: var(--accent); font-size: 0.9rem; }
+.mm-foot { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+body.menu-open { overflow: hidden; }
 .icon-btn {
  position: relative;
  display: flex;
@@ -3413,4 +3445,16 @@ textarea,
   scroll-behavior: auto !important;
   transition-duration: 0.001ms !important;
  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Navigation mobile — hamburger + tiroir latéral
+   Placé en fin de feuille et sur-spécifié (.header …) pour passer
+   devant la barre de nav scrollable héritée (≤1080px) : sur mobile
+   on remplace la barre par un menu accessible donnant accès à toutes
+   les catégories (les sous-menus déroulants n'existaient pas en mobile).
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 1080px) {
+ .header .nav { display: none; }
+ .header .menu-btn { display: grid; place-items: center; }
 }

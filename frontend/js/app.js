@@ -3851,6 +3851,41 @@ function fillNavMenus() {
     `<a class="nav-menu-all" href="/catalogue?new=1">Toutes les nouveautés →</a>`;
 }
 
+/* ─── Menu mobile (navigation latérale) ─── */
+function fillMobileMenu() {
+  const body = $("#mobileMenuBody");
+  if (!body) return;
+  const cat = (k) => `<a class="mm-cat" href="${catUrl(k)}"><span class="mm-ico">${art(k, 24)}</span>${CATS[k].label}</a>`;
+  body.innerHTML = `
+    <a class="mm-link" href="/">Accueil</a>
+    <a class="mm-link" href="/configurateur">Configurateur</a>
+    <a class="mm-link" href="/contact">Nous contacter</a>
+    <div class="mm-section">Composants</div>
+    <div class="mm-grid">${COMPONENT_CATS.map(cat).join("")}</div>
+    <a class="mm-all" href="/catalogue">Tout le catalogue →</a>
+    <div class="mm-section">Périphériques</div>
+    <div class="mm-grid">${PERIPH_CATS.map(cat).join("")}</div>
+    <div class="mm-foot">
+      <a class="mm-link" href="/compte">Mon compte</a>
+    </div>`;
+  // Clic sur un lien → on laisse le routeur agir puis on referme le menu.
+  body.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeMenu));
+}
+
+function openMenu() {
+  $("#mobileMenu").classList.add("open");
+  $("#menuOverlay").hidden = false;
+  $("#menuBtn")?.setAttribute("aria-expanded", "true");
+  document.body.classList.add("menu-open");
+}
+function closeMenu() {
+  $("#mobileMenu").classList.remove("open");
+  $("#menuOverlay").hidden = true;
+  $("#menuBtn")?.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("menu-open");
+}
+window.closeMenu = closeMenu;
+
 /* ─── Thème clair / sombre ─── */
 function setupTheme() {
   const btn = $("#themeBtn");
@@ -3887,12 +3922,16 @@ function init() {
   updateCartCount();
   setupAuth();
   fillNavMenus();
+  fillMobileMenu();
 
   setupTheme();
   setupCookieBanner();
   $("#cartBtn").onclick = openCart;
   $("#cartClose").onclick = closeCart;
   $("#drawerOverlay").onclick = closeCart;
+  $("#menuBtn").onclick = openMenu;
+  $("#menuClose").onclick = closeMenu;
+  $("#menuOverlay").onclick = closeMenu;
   $("#accountBtn").onclick = async () => {
     const ordersUrl = "/compte?tab=orders";
     if (state.user) { go(ordersUrl, { force: true }); return; }
@@ -3908,7 +3947,7 @@ function init() {
   };
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      closeCart(); closeAuth();
+      closeCart(); closeAuth(); closeMenu();
       $$(".modal-overlay:not(#authModal)").forEach((m) => m.remove());
       document.body.classList.remove("picker-open");
     }
