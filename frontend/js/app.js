@@ -3236,14 +3236,20 @@ function renderPanelError(panel, retry) {
 }
 
 /* ─── Compte : commandes (avec annulation) ─── */
-async function renderAccountOrders(panel) {
+async function renderAccountOrders(panel, sub = "active") {
   panel.innerHTML = `<div class="skeleton" style="min-height:110px"></div>`;
   let orders;
   try { orders = await api("/orders"); }
-  catch { return renderPanelError(panel, () => renderAccountOrders(panel)); }
+  catch { return renderPanelError(panel, () => renderAccountOrders(panel, sub)); }
   const cancellable = new Set(["en attente de paiement", "payée", "préparée"]);
-  panel.innerHTML = orders.length
-    ? orders.map((o) => `
+  // Les commandes annulées sont rangées dans un onglet séparé pour ne pas
+  // encombrer indéfiniment la liste des commandes en cours.
+  const active = orders.filter((o) => o.status !== "annulée");
+  const cancelled = orders.filter((o) => o.status === "annulée");
+  if (sub === "cancelled" && !cancelled.length) sub = "active";
+  const list = sub === "cancelled" ? cancelled : active;
+
+  const card = (o) => `
       <div class="order-card">
         <div class="order-head">
           <h3>Commande n°${o.user_seq || o.id} — ${new Date(o.created_at * 1000).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</h3>
@@ -3258,16 +3264,30 @@ async function renderAccountOrders(panel) {
           ${o.status !== "en attente de paiement" ? `<button class="btn btn-ghost btn-sm" onclick="downloadInvoice(${o.id})">Télécharger la facture</button>` : ""}
           ${cancellable.has(o.status) ? `<button class="btn btn-ghost btn-sm order-cancel" data-cancel="${o.id}" style="color:var(--red)">Annuler la commande</button>` : ""}
         </div>
-      </div>`).join("")
+      </div>`;
+
+  const subtabs = cancelled.length ? `
+    <div class="order-subtabs">
+      <button class="order-subtab${sub === "active" ? " active" : ""}" data-sub="active">En cours (${active.length})</button>
+      <button class="order-subtab${sub === "cancelled" ? " active" : ""}" data-sub="cancelled">Annulées (${cancelled.length})</button>
+    </div>` : "";
+
+  const empty = sub === "cancelled"
+    ? `<div class="empty-state"><p>Aucune commande annulée.</p></div>`
+    : `<div class="empty-state"><p>Aucune commande en cours.</p><br><a class="btn btn-primary" href="/catalogue">Découvrir le catalogue</a></div>`;
+
+  panel.innerHTML = orders.length
+    ? subtabs + (list.length ? list.map(card).join("") : empty)
     : `<div class="empty-state"><p>Aucune commande pour le moment.</p><br><a class="btn btn-primary" href="/catalogue">Découvrir le catalogue</a></div>`;
 
+  $$("[data-sub]", panel).forEach((b) => b.onclick = () => renderAccountOrders(panel, b.dataset.sub));
   $$("[data-cancel]", panel).forEach((btn) => btn.onclick = async () => {
     if (!confirm("Annuler cette commande ? Le stock sera restitué.")) return;
     btn.disabled = true;
     try {
       const res = await api(`/orders/${btn.dataset.cancel}/cancel`, { method: "POST" });
       toast(res.refund_pending ? "Commande annulée — remboursement en cours de traitement" : "Commande annulée");
-      renderAccountOrders(panel);
+      renderAccountOrders(panel, sub);
     } catch (e) { toast(e.message, "error"); btn.disabled = false; }
   });
 }
