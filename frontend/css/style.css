@@ -980,6 +980,24 @@ a.contact-card:hover { border-color: var(--accent); transform: translateY(-3px);
 .brand-pick label { font-size: .8rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-faint); flex: none; }
 .brand-pick .select { flex: 1; min-width: 0; }
 
+/* Rectangles « marques disponibles » sur la fiche produit */
+.variant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 12px; }
+.variant-card {
+ position: relative; display: flex; flex-direction: column; gap: 6px;
+ padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+ background: var(--surface); cursor: pointer;
+ transition: border-color .18s, transform .18s, box-shadow .18s;
+}
+.variant-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow-sm); }
+.variant-card.current { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-wash); cursor: default; }
+.variant-brand { font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.variant-name { font-weight: 600; color: var(--text); font-size: .92rem; line-height: 1.35; flex: 1; }
+.variant-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.variant-price { font-family: var(--font-display); font-weight: 700; font-size: 1.12rem; color: var(--text); }
+.variant-stock { font-size: .72rem; color: var(--green); font-weight: 600; }
+.variant-stock.out { color: var(--text-faint); }
+.variant-tag { position: absolute; top: 10px; right: 10px; font-size: .64rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); background: var(--accent-wash); padding: 3px 7px; border-radius: 999px; }
+
 .legal-consent {
  display: flex;
  align-items: flex-start;

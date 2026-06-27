@@ -2410,7 +2410,31 @@ async function renderRecos(p) {
   const block = (title, items) => items.length
     ? `<section class="section"><div class="section-head"><h2>${title}</h2></div><div class="product-grid reco-grid">${items.map(productCard).join("")}</div></section>` : "";
 
+  // Marques disponibles : un rectangle par variante du même modèle (autres
+  // marques), affiché AU-DESSUS des compatibilités.
+  const model = productModel(p);
+  const variants = all.filter((x) => x.category === p.category && productModel(x) === model)
+    .sort((a, b) => a.price - b.price);
+  const variantBrands = new Set(variants.map((v) => v.brand)).size;
+  const variantBlock = (variants.length > 1 && variantBrands > 1) ? `
+    <section class="section">
+      <div class="section-head"><h2>Marques disponibles</h2></div>
+      <div class="variant-grid">
+        ${variants.map((v) => `
+          <article class="variant-card${v.id === p.id ? " current" : ""}" data-goto="/produit/${v.id}">
+            <span class="variant-brand">${esc(v.brand)}</span>
+            <span class="variant-name">${esc(v.name)}</span>
+            <span class="variant-foot">
+              <span class="variant-price">${fmt(v.price)}</span>
+              <span class="variant-stock${v.stock > 0 ? "" : " out"}">${v.stock > 0 ? "En stock" : "Rupture"}</span>
+            </span>
+            ${v.id === p.id ? `<span class="variant-tag">Sélectionné</span>` : ""}
+          </article>`).join("")}
+      </div>
+    </section>` : "";
+
   zone.innerHTML =
+    variantBlock +
     block("Compatible avec ce produit", compat) +
     block("Alternative moins chère", cheaper ? [cheaper] : []) +
     block("Alternative plus puissante", stronger ? [stronger] : []) +
