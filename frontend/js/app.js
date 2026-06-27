@@ -676,15 +676,15 @@ function productCard(p) {
 // que la puce (RTX 5070) est commune : on regroupe donc les variantes d'un même
 // modèle. Pour la RAM on regroupe par capacité + fréquence. Ailleurs, chaque
 // produit reste unique (sa clé = son nom → aucun regroupement).
+// Modèle GPU = la PUCE uniquement (sans la mémoire ni la gamme du fabricant) :
+// toutes les variantes d'une même puce sont regroupées (ex. RTX 5090 « Gaming
+// Trio » et « SUPRIM Liquid 32G » → un seul modèle « GeForce RTX 5090 »).
 function gpuModel(name) {
   let m = name.match(/(GeForce\s+(?:RTX|GTX)\s*\d{3,4})(\s*Ti)?(\s*Super)?/i);
-  let fam;
-  if (m) fam = (m[1] + (m[2] || "") + (m[3] || "")).replace(/\s+/g, " ").trim();
-  else if ((m = name.match(/(Radeon\s+RX\s*\d{3,4})(\s*(?:XTX|XT|GRE))?/i))) fam = (m[1] + (m[2] || "")).replace(/\s+/g, " ").trim();
-  else if ((m = name.match(/(Arc\s+[AB]\d{3})/i))) fam = m[1].replace(/\s+/g, " ").trim();
-  else return null;
-  const mem = name.match(/(\d+)\s*G(?:o|B)?\b/i);
-  return fam + (mem ? ` ${mem[1]} Go` : "");
+  if (m) return (m[1] + (m[2] || "") + (m[3] || "")).replace(/\s+/g, " ").trim();
+  if ((m = name.match(/(Radeon\s+RX\s*\d{3,4})(\s*(?:XTX|XT|GRE))?/i))) return (m[1] + (m[2] || "")).replace(/\s+/g, " ").trim();
+  if ((m = name.match(/(Arc\s+[AB]\d{3})/i))) return m[1].replace(/\s+/g, " ").trim();
+  return null;
 }
 // Constructeur (fabricant de la puce) plutôt que la marque de revente :
 // pour un GPU, NVIDIA / AMD / Intel et non MSI / ASUS / Gigabyte. Ailleurs, la
@@ -2253,16 +2253,8 @@ async function viewCatalog(app, params) {
 async function viewProduct(app, id) {
   app.innerHTML = skeletons(4);
   const p = await api("/products/" + id);
-  // Variantes du même modèle (autres marques) → sélecteur de marque.
-  let variants = [p];
-  try {
-    const sibs = await api("/products?category=" + encodeURIComponent(p.category));
-    const model = productModel(p);
-    const same = sibs.filter((s) => productModel(s) === model);
-    const brandCount = new Set(same.map((s) => s.brand)).size;
-    if (same.length > 1 && brandCount > 1) variants = same.sort((a, b) => a.price - b.price);
-  } catch { /* sélecteur ignoré si le chargement échoue */ }
-  const multi = variants.length > 1;
+  // Le choix de la marque/variante se fait via les rectangles « Marques
+  // disponibles » (voir renderRecos), pas par un menu déroulant.
   // Boîtier sans ventilateur → on charge les packs de ventilateurs (option obligatoire).
   let fanOptions = [];
   if (caseNeedsFans(p)) {
@@ -2295,15 +2287,8 @@ async function viewProduct(app, id) {
     </div>
     <div class="product-page-info">
       <span class="product-brand">${esc(p.brand)} · ${CATS[p.category]?.label ?? ""}</span>
-      <h1>${esc(multi ? productModel(p) : p.name)}</h1>
+      <h1>${esc(p.name)}</h1>
       <div class="product-rating">${stars(p.rating)} <span>${p.rating.toFixed(1)} — ${p.rating_count} avis</span></div>
-      ${multi ? `
-      <div class="brand-pick">
-        <label for="brandPick">Marque</label>
-        <select class="select" id="brandPick">
-          ${variants.map((v) => `<option value="${v.id}" ${v.id === p.id ? "selected" : ""}>${esc(v.brand)} — ${esc(v.name)} · ${fmt(v.price)}${v.stock <= 0 ? " (rupture)" : ""}</option>`).join("")}
-        </select>
-      </div>` : ""}
       <p class="desc">${esc(p.description)}</p>
       <div class="price-row">
         <span class="price">${fmt(p.price)}</span>
@@ -2360,8 +2345,6 @@ async function viewProduct(app, id) {
     }
   };
   $("#ppBack").onclick = () => { if (history.length > 1) history.back(); else go("/catalogue"); };
-  const brandPick = $("#brandPick");
-  if (brandPick) brandPick.onchange = (e) => go("/produit/" + e.target.value);
 
   // Galerie : clic sur une miniature → change l'image principale.
   $$("#ppThumbs .pp-thumb").forEach((btn) => btn.onclick = () => {
