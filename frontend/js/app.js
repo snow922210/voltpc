@@ -1420,7 +1420,10 @@ const findPrebuilt = (key) => PREBUILTS.find((b) => b.key === key);
 // pour composer des machines à la volée à n'importe quel budget.
 async function loadPrebuiltCatalog() {
   const wanted = new Set(Object.values(PREBUILT_CATEGORIES));
-  const all = await api(`/products?compact=1&limit=1000`);
+  // Vue compacte enrichie des seules specs nécessaires à la compatibilité :
+  // nettement plus légère que les fiches complètes, mais assez riche pour
+  // composer une vraie machine (socket, TDP, dimensions, puissance).
+  const all = await api(`/products?compact=1&compat=1&limit=1000`);
   const byCat = new Map();
   for (const p of all) {
     if (!wanted.has(p.category) || (p.stock ?? 0) <= 0) continue;
@@ -1431,31 +1434,205 @@ async function loadPrebuiltCatalog() {
   return byCat;
 }
 
-// Compose une machine pour un budget donné. 1) allocation par poste ;
-// 2) on dépense le budget restant en améliorant en priorité GPU puis CPU…
-// jusqu'à ce qu'aucune montée de gamme ne tienne dans le budget (rentable).
-function composeForBudget(budget, byCat, roles = PREBUILT_ROLES) {
-  const chosen = {};
-  let spent = 0;
-  for (const role of roles) {
-    const list = byCat.get(PREBUILT_CATEGORIES[role]);
-    if (!list || !list.length) continue;
-    const idx = pickIndexForBudget(list, budget * (BUDGET_SPLIT[role] || 0.1));
-    chosen[role] = { list, idx };
-    spent += list[idx].price;
+const partSpec = (p, key, label = key) => p?.specs?.[key] ?? p?.specs?.[label];
+const partWatts = (p) => Number(partSpec(p, "watts")) || specNum(partSpec(p, "Puissance"));
+const partTdp = (p) => Number(partSpec(p, "tdp_w")) || specNum(partSpec(p, "TDP"));
+const gpuLength = (p) => Number(partSpec(p, "length_mm")) || specNum(partSpec(p, "Longueur"));
+const caseGpuLength = (p) => Number(partSpec(p, "max_gpu_mm")) || specNum(partSpec(p, "GPU max")) || 999;
+const coolingCapacity = (p) => specNum(partSpec(p, "TDP supporté"));
+const storageTerabytes = (p) => {
+  const value = String(partSpec(p, "Capacité") || "");
+  const amount = specNum(value);
+  return /\bgo\b/i.test(value) ? amount / 1000 : amount;
+};
+
+function caseSupportsMotherboard(pcCase, motherboard) {
+  const board = String(partSpec(motherboard, "form_factor", "Format") || "").toLowerCase();
+  const tower = String(partSpec(pcCase, "Format") || "").toLowerCase();
+  if (!board || !tower) return true;
+  if (board.includes("e-atx")) return tower.includes("e-atx");
+  if (board.includes("atx") && !board.includes("micro")) return tower.includes("atx") && !tower.includes("mini");
+  if (board.includes("matx") || board.includes("micro")) return !tower.includes("mini-itx");
+  return true; // Une carte Mini-ITX tient dans tous les formats du catalogue.
+}
+
+function compatibleBudgetPart(role, product, chosen) {
+  const cpu = chosen["Processeur"]?.product;
+  const gpu = chosen["Carte graphique"]?.product;
+  const motherboard = chosen["Carte mère"]?.product;
+  if (role === "Carte mère" && cpu) {
+    const ram = chosen["Mémoire"]?.product;
+    const pcCase = chosen["Boîtier"]?.product;
+    return partSpec(product, "socket") === partSpec(cpu, "socket")
+      && (!ram || partSpec(product, "ram_type") === partSpec(ram, "ram_type"))
+      && (!pcCase || caseSupportsMotherboard(pcCase, product));
   }
-  const upgradeOrder = ["Carte graphique", "Processeur", "Stockage", "Mémoire", "Écran", "Carte mère"];
-  let improved = true;
-  while (improved) {
-    improved = false;
-    for (const role of upgradeOrder) {
-      const c = chosen[role];
-      if (!c) continue;
-      const cur = c.list[c.idx], next = c.list[c.idx + 1];
-      if (next && spent - cur.price + next.price <= budget) { spent += next.price - cur.price; c.idx++; improved = true; }
+  if (role === "Mémoire" && motherboard) return partSpec(product, "ram_type") === partSpec(motherboard, "ram_type");
+  if (role === "Refroidissement" && cpu) {
+    const sockets = partSpec(product, "sockets") || [];
+    return sockets.includes(partSpec(cpu, "socket")) && (!coolingCapacity(product) || coolingCapacity(product) >= partTdp(cpu));
+  }
+  if (role === "Boîtier") {
+    const gpuFits = !gpu || !gpuLength(gpu) || caseGpuLength(product) >= gpuLength(gpu);
+    return gpuFits && (!motherboard || caseSupportsMotherboard(product, motherboard));
+  }
+  if (role === "Alimentation" && (cpu || gpu)) {
+    const need = Math.ceil((150 + partTdp(cpu) + partTdp(gpu)) * 1.25 / 50) * 50;
+    return partWatts(product) >= need;
+  }
+  return true;
+}
+
+function bestBudgetPart(list, ceiling, score = perfScore) {
+  const affordable = list.filter((p) => p.price <= ceiling);
+  const pool = affordable.length ? affordable : list.slice(0, 1);
+  return pool.reduce((best, p) => {
+    const diff = score(p) - score(best);
+    return diff > 0 || (diff === 0 && p.price < best.price) ? p : best;
+  }, pool[0]);
+}
+
+function budgetCpuTier(p) {
+  const cores = Math.min(16, specNum(partSpec(p, "Cœurs")));
+  const boost = specNumMax(partSpec(p, "Boost") || partSpec(p, "Fréquence"));
+  const generation = /ryzen\s+\d\s+9\d{3}/i.test(p.name) ? 5
+    : /core ultra/i.test(p.name) ? 4
+    : /ryzen\s+\d\s+7\d{3}|i[579]-14/i.test(p.name) ? 2 : 0;
+  return cores * 2 + boost * 7 + (/x3d/i.test(p.name) ? 18 : 0) + generation;
+}
+
+function budgetRoleScore(role, p, chosen) {
+  if (role === "Carte mère") {
+    return (p.rating || 0) * 10 + specNum(partSpec(p, "M.2")) * 3 + (/wifi/i.test(p.name) ? 2 : 0);
+  }
+  if (role === "Refroidissement") {
+    const cpuTdp = partTdp(chosen["Processeur"]?.product);
+    return Math.min(coolingCapacity(p), Math.max(180, cpuTdp * 1.25)) / 5 + (p.rating || 0) * 2;
+  }
+  if (role === "Boîtier") return (p.rating || 0) * 10 + Math.min(5, caseGpuLength(p) / 100);
+  return perfScore(p);
+}
+
+// Élimine les produits dominés (plus chers sans être plus performants).
+// La recherche CPU × GPU travaille ainsi sur une petite frontière de Pareto
+// plutôt que sur tout le catalogue à chaque mouvement du curseur.
+function performanceFrontier(list, score) {
+  let best = -Infinity;
+  return [...list].sort((a, b) => a.price - b.price).filter((p) => {
+    const value = score(p);
+    if (value <= best) return false;
+    best = value;
+    return true;
+  });
+}
+
+// Compose une machine compatible et équilibrée. Le moteur évalue les couples
+// CPU/GPU, construit pour chacun la plateforme minimale valide, puis utilise le
+// budget restant sur les améliorations offrant le meilleur gain par euro.
+function composeForBudget(budget, byCat, roles = PREBUILT_ROLES) {
+  const lists = Object.fromEntries(roles.map((role) => [role, byCat.get(PREBUILT_CATEGORIES[role]) || []]));
+  const fixed = {};
+  const platformRoles = new Set(PREBUILT_CORE_ROLES);
+
+  // Les périphériques sont réservés avant la tour pour que les bundles ne
+  // consomment pas tout leur budget dans le GPU.
+  for (const role of roles.filter((r) => !platformRoles.has(r))) {
+    if (!lists[role].length) continue;
+    fixed[role] = { product: bestBudgetPart(lists[role], budget * (BUDGET_SPLIT[role] || .03)) };
+  }
+  const fixedSpent = Object.values(fixed).reduce((sum, c) => sum + c.product.price, 0);
+  const coreBudget = budget - fixedSpent;
+  const cpus = performanceFrontier((lists["Processeur"] || []).filter((cpu) => {
+    const socket = partSpec(cpu, "socket");
+    return socket !== "sTR5"
+      && !(budget >= 1800 && socket === "AM4")
+      && lists["Carte mère"]?.some((m) => partSpec(m, "socket") === socket)
+      && lists["Refroidissement"]?.some((c) => (partSpec(c, "sockets") || []).includes(socket));
+  }), budgetCpuTier);
+  const gpus = performanceFrontier(lists["Carte graphique"] || [], gpuTier);
+  let winner = null;
+
+  for (const cpu of cpus) {
+    for (const gpu of gpus) {
+      if (cpu.price > coreBudget * .30 || gpu.price > coreBudget * .58) continue;
+      const chosen = {
+        ...fixed,
+        "Processeur": { product: cpu },
+        "Carte graphique": { product: gpu },
+      };
+      const socket = partSpec(cpu, "socket");
+      const mobos = lists["Carte mère"].filter((p) => partSpec(p, "socket") === socket);
+      if (!mobos.length) continue;
+      chosen["Carte mère"] = {
+        product: bestBudgetPart(mobos, coreBudget * .08, (p) => budgetRoleScore("Carte mère", p, chosen)),
+      };
+
+      const ramType = partSpec(chosen["Carte mère"].product, "ram_type");
+      const targetRam = budget >= 2500 ? 64 : budget >= 1000 ? 32 : 16;
+      let rams = lists["Mémoire"].filter((p) => partSpec(p, "ram_type") === ramType && specNum(partSpec(p, "Capacité")) >= targetRam);
+      if (!rams.length) rams = lists["Mémoire"].filter((p) => partSpec(p, "ram_type") === ramType);
+      const coolers = lists["Refroidissement"].filter((p) => compatibleBudgetPart("Refroidissement", p, chosen));
+      const cases = lists["Boîtier"].filter((p) => compatibleBudgetPart("Boîtier", p, chosen));
+      if (!rams.length || !coolers.length || !cases.length) continue;
+      chosen["Mémoire"] = { product: bestBudgetPart(rams, coreBudget * .06) };
+      chosen["Refroidissement"] = { product: coolers[0] };
+      chosen["Boîtier"] = {
+        product: bestBudgetPart(cases, coreBudget * .06, (p) => budgetRoleScore("Boîtier", p, chosen)),
+      };
+
+      const psus = lists["Alimentation"].filter((p) => compatibleBudgetPart("Alimentation", p, chosen))
+        .sort((a, b) => partWatts(a) - partWatts(b) || a.price - b.price);
+      if (!psus.length) continue;
+      chosen["Alimentation"] = { product: psus[0] };
+      if (lists["Stockage"]?.length) {
+        const targetStorage = budget >= 3000 ? 2 : budget >= 1000 ? 1 : .48;
+        const storage = lists["Stockage"].filter((p) => storageTerabytes(p) >= targetStorage);
+        chosen["Stockage"] = { product: bestBudgetPart(storage.length ? storage : lists["Stockage"], coreBudget * .07) };
+      }
+
+      const spent = Object.values(chosen).reduce((sum, c) => sum + c.product.price, 0);
+      if (spent > budget) continue;
+      const gpuScore = gpuTier(gpu), cpuScore = budgetCpuTier(cpu);
+      const score = gpuScore * 2 + cpuScore * .85 - Math.max(0, gpuScore - cpuScore - 18) * .7;
+      if (!winner || score > winner.score || (score === winner.score && spent < winner.spent)) {
+        winner = { chosen, spent, score };
+      }
     }
   }
-  return roles.map((role) => chosen[role] ? { role, product: chosen[role].list[chosen[role].idx] } : null).filter(Boolean);
+
+  if (!winner) {
+    // Repli robuste pour un catalogue incomplet ou un budget exceptionnellement bas.
+    const chosen = { ...fixed };
+    for (const role of roles.filter((r) => !chosen[r] && lists[r]?.length)) chosen[role] = { product: lists[role][0] };
+    return roles.map((role) => chosen[role] ? { role, product: chosen[role].product } : null).filter(Boolean);
+  }
+
+  // Améliorations sûres : chaque candidate est revérifiée contre la plateforme
+  // courante et classée par gain de performance / euro.
+  const chosen = winner.chosen;
+  let spent = winner.spent;
+  const maxRam = budget < 1000 ? 16 : budget < 2500 ? 32 : budget < 4000 ? 64 : 96;
+  const upgradable = new Set(["Stockage", "Mémoire", "Carte mère", "Refroidissement", "Écran", "Clavier", "Souris", "Casque", "Tapis"]);
+  for (let pass = 0; pass < 24; pass++) {
+    let best = null;
+    for (const role of roles) {
+      if (!upgradable.has(role) || !chosen[role]) continue;
+      const current = chosen[role].product;
+      for (const candidate of lists[role] || []) {
+        if (role === "Mémoire" && specNum(partSpec(candidate, "Capacité")) > maxRam) continue;
+        const extra = candidate.price - current.price;
+        if (extra <= 0 || spent + extra > budget || !compatibleBudgetPart(role, candidate, chosen)) continue;
+        const gain = budgetRoleScore(role, candidate, chosen) - budgetRoleScore(role, current, chosen);
+        if (gain <= 0) continue;
+        const value = gain / extra;
+        if (!best || value > best.value || (value === best.value && gain > best.gain)) best = { role, candidate, extra, gain, value };
+      }
+    }
+    if (!best) break;
+    chosen[best.role] = { product: best.candidate };
+    spent += best.extra;
+  }
+  return roles.map((role) => chosen[role] ? { role, product: chosen[role].product } : null).filter(Boolean);
 }
 
 async function loadPrebuiltProducts() {
@@ -1538,25 +1715,35 @@ async function renderBudgetBuilder() {
           aria-label="Budget de la configuration">
       </div>
       <div class="bb-ticks"><span>${fmt(MIN)}</span><span>${fmt(MAX)}</span></div>
+      <div class="bb-smart" id="bbSmart" aria-live="polite"></div>
       <ul class="bb-parts" id="bbParts"></ul>
       <div class="bb-total"><span>Total estimé</span><strong id="bbTotal"></strong></div>
     </div>`;
 
   const range = $("#bbRange", host);
   const slider = range.closest(".bb-slider");
+  const buildCache = new Map();
   let current = [];
   const update = () => {
     const budget = +range.value;
     const fill = `${(budget - MIN) / (MAX - MIN) * 100}%`;
     // Le curseur compose une TOUR (composants seuls) ; les 4 configs sont des bundles.
-    current = composeForBudget(budget, byCat, PREBUILT_CORE_ROLES);
+    current = buildCache.get(budget) || composeForBudget(budget, byCat, PREBUILT_CORE_ROLES);
+    if (!buildCache.has(budget)) buildCache.set(budget, current);
     const total = prebuiltTotal(current);
+    const selected = Object.fromEntries(current.map(({ role, product }) => [role, product]));
+    const estimatedLoad = 150 + partTdp(selected["Processeur"]) + partTdp(selected["Carte graphique"]);
+    const psuHeadroom = Math.max(0, partWatts(selected["Alimentation"]) - estimatedLoad);
     slider.style.setProperty("--bb-fill", fill);
     range.setAttribute("aria-valuetext", fmt(budget));
     $("#bbBudgetPop", host).textContent = fmt(budget);
     $("#bbAmount", host).textContent = fmt(budget);
     $("#bbPower", host).innerHTML = budgetPowerLabel(budget);
     $("#bbTotal", host).textContent = fmt(total);
+    $("#bbSmart", host).innerHTML = `
+      <span class="bb-smart-ok">✓ Compatibilité vérifiée</span>
+      <span>⚡ ${Math.round(psuHeadroom)} W de marge</span>
+      <span>Budget utilisé à ${Math.round(total / budget * 100)} %</span>`;
     $("#bbParts", host).innerHTML = current.map(({ role, product }) =>
       `<li><span class="k">${prebuiltRoleLabel(role)}</span><span class="v">${esc(product.brand)} ${esc(product.name)}</span><span class="p">${fmt(product.price)}</span></li>`
     ).join("");

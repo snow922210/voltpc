@@ -1526,6 +1526,9 @@ a.contact-card:hover { border-color: var(--accent); transform: translateY(-3px);
 @keyframes bbIcePulse { 0% { transform: translate(-50%,-50%) scale(.8); opacity: .55; } 100% { transform: translate(-50%,-50%) scale(1.55); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .bb-fill, .bb-budget-pop, .bb-range::-webkit-slider-thumb { transition: none; } .bb-flow, .bb-slider.is-settling::before { animation: none; } }
 .bb-ticks { display: flex; justify-content: space-between; font-size: .74rem; color: var(--text-faint); margin-bottom: 12px; }
+.bb-smart { display: flex; flex-wrap: wrap; gap: 7px; margin: -2px 0 8px; color: var(--text-faint); font-size: .68rem; }
+.bb-smart span { padding: 4px 8px; border: 1px solid var(--border); border-radius: 999px; background: color-mix(in srgb, var(--surface-2) 72%, transparent); }
+.bb-smart .bb-smart-ok { color: #9bd9bc; border-color: color-mix(in srgb, #66c99a 30%, var(--border)); }
 .bb-parts { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 22px; }
 .bb-parts li { display: flex; gap: 10px; align-items: baseline; font-size: .86rem; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .bb-parts .k { color: var(--text-faint); width: 64px; flex: none; text-transform: uppercase; font-size: .66rem; font-weight: 700; letter-spacing: .04em; }

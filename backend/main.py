@@ -748,6 +748,8 @@ def product_out(row: sqlite3.Row) -> dict:
 
 def product_summary_out(row: sqlite3.Row) -> dict:
     d = dict(row)
+    if "specs" in d:
+        d["specs"] = json.loads(d["specs"])
     d["featured"] = bool(d["featured"])
     return d
 
@@ -801,14 +803,17 @@ def list_products(
     max_price: Optional[float] = None,
     ids: Optional[str] = None,
     compact: bool = False,
+    compat: bool = False,
     limit: Optional[int] = Query(None, ge=1, le=1000),
     sort: str = Query("featured", pattern="^(featured|performance|price_asc|price_desc|rating|name)$"),
 ):
-    cache_key = ("products", category, search, brand, min_price, max_price, ids, compact, limit, sort)
+    cache_key = ("products", category, search, brand, min_price, max_price, ids, compact, compat, limit, sort)
     cached = _cache_get(cache_key)
     if cached is not None:
         return cached
     summary_cols = "id, name, brand, category, price, old_price, stock, rating, rating_count, featured, badge, image_url"
+    if compact and compat:
+        summary_cols += ", specs"
     sql = f"SELECT {'*' if not compact or sort == 'performance' else summary_cols} FROM products WHERE 1=1"
     args: list = []
     id_list = []
