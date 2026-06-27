@@ -1213,6 +1213,7 @@ async function viewHome(app) {
       <div class="section-head"><h2>Machines pr&ecirc;tes</h2><a href="/configurateur">Composer le mien &rarr;</a></div>
       <p class="pb-sub">Quatre bases noires, lisibles, calibr&eacute;es pour comparer vite sans effet inutile.</p>
       <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton void-skeleton' style='min-height:420px'></div>".repeat(4)}</div>
+      <div class="budget-builder" id="budgetBuilder"></div>
     </section>
 
     <section class="section void-section">
@@ -1253,6 +1254,7 @@ async function viewHome(app) {
   bindProductCards(app, featured);
 
   renderPrebuilts();
+  renderBudgetBuilder();
   initHome3D();
 }
 
@@ -1316,7 +1318,10 @@ const findPrebuilt = (key) => PREBUILTS.find((b) => b.key === key);
 
 // Charge le catalogue, compose chaque machine (remplit b.ids role→id) et renvoie
 // une Map id→produit avec tous les composants retenus.
-async function loadPrebuiltProducts() {
+
+// Charge le catalogue groupé par catégorie (listes triées par prix croissant),
+// pour composer des machines à la volée à n'importe quel budget.
+async function loadPrebuiltCatalog() {
   const wanted = new Set(Object.values(PREBUILT_CATEGORIES));
   const all = await api(`/products?compact=1&limit=1000`);
   const byCat = new Map();
@@ -1326,16 +1331,29 @@ async function loadPrebuiltProducts() {
     byCat.get(p.category).push(p);
   }
   for (const list of byCat.values()) list.sort((a, b) => a.price - b.price);
+  return byCat;
+}
+
+// Compose une machine complète pour un budget donné (réparti par poste).
+function composeForBudget(budget, byCat) {
+  const parts = [];
+  for (const role of PREBUILT_ROLES) {
+    const list = byCat.get(PREBUILT_CATEGORIES[role]);
+    if (!list || !list.length) continue;
+    const alloc = budget * (BUDGET_SPLIT[role] || 0.1);
+    parts.push({ role, product: pickForBudget(list, alloc) });
+  }
+  return parts;
+}
+
+async function loadPrebuiltProducts() {
+  const byCat = await loadPrebuiltCatalog();
   const byId = new Map();
   for (const b of PREBUILTS) {
     b.ids = {};
-    for (const role of PREBUILT_ROLES) {
-      const list = byCat.get(PREBUILT_CATEGORIES[role]);
-      if (!list || !list.length) continue;
-      const alloc = b.budget * (BUDGET_SPLIT[role] || 0.1);
-      const p = pickForBudget(list, alloc);
-      b.ids[role] = p.id;
-      byId.set(p.id, p);
+    for (const { role, product } of composeForBudget(b.budget, byCat)) {
+      b.ids[role] = product.id;
+      byId.set(product.id, product);
     }
   }
   return byId;
@@ -1357,6 +1375,73 @@ function addPrebuiltToCart(b, byId) {
   fireVoltBurst();
   toast(`${b.name} ajouté : ${n} composants`, "success");
   openCart();
+}
+
+function addPartsToCart(parts, label = "Configuration") {
+  if (!state.user) {
+    requireAuth(() => addPartsToCart(parts, label));
+    toast("Connectez-vous pour enregistrer votre panier sur votre compte", "info");
+    return;
+  }
+  let n = 0;
+  parts.forEach(({ product }) => { if (product.stock > 0) { addToCart(product, 1, true); n++; } });
+  fireVoltBurst();
+  toast(`${label} ajoutée : ${n} composants`, "success");
+  openCart();
+}
+
+// Niveau de jeu indicatif selon le budget total.
+function budgetPowerLabel(b) {
+  if (b < 800) return "Bureautique &amp; e-sport · 1080p";
+  if (b < 1300) return "Gaming fluide · 1080p haute fréquence";
+  if (b < 2000) return "Gaming exigeant · 1440p";
+  if (b < 3000) return "Création &amp; gaming · 1440p/4K";
+  return "Ultra · 4K &amp; IA";
+}
+
+// Générateur de configuration accessible : un curseur de budget compose en
+// direct une machine complète et équilibrée pour le montant choisi.
+async function renderBudgetBuilder() {
+  const host = $("#budgetBuilder");
+  if (!host) return;
+  let byCat;
+  try { byCat = await loadPrebuiltCatalog(); }
+  catch { host.innerHTML = ""; return; }
+  const MIN = 500, MAX = 5000, STEP = 50, def = 1200;
+
+  host.innerHTML = `
+    <div class="bb-card">
+      <div class="bb-head">
+        <div>
+          <span class="pb-tier">Composez par budget</span>
+          <h3 class="bb-title">Un PC complet pour <span id="bbAmount"></span></h3>
+          <p class="bb-power" id="bbPower"></p>
+        </div>
+        <button class="btn void-btn void-btn-primary" id="bbAdd"><span>Ajouter au panier</span><b aria-hidden="true">+</b></button>
+      </div>
+      <input type="range" id="bbRange" class="bb-range" min="${MIN}" max="${MAX}" step="${STEP}" value="${def}"
+        aria-label="Budget de la configuration">
+      <div class="bb-ticks"><span>${fmt(MIN)}</span><span>${fmt(MAX)}</span></div>
+      <ul class="bb-parts" id="bbParts"></ul>
+      <div class="bb-total"><span>Total estimé</span><strong id="bbTotal"></strong></div>
+    </div>`;
+
+  const range = $("#bbRange", host);
+  let current = [];
+  const update = () => {
+    const budget = +range.value;
+    current = composeForBudget(budget, byCat);
+    const total = prebuiltTotal(current);
+    $("#bbAmount", host).textContent = fmt(budget);
+    $("#bbPower", host).innerHTML = budgetPowerLabel(budget);
+    $("#bbTotal", host).textContent = fmt(total);
+    $("#bbParts", host).innerHTML = current.map(({ role, product }) =>
+      `<li><span class="k">${prebuiltRoleLabel(role)}</span><span class="v">${esc(product.brand)} ${esc(product.name)}</span><span class="p">${fmt(product.price)}</span></li>`
+    ).join("");
+  };
+  range.oninput = update;
+  $("#bbAdd", host).onclick = () => addPartsToCart(current, "Configuration sur mesure");
+  update();
 }
 
 async function viewPrebuilt(app, key) {
