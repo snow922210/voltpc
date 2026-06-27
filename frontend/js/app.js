@@ -671,6 +671,71 @@ function productCard(p) {
   </article>`;
 }
 
+/* ─── Regroupement par modèle (afficher « RTX 5070 » + menu des marques) ─── */
+// Pour les GPU, la « marque » est le fabricant de la carte (MSI, ASUS…) alors
+// que la puce (RTX 5070) est commune : on regroupe donc les variantes d'un même
+// modèle. Pour la RAM on regroupe par capacité + fréquence. Ailleurs, chaque
+// produit reste unique (sa clé = son nom → aucun regroupement).
+function gpuModel(name) {
+  let m = name.match(/(GeForce\s+(?:RTX|GTX)\s*\d{3,4})(\s*Ti)?(\s*Super)?/i);
+  let fam;
+  if (m) fam = (m[1] + (m[2] || "") + (m[3] || "")).replace(/\s+/g, " ").trim();
+  else if ((m = name.match(/(Radeon\s+RX\s*\d{3,4})(\s*(?:XTX|XT|GRE))?/i))) fam = (m[1] + (m[2] || "")).replace(/\s+/g, " ").trim();
+  else if ((m = name.match(/(Arc\s+[AB]\d{3})/i))) fam = m[1].replace(/\s+/g, " ").trim();
+  else return null;
+  const mem = name.match(/(\d+)\s*G(?:o|B)?\b/i);
+  return fam + (mem ? ` ${mem[1]} Go` : "");
+}
+function productModel(p) {
+  if (p.category === "gpu") { const g = gpuModel(p.name); if (g) return g; }
+  if (p.category === "ram") {
+    const r = p.name.match(/(\d+)\s*Go\s+(DDR\d)[ -]?(\d{3,4})/i);
+    if (r) return `${r[1]} Go ${r[2].toUpperCase()}-${r[3]}`;
+  }
+  return p.name;  // unique → pas de regroupement
+}
+// Regroupe une liste (déjà triée) par modèle, en conservant l'ordre d'apparition.
+function groupByModel(products) {
+  const map = new Map();
+  for (const p of products) {
+    const key = p.category + "|" + productModel(p);
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(p);
+  }
+  return [...map.values()].map((items) => {
+    const sorted = items.slice().sort((a, b) => a.price - b.price);
+    return {
+      model: productModel(sorted[0]), items: sorted, rep: sorted[0],
+      min: sorted[0].price,
+      brands: [...new Set(sorted.map((p) => p.brand))],
+    };
+  });
+}
+// Carte « modèle » : un seul visuel pour plusieurs marques, prix « dès … ».
+function modelCard(g) {
+  const p = g.rep;
+  const n = g.brands.length;
+  return `
+  <article class="product-card model-card" data-goto="/produit/${p.id}">
+    <div class="product-visual" style="--tint:${tintOf(p)}">
+      ${art(p.category, hueOf(p))}
+      ${imgTag(p)}
+      <span class="model-badge">${n} marque${n > 1 ? "s" : ""}</span>
+    </div>
+    <div class="product-info">
+      <span class="product-brand">${n} marque${n > 1 ? "s" : ""} disponible${n > 1 ? "s" : ""}</span>
+      <h3 class="product-name">${esc(g.model)}</h3>
+      <div class="product-rating">${stars(p.rating)} <span>${p.rating.toFixed(1)}</span></div>
+      <div class="product-bottom">
+        <div class="price"><small class="price-from">dès</small> ${fmt(g.min)}</div>
+        <span class="add-btn model-go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="19" height="19"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </div>
+  </article>`;
+}
+
 /* ─── Panier ─── */
 function updateCartCount() {
   const n = state.cart.reduce((s, i) => s + i.qty, 0);
@@ -2045,15 +2110,23 @@ async function viewCatalog(app, params) {
   }
   $("#resultCount").textContent = `${products.length} produit${products.length > 1 ? "s" : ""}`;
 
-  // Pagination côté client : l'API renvoie tout, on affiche par tranches.
-  const pageCount = Math.max(1, Math.ceil(products.length / PER_PAGE));
+  // Regroupement par modèle : les variantes d'un même modèle (ex. RTX 5070 de
+  // marques différentes) sont réunies sur une seule carte ; on choisit la marque
+  // sur la fiche produit. Pagination côté client sur les groupes.
+  const groups = groupByModel(products);
+  const pageCount = Math.max(1, Math.ceil(groups.length / PER_PAGE));
   const page = Math.min(filters.page, pageCount);
-  const pageItems = products.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const pageGroups = groups.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  $("#catalogGrid").innerHTML = products.length
-    ? `<div class="product-grid">${pageItems.map(productCard).join("")}</div>${pagerHtml(page, pageCount)}`
+  // On ne regroupe en carte « modèle » que s'il existe au moins 2 marques
+  // distinctes (vrai choix de marque) ; sinon chaque variante reste une carte.
+  const cells = pageGroups.flatMap((g) => g.brands.length > 1 ? [modelCard(g)] : g.items.map(productCard));
+  $("#catalogGrid").innerHTML = groups.length
+    ? `<div class="product-grid">${cells.join("")}</div>${pagerHtml(page, pageCount)}`
     : `<div class="empty-state"><p>Aucun produit ne correspond à vos critères.</p></div>`;
-  bindProductCards(app, pageItems);
+  // Seules les cartes « produit » portent les actions panier/favori/comparer ;
+  // les cartes « modèle » mènent à la fiche pour choisir la marque.
+  bindProductCards(app, pageGroups.flatMap((g) => g.brands.length > 1 ? [] : g.items));
   $$("[data-page]", app).forEach((b) => b.onclick = () => { navigate({ page: Number(b.dataset.page) }); window.scrollTo({ top: 0 }); });
 
   // Marques disponibles (sur la catégorie courante, sans filtre marque)
@@ -2112,6 +2185,16 @@ async function viewCatalog(app, params) {
 async function viewProduct(app, id) {
   app.innerHTML = skeletons(4);
   const p = await api("/products/" + id);
+  // Variantes du même modèle (autres marques) → sélecteur de marque.
+  let variants = [p];
+  try {
+    const sibs = await api("/products?category=" + encodeURIComponent(p.category));
+    const model = productModel(p);
+    const same = sibs.filter((s) => productModel(s) === model);
+    const brandCount = new Set(same.map((s) => s.brand)).size;
+    if (same.length > 1 && brandCount > 1) variants = same.sort((a, b) => a.price - b.price);
+  } catch { /* sélecteur ignoré si le chargement échoue */ }
+  const multi = variants.length > 1;
   const discount = p.old_price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
   const specEntries = Object.entries(p.specs).filter(([k]) => /^[A-ZÀ-Ü]/.test(k));
   app.innerHTML = `
@@ -2136,8 +2219,15 @@ async function viewProduct(app, id) {
     </div>
     <div class="product-page-info">
       <span class="product-brand">${esc(p.brand)} · ${CATS[p.category]?.label ?? ""}</span>
-      <h1>${esc(p.name)}</h1>
+      <h1>${esc(multi ? productModel(p) : p.name)}</h1>
       <div class="product-rating">${stars(p.rating)} <span>${p.rating.toFixed(1)} — ${p.rating_count} avis</span></div>
+      ${multi ? `
+      <div class="brand-pick">
+        <label for="brandPick">Marque</label>
+        <select class="select" id="brandPick">
+          ${variants.map((v) => `<option value="${v.id}" ${v.id === p.id ? "selected" : ""}>${esc(v.brand)} — ${esc(v.name)} · ${fmt(v.price)}${v.stock <= 0 ? " (rupture)" : ""}</option>`).join("")}
+        </select>
+      </div>` : ""}
       <p class="desc">${esc(p.description)}</p>
       <div class="price-row">
         <span class="price">${fmt(p.price)}</span>
@@ -2178,6 +2268,8 @@ async function viewProduct(app, id) {
 
   $("#buyBtn").onclick = () => addToCart(p, 1);
   $("#ppBack").onclick = () => { if (history.length > 1) history.back(); else go("/catalogue"); };
+  const brandPick = $("#brandPick");
+  if (brandPick) brandPick.onchange = (e) => go("/produit/" + e.target.value);
 
   // Galerie : clic sur une miniature → change l'image principale.
   $$("#ppThumbs .pp-thumb").forEach((btn) => btn.onclick = () => {

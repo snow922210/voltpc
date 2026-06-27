@@ -966,6 +966,20 @@ a.contact-card:hover { border-color: var(--accent); transform: translateY(-3px);
 .order-subtab.active { background: var(--gradient); color: var(--on-primary); box-shadow: var(--shadow-accent); }
 .order-subtab:hover:not(.active) { color: var(--text); }
 
+/* Carte « modèle » (plusieurs marques) + sélecteur de marque fiche produit */
+.model-badge {
+ position: absolute; top: 8px; left: 8px; z-index: 2;
+ background: var(--accent); color: var(--on-primary);
+ font-size: .68rem; font-weight: 700; letter-spacing: .03em;
+ padding: 4px 9px; border-radius: 999px; box-shadow: var(--shadow-xs);
+}
+.price-from { color: var(--text-faint); font-weight: 500; font-size: .72rem; }
+.model-go { background: transparent; color: var(--accent); pointer-events: none; }
+.model-card { cursor: pointer; }
+.brand-pick { display: flex; align-items: center; gap: 10px; margin: 4px 0 4px; }
+.brand-pick label { font-size: .8rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-faint); flex: none; }
+.brand-pick .select { flex: 1; min-width: 0; }
+
 .legal-consent {
  display: flex;
  align-items: flex-start;
