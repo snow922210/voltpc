@@ -1192,7 +1192,7 @@ async function viewHome(app) {
         </div>
         <div class="void-readout">
           <div><strong id="statCount">280+</strong><span>pieces en stock</span></div>
-          <div><strong>3</strong><span>machines pretes</span></div>
+          <div><strong>4</strong><span>machines pretes</span></div>
         </div>
       </div>
 
@@ -1211,8 +1211,8 @@ async function viewHome(app) {
 
     <section class="section void-section prebuilts" id="prebuilts">
       <div class="section-head"><h2>Machines pr&ecirc;tes</h2><a href="/configurateur">Composer le mien &rarr;</a></div>
-      <p class="pb-sub">Trois bases noires, lisibles, calibr&eacute;es pour comparer vite sans effet inutile.</p>
-      <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton void-skeleton' style='min-height:420px'></div>".repeat(3)}</div>
+      <p class="pb-sub">Quatre bases noires, lisibles, calibr&eacute;es pour comparer vite sans effet inutile.</p>
+      <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton void-skeleton' style='min-height:420px'></div>".repeat(4)}</div>
     </section>
 
     <section class="section void-section">
@@ -1257,16 +1257,31 @@ async function viewHome(app) {
 }
 
 /* ─── PC prémontés (configs curées, compatibilité vérifiée) ─── */
+// Rôle d'une machine → catégorie du catalogue correspondante.
+const PREBUILT_CATEGORIES = {
+  "Processeur": "cpu",
+  "Carte graphique": "gpu",
+  "Mémoire": "ram",
+  "Carte mère": "motherboard",
+  "Stockage": "storage",
+  "Refroidissement": "cooling",
+  "Alimentation": "psu",
+  "Boîtier": "case",
+};
+const PREBUILT_ROLES = Object.keys(PREBUILT_CATEGORIES);
+
+// Machines composées DYNAMIQUEMENT depuis le catalogue. `level` = position
+// cible (0 = entrée de gamme … 1 = haut de gamme) dans chaque catégorie, triée
+// par prix. Plus aucune référence produit figée : les configurations restent
+// cohérentes même après un reseed/réorganisation du catalogue (corrige le bug
+// où les ids pointaient vers de mauvaises catégories — GPU = écran, etc.).
 const PREBUILTS = [
-  { key: "spark", tier: "Entrée gaming", name: "VoltCore Spark", tag: "Gaming 1080p haute fréquence", featured: false,
-    ids: { "Processeur": 141, "Carte graphique": 166, "Mémoire": 80, "Carte mère": 75, "Stockage": 89, "Refroidissement": 102, "Alimentation": 93, "Boîtier": 230 } },
-  { key: "surge", tier: "Performance", name: "VoltCore Surge", tag: "1440p haut niveau & création", featured: true,
-    ids: { "Processeur": 138, "Carte graphique": 169, "Mémoire": 81, "Carte mère": 214, "Stockage": 64, "Refroidissement": 105, "Alimentation": 223, "Boîtier": 100 } },
-  { key: "apex", tier: "Ultra haut de gamme", name: "VoltCore Apex", tag: "4K ultra & IA", featured: false,
-    ids: { "Processeur": 136, "Carte graphique": 17, "Mémoire": 20, "Carte mère": 28, "Stockage": 204, "Refroidissement": 243, "Alimentation": 225, "Boîtier": 38 } },
+  { key: "pulse", tier: "Essentiel", name: "VoltCore Pulse", tag: "Bureautique & e-sport 1080p", featured: false, level: 0.10, ids: {} },
+  { key: "spark", tier: "Entrée gaming", name: "VoltCore Spark", tag: "Gaming 1080p haute fréquence", featured: false, level: 0.38, ids: {} },
+  { key: "surge", tier: "Performance", name: "VoltCore Surge", tag: "1440p haut niveau & création", featured: true, level: 0.66, ids: {} },
+  { key: "apex", tier: "Ultra haut de gamme", name: "VoltCore Apex", tag: "4K ultra & IA", featured: false, level: 0.94, ids: {} },
 ];
 
-const PREBUILT_ROLES = ["Processeur", "Carte graphique", "Mémoire", "Carte mère", "Stockage", "Refroidissement", "Alimentation", "Boîtier"];
 const prebuiltRoleLabel = (role) => ({
   "Carte graphique": "GPU",
   "Processeur": "CPU",
@@ -1276,11 +1291,33 @@ const prebuiltRoleLabel = (role) => ({
   "Alimentation": "PSU",
 }[role] || role);
 const findPrebuilt = (key) => PREBUILTS.find((b) => b.key === key);
-const prebuiltIds = () => [...new Set(PREBUILTS.flatMap((b) => Object.values(b.ids)))];
-const loadPrebuiltProducts = async () => {
-  const all = await api(`/products?compact=1&ids=${prebuiltIds().join(",")}`);
-  return new Map(all.map((p) => [p.id, p]));
-};
+
+// Charge le catalogue, compose chaque machine (remplit b.ids role→id) et renvoie
+// une Map id→produit avec tous les composants retenus.
+async function loadPrebuiltProducts() {
+  const wanted = new Set(Object.values(PREBUILT_CATEGORIES));
+  const all = await api(`/products?compact=1&limit=1000`);
+  const byCat = new Map();
+  for (const p of all) {
+    if (!wanted.has(p.category) || (p.stock ?? 0) <= 0) continue;
+    if (!byCat.has(p.category)) byCat.set(p.category, []);
+    byCat.get(p.category).push(p);
+  }
+  for (const list of byCat.values()) list.sort((a, b) => a.price - b.price);
+  const byId = new Map();
+  for (const b of PREBUILTS) {
+    b.ids = {};
+    for (const role of PREBUILT_ROLES) {
+      const list = byCat.get(PREBUILT_CATEGORIES[role]);
+      if (!list || !list.length) continue;
+      const idx = Math.min(list.length - 1, Math.round(b.level * (list.length - 1)));
+      const p = list[idx];
+      b.ids[role] = p.id;
+      byId.set(p.id, p);
+    }
+  }
+  return byId;
+}
 const prebuiltParts = (b, byId) =>
   PREBUILT_ROLES.map((role) => ({ role, product: byId.get(b.ids[role]) })).filter((x) => x.product);
 const prebuiltTotal = (parts) => parts.reduce((s, { product }) => s + product.price, 0);
@@ -1367,8 +1404,7 @@ async function renderPrebuilts(preloaded) {
   if (!grid) return;
   let byId;
   try {
-    const all = preloaded || await api(`/products?compact=1&ids=${prebuiltIds().join(",")}`);
-    byId = new Map(all.map((p) => [p.id, p]));
+    byId = await loadPrebuiltProducts();
   } catch {
     grid.innerHTML = `<p style="color:var(--text-faint)">Configurations momentanément indisponibles.</p>`;
     return;
