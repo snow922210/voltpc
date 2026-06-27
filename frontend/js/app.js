@@ -686,6 +686,18 @@ function gpuModel(name) {
   const mem = name.match(/(\d+)\s*G(?:o|B)?\b/i);
   return fam + (mem ? ` ${mem[1]} Go` : "");
 }
+// Constructeur (fabricant de la puce) plutôt que la marque de revente :
+// pour un GPU, NVIDIA / AMD / Intel et non MSI / ASUS / Gigabyte. Ailleurs, la
+// marque EST le fabricant.
+function manufacturer(p) {
+  if (p.category === "gpu") {
+    if (/GeForce|RTX|GTX/i.test(p.name)) return "NVIDIA";
+    if (/Radeon|\bRX\b/i.test(p.name)) return "AMD";
+    if (/\bArc\b/i.test(p.name)) return "Intel";
+  }
+  return p.brand;
+}
+
 function productModel(p) {
   if (p.category === "gpu") { const g = gpuModel(p.name); if (g) return g; }
   if (p.category === "ram") {
@@ -1170,6 +1182,9 @@ function go(to, options = {}) {
 
 const skeletons = (n) => `<div class="product-grid">${"<div class='skeleton'></div>".repeat(n)}</div>`;
 let currentRenderToken = 0;
+// Quand vrai, le prochain render() ne remonte PAS la page (ex. application d'un
+// filtre catalogue : on reste à la position de lecture courante).
+let preserveScroll = false;
 
 function isStaleRender(token, app) {
   return token !== currentRenderToken || !app?.isConnected || app !== $("#app");
@@ -1203,7 +1218,8 @@ async function render() {
   $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === path.split("/")[0]));
   document.body.classList.toggle("void-home-active", isHome);
   if (!isHome) cleanupHome3D();
-  window.scrollTo({ top: 0 });
+  if (preserveScroll) preserveScroll = false;
+  else window.scrollTo({ top: 0 });
 
   try {
     if (isHome) await viewHome(app);
@@ -1334,42 +1350,54 @@ const PREBUILT_CATEGORIES = {
   "Refroidissement": "cooling",
   "Alimentation": "psu",
   "Boîtier": "case",
+  "Écran": "monitor",
+  "Clavier": "keyboard",
+  "Souris": "mouse",
+  "Casque": "headset",
+  "Tapis": "mousepad",
 };
+// Roles « tour » (composants PC) et roles « bundle » (tour + périphériques).
+const PREBUILT_CORE_ROLES = ["Processeur", "Carte graphique", "Mémoire", "Carte mère", "Stockage", "Refroidissement", "Alimentation", "Boîtier"];
 const PREBUILT_ROLES = Object.keys(PREBUILT_CATEGORIES);
 
 // Machines composées DYNAMIQUEMENT depuis le catalogue, PAR TRANCHE DE BUDGET.
-// Chaque config vise un budget total ; le budget est réparti par poste puis on
-// retient, dans chaque catégorie, le composant le plus performant qui tient dans
-// son enveloppe → des configs équilibrées et rentables (meilleur rapport
-// perf/prix). Aucune référence produit figée : insensible aux reseed du catalogue.
+// Les 4 configs sont des BUNDLES COMPLETS (tour + écran, clavier, souris, casque
+// micro, tapis). Le budget est réparti par poste puis on retient le composant le
+// plus performant qui tient dans son enveloppe, et une 2e passe dépense le
+// budget restant à améliorer GPU/CPU → configs équilibrées et rentables.
 const PREBUILTS = [
-  { key: "pulse", tier: "Essentiel", name: "VoltCore Pulse", tag: "Bureautique & e-sport 1080p", featured: false, budget: 750, ids: {} },
-  { key: "spark", tier: "Entrée gaming", name: "VoltCore Spark", tag: "Gaming 1080p haute fréquence", featured: false, budget: 1300, ids: {} },
-  { key: "surge", tier: "Performance", name: "VoltCore Surge", tag: "1440p haut niveau & création", featured: true, budget: 2200, ids: {} },
-  { key: "apex", tier: "Ultra haut de gamme", name: "VoltCore Apex", tag: "4K ultra & IA", featured: false, budget: 4200, ids: {} },
+  { key: "pulse", tier: "Essentiel", name: "VoltCore Pulse", tag: "Bundle complet — bureautique & e-sport 1080p", featured: false, budget: 1050, ids: {} },
+  { key: "spark", tier: "Entrée gaming", name: "VoltCore Spark", tag: "Bundle complet — gaming 1080p haute fréquence", featured: false, budget: 1750, ids: {} },
+  { key: "surge", tier: "Performance", name: "VoltCore Surge", tag: "Bundle complet — 1440p haut niveau & création", featured: true, budget: 2800, ids: {} },
+  { key: "apex", tier: "Ultra haut de gamme", name: "VoltCore Apex", tag: "Bundle complet — 4K ultra & IA", featured: false, budget: 5200, ids: {} },
 ];
 
-// Répartition indicative du budget par poste (somme ≈ 1). On concentre sur le
-// GPU puis le CPU (postes qui portent les perfs), on économise sur boîtier / RAM
-// / stockage, sans rogner sur l'alimentation ni le refroidissement (stabilité).
+// Répartition indicative du budget par poste (somme ≈ 1, bundle complet). On
+// concentre sur GPU puis CPU, on économise sur boîtier/RAM/périphériques, sans
+// rogner sur l'alimentation ni le refroidissement (stabilité).
 const BUDGET_SPLIT = {
-  "Carte graphique": 0.36,
-  "Processeur": 0.18,
-  "Carte mère": 0.10,
-  "Mémoire": 0.07,
-  "Stockage": 0.08,
-  "Refroidissement": 0.06,
-  "Alimentation": 0.08,
-  "Boîtier": 0.07,
+  "Carte graphique": 0.30,
+  "Processeur": 0.15,
+  "Carte mère": 0.08,
+  "Mémoire": 0.06,
+  "Stockage": 0.07,
+  "Refroidissement": 0.05,
+  "Alimentation": 0.07,
+  "Boîtier": 0.06,
+  "Écran": 0.09,
+  "Clavier": 0.025,
+  "Souris": 0.02,
+  "Casque": 0.03,
+  "Tapis": 0.01,
 };
 
-// Dans une liste triée par prix croissant, retient le composant le plus cher
-// qui tient dans l'enveloppe ; à défaut (tout est plus cher), le moins cher.
-function pickForBudget(list, alloc) {
-  let chosen = list[0];
-  for (const p of list) { if (p.price <= alloc) chosen = p; else break; }
-  return chosen;
+// Index du composant le plus cher tenant dans l'enveloppe (liste triée croissant).
+function pickIndexForBudget(list, alloc) {
+  let idx = 0;
+  for (let i = 0; i < list.length; i++) { if (list[i].price <= alloc) idx = i; else break; }
+  return idx;
 }
+function pickForBudget(list, alloc) { return list[pickIndexForBudget(list, alloc)]; }
 
 const prebuiltRoleLabel = (role) => ({
   "Carte graphique": "GPU",
@@ -1399,16 +1427,31 @@ async function loadPrebuiltCatalog() {
   return byCat;
 }
 
-// Compose une machine complète pour un budget donné (réparti par poste).
-function composeForBudget(budget, byCat) {
-  const parts = [];
-  for (const role of PREBUILT_ROLES) {
+// Compose une machine pour un budget donné. 1) allocation par poste ;
+// 2) on dépense le budget restant en améliorant en priorité GPU puis CPU…
+// jusqu'à ce qu'aucune montée de gamme ne tienne dans le budget (rentable).
+function composeForBudget(budget, byCat, roles = PREBUILT_ROLES) {
+  const chosen = {};
+  let spent = 0;
+  for (const role of roles) {
     const list = byCat.get(PREBUILT_CATEGORIES[role]);
     if (!list || !list.length) continue;
-    const alloc = budget * (BUDGET_SPLIT[role] || 0.1);
-    parts.push({ role, product: pickForBudget(list, alloc) });
+    const idx = pickIndexForBudget(list, budget * (BUDGET_SPLIT[role] || 0.1));
+    chosen[role] = { list, idx };
+    spent += list[idx].price;
   }
-  return parts;
+  const upgradeOrder = ["Carte graphique", "Processeur", "Stockage", "Mémoire", "Écran", "Carte mère"];
+  let improved = true;
+  while (improved) {
+    improved = false;
+    for (const role of upgradeOrder) {
+      const c = chosen[role];
+      if (!c) continue;
+      const cur = c.list[c.idx], next = c.list[c.idx + 1];
+      if (next && spent - cur.price + next.price <= budget) { spent += next.price - cur.price; c.idx++; improved = true; }
+    }
+  }
+  return roles.map((role) => chosen[role] ? { role, product: chosen[role].list[chosen[role].idx] } : null).filter(Boolean);
 }
 
 async function loadPrebuiltProducts() {
@@ -1416,7 +1459,7 @@ async function loadPrebuiltProducts() {
   const byId = new Map();
   for (const b of PREBUILTS) {
     b.ids = {};
-    for (const { role, product } of composeForBudget(b.budget, byCat)) {
+    for (const { role, product } of composeForBudget(b.budget, byCat)) {  // bundle complet
       b.ids[role] = product.id;
       byId.set(product.id, product);
     }
@@ -1495,8 +1538,10 @@ async function renderBudgetBuilder() {
   let current = [];
   const update = () => {
     const budget = +range.value;
-    current = composeForBudget(budget, byCat);
+    // Le curseur compose une TOUR (composants seuls) ; les 4 configs sont des bundles.
+    current = composeForBudget(budget, byCat, PREBUILT_CORE_ROLES);
     const total = prebuiltTotal(current);
+    range.style.setProperty("--bb-fill", `${(budget - MIN) / (MAX - MIN) * 100}%`);
     $("#bbAmount", host).textContent = fmt(budget);
     $("#bbPower", host).innerHTML = budgetPowerLabel(budget);
     $("#bbTotal", host).textContent = fmt(total);
@@ -2060,16 +2105,9 @@ async function viewCatalog(app, params) {
         ${Object.entries(CATS).map(([k, c]) => `
           <label class="filter-option"><input type="radio" name="cat" value="${k}" ${filters.cat === k ? "checked" : ""}> ${c.label}</label>`).join("")}
       </div>
-      <div class="filter-group" id="brandGroup"><span>Marque</span></div>
+      <div class="filter-group" id="brandGroup"><span>Constructeur</span></div>
       <div id="specGroup"></div>
-      <div class="filter-group">
-        <span>Prix (€)</span>
-        <div class="price-inputs">
-          <input type="number" id="minPrice" placeholder="Min" value="${esc(filters.min)}" min="0">
-          <span>—</span>
-          <input type="number" id="maxPrice" placeholder="Max" value="${esc(filters.max)}" min="0">
-        </div>
-      </div>
+      <div class="filter-group" id="priceGroup"><span>Prix (€)</span></div>
       <button class="btn btn-ghost btn-sm" id="resetFilters">Réinitialiser</button>
     </aside>
     <div>
@@ -2091,7 +2129,6 @@ async function viewCatalog(app, params) {
   const qs = new URLSearchParams();
   if (filters.cat) qs.set("category", filters.cat);
   if (filters.q) qs.set("search", filters.q);
-  if (filters.brand) qs.set("brand", filters.brand);
   if (filters.min) qs.set("min_price", filters.min);
   if (filters.max) qs.set("max_price", filters.max);
   qs.set("sort", filters.sort);
@@ -2099,6 +2136,9 @@ async function viewCatalog(app, params) {
   let products = await api("/products?" + qs.toString());
   if (filters.promo) products = products.filter((p) => p.old_price);
   if (filters.nouveau) products = products.filter((p) => p.badge === "Nouveau");
+  // Filtre constructeur côté client (NVIDIA/AMD/Intel pour les GPU, etc.).
+  const allForBrand = products.slice();
+  if (filters.brand) products = products.filter((p) => manufacturer(p) === filters.brand);
 
   // Filtres par caractéristiques (client) : on garde une base non filtrée par
   // specs pour proposer les options encore pertinentes.
@@ -2129,20 +2169,17 @@ async function viewCatalog(app, params) {
   bindProductCards(app, pageGroups.flatMap((g) => g.brands.length > 1 ? [] : g.items));
   $$("[data-page]", app).forEach((b) => b.onclick = () => { navigate({ page: Number(b.dataset.page) }); window.scrollTo({ top: 0 }); });
 
-  // Marques disponibles (sur la catégorie courante, sans filtre marque)
-  const brandQs = new URLSearchParams();
-  if (filters.cat) brandQs.set("category", filters.cat);
-  if (filters.q) brandQs.set("search", filters.q);
-  const all = filters.brand ? await api("/products?" + brandQs.toString()) : products;
-  const brands = [...new Set(all.map((p) => p.brand))].sort();
+  // Constructeurs disponibles (sur la catégorie courante, avant filtre).
+  const brands = [...new Set(allForBrand.map(manufacturer))].sort();
   $("#brandGroup").insertAdjacentHTML("beforeend",
-    `<label class="filter-option"><input type="radio" name="brand" value="" ${!filters.brand ? "checked" : ""}> Toutes</label>` +
+    `<label class="filter-option"><input type="radio" name="brand" value="" ${!filters.brand ? "checked" : ""}> Tous</label>` +
     brands.map((b) => `<label class="filter-option"><input type="radio" name="brand" value="${esc(b)}" ${filters.brand === b ? "checked" : ""}> ${esc(b)}</label>`).join(""));
 
   const navigate = (patch) => {
     // Changer un filtre ramène en page 1 ; seul un patch {page} conserve le reste.
     const next = { ...filters, ...patch };
-    if (!("page" in patch)) next.page = 1;
+    // Application d'un filtre (hors pagination) : on ne remonte pas la page.
+    if (!("page" in patch)) { next.page = 1; preserveScroll = true; }
     const p = new URLSearchParams();
     if (next.cat) p.set("cat", next.cat);
     if (next.q) p.set("q", next.q);
@@ -2175,10 +2212,37 @@ async function viewCatalog(app, params) {
   $$("input[name=cat]", app).forEach((r) => r.onchange = () => navigate({ cat: r.value, brand: "", spec: {} }));
   $$("input[name=brand]", app).forEach((r) => r.onchange = () => navigate({ brand: r.value }));
   $("#sortSelect").onchange = (e) => navigate({ sort: e.target.value });
-  const priceApply = () => navigate({ min: $("#minPrice").value, max: $("#maxPrice").value });
-  $("#minPrice").onchange = priceApply;
-  $("#maxPrice").onchange = priceApply;
   $("#resetFilters").onclick = () => { go("/catalogue"); };
+
+  // Curseur de prix à deux poignées (min/max) — bornes dérivées du catalogue.
+  const prices = allForBrand.map((p) => p.price);
+  if (prices.length) {
+    const lo = Math.floor(Math.min(...prices) / 10) * 10;
+    const hi = Math.ceil(Math.max(...prices) / 10) * 10;
+    const step = Math.max(1, Math.round((hi - lo) / 100 / 5) * 5) || 10;
+    const curMin = Math.max(lo, Math.min(+filters.min || lo, hi));
+    const curMax = Math.min(hi, Math.max(+filters.max || hi, lo));
+    $("#priceGroup").innerHTML = `<span>Prix (€)</span>
+      <div class="range-dual">
+        <div class="range-track"><div class="range-fill" id="prFill"></div></div>
+        <input type="range" id="prMin" min="${lo}" max="${hi}" step="${step}" value="${curMin}" aria-label="Prix minimum">
+        <input type="range" id="prMax" min="${lo}" max="${hi}" step="${step}" value="${curMax}" aria-label="Prix maximum">
+      </div>
+      <div class="range-readout"><span id="prMinLbl"></span><span id="prMaxLbl"></span></div>`;
+    const mn = $("#prMin"), mx = $("#prMax"), fill = $("#prFill"), mnl = $("#prMinLbl"), mxl = $("#prMaxLbl");
+    const span = hi - lo || 1;
+    const paint = () => {
+      const a = +mn.value, b = +mx.value;
+      fill.style.left = `${(a - lo) / span * 100}%`;
+      fill.style.right = `${(1 - (b - lo) / span) * 100}%`;
+      mnl.textContent = fmt(a); mxl.textContent = fmt(b);
+    };
+    mn.oninput = () => { if (+mn.value > +mx.value) mn.value = mx.value; paint(); };
+    mx.oninput = () => { if (+mx.value < +mn.value) mx.value = mn.value; paint(); };
+    const apply = () => navigate({ min: +mn.value > lo ? String(mn.value) : "", max: +mx.value < hi ? String(mx.value) : "" });
+    mn.onchange = apply; mx.onchange = apply;
+    paint();
+  }
 }
 
 /* ─── Vue : fiche produit ─── */
