@@ -67,6 +67,66 @@ def _eur(n: float) -> str:
     return f"{n:.2f} €".replace(".", ",")
 
 
+# ─── Gabarit d'email partagé ─────────────────────────────────────────
+# Tous les emails transactionnels partagent la même enveloppe (en-tête de
+# marque, liseré accent, pied de page contact) pour un rendu cohérent et
+# soigné. Mise en page par tables + styles inline = compatibilité maximale
+# (Gmail, Outlook, Apple Mail, clients mobiles).
+
+ACCENT = "#e0700f"
+INK = "#16161d"
+TEXT = "#2b303a"
+MUTED = "#8a909c"
+
+
+def _email_shell(cfg: dict, eyebrow: str, inner: str, preheader: str = "") -> str:
+    shop = cfg["shop"]
+    return f"""<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
+</head>
+<body style="margin:0;padding:0;background:#0e0e12;-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">{preheader}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0e0e12;padding:30px 14px">
+ <tr><td align="center">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:18px;overflow:hidden;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+   <tr><td style="background:{INK};padding:24px 34px">
+    <table role="presentation" width="100%"><tr>
+     <td style="font-size:21px;font-weight:800;letter-spacing:.5px;color:#ffffff">&#9889; {shop.upper()}</td>
+     <td align="right" style="font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:{ACCENT}">{eyebrow}</td>
+    </tr></table>
+   </td></tr>
+   <tr><td style="height:4px;background:{ACCENT}"></td></tr>
+   <tr><td style="padding:34px 34px 30px;color:{TEXT};font-size:15px;line-height:1.6">{inner}</td></tr>
+   <tr><td style="padding:22px 34px;background:#fafafb;border-top:1px solid #ececf1;color:{MUTED};font-size:12px;line-height:1.7;text-align:center">
+    <strong style="color:{INK}">{shop}</strong> — Composants PC haute performance<br>
+    Une question ? <a href="mailto:support@voltcore.fr" style="color:{ACCENT};text-decoration:none">support@voltcore.fr</a><br>
+    <span style="color:#b9bdc6">Site en cours de développement — aucun paiement réel, aucune livraison.</span>
+   </td></tr>
+  </table>
+ </td></tr>
+</table>
+</body></html>"""
+
+
+def _btn(href: str, label: str) -> str:
+    return (
+        f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 6px">'
+        f'<tr><td style="border-radius:10px;background:{ACCENT}">'
+        f'<a href="{href}" style="display:inline-block;padding:13px 26px;color:#ffffff;'
+        f'font-size:14px;font-weight:700;text-decoration:none;border-radius:10px">{label}</a>'
+        f'</td></tr></table>'
+    )
+
+
+def _code_box(code: str) -> str:
+    return (
+        f'<div style="font-size:34px;font-weight:800;letter-spacing:10px;color:{INK};'
+        f'background:#f5f5f8;border:1px solid #e6e6ec;border-radius:12px;'
+        f'padding:18px;margin:22px 0;text-align:center">{code}</div>'
+    )
+
+
 def _build_message(cfg: dict, order: dict, items: list[dict]) -> EmailMessage:
     shop = cfg["shop"]
     # Numéro affiché au client : son propre compteur (1, 2, 3…), pas l'id global.
@@ -113,34 +173,26 @@ L'équipe {shop}
         if order.get("discount") else ""
     )
 
-    html = f"""<!doctype html><html><body style="font-family:'Segoe UI',Arial,Helvetica,sans-serif;background:#f4f4f7;color:#1f2430;margin:0;padding:32px 16px">
-  <div style="max-width:560px;margin:auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e3e3ea">
-    <div style="height:4px;background:#e0700f"></div>
-    <div style="padding:34px 34px 28px">
-      <div style="font-size:22px;font-weight:800;letter-spacing:3px;color:#16161d">{shop.upper()}</div>
-      <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#e0700f;margin-top:5px">Confirmation de commande</div>
+    inner = f"""
+      <p style="margin:0 0 4px">Bonjour <strong>{order['customer_name']}</strong>,</p>
+      <p style="margin:0 0 24px;color:{TEXT}">Merci pour votre commande ! Votre paiement a bien été reçu et votre commande est en cours de préparation.</p>
 
-      <p style="color:#333a48;font-size:15px;line-height:1.6;margin:26px 0 0">Bonjour <strong>{order['customer_name']}</strong>,</p>
-      <p style="color:#333a48;font-size:15px;line-height:1.6;margin:6px 0 26px">Merci pour votre commande. Votre paiement a bien été reçu et votre commande est en cours de préparation.</p>
-
-      <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9aa0ab;margin-bottom:8px">Commande n°{oid}</div>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333a48">{lignes_html}
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:{MUTED};margin-bottom:10px">Commande n°{oid}</div>
+      <table role="presentation" style="width:100%;border-collapse:collapse;font-size:14px;color:{TEXT}">{lignes_html}
         {remise_row}
-        <tr><td style="padding:10px 0 0;color:#6b7280">Livraison</td><td style="padding:10px 0 0;text-align:right;color:#6b7280">{port_txt}</td></tr>
-        <tr><td style="padding:14px 0 0;font-weight:700;font-size:16px;color:#16161d;border-top:1px solid #ebebf0">Total réglé</td>
-            <td style="padding:14px 0 0;text-align:right;font-weight:700;font-size:16px;color:#16161d;border-top:1px solid #ebebf0">{_eur(order['total'])}</td></tr>
+        <tr><td style="padding:10px 0 0;color:{MUTED}">Livraison</td><td style="padding:10px 0 0;text-align:right;color:{MUTED}">{port_txt}</td></tr>
+        <tr><td style="padding:14px 0 0;font-weight:800;font-size:17px;color:{INK};border-top:2px solid #efeff3">Total réglé</td>
+            <td style="padding:14px 0 0;text-align:right;font-weight:800;font-size:17px;color:{ACCENT};border-top:2px solid #efeff3">{_eur(order['total'])}</td></tr>
       </table>
 
-      <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9aa0ab;margin:30px 0 8px">Adresse de livraison</div>
-      <p style="font-size:14px;line-height:1.6;margin:0;color:#333a48">
-        {order['ship_name']}<br>{order['ship_address']}<br>{order['ship_zip']} {order['ship_city']}</p>
+      <div style="margin-top:26px;background:#f7f7fa;border-radius:12px;padding:18px 20px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:{MUTED};margin-bottom:8px">Adresse de livraison</div>
+        <div style="font-size:14px;line-height:1.6;color:{TEXT}">{order['ship_name']}<br>{order['ship_address']}<br>{order['ship_zip']} {order['ship_city']}</div>
+      </div>
 
-      <p style="color:#6b7280;font-size:13px;line-height:1.6;margin:26px 0 0">Vous pouvez suivre votre commande depuis votre espace « Mon compte ».</p>
-      <p style="margin:22px 0 0;color:#333a48;font-size:14px">Cordialement,<br>L'équipe {shop}</p>
-    </div>
-    <div style="padding:18px 34px;background:#fafafb;border-top:1px solid #ebebf0;color:#9aa0ab;font-size:12px;text-align:center">{shop} — Merci de votre confiance</div>
-  </div>
-</body></html>"""
+      <p style="color:{MUTED};font-size:13px;line-height:1.6;margin:24px 0 0">Suivez votre commande à tout moment depuis votre espace « Mon compte ».</p>"""
+    html = _email_shell(cfg, "Confirmation de commande", inner,
+                        preheader=f"Commande n°{oid} confirmée — {_eur(order['total'])}")
 
     msg = EmailMessage()
     msg["Subject"] = f"Confirmation de votre commande {shop} n°{oid}"
@@ -182,24 +234,28 @@ Adresse de livraison :
 → Détail complet dans l'espace admin du site.
 """
 
-    html = f"""<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;background:#f4f4f7;color:#1f2430;margin:0;padding:24px">
-  <div style="max-width:560px;margin:auto;background:#ffffff;border-radius:14px;padding:28px;border:1px solid #e3e3ea">
-    <h1 style="margin:0 0 4px;font-size:20px;color:#16161d">🔔 Nouvelle commande — {shop}</h1>
-    <p style="color:#6b7280;margin:0 0 18px">Commande n°{oid} · <strong style="color:#1a9d63">{_eur(order['total'])}</strong></p>
-    <h2 style="font-size:15px;color:#16161d;border-bottom:2px solid #f0f0f4;padding-bottom:6px">👤 Client</h2>
-    <p style="font-size:14px;margin:6px 0 16px;color:#333a48">{order['customer_name']}<br>
-      <a href="mailto:{order['customer_email']}" style="color:#2563eb">{order['customer_email']}</a></p>
-    <h2 style="font-size:15px;color:#16161d;border-bottom:2px solid #f0f0f4;padding-bottom:6px">🛒 Articles</h2>
-    <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333a48">{lignes_html}
-      <tr><td style="padding:10px 0;font-weight:bold;color:#16161d;border-top:2px solid #f0f0f4">Total</td>
-          <td style="padding:10px 0;text-align:right;font-weight:bold;color:#16161d;border-top:2px solid #f0f0f4">{_eur(order['total'])}</td></tr>
-    </table>
-    <h2 style="font-size:15px;color:#16161d;border-bottom:2px solid #f0f0f4;padding-bottom:6px;margin-top:22px">📦 À expédier à</h2>
-    <p style="font-size:14px;line-height:1.6;margin:6px 0;color:#333a48">
-      {order['ship_name']}<br>{order['ship_address']}<br>{order['ship_zip']} {order['ship_city']}</p>
-    <p style="color:#6b7280;font-size:13px;margin-top:20px">Détail complet dans l'espace admin du site.</p>
-  </div>
-</body></html>"""
+    sec = f"font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:{MUTED};margin:24px 0 8px"
+    inner = f"""
+      <p style="margin:0 0 4px;font-size:16px;font-weight:700;color:{INK}">Nouvelle commande n°{oid}</p>
+      <p style="margin:0;color:{MUTED};font-size:14px">Montant : <strong style="color:{ACCENT};font-size:16px">{_eur(order['total'])}</strong></p>
+
+      <div style="{sec}">Client</div>
+      <p style="font-size:14px;margin:0;color:{TEXT}">{order['customer_name']}<br>
+        <a href="mailto:{order['customer_email']}" style="color:{ACCENT};text-decoration:none">{order['customer_email']}</a></p>
+
+      <div style="{sec}">Articles</div>
+      <table role="presentation" style="width:100%;border-collapse:collapse;font-size:14px;color:{TEXT}">{lignes_html}
+        <tr><td style="padding:12px 0 0;font-weight:800;color:{INK};border-top:2px solid #efeff3">Total</td>
+            <td style="padding:12px 0 0;text-align:right;font-weight:800;color:{INK};border-top:2px solid #efeff3">{_eur(order['total'])}</td></tr>
+      </table>
+
+      <div style="{sec}">À expédier à</div>
+      <div style="background:#f7f7fa;border-radius:12px;padding:16px 20px;font-size:14px;line-height:1.6;color:{TEXT}">
+        {order['ship_name']}<br>{order['ship_address']}<br>{order['ship_zip']} {order['ship_city']}</div>
+
+      <p style="color:{MUTED};font-size:13px;margin:22px 0 0">Détail complet dans l'espace admin du site.</p>"""
+    html = _email_shell(cfg, "Nouvelle commande", inner,
+                        preheader=f"Commande n°{oid} — {_eur(order['total'])} à expédier")
 
     msg = EmailMessage()
     msg["Subject"] = f"🔔 Nouvelle commande {shop} n°{oid} — {_eur(order['total'])}"
@@ -371,23 +427,20 @@ L'équipe {shop} ⚡
     suivi_html = ""
     if tracking:
         suivi_html = (
-            f"<div style='background:#f4f4f7;border:2px solid #e3e3ea;border-radius:10px;padding:16px;margin:18px 0'>"
-            f"<p style='margin:0 0 4px;color:#6b7280;font-size:13px'>Transporteur : <strong style='color:#16161d'>{carrier or 'Non précisé'}</strong></p>"
-            f"<p style='margin:0;color:#6b7280;font-size:13px'>Numéro de suivi : <strong style='color:#16161d;font-size:16px'>{tracking}</strong></p></div>"
+            f"<div style='background:#f7f7fa;border:1px solid #e6e6ec;border-radius:12px;padding:16px 20px;margin:20px 0'>"
+            f"<p style='margin:0 0 6px;color:{MUTED};font-size:13px'>Transporteur : <strong style='color:{INK}'>{carrier or 'Non précisé'}</strong></p>"
+            f"<p style='margin:0;color:{MUTED};font-size:13px'>Numéro de suivi : <strong style='color:{ACCENT};font-size:16px;letter-spacing:.5px'>{tracking}</strong></p></div>"
         )
-    html = f"""<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;background:#f4f4f7;color:#1f2430;margin:0;padding:24px">
-  <div style="max-width:520px;margin:auto;background:#ffffff;border-radius:14px;padding:28px;border:1px solid #e3e3ea">
-    <h1 style="margin:0 0 4px;font-size:22px;color:#16161d">⚡ {shop}</h1>
-    <p style="color:#e0700f;font-weight:bold;margin:0 0 20px">📦 Votre commande est en route</p>
-    <p style="color:#333a48">Bonjour <strong>{order.get('customer_name', '')}</strong>,<br>
-    Votre commande <strong>n°{oid}</strong> vient d'être expédiée !</p>
-    {suivi_html}
-    <h2 style="font-size:15px;color:#16161d;border-bottom:2px solid #f0f0f4;padding-bottom:6px">Adresse de livraison</h2>
-    <p style="font-size:14px;line-height:1.6;margin:6px 0;color:#333a48">
-      {order['ship_name']}<br>{order['ship_address']}<br>{order['ship_zip']} {order['ship_city']}</p>
-    <p style="margin-top:18px;color:#333a48">Merci de votre confiance,<br>L'équipe {shop} ⚡</p>
-  </div>
-</body></html>"""
+    inner = f"""
+      <p style="margin:0 0 4px;font-size:17px;font-weight:800;color:{INK}">Votre commande est en route &#128230;</p>
+      <p style="margin:0 0 18px;color:{TEXT}">Bonjour <strong>{order.get('customer_name', '')}</strong>, votre commande <strong>n°{oid}</strong> vient d'être expédiée !</p>
+      {suivi_html}
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:{MUTED};margin:22px 0 8px">Adresse de livraison</div>
+      <div style="background:#f7f7fa;border-radius:12px;padding:16px 20px;font-size:14px;line-height:1.6;color:{TEXT}">
+        {order['ship_name']}<br>{order['ship_address']}<br>{order['ship_zip']} {order['ship_city']}</div>
+      <p style="margin:22px 0 0;color:{TEXT}">Merci de votre confiance.</p>"""
+    html = _email_shell(cfg, "Commande expédiée", inner,
+                        preheader=f"Votre commande n°{oid} a été expédiée")
     msg = EmailMessage()
     msg["Subject"] = f"📦 Votre commande {shop} n°{oid} a été expédiée"
     msg["From"] = cfg["from"]
@@ -416,16 +469,14 @@ Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement cet em
 
 L'équipe {shop} ⚡
 """
-    html = f"""<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;background:#f4f4f7;color:#1f2430;margin:0;padding:24px">
-  <div style="max-width:480px;margin:auto;background:#ffffff;border-radius:14px;padding:28px;border:1px solid #e3e3ea;text-align:center">
-    <h1 style="margin:0 0 4px;font-size:22px;color:#16161d">⚡ {shop}</h1>
-    <p style="color:#e0700f;font-weight:bold;margin:0 0 22px">Vérification de votre compte</p>
-    <p style="font-size:14px;margin:0 0 18px;color:#333a48">Bonjour <strong>{name}</strong>, voici votre code de vérification :</p>
-    <div style="font-size:34px;font-weight:bold;letter-spacing:10px;color:#16161d;background:#f4f4f7;border:2px solid #e3e3ea;border-radius:10px;padding:18px;margin:0 0 18px">{code}</div>
-    <p style="color:#6b7280;font-size:13px;margin:0">Valable 15 minutes. Saisissez-le sur le site pour activer votre compte.</p>
-    <p style="color:#9aa0ab;font-size:12px;margin-top:20px">Si vous n'êtes pas à l'origine de cette inscription, ignorez cet email.</p>
-  </div>
-</body></html>"""
+    inner = f"""
+      <p style="margin:0 0 6px">Bonjour <strong>{name}</strong>,</p>
+      <p style="margin:0 0 4px;color:{TEXT}">Bienvenue chez {shop} ! Voici votre code de vérification pour activer votre compte :</p>
+      {_code_box(code)}
+      <p style="color:{MUTED};font-size:13px;margin:0;text-align:center">Valable 15 minutes.</p>
+      <p style="color:#b9bdc6;font-size:12px;margin:18px 0 0;text-align:center">Si vous n'êtes pas à l'origine de cette inscription, ignorez cet email.</p>"""
+    html = _email_shell(cfg, "Vérification du compte", inner,
+                        preheader=f"Votre code de vérification : {code}")
 
     msg = EmailMessage()
     msg["Subject"] = f"Votre code de vérification {shop} : {code}"
@@ -455,16 +506,14 @@ Si vous n'êtes pas à l'origine de cette demande, ignorez cet email : votre mot
 
 L'équipe {shop} ⚡
 """
-    html = f"""<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;background:#f4f4f7;color:#1f2430;margin:0;padding:24px">
-  <div style="max-width:480px;margin:auto;background:#ffffff;border-radius:14px;padding:28px;border:1px solid #e3e3ea;text-align:center">
-    <h1 style="margin:0 0 4px;font-size:22px;color:#16161d">⚡ {shop}</h1>
-    <p style="color:#e0700f;font-weight:bold;margin:0 0 22px">Réinitialisation du mot de passe</p>
-    <p style="font-size:14px;margin:0 0 18px;color:#333a48">Bonjour <strong>{name}</strong>, voici votre code de réinitialisation :</p>
-    <div style="font-size:34px;font-weight:bold;letter-spacing:10px;color:#16161d;background:#f4f4f7;border:2px solid #e3e3ea;border-radius:10px;padding:18px;margin:0 0 18px">{code}</div>
-    <p style="color:#6b7280;font-size:13px;margin:0">Valable 15 minutes. Saisissez-le avec votre nouveau mot de passe.</p>
-    <p style="color:#9aa0ab;font-size:12px;margin-top:20px">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
-  </div>
-</body></html>"""
+    inner = f"""
+      <p style="margin:0 0 6px">Bonjour <strong>{name}</strong>,</p>
+      <p style="margin:0 0 4px;color:{TEXT}">Vous avez demandé à réinitialiser votre mot de passe {shop}. Voici votre code :</p>
+      {_code_box(code)}
+      <p style="color:{MUTED};font-size:13px;margin:0;text-align:center">Valable 15 minutes. Saisissez-le avec votre nouveau mot de passe.</p>
+      <p style="color:#b9bdc6;font-size:12px;margin:18px 0 0;text-align:center">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email : votre mot de passe reste inchangé.</p>"""
+    html = _email_shell(cfg, "Réinitialisation du mot de passe", inner,
+                        preheader=f"Votre code de réinitialisation : {code}")
 
     msg = EmailMessage()
     msg["Subject"] = f"Réinitialisation de votre mot de passe {shop} : {code}"
