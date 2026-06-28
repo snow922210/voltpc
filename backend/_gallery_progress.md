@@ -125,7 +125,8 @@ prod diffèrent du worklist). Puis partie B : supprimer images à texte chinois/
 - [x] Lot 1 (5/41) : RTX 5080 TUF Gaming, 5090 Suprim, 5060 8 Go, 5090 Windforce OC,
       4060 Ventus 2X 8G — commit ab1ba8c.
 - [SKIP] GeForce RTX 4070 Dual (633) : Amazon ne propose que "4070 Super Dual Evo" → à revoir.
-- [ ] RESTE ~36 : ROG Crosshair X870E Hero(27), RM1000x Shift(32), O11 Dynamic EVO XL(36),
+- [x] Lot 2 (8/41) : i9-14900K/KF/14900, i7-14700KF, i5-13600KF, Ryzen 9 9900X3D, Ryzen 7 5800X3D, Ryzen 5 5500 — commit lot CPU.
+- [ ] RESTE ~27 : ROG Crosshair X870E Hero(27), RM1000x Shift(32), O11 Dynamic EVO XL(36),
       H9 Flow RGB(38), ROG Swift PG27UCDM(46), Huntsman V3 Pro TKL(53), PRIME A620M-K(75),
       Pro 16Go DDR5-5600(80), NV2 1To(89), MAG A650BN(93), Freezer 36(102), G203(116),
       MPG A1000G(225), LE520 240(243), Trident Z5 RGB 32Go 6400(20), + IDs 613-631 (CPU Intel/AMD,
