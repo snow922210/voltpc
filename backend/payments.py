@@ -49,6 +49,55 @@ router = APIRouter(prefix="/api", tags=["paiement"])
 
 CURRENCY = "eur"
 
+# Timeout par appel Stripe (secondes) : évite qu'un incident réseau ne bloque la
+# requête utilisateur pendant des dizaines de secondes. Surchargable via l'env.
+STRIPE_TIMEOUT = float(os.environ.get("STRIPE_TIMEOUT", "20"))
+
+# Indique si le client HTTP persistant a déjà été installé (une seule fois).
+_http_client_ready = False
+
+
+def _install_pooled_http_client() -> None:
+    """Installe un client HTTP Stripe avec pooling de connexions (keep-alive).
+
+    Sans cela, le SDK retombe sur urllib : une NOUVELLE connexion TLS est ouverte
+    à chaque appel (poignée TLS + résolution DNS, parfois ralentie par une
+    tentative IPv6 qui expire), ce qui ajoute plusieurs secondes par paiement.
+    Un `requests.Session` réutilise la connexion → appels suivants quasi instantanés.
+
+    Best-effort : si `requests` n'est pas installé, on laisse le client par défaut.
+    """
+    global _http_client_ready
+    if _http_client_ready or stripe is None:
+        return
+
+    # Le module client HTTP est privé (« _http_client ») depuis Stripe v15 ;
+    # on tente les deux noms pour rester compatible avec d'éventuelles versions.
+    hc = None
+    try:
+        from stripe import _http_client as hc  # type: ignore
+    except Exception:
+        try:
+            from stripe import http_client as hc  # type: ignore  # versions < 15
+        except Exception:
+            hc = None
+
+    if hc is not None:
+        try:
+            import requests  # présence = client requests disponible
+            stripe.default_http_client = hc.RequestsClient(
+                session=requests.Session(), timeout=STRIPE_TIMEOUT,
+            )
+            log.info("Stripe : client HTTP poolé (requests) installé — keep-alive actif")
+        except Exception:
+            # Repli : on borne au moins le timeout global pour ne pas rester bloqué.
+            try:
+                stripe.default_http_client = hc.new_default_http_client(timeout=STRIPE_TIMEOUT)
+                log.info("Stripe : client HTTP par défaut avec timeout %ss", STRIPE_TIMEOUT)
+            except Exception:
+                log.warning("Stripe : client HTTP par défaut conservé (sans réglage)")
+    _http_client_ready = True
+
 
 # ─── Helpers de configuration ────────────────────────────────────────
 
@@ -59,6 +108,7 @@ def _stripe():
     key = os.environ.get("STRIPE_SECRET_KEY")
     if not key:
         raise HTTPException(503, "STRIPE_SECRET_KEY manquante — paiement indisponible")
+    _install_pooled_http_client()
     stripe.api_key = key
     return stripe
 
@@ -227,7 +277,9 @@ def create_checkout_session(
                 }
             ]
 
+        _t0 = time.perf_counter()
         session = sk.checkout.Session.create(**params)
+        log.info("Stripe Session.create — %.0f ms", (time.perf_counter() - _t0) * 1000)
 
         # (c) On relie la session Stripe à la commande pour le suivi.
         with db() as conn:
@@ -314,7 +366,9 @@ def checkout_status(response: Response, session_id: str, return_token: str = "")
     """
     sk = _stripe()
     try:
+        _t0 = time.perf_counter()
         session = sk.checkout.Session.retrieve(session_id)
+        log.info("Stripe Session.retrieve — %.0f ms", (time.perf_counter() - _t0) * 1000)
     except Exception:
         raise HTTPException(404, "Session introuvable")
 

@@ -221,15 +221,15 @@ async function toggleFavorite(id, btn) {
   const isFav = state.favorites.has(id);
   try {
     await api(`/favorites/${id}`, { method: isFav ? "DELETE" : "POST" });
-    if (isFav) { state.favorites.delete(id); toast("Retiré des favoris", "info"); }
-    else { state.favorites.add(id); toast("Ajouté aux favoris ♥"); }
+    if (isFav) { state.favorites.delete(id); toast("Retiré de la liste de souhaits", "info"); }
+    else { state.favorites.add(id); toast("Ajouté à la liste de souhaits ♥"); }
     // Rafraîchit tous les boutons cœur de cet id présents à l'écran.
     $$(`[data-fav="${id}"]`).forEach((b) => b.classList.toggle("on", state.favorites.has(id)));
   } catch (e) { toast(e.message, "error"); }
 }
 
 const heartBtn = (p) => `
-  <button class="fav-btn ${state.favorites.has(p.id) ? "on" : ""}" data-fav="${p.id}" title="Ajouter aux favoris" aria-label="Favori">
+  <button class="fav-btn ${state.favorites.has(p.id) ? "on" : ""}" data-fav="${p.id}" title="Ajouter à ma liste de souhaits" aria-label="Liste de souhaits">
     <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 21s-7.5-4.6-9.7-9C.8 8.6 2.5 5 6 5c2 0 3.2 1.1 4 2.3C10.8 6.1 12 5 14 5c3.5 0 5.2 3.6 3.7 7-2.2 4.4-9.7 9-9.7 9z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>
   </button>`;
 
@@ -937,14 +937,13 @@ function showAuthStep(formId, withTabs = false) {
     .forEach((id) => { $(id).hidden = id !== formId; });
 }
 
-// Repli développement : si le serveur renvoie un `dev_code` (SMTP non configuré),
-// on pré-remplit le champ et on affiche le code pour permettre les tests locaux.
+// Repli : si le serveur renvoie un `dev_code` (aucun service d'email configuré),
+// on pré-remplit silencieusement le champ pour ne pas bloquer l'inscription.
 function showDevCode(code, inputName) {
   if (!code) return;
   const input = document.querySelector(`input[name="${inputName}"]:not([hidden])`)
     || [...document.querySelectorAll(`input[name="${inputName}"]`)].find((i) => i.offsetParent !== null);
   if (input) input.value = code;
-  toast(`Mode test — votre code : ${code}`, "info");
 }
 
 // Affiche l'étape « saisie du code » pour l'email donné.
@@ -1257,7 +1256,8 @@ async function render() {
   } catch (e) {
     if (isStaleRender(renderToken, app)) return;
     app.innerHTML = `<div class="empty-state"><h2>Oups, une erreur</h2><p>${esc(e.message)}</p><br>
-      <p style="color:var(--text-faint);font-size:.85rem">Le serveur est-il lancé ? <code>uvicorn main:app</code> dans voltpc/backend</p></div>`;
+      <p style="color:var(--text-faint);font-size:.85rem">Une erreur est survenue. Réessayez dans un instant ou revenez à l'accueil.</p>
+      <br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
   }
 }
 
@@ -1938,10 +1938,12 @@ function viewAbout(app) {
     <div class="content-actions">
       <a class="btn btn-primary" href="/configurateur">Configurer un PC</a>
       <a class="btn btn-ghost" href="/catalogue">Voir le catalogue</a>
+      <a class="btn btn-ghost" href="/contact">Nous contacter</a>
     </div>
   </section>`;
 }
 
+/* ─── Vue : Nous contacter ─── */
 function viewContact(app) {
   app.innerHTML = `
   <section class="content-page contact-page">
@@ -1983,11 +1985,11 @@ const LEGAL_PAGES = {
     title: "Mentions légales",
     intro: "Informations d'identification, de contact et de responsabilité de la boutique VoltCore.",
     sections: [
-      ["Éditeur du site", "VoltCore, boutique française de composants PC. Avant mise en production, compléter la raison sociale, la forme juridique, le capital, l'adresse du siège, le SIRET/RCS, le numéro de TVA si applicable et le responsable de publication."],
-      ["Contact", "Pour toute question ou réclamation : support@voltcore.fr. Les demandes liées aux commandes doivent préciser le numéro de commande et l'adresse e-mail utilisée lors de l'achat."],
-      ["Hébergement", "Site hébergé sur Render pour la démonstration, avec service applicatif FastAPI et base de données de développement. Remplacer par les informations exactes de l'hébergeur en production."],
-      ["Facturation", "Une facture PDF est générée après paiement et reste disponible depuis l'espace client. Les mentions société des factures doivent être renseignées dans la configuration de production."],
-      ["Propriété intellectuelle", "Les textes, interfaces et éléments de marque VoltCore sont protégés. Les photos produits référencées indiquent leurs crédits dans le fichier dédié."],
+      ["Éditeur du site", "VoltCore, boutique française de composants et de périphériques PC. Pour toute question relative à l'identité de l'éditeur ou au responsable de publication, contactez-nous à support@voltpc.fr."],
+      ["Contact", "Pour toute question ou réclamation : support@voltpc.fr. Les demandes liées aux commandes doivent préciser le numéro de commande et l'adresse e-mail utilisée lors de l'achat."],
+      ["Hébergement", "Le site est hébergé par Render (Render Inc.). Toute demande relative à l'hébergement peut être adressée à notre support."],
+      ["Facturation", "Une facture PDF est générée automatiquement après paiement et reste disponible à tout moment depuis l'espace client."],
+      ["Propriété intellectuelle", "Les textes, interfaces et éléments de marque VoltCore sont protégés. Toute reproduction sans autorisation est interdite."],
       ["Approvisionnement", "Les produits proposés doivent provenir de fournisseurs légitimes. Les factures d'achat sont à conserver afin de justifier l'origine des marchandises et d'éviter toute vente de contrefaçon ou d'importation irrégulière."],
     ],
   },
@@ -2548,14 +2550,17 @@ async function viewProduct(app, id) {
         </select>
       </div>` : ""}
       <div class="buy-row">
-        <button class="btn btn-primary" id="buyBtn" style="flex:1" ${p.stock <= 0 ? "disabled" : ""}>
-          ${p.stock <= 0 ? "Indisponible" : needFans ? "Ajouter le boîtier + ventilateurs" : "Ajouter au panier"}
-        </button>
+        ${p.stock <= 0
+          ? `<button class="btn btn-primary" style="flex:1" data-fav="${p.id}" id="buyBtn">
+               ${state.favorites.has(p.id) ? "♥ Dans ma liste de souhaits" : "♡ Ajouter à ma liste de souhaits"}
+             </button>`
+          : `<button class="btn btn-primary" id="buyBtn" style="flex:1">${needFans ? "Ajouter le boîtier + ventilateurs" : "Ajouter au panier"}</button>`}
       </div>
+      ${p.stock <= 0 ? `<p class="oos-note" style="color:var(--text-dim);font-size:.85rem;margin:8px 0 0">Produit en rupture — ajoutez-le à votre liste de souhaits pour le retrouver facilement.</p>` : ""}
       <div class="pp-actions">
-        <button class="btn btn-ghost btn-sm ${state.favorites.has(p.id) ? "fav-active" : ""}" data-fav="${p.id}" id="ppFav">
-          ${state.favorites.has(p.id) ? "♥ Dans mes favoris" : "♡ Ajouter aux favoris"}
-        </button>
+        ${p.stock > 0 ? `<button class="btn btn-ghost btn-sm ${state.favorites.has(p.id) ? "fav-active" : ""}" data-fav="${p.id}" id="ppFav">
+          ${state.favorites.has(p.id) ? "♥ Dans ma liste de souhaits" : "♡ Ajouter à ma liste de souhaits"}
+        </button>` : ""}
         <button class="btn btn-ghost btn-sm ${inCompare(p.id) ? "fav-active" : ""}" data-cmp="${p.id}" id="ppCmp">
           ⇄ ${inCompare(p.id) ? "Dans le comparateur" : "Comparer"}
         </button>
@@ -2579,16 +2584,27 @@ async function viewProduct(app, id) {
     </div>
   </section>`;
 
-  $("#buyBtn").onclick = () => {
-    if (needFans) {
-      const fan = fanOptions.find((f) => f.id === +$("#fanPick").value) || fanOptions[0];
-      addToCart(fan, 1, true);
-      addToCart(p, 1, true);
-      toast(`Boîtier + ${fan.name} ajoutés`, "success");
-    } else {
-      addToCart(p, 1);
-    }
-  };
+  // En stock : ajoute au panier (avec ventilateurs si le boîtier en exige).
+  // En rupture : le bouton principal bascule la liste de souhaits.
+  if (p.stock > 0) {
+    $("#buyBtn").onclick = () => {
+      if (needFans) {
+        const fan = fanOptions.find((f) => f.id === +$("#fanPick").value) || fanOptions[0];
+        addToCart(fan, 1, true);
+        addToCart(p, 1, true);
+        toast(`Boîtier + ${fan.name} ajoutés`, "success");
+      } else {
+        addToCart(p, 1);
+      }
+    };
+  } else {
+    $("#buyBtn").onclick = async () => {
+      await toggleFavorite(p.id);
+      const on = state.favorites.has(p.id);
+      $("#buyBtn").classList.toggle("fav-active", on);
+      $("#buyBtn").textContent = on ? "♥ Dans ma liste de souhaits" : "♡ Ajouter à ma liste de souhaits";
+    };
+  }
   $("#ppBack").onclick = () => { if (history.length > 1) history.back(); else go("/catalogue"); };
 
   // Galerie : clic sur une miniature → change l'image principale.
@@ -2601,11 +2617,12 @@ async function viewProduct(app, id) {
   setTimeout(cleanupProductThumbs, 1200);
   validateProductGallery();
   renderRecos(p);
-  $("#ppFav").onclick = async () => {
+  const ppFav = $("#ppFav");
+  if (ppFav) ppFav.onclick = async () => {
     await toggleFavorite(p.id);
     const on = state.favorites.has(p.id);
-    $("#ppFav").classList.toggle("fav-active", on);
-    $("#ppFav").textContent = on ? "♥ Dans mes favoris" : "♡ Ajouter aux favoris";
+    ppFav.classList.toggle("fav-active", on);
+    ppFav.textContent = on ? "♥ Dans ma liste de souhaits" : "♡ Ajouter à ma liste de souhaits";
   };
   $("#ppCmp").onclick = () => {
     toggleCompare(p.id);
@@ -3322,7 +3339,7 @@ async function viewBuilder(app) {
             </div>
             <button class="btn btn-primary btn-block btn-sm" data-preview-pick="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>${p.stock <= 0 ? "Indisponible" : "Choisir"}</button>
             <div class="picker-preview-actions">
-              <button class="btn btn-ghost btn-sm ${state.favorites.has(p.id) ? "on" : ""}" data-fav="${p.id}" type="button">♡ Ajouter aux favoris</button>
+              <button class="btn btn-ghost btn-sm ${state.favorites.has(p.id) ? "on" : ""}" data-fav="${p.id}" type="button">♡ Ajouter à ma liste de souhaits</button>
               <button class="btn btn-ghost btn-sm ${inCompare(p.id) ? "on" : ""}" data-picker-compare-open="${p.id}" type="button">⇄ Comparer</button>
             </div>
             ${specs.length ? `<section class="picker-preview-section">
@@ -3738,7 +3755,7 @@ async function viewAccount(app, params) {
   <p style="color:var(--text-dim);margin-bottom:22px">${esc(state.user.email)}</p>
   <div class="account-tabs" id="accountTabs">
     <button class="account-tab active" data-tab="orders">Commandes</button>
-    <button class="account-tab" data-tab="favorites">Favoris</button>
+    <button class="account-tab" data-tab="favorites">Liste de souhaits</button>
     <button class="account-tab" data-tab="addresses">Adresses</button>
     <button class="account-tab" data-tab="profile">Profil</button>
   </div>
@@ -3844,7 +3861,7 @@ async function renderAccountFavorites(panel) {
   state.favorites = new Set(favs.map((p) => p.id));
   panel.innerHTML = favs.length
     ? `<div class="product-grid">${favs.map(productCard).join("")}</div>`
-    : `<div class="empty-state"><div class="big">♡</div><p>Aucun favori pour le moment.</p><br><a class="btn btn-primary" href="/catalogue">Parcourir le catalogue</a></div>`;
+    : `<div class="empty-state"><div class="big">♡</div><p>Votre liste de souhaits est vide pour le moment.</p><br><a class="btn btn-primary" href="/catalogue">Parcourir le catalogue</a></div>`;
   bindProductCards(panel, favs);
 }
 

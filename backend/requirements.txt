@@ -2,6 +2,9 @@
 fastapi==0.136.3
 uvicorn[standard]==0.49.0
 stripe==15.2.0
+# Client HTTP performant pour le SDK Stripe : connexions réutilisées (keep-alive)
+# au lieu d'une nouvelle poignée TLS à chaque appel → réponses paiement plus rapides.
+requests>=2.31,<3
 fpdf2==2.8.7
 # Pilote PostgreSQL — importé uniquement si DATABASE_URL est défini (production).
 # En local sans DATABASE_URL, jamais chargé (base SQLite par défaut).
