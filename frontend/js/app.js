@@ -440,7 +440,7 @@ const tintOf = (p) => `hsla(${hueOf(p) + 205}, 60%, 60%, 0.12)`;
 // local images/{id}.jpg. Si rien ne charge, l'img se retire et le visuel SVG
 // situé dessous reste affiché.
 const imgTag = (p) =>
-  `<img class="pimg" src="${esc(p.image_url || `/images/${slugify(p.name)}-1.jpg`)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.remove()">`;
+  `<img class="pimg" src="${esc(p.image_url || `/images/${slugify(p.name)}-1.jpg`)}" alt="${esc(p.name)}" width="800" height="800" loading="lazy" decoding="async" onerror="this.remove()">`;
 
 // Slug stable du nom (identique à backend/gen_images.py) pour retrouver les
 // fichiers galerie /images/<slug>-N.jpg.
@@ -2512,13 +2512,13 @@ async function viewProduct(app, id) {
     <div class="product-gallery">
       <div class="product-page-visual" style="--tint:${tintOf(p)}">
         ${art(p.category, hueOf(p))}
-        <img class="pimg" id="ppMain" src="${esc(p.image_url || `/images/${slugify(p.name)}-1.jpg`)}" alt="${esc(p.name)}" onerror="this.remove(); cleanupProductThumbs()">
+        <img class="pimg" id="ppMain" src="${esc(p.image_url || `/images/${slugify(p.name)}-1.jpg`)}" alt="${esc(p.name)}" width="800" height="800" fetchpriority="high" decoding="async" onerror="this.remove(); cleanupProductThumbs()">
         ${badgeHtml(usefulBadge(p) || p.badge)}
       </div>
       <div class="pp-thumbs" id="ppThumbs">
         ${[1,2,3,4,5].map((n) => `
           <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="/images/${slugify(p.name)}-${n}.jpg">
-            <img src="/images/${slugify(p.name)}-${n}.jpg" alt="" loading="lazy" onerror="this.closest('.pp-thumb').remove(); cleanupProductThumbs()">
+            <img src="/images/${slugify(p.name)}-${n}.jpg" alt="" width="800" height="800" loading="lazy" decoding="async" onerror="this.closest('.pp-thumb').remove(); cleanupProductThumbs()">
           </button>`).join("")}
       </div>
     </div>
@@ -4277,7 +4277,7 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
     return `
       <div class="order-card" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:12px;min-width:220px">
-          <img src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" onerror="this.style.visibility='hidden'" style="width:44px;height:44px;object-fit:contain;border-radius:6px;background:var(--surface);flex-shrink:0">
+          <img src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" alt="" width="800" height="800" loading="lazy" decoding="async" onerror="this.style.visibility='hidden'" style="width:44px;height:44px;object-fit:contain;border-radius:6px;background:var(--surface);flex-shrink:0">
           <div>
             <strong>${esc(p.name)}</strong>${p.stock === 0 ? ` <span style="color:#d9544f;font-size:.8rem">• Rupture</span>` : ""}<br>
             <small style="color:var(--text-dim)">#${p.id} · ${esc(CATS[p.category]?.label || p.category)} · ${esc(p.brand)}</small>
