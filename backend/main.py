@@ -699,6 +699,13 @@ async def security_headers(request: Request, call_next):
     resp.headers.setdefault("X-Frame-Options", "DENY")
     resp.headers.setdefault("Referrer-Policy", "no-referrer")
     resp.headers.setdefault("Content-Security-Policy", _CSP)
+    # Tant que le site est en développement, on demande à Google (et aux autres
+    # moteurs) de NE PAS indexer : en-tête appliqué à TOUTES les réponses, ce qui
+    # couvre les pages HTML ET les routes dynamiques. robots.txt reste permissif
+    # exprès, sinon le crawler ne verrait jamais ce noindex. Pour mettre le site
+    # en ligne, définir SITE_INDEXABLE=1 dans .env.
+    if not os.environ.get("SITE_INDEXABLE"):
+        resp.headers.setdefault("X-Robots-Tag", "noindex, nofollow")
     # HSTS seulement derrière HTTPS — à activer en prod (ENABLE_HSTS=1 dans .env).
     # Inutile/risqué en local HTTP, donc désactivé par défaut.
     if os.environ.get("ENABLE_HSTS"):
