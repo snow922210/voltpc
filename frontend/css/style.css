@@ -722,8 +722,17 @@ body.menu-open { overflow: hidden; }
  transition: border-color 0.15s, color 0.15s;
 }
 .cart-item-qty button:hover { border-color: var(--accent); color: var(--accent); }
-.cart-item-remove { background: none; border: none; color: var(--text-faint); font-size: 0.78rem; margin-top: 6px; }
-.cart-item-remove:hover { color: var(--red); text-decoration: underline; }
+.cart-item-remove {
+ display: grid; place-items: center; width: 36px; height: 36px; margin-top: 6px; padding: 0;
+ background: none; border: 1px solid transparent; border-radius: 8px; color: var(--text-faint);
+ transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.cart-item-remove svg {
+ width: 18px; height: 18px; fill: none; stroke: currentColor;
+ stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.cart-item-remove:hover { color: var(--red); border-color: color-mix(in srgb, var(--red) 45%, transparent); background: color-mix(in srgb, var(--red) 8%, transparent); }
+.cart-item-remove:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .cart-totals { display: flex; flex-direction: column; gap: 7px; font-size: 0.92rem; }
 .cart-totals .row { display: flex; justify-content: space-between; color: var(--text-dim); }
@@ -2901,8 +2910,9 @@ textarea,
 .cmp-remove,
 .cart-item-remove {
  min-height: 36px;
- padding-inline: 4px;
 }
+
+.cmp-remove { padding-inline: 4px; }
 
 .compare-bar {
  max-height: min(42vh, 260px);

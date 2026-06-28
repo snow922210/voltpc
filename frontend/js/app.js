@@ -846,7 +846,11 @@ function renderCartDrawer() {
         <div class="cart-item-qty">
           <button data-qty="${i.id}|-1" aria-label="Retirer une unité de ${esc(i.name)}">−</button><span aria-label="Quantité ${i.qty}">${i.qty}</span><button data-qty="${i.id}|1" aria-label="Ajouter une unité de ${esc(i.name)}">+</button>
         </div>
-        <button class="cart-item-remove" data-remove="${i.id}" aria-label="Retirer ${esc(i.name)} du panier">Retirer</button>
+        <button class="cart-item-remove" data-remove="${i.id}" aria-label="Retirer ${esc(i.name)} du panier" title="Retirer du panier">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5" />
+          </svg>
+        </button>
       </div>
     </div>`).join("");
 
