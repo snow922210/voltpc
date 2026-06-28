@@ -29,9 +29,20 @@ def fresh_db(tmp_path, monkeypatch):
     yield
 
 
-def _demo_user():
+def _demo_user(email="client@example.test"):
+    """Crée (si besoin) et renvoie un utilisateur vérifié pour les tests."""
     with main.db() as conn:
-        return conn.execute("SELECT * FROM users WHERE email = ?", ("demo@voltcore.fr",)).fetchone()
+        existing = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        if existing:
+            return existing
+        salt = main.secrets.token_bytes(16)
+        conn.execute(
+            "INSERT INTO users (email, name, password_hash, salt, created_at, email_verified)"
+            " VALUES (?,?,?,?,?,1)",
+            (email, "Client Test", main.hash_password("test1234", salt),
+             salt.hex(), main.time.time()),
+        )
+        return conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
 
 
 def _first_product():

@@ -201,7 +201,6 @@ Les pages existent deja, mais elles contiennent encore des textes a personnalise
 | Depot GitHub | https://github.com/snow922210/voltpc |
 | Render - Logs | https://dashboard.render.com/web/srv-d8m8c33bc2fs738h8u90/logs |
 | Render - Variables | https://dashboard.render.com/web/srv-d8m8c33bc2fs738h8u90/env |
-| Compte demo | `demo@voltcore.fr` / `demo1234` |
 | Lancer en local | double-clic sur `start.bat` puis http://127.0.0.1:8000 |
 | Publier une modif | `git add -A && git commit -m "..." && git push` |
 | Guide deploiement | voir `deploiement.md` (dossier docs/) |

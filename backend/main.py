@@ -283,7 +283,7 @@ def _init_db_pg() -> None:
 
 
 def _seed_db(conn) -> None:
-    """Insertion initiale (produits, avis, compte démo). Portable SQLite / PostgreSQL."""
+    """Insertion initiale (produits, avis). Portable SQLite / PostgreSQL."""
     if conn.execute("SELECT COUNT(*) FROM products").fetchone()[0] == 0:
         try:
             from product_images import PRODUCT_IMAGES
@@ -316,14 +316,6 @@ def _seed_db(conn) -> None:
         conn.execute(
             "UPDATE products SET rating_count ="
             " (SELECT COUNT(*) FROM reviews WHERE reviews.product_id = products.id)"
-        )
-    if conn.execute("SELECT 1 FROM users WHERE email = 'demo@voltcore.fr'").fetchone() is None:
-        salt = secrets.token_bytes(16)
-        conn.execute(
-            "INSERT INTO users (email, name, password_hash, salt, created_at, email_verified)"
-            " VALUES (?,?,?,?,?,1)",
-            ("demo@voltcore.fr", "Client Démo",
-             hash_password("demo1234", salt), salt.hex(), time.time()),
         )
 
 
