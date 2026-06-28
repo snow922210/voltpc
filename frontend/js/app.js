@@ -1223,10 +1223,7 @@ async function render() {
   const renderToken = ++currentRenderToken;
   const isHome = path === "";
   const navSection = path.split("/")[0];
-  $$(".nav a").forEach((a) => a.classList.toggle(
-    "active",
-    a.dataset.nav === navSection || (navSection === "configurateur" && a.dataset.nav === "catalogue"),
-  ));
+  $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === navSection));
   document.body.classList.toggle("void-home-active", isHome);
   if (!isHome) cleanupHome3D();
   if (preserveScroll) preserveScroll = false;
@@ -3099,7 +3096,14 @@ async function viewBuilder(app) {
     <h1>Configurateur PC</h1>
   </div>
   <p class="builder-intro">Composez votre PC vous-même — chaque étape vous explique à quoi sert la pièce et ce qui doit être compatible. Tout est vérifié automatiquement.</p>
-  <div class="budget-builder" id="budgetBuilder"></div>
+  <details class="budget-assist">
+    <summary>
+      <span class="budget-assist-icon" aria-hidden="true">€</span>
+      <span><strong>Composer automatiquement par budget</strong><small>Un raccourci optionnel pour générer une base avec un curseur</small></span>
+      <span class="budget-assist-chevron" aria-hidden="true">⌄</span>
+    </summary>
+    <div class="budget-builder" id="budgetBuilder"></div>
+  </details>
   <a class="builder-summary-skip btn btn-ghost btn-sm" href="#buildSummary">Voir le récapitulatif</a>
   <div class="presets" id="presetBar">
     <span class="presets-label">Pour démarrer vite (puis ajustez)</span>
@@ -4607,10 +4611,7 @@ function fillMobileMenu() {
   body.innerHTML = `
     <a class="mm-link" href="/">Accueil</a>
     <a class="mm-link" href="/catalogue">Catalogue</a>
-    <a class="mm-cat mm-tool" href="/configurateur">
-      <span class="mm-tool-ico" aria-hidden="true">⌁</span>
-      <span><strong>Configurateur PC</strong><small>Outil de composition guidée</small></span>
-    </a>
+    <a class="mm-link" href="/configurateur">Configurateur</a>
     <a class="mm-link" href="/contact">Nous contacter</a>
     <div class="mm-foot">
       <a class="mm-link" href="/compte">Mon compte</a>
