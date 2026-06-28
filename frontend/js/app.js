@@ -2560,8 +2560,8 @@ async function viewProduct(app, id) {
       </div>
       <div class="pp-thumbs" id="ppThumbs">
         ${[1,2,3,4,5].map((n) => `
-          <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="/images/${slugify(p.name)}-${n}.jpg">
-            <img src="/images/${slugify(p.name)}-${n}.jpg" alt="" width="800" height="800" loading="lazy" decoding="async" onerror="this.closest('.pp-thumb').remove(); cleanupProductThumbs()">
+          <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="/images/${slugify(p.name)}-${n}.jpg?v=2">
+            <img src="/images/${slugify(p.name)}-${n}.jpg?v=2" alt="" width="800" height="800" loading="lazy" decoding="async" onerror="this.closest('.pp-thumb').remove(); cleanupProductThumbs()">
           </button>`).join("")}
       </div>
     </div>
