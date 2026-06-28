@@ -317,6 +317,35 @@ def _seed_db(conn) -> None:
             "UPDATE products SET rating_count ="
             " (SELECT COUNT(*) FROM reviews WHERE reviews.product_id = products.id)"
         )
+    _cleanup_demo_accounts(conn)
+
+
+# Anciens comptes démo qui ont pu être créés par des versions précédentes du seed.
+_DEMO_EMAILS = ("demo@voltpc.fr", "demo@voltcore.fr")
+
+
+def _cleanup_demo_accounts(conn) -> None:
+    """Supprime les comptes démo historiques et toutes leurs données liées.
+
+    Nettoyage unique et idempotent, exécuté au démarrage : nécessaire car le plan
+    gratuit Render ne donne pas accès à une console SQL. Ne fait rien si aucun
+    compte démo n'existe (cas normal après le premier passage).
+    """
+    placeholders = ",".join("?" for _ in _DEMO_EMAILS)
+    ids = [r["id"] for r in conn.execute(
+        f"SELECT id FROM users WHERE email IN ({placeholders})", _DEMO_EMAILS
+    ).fetchall()]
+    if not ids:
+        return
+    id_ph = ",".join("?" for _ in ids)
+    conn.execute(
+        f"DELETE FROM order_items WHERE order_id IN"
+        f" (SELECT id FROM orders WHERE user_id IN ({id_ph}))", ids
+    )
+    for table in ("orders", "reviews", "addresses", "favorites", "cart_items"):
+        conn.execute(f"DELETE FROM {table} WHERE user_id IN ({id_ph})", ids)
+    conn.execute(f"DELETE FROM users WHERE id IN ({id_ph})", ids)
+    log.info("Nettoyage : %d compte(s) démo supprimé(s)", len(ids))
 
 
 # ─── Sécurité ────────────────────────────────────────────────────────
