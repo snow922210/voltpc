@@ -586,7 +586,7 @@ body.menu-open { overflow: hidden; }
 .perk p { font-size: 0.82rem; color: var(--text-dim); line-height: 1.55; }
 
 /* ─── Page catalogue ─── */
-.catalog-layout { display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start; }
+.catalog-layout { display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start; touch-action: pan-y; }
 .filters { position: relative; display: flex; flex-direction: column; gap: 22px; padding: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-xs); }
 .filters h3 { font-size: 1.05rem; }
 .filter-group { display: flex; flex-direction: column; gap: 8px; }
