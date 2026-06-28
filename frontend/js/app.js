@@ -1222,7 +1222,11 @@ async function render() {
   const app = $("#app");
   const renderToken = ++currentRenderToken;
   const isHome = path === "";
-  $$(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === path.split("/")[0]));
+  const navSection = path.split("/")[0];
+  $$(".nav a").forEach((a) => a.classList.toggle(
+    "active",
+    a.dataset.nav === navSection || (navSection === "configurateur" && a.dataset.nav === "catalogue"),
+  ));
   document.body.classList.toggle("void-home-active", isHome);
   if (!isHome) cleanupHome3D();
   if (preserveScroll) preserveScroll = false;
@@ -4498,7 +4502,10 @@ function fillMobileMenu() {
   body.innerHTML = `
     <a class="mm-link" href="/">Accueil</a>
     <a class="mm-link" href="/catalogue">Catalogue</a>
-    <a class="mm-link" href="/configurateur">Configurateur</a>
+    <a class="mm-cat mm-tool" href="/configurateur">
+      <span class="mm-tool-ico" aria-hidden="true">⌁</span>
+      <span><strong>Configurateur PC</strong><small>Outil de composition guidée</small></span>
+    </a>
     <a class="mm-link" href="/contact">Nous contacter</a>
     <div class="mm-foot">
       <a class="mm-link" href="/compte">Mon compte</a>

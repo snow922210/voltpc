@@ -34,7 +34,7 @@
  <link rel="dns-prefetch" href="//checkout.stripe.com">
  <link rel="dns-prefetch" href="//js.stripe.com">
  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
- <link rel="stylesheet" href="/css/style.css?v=154">
+ <link rel="stylesheet" href="/css/style.css?v=155">
  <script>
   /* Thème appliqué avant le rendu (évite tout flash). Préférence enregistrée,
     sinon réglage système. */
@@ -98,8 +98,19 @@
 
   <nav class="nav">
    <a href="/" data-nav="">Accueil</a>
-   <a href="/catalogue" data-nav="catalogue">Catalogue</a>
-   <a href="/configurateur" data-nav="configurateur">Configurateur</a>
+   <div class="nav-item">
+    <a href="/catalogue" data-nav="catalogue">Catalogue <span class="chev">▼</span></a>
+    <div class="nav-menu" aria-label="Sous-menu catalogue">
+     <a class="nav-menu-link" href="/catalogue">
+      <span class="nav-menu-ico" aria-hidden="true">▦</span>
+      <span><strong>Tous les composants</strong><small>Parcourir le catalogue</small></span>
+     </a>
+     <a class="nav-menu-link" href="/configurateur" data-nav="configurateur">
+      <span class="nav-menu-ico" aria-hidden="true">⌁</span>
+      <span><strong>Configurateur PC</strong><small>Composer une machine compatible</small></span>
+     </a>
+    </div>
+   </div>
    <a href="/contact" data-nav="contact" class="nav-contact">Nous contacter</a>
   </nav>
 
@@ -248,6 +259,6 @@
 
  <!-- three.min.js (589 Ko) + hero-void.js : chargés à la demande par app.js,
       uniquement sur l'accueil (gros gain CWV/LCP sur les autres pages). -->
- <script src="/js/app.js?v=156"></script>
+ <script src="/js/app.js?v=157"></script>
 </body>
 </html>
