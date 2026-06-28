@@ -1189,6 +1189,7 @@ function go(to, options = {}) {
 
 const skeletons = (n) => `<div class="product-grid">${"<div class='skeleton'></div>".repeat(n)}</div>`;
 let currentRenderToken = 0;
+let cleanupCatalogWheel = null;
 // Quand vrai, le prochain render() ne remonte PAS la page (ex. application d'un
 // filtre catalogue : on reste à la position de lecture courante).
 let preserveScroll = false;
@@ -1218,6 +1219,8 @@ function pagerHtml(page, pageCount) {
 }
 
 async function render() {
+  cleanupCatalogWheel?.();
+  cleanupCatalogWheel = null;
   const { path, params } = parsePath();
   const app = $("#app");
   const renderToken = ++currentRenderToken;
@@ -2382,6 +2385,22 @@ async function viewCatalog(app, params) {
       <div id="catalogGrid">${skeletons(8)}</div>
     </div>
   </div>`;
+
+  const relayCatalogWheel = (event) => {
+    if (
+      event.ctrlKey
+      || !event.deltaY
+      || document.body.classList.contains("picker-open")
+      || event.target.closest(".product-grid, .sort-menu, .modal, .cart-drawer")
+    ) return;
+    const multiplier = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 18
+      : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? innerHeight : 1;
+    event.preventDefault();
+    window.scrollBy(0, event.deltaY * multiplier);
+  };
+  document.addEventListener("wheel", relayCatalogWheel, { passive: false, capture: true });
+  cleanupCatalogWheel = () =>
+    document.removeEventListener("wheel", relayCatalogWheel, { capture: true });
 
   const allProducts = await api("/products");
   const sortProducts = (list) => list.sort((a, b) => {
