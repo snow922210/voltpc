@@ -3,6 +3,7 @@
 backend/.env            # clés Stripe, mot de passe SMTP…
 backend/.secret         # clé de signature des jetons
 backend/voltpc.db       # base SQLite (recréée automatiquement)
+/voltpc.db              # ancien emplacement racine, inutilisé
 
 # Python
 __pycache__/
