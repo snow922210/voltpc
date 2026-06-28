@@ -133,7 +133,9 @@ prod diffèrent du worklist). Puis partie B : supprimer images à texte chinois/
 - [x] Lot 5 (9/41) divers : RM1000x Shift, O11 Dynamic EVO XL, H9 Flow RGB, ROG Swift PG27UCDM, Huntsman V3 Pro TKL, MAG A650BN, Freezer 36, G203 LIGHTSYNC, MPG A1000G.
 - [SKIP] NV2 1 To (89) + LE520 240 AIO (243) : Amazon remonte des concurrents -> a revoir requete.
 - [x] PARTIE A : 34/41 faits, 5 a revoir (4070 Dual, ROG Strix B850-F, Trident Z5 6400, NV2, LE520).
-- [ ] PROCHAIN : ROG Crosshair X870E Hero(27), RM1000x Shift(32), O11 Dynamic EVO XL(36),
+- [x] Lot 6 (4/5 retries) : 4070 Dual Evo OC, ROG Strix B850-F, Trident Z5 RGB 6400, NV2 1To. PARTIE A = 38/39 (seul LE520 reste, DeepCool absent).
+- [ ] PARTIE B (prochain) : scanner frontend/images, detecter texte chinois/asiatique (CJK), supprimer + regenerer si besoin.
+- [ ] NOTE : ROG Crosshair X870E Hero(27), RM1000x Shift(32), O11 Dynamic EVO XL(36),
       H9 Flow RGB(38), ROG Swift PG27UCDM(46), Huntsman V3 Pro TKL(53), PRIME A620M-K(75),
       Pro 16Go DDR5-5600(80), NV2 1To(89), MAG A650BN(93), Freezer 36(102), G203(116),
       MPG A1000G(225), LE520 240(243), Trident Z5 RGB 32Go 6400(20), + IDs 613-631 (CPU Intel/AMD,
