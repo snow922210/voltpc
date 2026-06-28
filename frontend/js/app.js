@@ -2386,27 +2386,36 @@ async function viewCatalog(app, params) {
     </div>
   </div>`;
 
-  const qs = new URLSearchParams();
-  if (filters.cat) qs.set("category", filters.cat);
-  if (filters.q) qs.set("search", filters.q);
-  qs.set("sort", filters.sort);
-
-  let products = await api("/products?" + qs.toString());
-  if (filters.promo) products = products.filter((p) => p.old_price);
-  if (filters.nouveau) products = products.filter((p) => p.badge === "Nouveau");
+  const allProducts = await api("/products");
+  const sortProducts = (list) => list.sort((a, b) => {
+    if (filters.sort === "performance") return perfScore(b) - perfScore(a);
+    if (filters.sort === "price_asc") return a.price - b.price;
+    if (filters.sort === "price_desc") return b.price - a.price;
+    if (filters.sort === "rating") return (b.rating - a.rating) || (b.rating_count - a.rating_count);
+    if (filters.sort === "name") return a.name.localeCompare(b.name, "fr");
+    return (Number(b.featured) - Number(a.featured)) || (b.rating - a.rating);
+  });
+  let products = allProducts.filter((p) => {
+    if (filters.cat && p.category !== filters.cat) return false;
+    if (filters.q && !`${p.name} ${p.brand} ${p.description || ""}`.toLowerCase().includes(filters.q.toLowerCase())) return false;
+    if (filters.promo && !p.old_price) return false;
+    if (filters.nouveau && p.badge !== "Nouveau") return false;
+    return true;
+  });
+  sortProducts(products);
   // Filtre constructeur côté client (NVIDIA/AMD/Intel pour les GPU, etc.).
-  const allForBrand = products.slice();
+  let allForBrand = products.slice();
   if (filters.brand) products = products.filter((p) => manufacturer(p) === filters.brand);
 
   // Filtres par caractéristiques (client) : on garde une base non filtrée par
   // specs pour proposer les options encore pertinentes.
-  const specFields = (filters.cat && SPEC_FILTERS[filters.cat]) || [];
-  const baseForSpecs = products.slice();
+  let specFields = (filters.cat && SPEC_FILTERS[filters.cat]) || [];
+  let baseForSpecs = products.slice();
   for (const f of specFields) {
     const sel = filters.spec[f.key];
     if (sel) products = products.filter((p) => f.fn(p) === sel);
   }
-  const priceBase = products.slice();
+  let priceBase = products.slice();
   const renderCatalogProducts = (visibleProducts, requestedPage = filters.page) => {
     $("#resultCount").textContent = `${visibleProducts.length} produit${visibleProducts.length > 1 ? "s" : ""}`;
     const groups = groupByModel(visibleProducts);
@@ -2434,22 +2443,41 @@ async function viewCatalog(app, params) {
     brands.map((b) => `<label class="filter-option"><input type="radio" name="brand" value="${esc(b)}" ${filters.brand === b ? "checked" : ""}> ${esc(b)}</label>`).join(""));
 
   const navigate = (patch) => {
-    // Changer un filtre ramène en page 1 ; seul un patch {page} conserve le reste.
-    const next = { ...filters, ...patch };
-    // Application d'un filtre (hors pagination) : on ne remonte pas la page.
-    if (!("page" in patch)) { next.page = 1; preserveScroll = true; }
+    Object.assign(filters, patch);
+    if (!("page" in patch)) filters.page = 1;
     const p = new URLSearchParams();
-    if (next.cat) p.set("cat", next.cat);
-    if (next.q) p.set("q", next.q);
-    if (next.brand) p.set("brand", next.brand);
-    if (next.min) p.set("min", next.min);
-    if (next.max) p.set("max", next.max);
-    if (next.sort !== "featured") p.set("sort", next.sort);
-    if (next.promo) p.set("promo", "1");
-    if (next.nouveau) p.set("new", "1");
-    for (const [k, v] of Object.entries(next.spec || {})) if (v) p.set("s_" + k, v);
-    if (next.page > 1) p.set("page", next.page);
-    go("/catalogue" + (p.toString() ? "?" + p.toString() : ""));
+    if (filters.cat) p.set("cat", filters.cat);
+    if (filters.q) p.set("q", filters.q);
+    if (filters.brand) p.set("brand", filters.brand);
+    if (filters.min) p.set("min", filters.min);
+    if (filters.max) p.set("max", filters.max);
+    if (filters.sort !== "featured") p.set("sort", filters.sort);
+    if (filters.promo) p.set("promo", "1");
+    if (filters.nouveau) p.set("new", "1");
+    for (const [k, v] of Object.entries(filters.spec || {})) if (v) p.set("s_" + k, v);
+    if (filters.page > 1) p.set("page", filters.page);
+    history.pushState({}, "", "/catalogue" + (p.toString() ? "?" + p.toString() : ""));
+
+    let nextProducts = allProducts.filter((product) => {
+      if (filters.cat && product.category !== filters.cat) return false;
+      if (filters.q && !`${product.name} ${product.brand} ${product.description || ""}`.toLowerCase().includes(filters.q.toLowerCase())) return false;
+      if (filters.promo && !product.old_price) return false;
+      if (filters.nouveau && product.badge !== "Nouveau") return false;
+      return true;
+    });
+    sortProducts(nextProducts);
+    allForBrand = nextProducts.slice();
+    if (filters.brand) nextProducts = nextProducts.filter((product) => manufacturer(product) === filters.brand);
+    specFields = (filters.cat && SPEC_FILTERS[filters.cat]) || [];
+    baseForSpecs = nextProducts.slice();
+    for (const field of specFields) {
+      const selected = filters.spec[field.key];
+      if (selected) nextProducts = nextProducts.filter((product) => field.fn(product) === selected);
+    }
+    priceBase = nextProducts;
+    const min = filters.min ? +filters.min : -Infinity;
+    const max = filters.max ? +filters.max : Infinity;
+    renderCatalogProducts(priceBase.filter((product) => product.price >= min && product.price <= max), filters.page);
   };
 
   // Options de filtres par specs : dérivées des produits de la catégorie courante.
@@ -2467,8 +2495,38 @@ async function viewCatalog(app, params) {
       navigate({ spec: { ...filters.spec, [r.name.slice(2)]: r.value } }));
   }
 
-  $$("input[name=cat]", app).forEach((r) => r.onchange = () => navigate({ cat: r.value, brand: "", spec: {} }));
-  $$("input[name=brand]", app).forEach((r) => r.onchange = () => navigate({ brand: r.value }));
+  const bindBrandFilters = () => {
+    $$("input[name=brand]", app).forEach((r) => r.onchange = () => navigate({ brand: r.value }));
+  };
+  const refreshDependentFilters = () => {
+    const availableBrands = [...new Set(allForBrand.map(manufacturer))].sort();
+    $("#brandGroup").innerHTML = `<span>Constructeur</span>
+      <label class="filter-option"><input type="radio" name="brand" value="" checked> Tous</label>
+      ${availableBrands.map((brand) => `<label class="filter-option"><input type="radio" name="brand" value="${esc(brand)}"> ${esc(brand)}</label>`).join("")}`;
+    $("#specGroup").innerHTML = specFields.map((field) => {
+      const options = [...new Set(baseForSpecs.map(field.fn).filter(Boolean))].sort(specOptSort);
+      if (options.length < 2) return "";
+      return `<div class="filter-group"><span>${esc(field.label)}</span>
+        <label class="filter-option"><input type="radio" name="s_${field.key}" value="" checked> Toutes</label>
+        ${options.map((option) => `<label class="filter-option"><input type="radio" name="s_${field.key}" value="${esc(option)}"> ${esc(option)}</label>`).join("")}
+      </div>`;
+    }).join("");
+    bindBrandFilters();
+    $$("#specGroup input[type=radio]", app).forEach((r) => r.onchange = () =>
+      navigate({ spec: { ...filters.spec, [r.name.slice(2)]: r.value } }));
+  };
+  $$("input[name=cat]", app).forEach((r) => r.onchange = () => {
+    navigate({ cat: r.value, brand: "", spec: {}, min: "", max: "" });
+    refreshDependentFilters();
+    const minRange = $("#prMin");
+    const maxRange = $("#prMax");
+    if (minRange && maxRange) {
+      minRange.value = minRange.min;
+      maxRange.value = maxRange.max;
+      minRange.oninput();
+    }
+  });
+  bindBrandFilters();
   const sortControl = $("#sortControl");
   const sortTrigger = $("#sortTrigger");
   const sortMenu = $("#sortMenu");
@@ -2492,12 +2550,32 @@ async function viewCatalog(app, params) {
     }
   };
   $$("[data-sort]", sortMenu).forEach((option) => {
-    option.onclick = () => navigate({ sort: option.dataset.sort });
+    option.onclick = () => {
+      navigate({ sort: option.dataset.sort });
+      sortTrigger.querySelector("strong").textContent = option.querySelector("span").textContent;
+      $$("[data-sort]", sortMenu).forEach((item) =>
+        item.setAttribute("aria-selected", String(item === option)));
+      closeSort();
+    };
   });
-  $("#resetFilters").onclick = () => { go("/catalogue"); };
+  $("#resetFilters").onclick = () => {
+    navigate({ cat: "", brand: "", spec: {}, min: "", max: "", sort: "featured", promo: false, nouveau: false, page: 1 });
+    $$("input[name=cat]", app).forEach((radio) => { radio.checked = radio.value === ""; });
+    refreshDependentFilters();
+    sortTrigger.querySelector("strong").textContent = "En vedette";
+    $$("[data-sort]", sortMenu).forEach((item) =>
+      item.setAttribute("aria-selected", String(item.dataset.sort === "featured")));
+    const minRange = $("#prMin");
+    const maxRange = $("#prMax");
+    if (minRange && maxRange) {
+      minRange.value = minRange.min;
+      maxRange.value = maxRange.max;
+      minRange.oninput();
+    }
+  };
 
   // Curseur de prix à deux poignées (min/max) — bornes dérivées du catalogue.
-  const prices = allForBrand.map((p) => p.price);
+  const prices = allProducts.map((p) => p.price);
   if (prices.length) {
     const lo = Math.floor(Math.min(...prices) / 10) * 10;
     const hi = Math.ceil(Math.max(...prices) / 10) * 10;
@@ -2523,6 +2601,9 @@ async function viewCatalog(app, params) {
       renderFrame = requestAnimationFrame(() => {
         const min = +mn.value;
         const max = +mx.value;
+        filters.min = min > lo ? String(min) : "";
+        filters.max = max < hi ? String(max) : "";
+        filters.page = 1;
         renderCatalogProducts(priceBase.filter((p) => p.price >= min && p.price <= max), 1);
         const url = new URL(location.href);
         if (min > lo) url.searchParams.set("min", String(min)); else url.searchParams.delete("min");
