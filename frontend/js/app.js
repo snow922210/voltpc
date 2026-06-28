@@ -1302,7 +1302,6 @@ async function viewHome(app) {
       <div class="section-head"><h2>Machines pr&ecirc;tes</h2><a href="/configurateur">Composer le mien &rarr;</a></div>
       <p class="pb-sub">Quatre bases noires, lisibles, calibr&eacute;es pour comparer vite sans effet inutile.</p>
       <div class="pb-grid" id="prebuiltGrid">${"<div class='skeleton void-skeleton' style='min-height:420px'></div>".repeat(4)}</div>
-      <div class="budget-builder" id="budgetBuilder"></div>
     </section>
 
     <section class="section void-section">
@@ -1343,7 +1342,6 @@ async function viewHome(app) {
   bindProductCards(app, featured);
 
   renderPrebuilts();
-  renderBudgetBuilder();
   initHome3D();
 }
 
@@ -2971,6 +2969,7 @@ async function viewBuilder(app) {
     <h1>Configurateur PC</h1>
   </div>
   <p class="builder-intro">Composez votre PC vous-même — chaque étape vous explique à quoi sert la pièce et ce qui doit être compatible. Tout est vérifié automatiquement.</p>
+  <div class="budget-builder" id="budgetBuilder"></div>
   <a class="builder-summary-skip btn btn-ghost btn-sm" href="#buildSummary">Voir le récapitulatif</a>
   <div class="presets" id="presetBar">
     <span class="presets-label">Pour démarrer vite (puis ajustez)</span>
@@ -2981,6 +2980,8 @@ async function viewBuilder(app) {
     <div id="slots" class="builder-slots" aria-label="Étapes du configurateur"></div>
     <aside id="buildSummary" aria-live="polite"></aside>
   </div>`;
+
+  renderBudgetBuilder();
 
   const products = await api("/products");
   const byCat = {};
