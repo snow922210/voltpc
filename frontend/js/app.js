@@ -1403,7 +1403,6 @@ function pickIndexForBudget(list, alloc) {
   for (let i = 0; i < list.length; i++) { if (list[i].price <= alloc) idx = i; else break; }
   return idx;
 }
-function pickForBudget(list, alloc) { return list[pickIndexForBudget(list, alloc)]; }
 
 const prebuiltRoleLabel = (role) => ({
   "Carte graphique": "GPU",
