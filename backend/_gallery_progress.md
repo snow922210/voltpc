@@ -135,7 +135,9 @@ prod diffèrent du worklist). Puis partie B : supprimer images à texte chinois/
 - [x] PARTIE A : 34/41 faits, 5 a revoir (4070 Dual, ROG Strix B850-F, Trident Z5 6400, NV2, LE520).
 - [x] Lot 6 (4/5 retries) : 4070 Dual Evo OC, ROG Strix B850-F, Trident Z5 RGB 6400, NV2 1To. PARTIE A = 38/39 (seul LE520 reste, DeepCool absent).
 - [ ] PARTIE B (prochain) : scanner frontend/images, detecter texte chinois/asiatique (CJK), supprimer + regenerer si besoin.
-- [ ] NOTE : ROG Crosshair X870E Hero(27), RM1000x Shift(32), O11 Dynamic EVO XL(36),
+- [x] PARTIE B : 680 images scannees (montage local + zooms). AUCUNE image a texte chinois/asiatique (CJK). Les seules images 'texte' sont des bannieres FR/EN (source amazon.fr) -> rien a supprimer.
+- [NOTE] Bannieres FR/EN existantes (ex. value-16-go-ddr5 -3/-4, vengeance feature, WD_black) = ameliorables mais hors scope 'texte asiatique'.
+- [ ] OPTIONNEL : ROG Crosshair X870E Hero(27), RM1000x Shift(32), O11 Dynamic EVO XL(36),
       H9 Flow RGB(38), ROG Swift PG27UCDM(46), Huntsman V3 Pro TKL(53), PRIME A620M-K(75),
       Pro 16Go DDR5-5600(80), NV2 1To(89), MAG A650BN(93), Freezer 36(102), G203(116),
       MPG A1000G(225), LE520 240(243), Trident Z5 RGB 32Go 6400(20), + IDs 613-631 (CPU Intel/AMD,
