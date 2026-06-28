@@ -317,12 +317,12 @@ def _seed_db(conn) -> None:
             "UPDATE products SET rating_count ="
             " (SELECT COUNT(*) FROM reviews WHERE reviews.product_id = products.id)"
         )
-    if conn.execute("SELECT 1 FROM users WHERE email = 'demo@voltpc.fr'").fetchone() is None:
+    if conn.execute("SELECT 1 FROM users WHERE email = 'demo@voltcore.fr'").fetchone() is None:
         salt = secrets.token_bytes(16)
         conn.execute(
             "INSERT INTO users (email, name, password_hash, salt, created_at, email_verified)"
             " VALUES (?,?,?,?,?,1)",
-            ("demo@voltpc.fr", "Client Démo",
+            ("demo@voltcore.fr", "Client Démo",
              hash_password("demo1234", salt), salt.hex(), time.time()),
         )
 
@@ -1012,9 +1012,9 @@ def _send_code_bg(send_fn, email: str, name: str, code: str) -> None:
 def _dev_show_codes() -> bool:
     """Mode test : renvoyer le code dans la réponse HTTP même si le SMTP a réussi.
 
-    Indispensable pour tester en local avec des adresses non routables (ex. la
-    démo `…@voltpc.fr`, domaine sans MX → le mail part puis « bounce ») : le SMTP
-    répond OK, donc le repli sur échec ne suffit pas. À n'activer QU'EN DÉV.
+    Indispensable pour tester en local avec des adresses non routables (le SMTP
+    répond OK alors que le mail « bounce » ensuite), donc le repli sur échec ne
+    suffit pas à récupérer le code. À n'activer QU'EN DÉV.
     """
     return os.environ.get("DEV_SHOW_CODES", "").strip().lower() in ("1", "true", "yes", "on")
 

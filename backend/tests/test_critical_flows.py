@@ -31,7 +31,7 @@ def fresh_db(tmp_path, monkeypatch):
 
 def _demo_user():
     with main.db() as conn:
-        return conn.execute("SELECT * FROM users WHERE email = ?", ("demo@voltpc.fr",)).fetchone()
+        return conn.execute("SELECT * FROM users WHERE email = ?", ("demo@voltcore.fr",)).fetchone()
 
 
 def _first_product():
