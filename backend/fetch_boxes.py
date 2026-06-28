@@ -8,7 +8,6 @@ Usage :  python fetch_boxes.py
 """
 import json
 import sys
-from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 

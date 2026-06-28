@@ -163,7 +163,6 @@ def translate(sql: str):
 
 
 if IS_PG:
-    import psycopg
     from psycopg_pool import ConnectionPool
 
     _POOL_MIN = int(os.environ.get("DB_POOL_MIN", "1"))
