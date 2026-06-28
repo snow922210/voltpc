@@ -1913,21 +1913,6 @@ async function renderPrebuilts(preloaded) {
 }
 
 /* ─── Pages de confiance ─── */
-const trustIcon = (path) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
-
-function trustStrip() {
-  const items = [
-    ["Paiement sécurisé Stripe", "M12 3 5 6v5c0 4.4 2.9 7.6 7 9 4.1-1.4 7-4.6 7-9V6l-7-3z"],
-    ["Rétractation 14 jours", "M4 7h10a5 5 0 1 1-4 8M4 7l4-4M4 7l4 4"],
-    ["Espace client", "M5 18v-5a7 7 0 0 1 14 0v5M5 18h4v-6H5v6zm10 0h4v-6h-4v6z"],
-    ["Facture PDF", "M7 3h8l4 4v14H7z"],
-    ["Garantie légale", "M12 3 5 6v5c0 4.4 2.9 7.6 7 9 4.1-1.4 7-4.6 7-9V6l-7-3z"],
-    ["DEEE / recyclage", "M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 10v7M14 10v7"],
-  ];
-  return `<div class="trust-strip">${items.map(([label, path]) =>
-    `<span>${trustIcon(path)}${label}</span>`).join("")}</div>`;
-}
-
 function viewAbout(app) {
   app.innerHTML = `
   <section class="content-page about-page">
@@ -1937,7 +1922,6 @@ function viewAbout(app) {
       <h1>VoltCore aide à choisir les bons composants, sans jargon inutile.</h1>
       <p>Nous sélectionnons des cartes graphiques, processeurs, alimentations, boîtiers et périphériques pensés pour des configurations fiables, équilibrées et faciles à faire évoluer.</p>
     </div>
-    ${trustStrip()}
     <div class="story-grid">
       <article><h2>Notre rôle</h2><p>Rendre l'achat PC plus clair : des fiches lisibles, des conseils de compatibilité, un configurateur guidé et un panier qui garde les informations importantes sous les yeux.</p></article>
       <article><h2>Notre méthode</h2><p>Chaque recommandation met en avant l'usage réel : gaming 1080p, 1440p, création vidéo, silence, évolutivité ou budget maîtrisé.</p></article>
@@ -2055,7 +2039,6 @@ function viewLegal(app, key) {
     <div class="legal-grid">
       ${page.sections.map(([title, text]) => `<article><h2>${title}</h2><p>${text}</p></article>`).join("")}
     </div>
-    ${trustStrip()}
   </section>`;
 }
 
@@ -3588,7 +3571,6 @@ async function viewCheckout(app) {
       ${t.discount ? `<div class="summary-line"><span>Code ${esc(state.promo.code)}</span><span style="color:var(--green)">−${fmt(t.discount)}</span></div>` : ""}
       <div class="summary-line"><span>Livraison</span><span>${t.shipping ? fmt(t.shipping) : "Offerte"}</span></div>
       <div class="summary-line"><span>Total</span><span>${fmt(t.total)}</span></div>
-      ${trustStrip()}
     </div>
   </div>`;
 
