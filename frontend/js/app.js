@@ -2389,8 +2389,6 @@ async function viewCatalog(app, params) {
   const qs = new URLSearchParams();
   if (filters.cat) qs.set("category", filters.cat);
   if (filters.q) qs.set("search", filters.q);
-  if (filters.min) qs.set("min_price", filters.min);
-  if (filters.max) qs.set("max_price", filters.max);
   qs.set("sort", filters.sort);
 
   let products = await api("/products?" + qs.toString());
@@ -2408,26 +2406,26 @@ async function viewCatalog(app, params) {
     const sel = filters.spec[f.key];
     if (sel) products = products.filter((p) => f.fn(p) === sel);
   }
-  $("#resultCount").textContent = `${products.length} produit${products.length > 1 ? "s" : ""}`;
-
-  // Regroupement par modèle : les variantes d'un même modèle (ex. RTX 5070 de
-  // marques différentes) sont réunies sur une seule carte ; on choisit la marque
-  // sur la fiche produit. Pagination côté client sur les groupes.
-  const groups = groupByModel(products);
-  const pageCount = Math.max(1, Math.ceil(groups.length / PER_PAGE));
-  const page = Math.min(filters.page, pageCount);
-  const pageGroups = groups.slice((page - 1) * PER_PAGE, page * PER_PAGE);
-
-  // On ne regroupe en carte « modèle » que s'il existe au moins 2 marques
-  // distinctes (vrai choix de marque) ; sinon chaque variante reste une carte.
-  const cells = pageGroups.flatMap((g) => g.brands.length > 1 ? [modelCard(g)] : g.items.map(productCard));
-  $("#catalogGrid").innerHTML = groups.length
-    ? `<div class="product-grid">${cells.join("")}</div>${pagerHtml(page, pageCount)}`
-    : `<div class="empty-state"><p>Aucun produit ne correspond à vos critères.</p></div>`;
-  // Seules les cartes « produit » portent les actions panier/favori/comparer ;
-  // les cartes « modèle » mènent à la fiche pour choisir la marque.
-  bindProductCards(app, pageGroups.flatMap((g) => g.brands.length > 1 ? [] : g.items));
-  $$("[data-page]", app).forEach((b) => b.onclick = () => { navigate({ page: Number(b.dataset.page) }); window.scrollTo({ top: 0 }); });
+  const priceBase = products.slice();
+  const renderCatalogProducts = (visibleProducts, requestedPage = filters.page) => {
+    $("#resultCount").textContent = `${visibleProducts.length} produit${visibleProducts.length > 1 ? "s" : ""}`;
+    const groups = groupByModel(visibleProducts);
+    const pageCount = Math.max(1, Math.ceil(groups.length / PER_PAGE));
+    const page = Math.min(requestedPage, pageCount);
+    const pageGroups = groups.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+    const cells = pageGroups.flatMap((g) => g.brands.length > 1 ? [modelCard(g)] : g.items.map(productCard));
+    $("#catalogGrid").innerHTML = groups.length
+      ? `<div class="product-grid">${cells.join("")}</div>${pagerHtml(page, pageCount)}`
+      : `<div class="empty-state"><p>Aucun produit ne correspond à vos critères.</p></div>`;
+    bindProductCards(app, pageGroups.flatMap((g) => g.brands.length > 1 ? [] : g.items));
+    $$("[data-page]", app).forEach((b) => b.onclick = () => {
+      navigate({ page: Number(b.dataset.page) });
+      window.scrollTo({ top: 0 });
+    });
+  };
+  const initialMin = filters.min ? +filters.min : -Infinity;
+  const initialMax = filters.max ? +filters.max : Infinity;
+  renderCatalogProducts(priceBase.filter((p) => p.price >= initialMin && p.price <= initialMax));
 
   // Constructeurs disponibles (sur la catégorie courante, avant filtre).
   const brands = [...new Set(allForBrand.map(manufacturer))].sort();
@@ -2507,24 +2505,50 @@ async function viewCatalog(app, params) {
     const curMin = Math.max(lo, Math.min(+filters.min || lo, hi));
     const curMax = Math.min(hi, Math.max(+filters.max || hi, lo));
     $("#priceGroup").innerHTML = `<span>Prix (€)</span>
+      <div class="range-values" aria-live="polite">
+        <output for="prMin"><small>Minimum</small><strong id="prMinLbl"></strong></output>
+        <output for="prMax"><small>Maximum</small><strong id="prMaxLbl"></strong></output>
+      </div>
       <div class="range-dual">
         <div class="range-track"><div class="range-fill" id="prFill"></div></div>
         <input type="range" id="prMin" min="${lo}" max="${hi}" step="${step}" value="${curMin}" aria-label="Prix minimum">
         <input type="range" id="prMax" min="${lo}" max="${hi}" step="${step}" value="${curMax}" aria-label="Prix maximum">
       </div>
-      <div class="range-readout"><span id="prMinLbl"></span><span id="prMaxLbl"></span></div>`;
+      <div class="range-bounds"><span>${fmt(lo)}</span><span>${fmt(hi)}</span></div>`;
     const mn = $("#prMin"), mx = $("#prMax"), fill = $("#prFill"), mnl = $("#prMinLbl"), mxl = $("#prMaxLbl");
     const span = hi - lo || 1;
+    let renderFrame = 0;
+    const applyLive = () => {
+      cancelAnimationFrame(renderFrame);
+      renderFrame = requestAnimationFrame(() => {
+        const min = +mn.value;
+        const max = +mx.value;
+        renderCatalogProducts(priceBase.filter((p) => p.price >= min && p.price <= max), 1);
+        const url = new URL(location.href);
+        if (min > lo) url.searchParams.set("min", String(min)); else url.searchParams.delete("min");
+        if (max < hi) url.searchParams.set("max", String(max)); else url.searchParams.delete("max");
+        url.searchParams.delete("page");
+        history.replaceState({}, "", url);
+      });
+    };
     const paint = () => {
       const a = +mn.value, b = +mx.value;
       fill.style.left = `${(a - lo) / span * 100}%`;
       fill.style.right = `${(1 - (b - lo) / span) * 100}%`;
       mnl.textContent = fmt(a); mxl.textContent = fmt(b);
+      mn.style.zIndex = a >= hi - step ? "5" : "3";
+      mx.style.zIndex = "4";
     };
-    mn.oninput = () => { if (+mn.value > +mx.value) mn.value = mx.value; paint(); };
-    mx.oninput = () => { if (+mx.value < +mn.value) mx.value = mn.value; paint(); };
-    const apply = () => navigate({ min: +mn.value > lo ? String(mn.value) : "", max: +mx.value < hi ? String(mx.value) : "" });
-    mn.onchange = apply; mx.onchange = apply;
+    mn.oninput = () => {
+      if (+mn.value > +mx.value - step) mn.value = Math.max(lo, +mx.value - step);
+      paint();
+      applyLive();
+    };
+    mx.oninput = () => {
+      if (+mx.value < +mn.value + step) mx.value = Math.min(hi, +mn.value + step);
+      paint();
+      applyLive();
+    };
     paint();
   }
 }
