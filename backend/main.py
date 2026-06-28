@@ -1997,7 +1997,7 @@ def _cat_url(cat: str) -> str:
     return f"{SITE_URL}/categorie/{slug}" if slug else f"{SITE_URL}/catalogue?cat={cat}"
 
 
-@app.get("/robots.txt", include_in_schema=False)
+@app.api_route("/robots.txt", methods=["GET", "HEAD"], include_in_schema=False)
 def robots_txt():
     body = (
         "User-agent: *\n"
@@ -2008,7 +2008,7 @@ def robots_txt():
     return Response(content=body, media_type="text/plain")
 
 
-@app.get("/llms.txt", include_in_schema=False)
+@app.api_route("/llms.txt", methods=["GET", "HEAD"], include_in_schema=False)
 def llms_txt():
     """Fichier llms.txt : résumé du site pour les moteurs IA (ChatGPT,
     Perplexity, etc.) avec les points d'entrée canoniques."""
@@ -2038,7 +2038,7 @@ def llms_txt():
     return Response(content=body, media_type="text/plain; charset=utf-8")
 
 
-@app.get("/sitemap.xml", include_in_schema=False)
+@app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
 def sitemap_xml():
     """Sitemap complet : accueil, catalogue, catégories et toutes les fiches
     produit (URL réelles depuis le Lot 1)."""
@@ -2087,9 +2087,10 @@ def _jsonld(obj: dict) -> str:
     return f'<script type="application/ld+json">{raw}</script>\n  '
 
 
-def _seo_block(title, desc, canonical, og_title, og_desc, image=None) -> str:
-    img = (f'  <meta property="og:image" content="{_E(image)}">\n'
-           f'  <meta name="twitter:image" content="{_E(image)}">\n') if image else ""
+def _seo_block(title, desc, canonical, og_title, og_desc) -> str:
+    # NB : og:image / twitter:image ne sont PAS émis ici. L'image par défaut vit
+    # dans le template (une seule balise) ; _render remplace son URL par l'image
+    # de la page si fournie → exactement une og:image par page (pas de doublon).
     return (
         f"<title>{_E(title)}</title>\n"
         f'  <meta name="description" content="{_E(desc)}">\n'
@@ -2097,7 +2098,6 @@ def _seo_block(title, desc, canonical, og_title, og_desc, image=None) -> str:
         f'  <meta property="og:title" content="{_E(og_title)}">\n'
         f'  <meta property="og:description" content="{_E(og_desc)}">\n'
         f'  <meta property="og:url" content="{_E(canonical)}">\n'
-        f"{img}"
         f'  <meta name="twitter:title" content="{_E(og_title)}">\n'
         f'  <meta name="twitter:description" content="{_E(og_desc)}">'
     )
@@ -2108,15 +2108,25 @@ def _render(tpl, *, title=None, desc=None, canonical=None, og_title=None,
     out = tpl
     if title is not None:
         block = _seo_block(title, desc, canonical, og_title or title,
-                           og_desc or desc, image)
+                           og_desc or desc)
         i = out.find("<!-- PAGE-SEO:START")
         j = out.find("PAGE-SEO:END -->")
         if i != -1 and j != -1:
             out = out[:i] + block + out[j + len("PAGE-SEO:END -->"):]
+    # Image sociale : on remplace l'URL de l'image par défaut (template) par
+    # celle de la page si fournie. Couvre og:image ET twitter:image en une fois.
+    if image:
+        out = out.replace(SITE_URL + DEFAULT_OG_IMG, _E(image))
     out = out.replace("<!-- PAGE-JSONLD -->", jsonld or "")
     out = out.replace("<!--SSR-->", main or "")
-    if robots:
-        out = out.replace('content="index, follow"', f'content="{robots}"')
+    # Tant que le site n'est pas indexable (dev), la balise meta robots suit le
+    # header X-Robots-Tag pour rester cohérente. En prod (SITE_INDEXABLE=1) on
+    # conserve "index, follow", sauf robots explicite (ex. 404 → noindex).
+    effective_robots = robots
+    if effective_robots is None and not os.environ.get("SITE_INDEXABLE"):
+        effective_robots = "noindex, nofollow"
+    if effective_robots:
+        out = out.replace('content="index, follow"', f'content="{effective_robots}"')
     return out
 
 
@@ -2125,8 +2135,20 @@ def _html(content: str, status: int = 200) -> Response:
                     status_code=status)
 
 
+# Mapping nom -> image principale (même source que le seed) : sert de repli quand
+# products.image_url est NULL (ex. produit dont le nom ne correspondait pas au
+# mapping lors du seed). Évite de fabriquer un /images/<id>-1.jpg inexistant.
+try:
+    from product_images import PRODUCT_IMAGES as _PRODUCT_IMAGES
+except Exception:  # pragma: no cover - mapping optionnel
+    _PRODUCT_IMAGES = {}
+
+DEFAULT_OG_IMG = "/images/og-default.jpg"
+
+
 def _abs_img(p) -> str:
-    img = p["image_url"] or f"/images/{p['id']}-1.jpg"
+    # image_url en base → mapping par nom → image OG par défaut (toujours valide).
+    img = p["image_url"] or _PRODUCT_IMAGES.get(p["name"]) or DEFAULT_OG_IMG
     return img if img.startswith("http") else SITE_URL + img
 
 
@@ -2340,7 +2362,7 @@ def _static_page_ssr(heading: str, text: str) -> str:
     )
 
 
-@app.get("/categorie/{slug}", include_in_schema=False)
+@app.api_route("/categorie/{slug}", methods=["GET", "HEAD"], include_in_schema=False)
 def category_page(slug: str):
     """URL propre d'une catégorie. Rend la même vue catalogue (cat seule),
     avec le canonical /categorie/<slug>."""
@@ -2357,7 +2379,7 @@ def category_page(slug: str):
     return _catalog_render(tpl, {"cat": cat})
 
 
-@app.get("/{full_path:path}", include_in_schema=False)
+@app.api_route("/{full_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
 def spa_fallback(full_path: str, request: Request):
     candidate = (FRONTEND_DIR / full_path).resolve()
     if (
