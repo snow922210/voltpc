@@ -3032,12 +3032,12 @@ const BUILD_SLOTS = [
 
 // Profils rapides : remplissent automatiquement une config compatible et équilibrée.
 const PRESETS = [
-  { id: "g800", label: "Gaming 800 €", gpu: 52, cpu: "game", ram: 16, budget: "low" },
-  { id: "g1500", label: "Gaming 1500 €", gpu: 80, cpu: "game", ram: 32, budget: "mid" },
-  { id: "uhd", label: "PC 4K", gpu: 100, cpu: "game", ram: 32, budget: "high" },
-  { id: "stream", label: "Streaming", gpu: 76, cpu: "threads", ram: 64, budget: "high" },
-  { id: "silent", label: "Silence", gpu: 72, cpu: "game", ram: 32, budget: "mid", quiet: true },
-  { id: "white", label: "Blanc RGB", gpu: 80, cpu: "game", ram: 32, budget: "mid", white: true },
+  { id: "g800", label: "Gaming 800 €", target: 800, cpu: "game", ram: 16, budget: "low" },
+  { id: "g1500", label: "Gaming 1500 €", target: 1500, cpu: "game", ram: 32, budget: "mid" },
+  { id: "uhd", label: "PC 4K", target: 2800, cpu: "game", ram: 32, budget: "high" },
+  { id: "stream", label: "Streaming", target: 2200, cpu: "threads", ram: 64, budget: "high" },
+  { id: "silent", label: "Silence", target: 1800, cpu: "game", ram: 32, budget: "mid", quiet: true },
+  { id: "white", label: "Blanc RGB", target: 1800, cpu: "game", ram: 32, budget: "mid", white: true },
 ];
 
 function buildChecks() {
@@ -3126,41 +3126,54 @@ async function viewBuilder(app) {
     const inStock = (cat) => (byCat[cat] || []).filter((p) => p.stock > 0);
     const closest = (list, val, key) => list.length
       ? list.reduce((best, p) => Math.abs(key(p) - val) < Math.abs(key(best) - val) ? p : best) : null;
+    const bestUnder = (list, ceiling, score) => {
+      const affordable = list.filter((p) => p.price <= ceiling);
+      const pool = affordable.length ? affordable : list;
+      return pool.sort((a, c) => (score(c) - score(a)) || (a.price - c.price))[0];
+    };
     const b = {};
 
     // CPU : jeu (le X3D prime, cœurs plafonnés à 8) ou multicœur (streaming/création),
     // borné par le budget du profil.
-    const gameValue = (p) => specNum(p.specs["Boost"]) * 6
-      + Math.min(specNum(p.specs["Cœurs"]), 8) * 4
-      + (/x3d/i.test(p.name) ? 40 : 0);
-    const cpuRanked = inStock("cpu").sort((a, c) => preset.cpu === "threads"
-      ? specNum(c.specs["Cœurs"]) - specNum(a.specs["Cœurs"])
-      : gameValue(c) - gameValue(a));
-    const cpuCeil = preset.budget === "low" ? 300 : preset.budget === "mid" ? 480 : Infinity;
-    b.cpu = cpuRanked.find((p) => p.price <= cpuCeil) || cpuRanked[0];
+    const cpuScore = preset.cpu === "threads"
+      ? cpuTier
+      : cpuGameTier;
+    const cpuCeil = preset.target * (preset.cpu === "threads" ? 0.22 : 0.18);
+    b.cpu = bestUnder(inStock("cpu"), cpuCeil, cpuScore);
 
     if (b.cpu) {
       let mobos = inStock("motherboard").filter((p) => p.specs.socket === b.cpu.specs.socket);
       if (!mobos.length) mobos = inStock("motherboard");
-      mobos.sort((a, c) => a.price - c.price);
-      b.motherboard = preset.budget === "high" ? mobos[mobos.length - 1] : mobos[Math.floor(mobos.length / 2)] || mobos[0];
+      const moboTarget = preset.budget === "low" ? 90 : preset.budget === "mid" ? 150 : 210;
+      b.motherboard = closest(mobos, moboTarget, (p) => p.price);
     }
     if (b.motherboard) {
       let rams = inStock("ram").filter((p) => p.specs.ram_type === b.motherboard.specs.ram_type);
       if (!rams.length) rams = inStock("ram");
-      b.ram = closest(rams, preset.ram, (p) => specNum(p.specs["Capacité"]));
+      const capacityDelta = Math.min(...rams.map((p) => Math.abs(specNum(p.specs["Capacité"]) - preset.ram)));
+      const matchingCapacity = rams.filter((p) => Math.abs(specNum(p.specs["Capacité"]) - preset.ram) === capacityDelta);
+      b.ram = bestUnder(matchingCapacity, preset.target * 0.11,
+        (p) => specNum(p.specs["Fréquence"]) / Math.max(1, specNum(p.specs["Latence"]) || 36));
     }
 
     let gpus = inStock("gpu");
     if (preset.white) { const w = gpus.filter((p) => /white|blanc|snow/i.test(p.name)); if (w.length) gpus = w; }
-    b.gpu = closest(gpus, preset.gpu, gpuTier);
+    const gpuShare = preset.cpu === "threads" ? 0.38 : 0.46;
+    b.gpu = bestUnder(gpus, preset.target * gpuShare, gpuTier);
 
     if (b.cpu) {
       let cool = inStock("cooling").filter((p) => (p.specs.sockets || []).includes(b.cpu.specs.socket));
       if (!cool.length) cool = inStock("cooling");
-      if (preset.quiet) { const aio = cool.filter((p) => /aio|360|liquid|freezer/i.test(`${p.name} ${JSON.stringify(p.specs)}`)); if (aio.length) cool = aio; }
-      cool.sort((a, c) => c.price - a.price);
-      b.cooling = preset.budget === "low" ? cool[cool.length - 1] : cool[0];
+      const isAio = (p) => /aio|240|280|360|liquid|water|freezer iii/i.test(`${p.name} ${JSON.stringify(p.specs)}`);
+      if (preset.budget !== "high") {
+        const air = cool.filter((p) => !isAio(p));
+        if (air.length) cool = air;
+      } else {
+        const sensible = cool.filter((p) => p.price <= 149);
+        if (sensible.length) cool = sensible;
+      }
+      const coolTarget = preset.budget === "low" ? 39 : preset.budget === "mid" ? (preset.quiet ? 99 : 65) : 99;
+      b.cooling = closest(cool, coolTarget, (p) => p.price);
     }
 
     const len = b.gpu ? (specNum(b.gpu.specs["Longueur"]) || b.gpu.specs.length_mm || 0) : 0;
@@ -3168,7 +3181,9 @@ async function viewBuilder(app) {
     if (!cases.length) cases = inStock("case");
     if (preset.white) { const w = cases.filter((p) => /white|blanc|snow/i.test(p.name)); if (w.length) cases = w; }
     if (preset.quiet) { const q = cases.filter((p) => /silent|silence|define|quiet/i.test(p.name)); if (q.length) cases = q; }
-    b.case = cases[0];
+    const caseTarget = preset.budget === "low" ? 89 : preset.budget === "mid" ? 109 : 139;
+    const sensibleCases = cases.filter((p) => p.price <= caseTarget + 30);
+    b.case = closest(sensibleCases.length ? sensibleCases : cases, caseTarget, (p) => p.price);
 
     state.build = b; // estimateWatts() lit state.build
     const need = estimateWatts();
@@ -3182,8 +3197,10 @@ async function viewBuilder(app) {
       ? (pool.find((p) => /platinum|titanium/i.test(p.specs["Certification"] || "")) || pool[0])
       : pool[0];
 
-    let st = inStock("storage").sort((a, c) => a.price - c.price);
-    b.storage = preset.budget === "high" ? st[st.length - 1] : st[Math.floor(st.length / 2)] || st[0];
+    let st = inStock("storage").filter((p) => !/sata|gen5/i.test(`${p.name} ${JSON.stringify(p.specs)}`));
+    if (!st.length) st = inStock("storage");
+    const storageTarget = preset.budget === "low" ? 64 : preset.budget === "mid" ? 99 : 149;
+    b.storage = closest(st, storageTarget, (p) => p.price);
 
     // Retire les emplacements non pourvus.
     for (const k of Object.keys(b)) if (!b[k]) delete b[k];
