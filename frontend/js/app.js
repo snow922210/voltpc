@@ -1985,8 +1985,8 @@ const LEGAL_PAGES = {
     title: "Mentions légales",
     intro: "Informations d'identification, de contact et de responsabilité de la boutique VoltCore.",
     sections: [
-      ["Éditeur du site", "VoltCore, boutique française de composants et de périphériques PC. Pour toute question relative à l'identité de l'éditeur ou au responsable de publication, contactez-nous à support@voltpc.fr."],
-      ["Contact", "Pour toute question ou réclamation : support@voltpc.fr. Les demandes liées aux commandes doivent préciser le numéro de commande et l'adresse e-mail utilisée lors de l'achat."],
+      ["Éditeur du site", "VoltCore, boutique française de composants et de périphériques PC. Pour toute question relative à l'identité de l'éditeur ou au responsable de publication, contactez-nous à support@voltcore.fr."],
+      ["Contact", "Pour toute question ou réclamation : support@voltcore.fr. Les demandes liées aux commandes doivent préciser le numéro de commande et l'adresse e-mail utilisée lors de l'achat."],
       ["Hébergement", "Le site est hébergé par Render (Render Inc.). Toute demande relative à l'hébergement peut être adressée à notre support."],
       ["Facturation", "Une facture PDF est générée automatiquement après paiement et reste disponible à tout moment depuis l'espace client."],
       ["Propriété intellectuelle", "Les textes, interfaces et éléments de marque VoltCore sont protégés. Toute reproduction sans autorisation est interdite."],
