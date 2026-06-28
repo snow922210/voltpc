@@ -4447,16 +4447,11 @@ function fillNavMenus() {
 function fillMobileMenu() {
   const body = $("#mobileMenuBody");
   if (!body) return;
-  const cat = (k) => `<a class="mm-cat" href="${catUrl(k)}"><span class="mm-ico">${art(k, 24)}</span>${CATS[k].label}</a>`;
   body.innerHTML = `
     <a class="mm-link" href="/">Accueil</a>
+    <a class="mm-link" href="/catalogue">Catalogue</a>
     <a class="mm-link" href="/configurateur">Configurateur</a>
     <a class="mm-link" href="/contact">Nous contacter</a>
-    <div class="mm-section">Composants</div>
-    <div class="mm-grid">${COMPONENT_CATS.map(cat).join("")}</div>
-    <a class="mm-all" href="/catalogue">Tout le catalogue →</a>
-    <div class="mm-section">Périphériques</div>
-    <div class="mm-grid">${PERIPH_CATS.map(cat).join("")}</div>
     <div class="mm-foot">
       <a class="mm-link" href="/compte">Mon compte</a>
     </div>`;
