@@ -2361,7 +2361,7 @@ async function viewCatalog(app, params) {
       <div class="filter-group" id="priceGroup"><span>Prix (€)</span></div>
       <button class="btn btn-ghost btn-sm" id="resetFilters">Réinitialiser</button>
     </aside>
-    <div>
+    <div class="catalog-results" id="catalogResults">
       <div class="catalog-toolbar">
         <h1>${pageTitle}<span class="count" id="resultCount"></span></h1>
         <div class="sort-control" id="sortControl">
@@ -2426,9 +2426,10 @@ async function viewCatalog(app, params) {
     bindProductCards(app, pageGroups.flatMap((g) => g.brands.length > 1 ? [] : g.items));
     $$("[data-page]", app).forEach((b) => b.onclick = () => {
       navigate({ page: Number(b.dataset.page) });
-      window.scrollTo({ top: 0 });
     });
   };
+  const revealCatalogResults = () => requestAnimationFrame(() =>
+    $("#catalogResults")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   const initialMin = filters.min ? +filters.min : -Infinity;
   const initialMax = filters.max ? +filters.max : Infinity;
   renderCatalogProducts(priceBase.filter((p) => p.price >= initialMin && p.price <= initialMax));
@@ -2475,6 +2476,7 @@ async function viewCatalog(app, params) {
     const min = filters.min ? +filters.min : -Infinity;
     const max = filters.max ? +filters.max : Infinity;
     renderCatalogProducts(priceBase.filter((product) => product.price >= min && product.price <= max), filters.page);
+    revealCatalogResults();
   };
 
   // Options de filtres par specs : dérivées des produits de la catégorie courante.
