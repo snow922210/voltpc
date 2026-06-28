@@ -117,3 +117,17 @@ Stockage/RAM = vetting visuel obligatoire (capacité imprimée).
 - Radeon RX 7600 XT 16 Go — pas d'ASRock (que Sapphire).
 - Radeon RX 6750 XT 12 Go — RX 6000 retirée d'amazon.fr.
 - Radeon RX 6650 XT 8 Go — que Sapphire (seed=ASRock).
+
+## SOUS-CAMPAGNE /loop (2026-06-28) — 41 produits prod sans image_url
+Méthode : set_full_gallery.py (crée -1..N, NE touche pas le mapping) + ajout
+manuel de l'entrée product_images.py par NOM EXACT de la base prod (les noms
+prod diffèrent du worklist). Puis partie B : supprimer images à texte chinois/asiatique.
+- [x] Lot 1 (5/41) : RTX 5080 TUF Gaming, 5090 Suprim, 5060 8 Go, 5090 Windforce OC,
+      4060 Ventus 2X 8G — commit ab1ba8c.
+- [SKIP] GeForce RTX 4070 Dual (633) : Amazon ne propose que "4070 Super Dual Evo" → à revoir.
+- [ ] RESTE ~36 : ROG Crosshair X870E Hero(27), RM1000x Shift(32), O11 Dynamic EVO XL(36),
+      H9 Flow RGB(38), ROG Swift PG27UCDM(46), Huntsman V3 Pro TKL(53), PRIME A620M-K(75),
+      Pro 16Go DDR5-5600(80), NV2 1To(89), MAG A650BN(93), Freezer 36(102), G203(116),
+      MPG A1000G(225), LE520 240(243), Trident Z5 RGB 32Go 6400(20), + IDs 613-631 (CPU Intel/AMD,
+      cartes mères B650/B850/Z790, RAM Dominator/Trident/Fury/Pro/Viper).
+- [ ] PARTIE B : scanner frontend/images pour texte CJK et supprimer.
