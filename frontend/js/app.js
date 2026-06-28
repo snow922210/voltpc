@@ -2335,6 +2335,15 @@ async function viewCatalog(app, params) {
     : filters.nouveau ? "Nouveautés"
     : filters.cat ? (CATS[filters.cat]?.label ?? "Catalogue")
     : filters.q ? `Recherche « ${esc(filters.q)} »` : "Catalogue";
+  const sortOptions = [
+    ["featured", "En vedette"],
+    ["performance", "Performance"],
+    ["price_asc", "Prix croissant"],
+    ["price_desc", "Prix décroissant"],
+    ["rating", "Meilleures notes"],
+    ["name", "Nom A→Z"],
+  ];
+  const activeSortLabel = sortOptions.find(([value]) => value === filters.sort)?.[1] || "En vedette";
 
   app.innerHTML = `
   <div class="catalog-layout">
@@ -2354,14 +2363,20 @@ async function viewCatalog(app, params) {
     <div>
       <div class="catalog-toolbar">
         <h1>${pageTitle}<span class="count" id="resultCount"></span></h1>
-        <select class="select" id="sortSelect">
-          <option value="featured" ${filters.sort === "featured" ? "selected" : ""}>En vedette</option>
-          <option value="performance" ${filters.sort === "performance" ? "selected" : ""}>Performance ↓</option>
-          <option value="price_asc" ${filters.sort === "price_asc" ? "selected" : ""}>Prix croissant</option>
-          <option value="price_desc" ${filters.sort === "price_desc" ? "selected" : ""}>Prix décroissant</option>
-          <option value="rating" ${filters.sort === "rating" ? "selected" : ""}>Meilleures notes</option>
-          <option value="name" ${filters.sort === "name" ? "selected" : ""}>Nom A→Z</option>
-        </select>
+        <div class="sort-control" id="sortControl">
+          <button class="sort-trigger" id="sortTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span class="sort-caption">Trier par</span>
+            <strong>${activeSortLabel}</strong>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+          </button>
+          <div class="sort-menu" id="sortMenu" role="listbox" aria-label="Ordre de tri" hidden>
+            ${sortOptions.map(([value, label]) => `
+              <button type="button" role="option" data-sort="${value}" aria-selected="${filters.sort === value}">
+                <span>${label}</span>
+                ${filters.sort === value ? '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7"/></svg>' : ""}
+              </button>`).join("")}
+          </div>
+        </div>
       </div>
       <div id="catalogGrid">${skeletons(8)}</div>
     </div>
@@ -2452,7 +2467,31 @@ async function viewCatalog(app, params) {
 
   $$("input[name=cat]", app).forEach((r) => r.onchange = () => navigate({ cat: r.value, brand: "", spec: {} }));
   $$("input[name=brand]", app).forEach((r) => r.onchange = () => navigate({ brand: r.value }));
-  $("#sortSelect").onchange = (e) => navigate({ sort: e.target.value });
+  const sortControl = $("#sortControl");
+  const sortTrigger = $("#sortTrigger");
+  const sortMenu = $("#sortMenu");
+  const closeSort = () => {
+    sortMenu.hidden = true;
+    sortTrigger.setAttribute("aria-expanded", "false");
+  };
+  sortTrigger.onclick = () => {
+    const opening = sortMenu.hidden;
+    sortMenu.hidden = !opening;
+    sortTrigger.setAttribute("aria-expanded", String(opening));
+    if (opening) sortMenu.querySelector('[aria-selected="true"]')?.focus();
+  };
+  sortControl.onfocusout = () => setTimeout(() => {
+    if (!sortControl.contains(document.activeElement)) closeSort();
+  });
+  sortControl.onkeydown = (e) => {
+    if (e.key === "Escape") {
+      closeSort();
+      sortTrigger.focus();
+    }
+  };
+  $$("[data-sort]", sortMenu).forEach((option) => {
+    option.onclick = () => navigate({ sort: option.dataset.sort });
+  });
   $("#resetFilters").onclick = () => { go("/catalogue"); };
 
   // Curseur de prix à deux poignées (min/max) — bornes dérivées du catalogue.
