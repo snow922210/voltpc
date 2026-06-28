@@ -1293,9 +1293,9 @@ async function viewHome(app) {
     </section>
 
     <section class="void-orbit-strip" data-void-sep>
-      <article><span>Catalogue</span><strong>Des composants visibles, sans lumi&egrave;re inutile.</strong></article>
-      <article><span>Config</span><strong>Une s&eacute;lection lente, claire, sans tunnel confus.</strong></article>
-      <article><span>Commande</span><strong>Panier, paiement et suivi restent sobres.</strong></article>
+      <a class="void-orbit-card" href="/catalogue"><span>Catalogue</span><strong>Plus de 280 composants en stock, fiches claires et prix &agrave; jour.</strong></a>
+      <a class="void-orbit-card" href="/configurateur"><span>Configurateur</span><strong>Un assistant guid&eacute; qui v&eacute;rifie la compatibilit&eacute; &agrave; chaque &eacute;tape.</strong></a>
+      <a class="void-orbit-card" href="/compte"><span>Commande</span><strong>Paiement s&eacute;curis&eacute; Stripe, facture PDF et suivi dans votre compte.</strong></a>
     </section>
 
     <section class="section void-section prebuilts" id="prebuilts">
@@ -1317,10 +1317,10 @@ async function viewHome(app) {
 
     <section class="section void-section">
       <div class="perks">
-        <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></div><div><h4>Livraison</h4><p>Les frais et options disponibles sont calculés au panier.</p></div></div>
-        <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garanties</h4><p>Rétractation légale 14 jours et garantie légale de conformité.</p></div></div>
-        <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></div><div><h4>Compatibilité</h4><p>Le configurateur vérifie les choix au fil de la sélection.</p></div></div>
-        <div class="perk"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><h4>Paiement</h4><p>Transactions chiffrées et données protégées.</p></div></div>
+        <a class="perk" href="/cgv"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7.5" cy="17.5" r="1.7"/><circle cx="17.5" cy="17.5" r="1.7"/></svg></div><div><h4>Livraison</h4><p>Les frais et options disponibles sont calculés au panier.</p></div></a>
+        <a class="perk" href="/retours-remboursements"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><h4>Garanties</h4><p>Rétractation légale 14 jours et garantie légale de conformité.</p></div></a>
+        <a class="perk" href="/configurateur"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></div><div><h4>Compatibilité</h4><p>Le configurateur vérifie les choix au fil de la sélection.</p></div></a>
+        <a class="perk" href="/confidentialite"><div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><h4>Paiement</h4><p>Transactions chiffrées et données protégées.</p></div></a>
       </div>
     </section>
   </div>`;
@@ -1416,6 +1416,9 @@ const prebuiltRoleLabel = (role) => ({
   "Alimentation": "PSU",
 }[role] || role);
 const findPrebuilt = (key) => PREBUILTS.find((b) => b.key === key);
+
+// Composants mis en avant sur la carte d'aperçu (les autres sont résumés).
+const PREBUILT_KEY_ROLES = ["Processeur", "Carte graphique", "Mémoire", "Stockage"];
 
 // Charge le catalogue, compose chaque machine (remplit b.ids role→id) et renvoie
 // une Map id→produit avec tous les composants retenus.
@@ -1878,9 +1881,16 @@ async function renderPrebuilts(preloaded) {
   grid.innerHTML = PREBUILTS.map((b) => {
     const parts = prebuiltParts(b, byId);
     const total = prebuiltTotal(parts);
-    const specs = parts.map(({ role, product }) =>
+    const keyParts = PREBUILT_KEY_ROLES
+      .map((r) => parts.find(({ role }) => role === r))
+      .filter(Boolean);
+    const restCount = parts.length - keyParts.length;
+    const specs = keyParts.map(({ role, product }) =>
       `<li><span class="k">${prebuiltRoleLabel(role)}</span><span class="v">${esc(product.brand)} ${esc(product.name)}</span></li>`
-    ).join("");
+    ).join("")
+    + (restCount > 0
+      ? `<li class="pb-more"><span class="k">+</span><span class="v">+${restCount} autres composants</span></li>`
+      : "");
     return `<article class="pb-card${b.featured ? " featured" : ""}">
       <div class="pb-head">
         <span class="pb-tier">${b.tier}</span>
