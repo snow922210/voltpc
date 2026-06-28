@@ -1651,18 +1651,22 @@ const prebuiltParts = (b, byId) =>
   PREBUILT_ROLES.map((role) => ({ role, product: byId.get(b.ids[role]) })).filter((x) => x.product);
 const prebuiltTotal = (parts) => parts.reduce((s, { product }) => s + product.price, 0);
 
-function addPrebuiltToCart(b, byId) {
+function addPrebuiltToCart(b, byId, excluded = null) {
   if (!state.user) {
-    requireAuth(() => addPrebuiltToCart(b, byId));
+    requireAuth(() => addPrebuiltToCart(b, byId, excluded));
     toast("Connectez-vous pour enregistrer votre panier sur votre compte", "info");
     return;
   }
   let n = 0;
-  prebuiltParts(b, byId).forEach(({ product }) => {
+  // `excluded` (Set d'index) = composants que le client a retirés sur la page
+  // détail ; le pack de base reste intact, seul le panier du client est filtré.
+  prebuiltParts(b, byId).forEach(({ product }, i) => {
+    if (excluded && excluded.has(i)) return;
     if (product.stock > 0) { addToCart(product, 1, true); n++; }
   });
+  if (n === 0) { toast("Aucun composant à ajouter", "info"); return; }
   fireVoltBurst();
-  toast(`${b.name} ajouté : ${n} composants`, "success");
+  toast(`${b.name} ajouté : ${n} composant${n > 1 ? "s" : ""}`, "success");
   openCart();
 }
 
@@ -1780,11 +1784,19 @@ async function viewPrebuilt(app, key) {
     return;
   }
 
-  const parts = prebuiltParts(b, byId);
-  const total = prebuiltTotal(parts);
-  const available = parts.filter(({ product }) => product.stock > 0).length;
-  const allAvailable = available === parts.length;
-  app.innerHTML = `
+  const allParts = prebuiltParts(b, byId);
+  // Composants retirés par le client — exclusion LOCALE à cette vue (par index).
+  // Ne modifie pas le pack de base (PREBUILTS) : ça n'agit que sur ce que le
+  // client ajoutera à son panier.
+  const excluded = new Set();
+  const kept = () => allParts.filter((_, i) => !excluded.has(i));
+
+  function render() {
+    const keptParts = kept();
+    const total = prebuiltTotal(keptParts);
+    const available = keptParts.filter(({ product }) => product.stock > 0).length;
+    const allAvailable = keptParts.length > 0 && available === keptParts.length;
+    app.innerHTML = `
   <div class="breadcrumb"><a href="/">Accueil</a><span>/</span><a href="/#prebuilts">PC prémontés</a><span>/</span><span>${esc(b.name)}</span></div>
   <section class="prebuilt-page">
     <div class="prebuilt-page-head">
@@ -1793,38 +1805,60 @@ async function viewPrebuilt(app, key) {
       <p>${esc(b.tag)}</p>
       <div class="prebuilt-facts">
         <span>Compatibilité vérifiée</span>
-        <span>${parts.length} composants</span>
-        <span>${allAvailable ? "Disponible selon stock actuel" : `${available}/${parts.length} composants en stock`}</span>
+        <span>${keptParts.length}/${allParts.length} composants${excluded.size ? " conservés" : ""}</span>
+        <span>${keptParts.length === 0 ? "Aucun composant sélectionné" : (allAvailable ? "Disponible selon stock actuel" : `${available}/${keptParts.length} composants en stock`)}</span>
       </div>
     </div>
     <aside class="prebuilt-summary panel">
       <span>Total composants</span>
       <strong>${fmt(total)}</strong>
-      <p>Prix calculé à partir des composants listés ci-dessous. Les frais éventuels sont calculés au panier.</p>
-      <button class="btn btn-primary btn-block" id="prebuiltAdd">Ajouter la configuration</button>
+      <p>Retirez des composants ci-dessous pour personnaliser ce que vous ajoutez au panier. Le pack de base n'est pas modifié.</p>
+      <button class="btn btn-primary btn-block" id="prebuiltAdd"${keptParts.length === 0 ? " disabled" : ""}>Ajouter la configuration${excluded.size ? " personnalisée" : ""}</button>
+      ${excluded.size ? `<button class="btn btn-ghost btn-block btn-sm" id="prebuiltReset">↩ Rétablir le pack complet</button>` : ""}
       <a class="btn btn-ghost btn-block" href="/configurateur">Ouvrir le configurateur</a>
     </aside>
   </section>
   <section class="section">
     <div class="section-head"><h2>Composants inclus</h2><a href="/#prebuilts">Retour aux configurations</a></div>
     <div class="prebuilt-component-list">
-      ${parts.map(({ role, product }) => `
-        <a class="prebuilt-component" href="/produit/${product.id}">
-          <div class="prebuilt-component-visual">${art(product.category, hueOf(product))}${imgTag(product)}</div>
-          <div>
-            <span>${prebuiltRoleLabel(role)}</span>
-            <strong>${esc(product.brand)} ${esc(product.name)}</strong>
-          </div>
-          <div class="prebuilt-component-meta">
-            <strong>${fmt(product.price)}</strong>
-            <small class="${product.stock > 0 ? "" : "out"}">${product.stock > 0 ? `${product.stock} en stock` : "Rupture"}</small>
-          </div>
-        </a>
-      `).join("")}
+      ${allParts.map(({ role, product }, i) => {
+        const off = excluded.has(i);
+        return `
+        <div class="prebuilt-component-row" style="display:flex;align-items:center;gap:10px${off ? ";opacity:.5" : ""}">
+          <a class="prebuilt-component" href="/produit/${product.id}" style="flex:1${off ? ";pointer-events:none" : ""}">
+            <div class="prebuilt-component-visual">${art(product.category, hueOf(product))}${imgTag(product)}</div>
+            <div>
+              <span>${prebuiltRoleLabel(role)}</span>
+              <strong>${esc(product.brand)} ${esc(product.name)}${off ? " — retiré" : ""}</strong>
+            </div>
+            <div class="prebuilt-component-meta">
+              <strong>${fmt(product.price)}</strong>
+              <small class="${product.stock > 0 ? "" : "out"}">${product.stock > 0 ? `${product.stock} en stock` : "Rupture"}</small>
+            </div>
+          </a>
+          <button class="btn btn-sm pb-comp-toggle" data-idx="${i}" title="${off ? "Remettre ce composant" : "Retirer ce composant de votre panier"}"
+            style="white-space:nowrap;flex-shrink:0;${off ? "" : "color:#d9544f;border:1px solid #d9544f;background:transparent"}">${off ? "↩ Remettre" : "✕ Retirer"}</button>
+        </div>`;
+      }).join("")}
     </div>
   </section>
   </div>`;
-  $("#prebuiltAdd").onclick = () => addPrebuiltToCart(b, byId);
+
+    const addBtn = $("#prebuiltAdd");
+    if (addBtn) addBtn.onclick = () => addPrebuiltToCart(b, byId, excluded);
+    const resetBtn = $("#prebuiltReset");
+    if (resetBtn) resetBtn.onclick = () => { excluded.clear(); render(); };
+    $$(".pb-comp-toggle").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        const i = +btn.dataset.idx;
+        if (excluded.has(i)) excluded.delete(i); else excluded.add(i);
+        render();
+      };
+    });
+  }
+
+  render();
 }
 
 async function renderPrebuilts(preloaded) {
@@ -4207,18 +4241,17 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
       <button class="btn btn-primary full" type="submit" style="color:var(--on-primary)">Créer le produit</button>
     </form>
   </details>
+  <div style="margin-bottom:14px">
+    <input id="adminSearch" type="search" autocomplete="off" placeholder="🔎 Rechercher un produit (nom, marque, catégorie, #id)…"
+      style="width:100%;padding:11px 13px;border-radius:10px;background:var(--bg);color:var(--text);border:1px solid var(--border-strong)">
+  </div>
   <div id="adminProducts"><div class="skeleton" style="min-height:160px"></div></div>`;
 
   const inp = "padding:8px 10px;border-radius:8px;background:var(--bg);color:var(--text);border:1px solid var(--border-strong)";
+  let allProducts = [];
 
-  async function load() {
-    const products = await api("/products?sort=name");
-    if (isStaleRender(renderToken, app)) return;
-    const adminProducts = $("#adminProducts");
-    if (!adminProducts) return;
-    adminProducts.innerHTML =
-      `<p style="color:var(--text-dim);margin-bottom:12px">${products.length} produits</p>` +
-      products.map((p) => `
+  function productCard(p) {
+    return `
       <div class="order-card" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:12px;min-width:220px">
           <img src="${esc(p.image_url || `/images/${p.id}-1.jpg`)}" onerror="this.style.visibility='hidden'" style="width:44px;height:44px;object-fit:contain;border-radius:6px;background:var(--surface);flex-shrink:0">
@@ -4232,10 +4265,27 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
           <label style="font-size:.75rem;color:var(--text-dim)">Stock<br><input class="pp-stock" data-pid="${p.id}" type="number" min="0" value="${p.stock}" style="${inp};width:70px"></label>
           <label style="font-size:.75rem;color:var(--text-dim)">URL d'image<br><input class="pp-img" data-pid="${p.id}" value="${esc(p.image_url || "")}" placeholder="https://…" style="${inp};width:220px"></label>
           <button class="btn btn-primary btn-sm pp-save" data-pid="${p.id}" style="color:var(--on-primary)">Enregistrer</button>
-          <button class="btn btn-ghost btn-sm pp-del" data-pid="${p.id}"></button>
+          <button class="btn btn-ghost btn-sm pp-del" data-pid="${p.id}" style="color:#d9544f;border-color:#d9544f">🗑 Supprimer</button>
         </div>
-      </div>`).join("");
+      </div>`;
+  }
 
+  function renderList(q = "") {
+    const adminProducts = $("#adminProducts");
+    if (!adminProducts) return;
+    const needle = q.trim().toLowerCase();
+    const list = needle
+      ? allProducts.filter((p) =>
+          `${p.name} ${p.brand} ${CATS[p.category]?.label || p.category} #${p.id}`.toLowerCase().includes(needle))
+      : allProducts;
+    adminProducts.innerHTML =
+      `<p style="color:var(--text-dim);margin-bottom:12px">${list.length} produit${list.length > 1 ? "s" : ""}${needle ? ` sur ${allProducts.length}` : ""}</p>` +
+      (list.length ? list.map(productCard).join("")
+        : `<p style="color:var(--text-dim)">Aucun produit ne correspond à « ${esc(q)} ».</p>`);
+    bindRowHandlers();
+  }
+
+  function bindRowHandlers() {
     $$(".pp-save").forEach((btn) => {
       btn.onclick = async () => {
         const id = btn.dataset.pid;
@@ -4264,6 +4314,15 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
       };
     });
   }
+
+  async function load() {
+    allProducts = await api("/products?sort=name");
+    if (isStaleRender(renderToken, app)) return;
+    renderList($("#adminSearch")?.value || "");
+  }
+
+  const searchInput = $("#adminSearch");
+  if (searchInput) searchInput.oninput = (e) => renderList(e.target.value);
 
   $("#addProductForm").onsubmit = async (e) => {
     e.preventDefault();
