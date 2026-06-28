@@ -4219,6 +4219,16 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
 
   const catOptions = Object.entries(CATS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join("");
   app.innerHTML = `
+  <style>
+    .pp-del{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;color:#e0564f;border:1px solid rgba(224,86,79,.45);background:transparent;border-radius:10px;cursor:pointer;transition:transform .12s ease,background .15s ease,border-color .15s ease,box-shadow .15s ease}
+    .pp-del:hover{background:rgba(224,86,79,.12);border-color:#e0564f;box-shadow:0 0 0 3px rgba(224,86,79,.12)}
+    .pp-del:active{transform:scale(.84)}
+    .pp-del.deleting svg{animation:ppTrash .5s ease}
+    .pp-del .lid{transform-origin:12px 6px}
+    @keyframes ppTrash{10%{transform:rotate(-22deg)}30%{transform:rotate(16deg)}50%{transform:rotate(-10deg)}70%{transform:rotate(6deg)}100%{transform:rotate(0)}}
+    .order-card.removing{animation:ppRowOut .34s ease forwards;overflow:hidden}
+    @keyframes ppRowOut{to{opacity:0;transform:translateX(28px);max-height:0;margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0}}
+  </style>
   <div class="section-head" style="margin-top:0">
     <h1>️ Produits — Admin</h1>
     <a class="btn btn-ghost btn-sm" href="/compte">← Mon compte</a>
@@ -4265,7 +4275,13 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
           <label style="font-size:.75rem;color:var(--text-dim)">Stock<br><input class="pp-stock" data-pid="${p.id}" type="number" min="0" value="${p.stock}" style="${inp};width:70px"></label>
           <label style="font-size:.75rem;color:var(--text-dim)">URL d'image<br><input class="pp-img" data-pid="${p.id}" value="${esc(p.image_url || "")}" placeholder="https://…" style="${inp};width:220px"></label>
           <button class="btn btn-primary btn-sm pp-save" data-pid="${p.id}" style="color:var(--on-primary)">Enregistrer</button>
-          <button class="btn btn-ghost btn-sm pp-del" data-pid="${p.id}" style="color:#d9544f;border-color:#d9544f">🗑 Supprimer</button>
+          <button class="pp-del" data-pid="${p.id}" title="Supprimer ce produit" aria-label="Supprimer ${esc(p.name)}">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path class="lid" d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+              <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+          </button>
         </div>
       </div>`;
   }
@@ -4305,12 +4321,20 @@ async function viewAdminProducts(app, renderToken = currentRenderToken) {
     $$(".pp-del").forEach((btn) => {
       btn.onclick = async () => {
         const id = btn.dataset.pid;
+        // Secousse de la poubelle, en laissant le navigateur peindre avant la
+        // confirmation (qui bloque le thread).
+        btn.classList.add("deleting");
+        await new Promise((r) => setTimeout(r, 180));
+        btn.classList.remove("deleting");
         if (!confirm("Supprimer ce produit définitivement ?")) return;
+        btn.disabled = true;
         try {
           await api(`/admin/products/${id}`, { method: "DELETE" });
           toast("Produit supprimé");
-          load();
-        } catch (err) { toast(err.message, "error"); }
+          const card = btn.closest(".order-card");
+          if (card) { card.classList.add("removing"); setTimeout(load, 320); }
+          else load();
+        } catch (err) { btn.disabled = false; toast(err.message, "error"); }
       };
     });
   }
