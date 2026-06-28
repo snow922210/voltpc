@@ -748,7 +748,7 @@ body.menu-open { overflow: hidden; }
  border: 1px solid var(--border);
  border-radius: 14px;
 }
-.cart-trust span, .trust-strip span {
+.cart-trust span {
  display: flex;
  align-items: center;
  gap: 7px;
@@ -757,7 +757,7 @@ body.menu-open { overflow: hidden; }
  font-size: 0.78rem;
  font-weight: 600;
 }
-.cart-trust svg, .trust-strip svg {
+.cart-trust svg {
  width: 16px;
  height: 16px;
  flex: none;
@@ -901,18 +901,6 @@ body.picker-open .compare-bar { display: none; }
  color: var(--text-dim);
  font-size: 1.08rem;
  line-height: 1.6;
-}
-.trust-strip {
- display: flex;
- flex-wrap: wrap;
- gap: 10px;
- margin: 22px 0 28px;
-}
-.trust-strip span {
- padding: 10px 13px;
- background: var(--surface-2);
- border: 1px solid var(--border);
- border-radius: 999px;
 }
 .story-grid, .legal-grid {
  display: grid;
