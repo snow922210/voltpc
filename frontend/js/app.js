@@ -2429,7 +2429,7 @@ async function viewCatalog(app, params) {
     });
   };
   const revealCatalogResults = () => requestAnimationFrame(() =>
-    $("#catalogResults")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    $("#catalogResults")?.scrollTo({ top: 0, behavior: "smooth" }));
   const initialMin = filters.min ? +filters.min : -Infinity;
   const initialMax = filters.max ? +filters.max : Infinity;
   renderCatalogProducts(priceBase.filter((p) => p.price >= initialMin && p.price <= initialMax));
