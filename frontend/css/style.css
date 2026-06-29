@@ -3844,8 +3844,8 @@ textarea,
   pointer-events: none;
   opacity: 0;
   transition: opacity .25s ease;
-  background: radial-gradient(220px circle at var(--gx, 50%) var(--gy, 0%),
-   rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 55%);
+  background: radial-gradient(200px circle at var(--gx, 50%) var(--gy, 0%),
+   rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 55%);
  }
  .void-home .product-card.is-tilt:hover .product-visual::after { opacity: 1; }
 
@@ -3877,4 +3877,37 @@ textarea,
   transform: translate3d(0, var(--copy-shift, 0px), 0);
   will-change: transform;
  }
+
+ /* 5 · Balayage lumineux du CTA principal au survol (sheen sweep). */
+ .void-hero .void-btn-primary { position: relative; overflow: hidden; }
+ .void-hero .void-btn-primary > span,
+ .void-hero .void-btn-primary > b { position: relative; z-index: 1; }
+ .void-hero .void-btn-primary::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: -60%;
+  width: 45%;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .35), transparent);
+  transform: skewX(-18deg);
+  transition: left .6s ease;
+ }
+ .void-hero .void-btn-primary:hover::before { left: 130%; }
+
+ /* 6 · Bandeau de marques : défilement continu (trust bar). Piste dupliquée
+    côté template pour une boucle sans couture ; pause au survol. */
+ .void-trust { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+ .void-trust-track { flex-wrap: nowrap; width: max-content; justify-content: flex-start; animation: voltMarquee 32s linear infinite; }
+ .void-trust:hover .void-trust-track { animation-play-state: paused; }
+ @keyframes voltMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 }
+
+/* ── Bandeau de marques (trust bar) : layout de base, toujours appliqué.
+   En prefers-reduced-motion il reste une rangée statique centrée ; le bloc
+   @media no-preference ci-dessus le transforme en défilement continu. */
+.void-trust { position: relative; margin-top: clamp(38px, 6vw, 64px); padding: 16px 0; border-block: 1px solid var(--border); }
+.void-trust-label { display: block; text-align: center; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 14px; }
+.void-trust-track { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 24px 56px; }
+.void-trust-item { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; letter-spacing: 0.01em; color: var(--text-faint); white-space: nowrap; opacity: 0.78; transition: color 0.2s ease, opacity 0.2s ease; }
+.void-trust-item:hover { color: var(--text); opacity: 1; }

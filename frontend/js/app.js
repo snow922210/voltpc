@@ -1263,7 +1263,11 @@ async function render() {
 }
 
 /* ─── Vue : accueil ─── */
+// Grandes marques du catalogue (bandeau défilant). Piste dupliquée côté template
+// pour une boucle sans couture (translateX(-50%) = exactement une piste).
+const TRUST_BRANDS = ["NVIDIA", "AMD", "Intel", "ASUS", "MSI", "Gigabyte", "Corsair", "Samsung", "Kingston", "Logitech", "Razer", "Noctua", "Seasonic", "be quiet!"];
 async function viewHome(app) {
+  const trustRow = TRUST_BRANDS.map((b) => `<span class="void-trust-item">${b}</span>`).join("");
   app.innerHTML = `
   <div class="void-home">
     <section class="void-hero">
@@ -1298,6 +1302,11 @@ async function viewHome(app) {
       <a class="void-orbit-card" href="/configurateur"><span>Configurateur</span><strong>Un assistant guid&eacute; qui v&eacute;rifie la compatibilit&eacute; &agrave; chaque &eacute;tape.</strong></a>
       <a class="void-orbit-card" href="/compte"><span>Commande</span><strong>Paiement s&eacute;curis&eacute; Stripe, facture PDF et suivi dans votre compte.</strong></a>
     </section>
+
+    <div class="void-trust" aria-label="Grandes marques de notre catalogue">
+      <span class="void-trust-label">Les grandes marques de notre catalogue</span>
+      <div class="void-trust-track">${trustRow}<span aria-hidden="true" style="display:contents">${trustRow}</span></div>
+    </div>
 
     <section class="section void-section prebuilts" id="prebuilts">
       <div class="section-head"><h2>Machines pr&ecirc;tes</h2><a href="/configurateur">Composer le mien &rarr;</a></div>
@@ -2284,7 +2293,10 @@ function initHomeMotion() {
   const home = $(".void-home");
   if (!home) return null;
   const cleanups = [];
-  const TILT = 6; // amplitude max de l'inclinaison (deg)
+  // Amplitude d'inclinaison (deg). Cartes produit volontairement plus douces
+  // (rendu pro, moins « gadget ») que les cartes catégorie.
+  const TILT_PRODUCT = 2.6;
+  const TILT_CAT = 4;
 
   /* 1 · Compteurs animés du hero (ex. « 280+ », « 4 ») */
   $$(".void-readout strong", home).forEach((el) => {
@@ -2314,9 +2326,11 @@ function initHomeMotion() {
     const r = active.getBoundingClientRect();
     const px = clamp01((lastEvt.clientX - r.left) / (r.width || 1));
     const py = clamp01((lastEvt.clientY - r.top) / (r.height || 1));
-    active.style.setProperty("--tilt-y", ((px - 0.5) * 2 * TILT).toFixed(2) + "deg");
-    active.style.setProperty("--tilt-x", (-(py - 0.5) * 2 * TILT).toFixed(2) + "deg");
-    active.style.setProperty("--tilt-lift", (active.matches(".cat-card") ? -4 : -6) + "px");
+    const isCat = active.matches(".cat-card");
+    const ampl = isCat ? TILT_CAT : TILT_PRODUCT;
+    active.style.setProperty("--tilt-y", ((px - 0.5) * 2 * ampl).toFixed(2) + "deg");
+    active.style.setProperty("--tilt-x", (-(py - 0.5) * 2 * ampl).toFixed(2) + "deg");
+    active.style.setProperty("--tilt-lift", (isCat ? -4 : -3) + "px");
     active.style.setProperty("--gx", (px * 100).toFixed(1) + "%");
     active.style.setProperty("--gy", (py * 100).toFixed(1) + "%");
   };
