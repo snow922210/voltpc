@@ -3911,3 +3911,58 @@ textarea,
 .void-trust-track { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 24px 56px; }
 .void-trust-item { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; letter-spacing: 0.01em; color: var(--text-faint); white-space: nowrap; opacity: 0.78; transition: color 0.2s ease, opacity 0.2s ease; }
 .void-trust-item:hover { color: var(--text); opacity: 1; }
+
+/* ════════════════════════════════════════════════════════════════
+   HERO « révélé par la lumière »
+   - le titre est TRACÉ par un faisceau lumineux au chargement
+     (light-wipe gauche→droite — pile le thème « construis dans le noir »)
+   - une LAMPE suit le curseur et révèle une fine grille blueprint dans
+     l'obscurité (JS pose --lx/--ly et la classe .is-lit sur .void-hero).
+   Theme-aware (color-mix sur --text), neutralisé en reduced-motion
+   (la grille/lampe ne s'activent que via .is-lit, ajoutée par le JS qui
+   ne tourne jamais en reduced-motion ; le tracé est sous no-preference).
+   ════════════════════════════════════════════════════════════════ */
+.void-h1-wrap { position: relative; display: inline-block; margin: 22px 0 16px; }
+.void-h1 { margin: 0 !important; position: relative; }
+/* Calque brillant superposé au titre (déjà peint dessous → LCP intact). */
+.void-h1-glow {
+ position: absolute; top: 0; left: 0; width: 100%;
+ pointer-events: none; opacity: 0;
+ color: transparent;
+ background: linear-gradient(100deg, transparent 38%, color-mix(in srgb, var(--text) 96%, transparent) 50%, transparent 62%);
+ -webkit-background-clip: text; background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-size: 280% 100%; background-position: 120% 0;
+ filter: drop-shadow(0 0 10px color-mix(in srgb, var(--text) 45%, transparent));
+}
+
+.void-grid {
+ position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0;
+ background-image:
+  linear-gradient(color-mix(in srgb, var(--text) 13%, transparent) 1px, transparent 1px),
+  linear-gradient(90deg, color-mix(in srgb, var(--text) 13%, transparent) 1px, transparent 1px);
+ background-size: 46px 46px;
+ -webkit-mask-image: radial-gradient(240px circle at var(--lx, 50%) var(--ly, 38%), #000 0%, rgba(0, 0, 0, .35) 42%, transparent 72%);
+ mask-image: radial-gradient(240px circle at var(--lx, 50%) var(--ly, 38%), #000 0%, rgba(0, 0, 0, .35) 42%, transparent 72%);
+ transition: opacity .5s ease;
+}
+.void-lamp {
+ position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0;
+ transition: opacity .5s ease;
+ background: radial-gradient(280px circle at var(--lx, 50%) var(--ly, 38%),
+  color-mix(in srgb, var(--text) 9%, transparent), transparent 66%);
+}
+.void-hero.is-lit .void-grid { opacity: .9; }
+.void-hero.is-lit .void-lamp { opacity: 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+ /* Ignition : une bande de lumière balaie le titre une fois au chargement
+    (le titre dessous reste peint → aucun impact LCP). */
+ .void-h1-glow { animation: voltIgnite 1.5s cubic-bezier(.32, 0, .2, 1) .35s 1 both; }
+ @keyframes voltIgnite {
+  0%   { opacity: 0; background-position: 120% 0; }
+  18%  { opacity: 1; }
+  82%  { opacity: 1; }
+  100% { opacity: 0; background-position: -60% 0; }
+ }
+}

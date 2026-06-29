@@ -1272,13 +1272,17 @@ async function viewHome(app) {
   <div class="void-home">
     <section class="void-hero">
       <canvas class="void-field" id="voidField" aria-hidden="true"></canvas>
+      <div class="void-grid" aria-hidden="true"></div>
+      <div class="void-lamp" aria-hidden="true"></div>
       <div class="void-depth" aria-hidden="true">
         <span></span><span></span><span></span><span></span>
       </div>
 
       <div class="void-copy">
         <span class="void-eyebrow">VoltCore / void build</span>
-        <h1>Construis dans le noir.</h1>
+        <div class="void-h1-wrap">
+          <h1 class="void-h1">Construis dans le noir.<span class="void-h1-glow" aria-hidden="true">Construis dans le noir.</span></h1>
+        </div>
         <p>Un espace calme pour choisir ton PC. Peu de bruit, des composants lisibles, une machine qui sort lentement du vide.</p>
         <div class="void-actions">
           <a class="btn void-btn void-btn-primary" href="#prebuilts"><span>Voir les machines</span><b aria-hidden="true">&rarr;</b></a>
@@ -2427,6 +2431,35 @@ function initHomeMotion() {
     window.addEventListener("scroll", onScroll, { passive: true });
     cleanups.push(() => window.removeEventListener("scroll", onScroll));
     onScroll();
+  }
+
+  /* 6 · Lampe du hero : un halo suit le curseur (--lx/--ly en %) et révèle
+     la grille blueprint. Classe .is-lit pour l'apparition/disparition. */
+  const hero = $(".void-hero", home);
+  if (hero) {
+    let ltick = false, lev = null;
+    const onLampMove = (e) => {
+      lev = e;
+      if (ltick) return;
+      ltick = true;
+      requestAnimationFrame(() => {
+        ltick = false;
+        const r = hero.getBoundingClientRect();
+        hero.style.setProperty("--lx", clamp01((lev.clientX - r.left) / (r.width || 1)) * 100 + "%");
+        hero.style.setProperty("--ly", clamp01((lev.clientY - r.top) / (r.height || 1)) * 100 + "%");
+      });
+    };
+    const onLampEnter = () => hero.classList.add("is-lit");
+    const onLampLeave = () => hero.classList.remove("is-lit");
+    hero.addEventListener("pointermove", onLampMove, { passive: true });
+    hero.addEventListener("pointerenter", onLampEnter);
+    hero.addEventListener("pointerleave", onLampLeave);
+    cleanups.push(() => {
+      hero.removeEventListener("pointermove", onLampMove);
+      hero.removeEventListener("pointerenter", onLampEnter);
+      hero.removeEventListener("pointerleave", onLampLeave);
+      hero.classList.remove("is-lit");
+    });
   }
 
   return () => cleanups.forEach((fn) => fn());
