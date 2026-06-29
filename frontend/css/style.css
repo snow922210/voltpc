@@ -3802,3 +3802,79 @@ textarea,
  .header .nav { display: none; }
  .header .menu-btn { display: grid; place-items: center; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   ACCUEIL · couche « premium » (pack complet)
+   Tilt 3D + reflet des cartes, CTA magnétiques, révélation des
+   sections au scroll et parallaxe du hero. Piloté par js/app.js
+   → initHomeMotion(). 100 % transform/opacity (60 fps), différé
+   (aucun impact LCP). Tout est sous prefers-reduced-motion:
+   no-preference ET la couche JS ne s'arme jamais en reduced-motion.
+   ════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: no-preference) {
+
+ /* 1 · Tilt 3D des cartes (parallaxe au curseur). JS pose
+    --tilt-x/-y (deg) et --tilt-lift (px). Le transform est en
+    !important pour passer DEVANT l'animation « voltReveal … both »
+    (un remplissage forwards/both verrouille sinon transform:none). */
+ .void-home .product-card.is-tilt,
+ .void-home .cat-card.is-tilt {
+  transform:
+   perspective(900px)
+   rotateX(var(--tilt-x, 0deg))
+   rotateY(var(--tilt-y, 0deg))
+   translateY(var(--tilt-lift, 0px)) !important;
+  transition: transform .14s ease-out, border-color .22s ease, box-shadow .28s ease;
+  will-change: transform;
+ }
+ /* Retour au repos après le survol : easing souple */
+ .void-home .product-card.is-tilt:not(:hover),
+ .void-home .cat-card.is-tilt:not(:hover) {
+  transition: transform .5s cubic-bezier(.22, .61, .36, 1);
+ }
+
+ /* Reflet spéculaire qui suit le curseur. JS pose --gx/--gy (%).
+    Voile blanc discret : quasi invisible sur fond clair, net en
+    thème sombre. Clippé par .product-visual (overflow:hidden). */
+ .void-home .product-card.is-tilt .product-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .25s ease;
+  background: radial-gradient(220px circle at var(--gx, 50%) var(--gy, 0%),
+   rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 55%);
+ }
+ .void-home .product-card.is-tilt:hover .product-visual::after { opacity: 1; }
+
+ /* 2 · CTA magnétiques du hero. JS pose --mx/--my (px). */
+ .void-hero .void-btn {
+  transition: transform .18s cubic-bezier(.22, .61, .36, 1), background .18s ease, color .18s ease;
+ }
+ .void-hero .void-btn.is-magnetic {
+  transform: translate(var(--mx, 0px), var(--my, 0px));
+ }
+
+ /* 3 · Révélation des sections au scroll (armée par JS → .is-in).
+    État par défaut = visible : si le JS ne s'arme pas, rien n'est
+    masqué (pas de FOUC). */
+ .void-home .void-section.reveal-armed {
+  opacity: 0;
+  transform: translateY(34px);
+  transition: opacity .7s cubic-bezier(.22, .61, .36, 1),
+   transform .7s cubic-bezier(.22, .61, .36, 1);
+  will-change: opacity, transform;
+ }
+ .void-home .void-section.reveal-armed.is-in {
+  opacity: 1;
+  transform: none;
+ }
+
+ /* 4 · Parallaxe douce du bloc texte du hero. JS pose --copy-shift. */
+ .void-hero .void-copy {
+  transform: translate3d(0, var(--copy-shift, 0px), 0);
+  will-change: transform;
+ }
+}

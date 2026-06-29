@@ -1344,6 +1344,7 @@ async function viewHome(app) {
 
   renderPrebuilts();
   initHome3D();
+  homeMotionCleanup = initHomeMotion();
 }
 
 /* ─── PC prémontés (configs curées, compatibilité vérifiée) ─── */
@@ -2047,10 +2048,10 @@ function viewLegal(app, key) {
    viewport ; le CSS la transforme en effets VARIÉS (profondeur, dépliage),
    pas seulement en rotation. La tour du hero réagit au scroll + à la souris. */
 let home3DCleanup = null;
+let homeMotionCleanup = null;
 function cleanupHome3D() {
-  if (!home3DCleanup) return;
-  home3DCleanup();
-  home3DCleanup = null;
+  if (home3DCleanup) { home3DCleanup(); home3DCleanup = null; }
+  if (homeMotionCleanup) { homeMotionCleanup(); homeMotionCleanup = null; }
 }
 
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
@@ -2270,6 +2271,151 @@ function initHome3D() {
     if (stopModel) stopModel();
   };
   update();
+}
+
+/* ─── Accueil : couche « premium » (pack complet) ──────────────────
+   Tilt 3D + reflet des cartes, CTA magnétiques du hero, révélation
+   des sections au scroll, compteurs animés et parallaxe du hero.
+   Différé (appelé en fin de viewHome → aucun impact LCP), 100 %
+   transform/opacity, jamais armé en prefers-reduced-motion. Renvoie
+   une fonction de nettoyage stockée dans homeMotionCleanup. */
+function initHomeMotion() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return null;
+  const home = $(".void-home");
+  if (!home) return null;
+  const cleanups = [];
+  const TILT = 6; // amplitude max de l'inclinaison (deg)
+
+  /* 1 · Compteurs animés du hero (ex. « 280+ », « 4 ») */
+  $$(".void-readout strong", home).forEach((el) => {
+    const m = el.textContent.match(/^(\D*)(\d+)(.*)$/);
+    if (!m) return;
+    const [, pre, numStr, suf] = m;
+    const target = +numStr;
+    if (!target) return;
+    const dur = 1100;
+    const t0 = performance.now();
+    let raf = requestAnimationFrame(function step(now) {
+      const k = Math.min(1, (now - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 3); // easeOutCubic
+      el.textContent = pre + Math.round(target * eased) + suf;
+      if (k < 1) raf = requestAnimationFrame(step);
+    });
+    cleanups.push(() => cancelAnimationFrame(raf));
+  });
+
+  /* 2 · Tilt 3D + reflet des cartes (parallaxe au curseur).
+     Délégation sur le conteneur → fonctionne aussi pour les cartes
+     injectées après coup (PC prémontés chargés en différé). */
+  let active = null, tiltTick = false, lastEvt = null, dropTimer = 0;
+  const applyTilt = () => {
+    tiltTick = false;
+    if (!active || !lastEvt) return;
+    const r = active.getBoundingClientRect();
+    const px = clamp01((lastEvt.clientX - r.left) / (r.width || 1));
+    const py = clamp01((lastEvt.clientY - r.top) / (r.height || 1));
+    active.style.setProperty("--tilt-y", ((px - 0.5) * 2 * TILT).toFixed(2) + "deg");
+    active.style.setProperty("--tilt-x", (-(py - 0.5) * 2 * TILT).toFixed(2) + "deg");
+    active.style.setProperty("--tilt-lift", (active.matches(".cat-card") ? -4 : -6) + "px");
+    active.style.setProperty("--gx", (px * 100).toFixed(1) + "%");
+    active.style.setProperty("--gy", (py * 100).toFixed(1) + "%");
+  };
+  const resetCard = (card) => {
+    card.style.setProperty("--tilt-x", "0deg");
+    card.style.setProperty("--tilt-y", "0deg");
+    card.style.setProperty("--tilt-lift", "0px");
+    clearTimeout(dropTimer);
+    dropTimer = setTimeout(() => card.classList.remove("is-tilt"), 520);
+  };
+  const onOver = (e) => {
+    const card = e.target.closest(".product-card, .cat-card");
+    if (!card || card === active) return;
+    if (active) resetCard(active);
+    active = card;
+    clearTimeout(dropTimer);
+    card.classList.add("is-tilt");
+  };
+  const onMove = (e) => {
+    if (!active) return;
+    lastEvt = e;
+    if (!tiltTick) { tiltTick = true; requestAnimationFrame(applyTilt); }
+  };
+  const onOut = (e) => {
+    if (!active) return;
+    if (e.relatedTarget && active.contains(e.relatedTarget)) return; // déplacement interne
+    resetCard(active);
+    active = null;
+  };
+  home.addEventListener("pointerover", onOver);
+  home.addEventListener("pointermove", onMove, { passive: true });
+  home.addEventListener("pointerout", onOut);
+  cleanups.push(() => {
+    home.removeEventListener("pointerover", onOver);
+    home.removeEventListener("pointermove", onMove);
+    home.removeEventListener("pointerout", onOut);
+    clearTimeout(dropTimer);
+  });
+
+  /* 3 · CTA magnétiques du hero (les 2 boutons d'action) */
+  $$(".void-hero .void-btn", home).forEach((btn) => {
+    let btick = false, bev = null;
+    const cl = (v) => Math.max(-12, Math.min(12, v));
+    const move = (e) => {
+      bev = e;
+      if (btick) return;
+      btick = true;
+      requestAnimationFrame(() => {
+        btick = false;
+        const r = btn.getBoundingClientRect();
+        btn.classList.add("is-magnetic");
+        btn.style.setProperty("--mx", cl((bev.clientX - (r.left + r.width / 2)) * 0.3).toFixed(1) + "px");
+        btn.style.setProperty("--my", cl((bev.clientY - (r.top + r.height / 2)) * 0.4).toFixed(1) + "px");
+      });
+    };
+    const leave = () => {
+      btn.style.setProperty("--mx", "0px");
+      btn.style.setProperty("--my", "0px");
+      setTimeout(() => btn.classList.remove("is-magnetic"), 200);
+    };
+    btn.addEventListener("pointermove", move, { passive: true });
+    btn.addEventListener("pointerleave", leave);
+    cleanups.push(() => {
+      btn.removeEventListener("pointermove", move);
+      btn.removeEventListener("pointerleave", leave);
+    });
+  });
+
+  /* 4 · Révélation des sections au scroll (IntersectionObserver) */
+  const secs = $$(".void-section", home);
+  if (secs.length && "IntersectionObserver" in window) {
+    secs.forEach((s) => s.classList.add("reveal-armed"));
+    const io = new IntersectionObserver((entries) => {
+      for (const en of entries) {
+        if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); }
+      }
+    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    secs.forEach((s) => io.observe(s));
+    cleanups.push(() => io.disconnect());
+  }
+
+  /* 5 · Parallaxe douce du bloc texte du hero au défilement */
+  const copy = $(".void-copy", home);
+  if (copy) {
+    let ptick = false;
+    const onScroll = () => {
+      if (ptick) return;
+      ptick = true;
+      requestAnimationFrame(() => {
+        ptick = false;
+        copy.style.setProperty("--copy-shift", (-Math.min(40, window.scrollY * 0.12)).toFixed(1) + "px");
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    cleanups.push(() => window.removeEventListener("scroll", onScroll));
+    onScroll();
+  }
+
+  return () => cleanups.forEach((fn) => fn());
 }
 
 /* ─── Filtres par caractéristiques (selon la catégorie) ─── */
