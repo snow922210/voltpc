@@ -3913,28 +3913,24 @@ textarea,
 .void-trust-item:hover { color: var(--text); opacity: 1; }
 
 /* ════════════════════════════════════════════════════════════════
-   HERO « révélé par la lumière »
-   - le titre est TRACÉ par un faisceau lumineux au chargement
-     (light-wipe gauche→droite — pile le thème « construis dans le noir »)
-   - une LAMPE suit le curseur et révèle une fine grille blueprint dans
-     l'obscurité (JS pose --lx/--ly et la classe .is-lit sur .void-hero).
-   Theme-aware (color-mix sur --text), neutralisé en reduced-motion
-   (la grille/lampe ne s'activent que via .is-lit, ajoutée par le JS qui
-   ne tourne jamais en reduced-motion ; le tracé est sous no-preference).
+   HERO « void / ice » — calques visuels (grille blueprint + lampe).
+   L'intro et les interactions sont pilotées par GSAP (js/hero-gsap.js) :
+   la LAMPE suit le curseur (GSAP pose --lx/--ly et la classe .is-lit) et
+   révèle la grille dans l'obscurité. Theme-aware (color-mix sur --text).
    ════════════════════════════════════════════════════════════════ */
 .void-h1-wrap { position: relative; display: inline-block; margin: 22px 0 16px; }
 .void-h1 { margin: 0 !important; position: relative; }
-/* Calque brillant superposé au titre (déjà peint dessous → LCP intact). */
-.void-h1-glow {
- position: absolute; top: 0; left: 0; width: 100%;
- pointer-events: none; opacity: 0;
- color: transparent;
- background: linear-gradient(100deg, transparent 38%, color-mix(in srgb, var(--text) 96%, transparent) 50%, transparent 62%);
- -webkit-background-clip: text; background-clip: text;
- -webkit-text-fill-color: transparent;
- background-size: 280% 100%; background-position: 120% 0;
- filter: drop-shadow(0 0 10px color-mix(in srgb, var(--text) 45%, transparent));
-}
+
+/* Anti-flash : la copie est masquée tant que GSAP n'a pas pris la main
+   (classe retirée par hero-gsap.js, ou par le fallback JS si le CDN GSAP est
+   bloqué). Jamais masquée en reduced-motion. */
+.void-copy.gsap-pending > * { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .void-copy.gsap-pending > * { opacity: 1; } }
+
+/* GSAP pilote la transform (x/y) des CTA → on coupe la transition transform
+   CSS et la version magnétique CSS héritée pour éviter qu'elles luttent. */
+.void-hero.gsap-hero .void-btn { transition: background .18s ease, color .18s ease; }
+.void-hero.gsap-hero .void-btn.is-magnetic { transform: none; }
 
 .void-grid {
  position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0;
@@ -3954,15 +3950,3 @@ textarea,
 }
 .void-hero.is-lit .void-grid { opacity: .9; }
 .void-hero.is-lit .void-lamp { opacity: 1; }
-
-@media (prefers-reduced-motion: no-preference) {
- /* Ignition : une bande de lumière balaie le titre une fois au chargement
-    (le titre dessous reste peint → aucun impact LCP). */
- .void-h1-glow { animation: voltIgnite 1.5s cubic-bezier(.32, 0, .2, 1) .35s 1 both; }
- @keyframes voltIgnite {
-  0%   { opacity: 0; background-position: 120% 0; }
-  18%  { opacity: 1; }
-  82%  { opacity: 1; }
-  100% { opacity: 0; background-position: -60% 0; }
- }
-}

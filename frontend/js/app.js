@@ -1278,10 +1278,10 @@ async function viewHome(app) {
         <span></span><span></span><span></span><span></span>
       </div>
 
-      <div class="void-copy">
+      <div class="void-copy gsap-pending">
         <span class="void-eyebrow">VoltCore / void build</span>
         <div class="void-h1-wrap">
-          <h1 class="void-h1">Construis dans le noir.<span class="void-h1-glow" aria-hidden="true">Construis dans le noir.</span></h1>
+          <h1 class="void-h1">Construis dans le noir.</h1>
         </div>
         <p>Un espace calme pour choisir ton PC. Peu de bruit, des composants lisibles, une machine qui sort lentement du vide.</p>
         <div class="void-actions">
@@ -1358,6 +1358,22 @@ async function viewHome(app) {
   renderPrebuilts();
   initHome3D();
   homeMotionCleanup = initHomeMotion();
+
+  // Hero GSAP (lazy, accueil uniquement). Progressive enhancement : si GSAP
+  // est indisponible ou lent, on retire .gsap-pending pour révéler la copie
+  // (jamais de hero masqué). Filet de sécurité à 2,5 s contre un CDN qui pend.
+  const heroEl = $(".void-hero");
+  const copyEl = $(".void-copy");
+  const revealCopy = () => copyEl && copyEl.classList.remove("gsap-pending");
+  const gsapFallback = setTimeout(revealCopy, 2500);
+  ensureGsap().then((ok) => {
+    clearTimeout(gsapFallback);
+    if (ok && heroEl && heroEl.isConnected && window.initVoltHeroGSAP) {
+      heroGsapCleanup = window.initVoltHeroGSAP(heroEl);
+    } else {
+      revealCopy();
+    }
+  });
 }
 
 /* ─── PC prémontés (configs curées, compatibilité vérifiée) ─── */
@@ -2062,9 +2078,36 @@ function viewLegal(app, key) {
    pas seulement en rotation. La tour du hero réagit au scroll + à la souris. */
 let home3DCleanup = null;
 let homeMotionCleanup = null;
+let heroGsapCleanup = null;
 function cleanupHome3D() {
   if (home3DCleanup) { home3DCleanup(); home3DCleanup = null; }
   if (homeMotionCleanup) { homeMotionCleanup(); homeMotionCleanup = null; }
+  if (heroGsapCleanup) { heroGsapCleanup(); heroGsapCleanup = null; }
+}
+
+/* Charge GSAP 3.13 (+ ScrollTrigger, SplitText) et hero-gsap.js à la demande,
+   uniquement sur l'accueil. Vendoré en local (comme three.min.js) → same-origin,
+   pas de CDN tiers. Tous les plugins GSAP sont gratuits (rachat Webflow).
+   Renvoie une promesse résolue à true si prêt, false sinon (le hero reste
+   alors statique mais entièrement fonctionnel). */
+let _gsapPromise = null;
+function ensureGsap() {
+  if (typeof gsap !== "undefined" && window.ScrollTrigger && window.SplitText && window.initVoltHeroGSAP) {
+    return Promise.resolve(true);
+  }
+  if (_gsapPromise) return _gsapPromise;
+  const load = (src) => new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = src; s.async = true; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  const v = "?v=313";
+  _gsapPromise = load("/js/gsap.min.js" + v)
+    .then(() => Promise.all([load("/js/ScrollTrigger.min.js" + v), load("/js/SplitText.min.js" + v)]))
+    .then(() => load("/js/hero-gsap.js?v=2"))
+    .then(() => { gsap.registerPlugin(window.ScrollTrigger, window.SplitText); return true; })
+    .catch(() => { _gsapPromise = null; return false; });
+  return _gsapPromise;
 }
 
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
@@ -2286,12 +2329,12 @@ function initHome3D() {
   update();
 }
 
-/* ─── Accueil : couche « premium » (pack complet) ──────────────────
-   Tilt 3D + reflet des cartes, CTA magnétiques du hero, révélation
-   des sections au scroll, compteurs animés et parallaxe du hero.
-   Différé (appelé en fin de viewHome → aucun impact LCP), 100 %
-   transform/opacity, jamais armé en prefers-reduced-motion. Renvoie
-   une fonction de nettoyage stockée dans homeMotionCleanup. */
+/* ─── Accueil : couche « premium » (cartes + sections) ─────────────
+   Tilt 3D + reflet des cartes et révélation des sections au scroll.
+   Le hero (intro, CTA magnétiques, lampe, compteurs, parallaxe) est
+   désormais géré par hero-gsap.js (GSAP). Différé (appelé en fin de
+   viewHome), 100 % transform/opacity, jamais armé en reduced-motion.
+   Renvoie une fonction de nettoyage stockée dans homeMotionCleanup. */
 function initHomeMotion() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return null;
   const home = $(".void-home");
@@ -2302,25 +2345,7 @@ function initHomeMotion() {
   const TILT_PRODUCT = 2.6;
   const TILT_CAT = 4;
 
-  /* 1 · Compteurs animés du hero (ex. « 280+ », « 4 ») */
-  $$(".void-readout strong", home).forEach((el) => {
-    const m = el.textContent.match(/^(\D*)(\d+)(.*)$/);
-    if (!m) return;
-    const [, pre, numStr, suf] = m;
-    const target = +numStr;
-    if (!target) return;
-    const dur = 1100;
-    const t0 = performance.now();
-    let raf = requestAnimationFrame(function step(now) {
-      const k = Math.min(1, (now - t0) / dur);
-      const eased = 1 - Math.pow(1 - k, 3); // easeOutCubic
-      el.textContent = pre + Math.round(target * eased) + suf;
-      if (k < 1) raf = requestAnimationFrame(step);
-    });
-    cleanups.push(() => cancelAnimationFrame(raf));
-  });
-
-  /* 2 · Tilt 3D + reflet des cartes (parallaxe au curseur).
+  /* 1 · Tilt 3D + reflet des cartes (parallaxe au curseur).
      Délégation sur le conteneur → fonctionne aussi pour les cartes
      injectées après coup (PC prémontés chargés en différé). */
   let active = null, tiltTick = false, lastEvt = null, dropTimer = 0;
@@ -2374,36 +2399,7 @@ function initHomeMotion() {
     clearTimeout(dropTimer);
   });
 
-  /* 3 · CTA magnétiques du hero (les 2 boutons d'action) */
-  $$(".void-hero .void-btn", home).forEach((btn) => {
-    let btick = false, bev = null;
-    const cl = (v) => Math.max(-12, Math.min(12, v));
-    const move = (e) => {
-      bev = e;
-      if (btick) return;
-      btick = true;
-      requestAnimationFrame(() => {
-        btick = false;
-        const r = btn.getBoundingClientRect();
-        btn.classList.add("is-magnetic");
-        btn.style.setProperty("--mx", cl((bev.clientX - (r.left + r.width / 2)) * 0.3).toFixed(1) + "px");
-        btn.style.setProperty("--my", cl((bev.clientY - (r.top + r.height / 2)) * 0.4).toFixed(1) + "px");
-      });
-    };
-    const leave = () => {
-      btn.style.setProperty("--mx", "0px");
-      btn.style.setProperty("--my", "0px");
-      setTimeout(() => btn.classList.remove("is-magnetic"), 200);
-    };
-    btn.addEventListener("pointermove", move, { passive: true });
-    btn.addEventListener("pointerleave", leave);
-    cleanups.push(() => {
-      btn.removeEventListener("pointermove", move);
-      btn.removeEventListener("pointerleave", leave);
-    });
-  });
-
-  /* 4 · Révélation des sections au scroll (IntersectionObserver) */
+  /* 2 · Révélation des sections au scroll (IntersectionObserver) */
   const secs = $$(".void-section", home);
   if (secs.length && "IntersectionObserver" in window) {
     secs.forEach((s) => s.classList.add("reveal-armed"));
@@ -2414,52 +2410,6 @@ function initHomeMotion() {
     }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
     secs.forEach((s) => io.observe(s));
     cleanups.push(() => io.disconnect());
-  }
-
-  /* 5 · Parallaxe douce du bloc texte du hero au défilement */
-  const copy = $(".void-copy", home);
-  if (copy) {
-    let ptick = false;
-    const onScroll = () => {
-      if (ptick) return;
-      ptick = true;
-      requestAnimationFrame(() => {
-        ptick = false;
-        copy.style.setProperty("--copy-shift", (-Math.min(40, window.scrollY * 0.12)).toFixed(1) + "px");
-      });
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    cleanups.push(() => window.removeEventListener("scroll", onScroll));
-    onScroll();
-  }
-
-  /* 6 · Lampe du hero : un halo suit le curseur (--lx/--ly en %) et révèle
-     la grille blueprint. Classe .is-lit pour l'apparition/disparition. */
-  const hero = $(".void-hero", home);
-  if (hero) {
-    let ltick = false, lev = null;
-    const onLampMove = (e) => {
-      lev = e;
-      if (ltick) return;
-      ltick = true;
-      requestAnimationFrame(() => {
-        ltick = false;
-        const r = hero.getBoundingClientRect();
-        hero.style.setProperty("--lx", clamp01((lev.clientX - r.left) / (r.width || 1)) * 100 + "%");
-        hero.style.setProperty("--ly", clamp01((lev.clientY - r.top) / (r.height || 1)) * 100 + "%");
-      });
-    };
-    const onLampEnter = () => hero.classList.add("is-lit");
-    const onLampLeave = () => hero.classList.remove("is-lit");
-    hero.addEventListener("pointermove", onLampMove, { passive: true });
-    hero.addEventListener("pointerenter", onLampEnter);
-    hero.addEventListener("pointerleave", onLampLeave);
-    cleanups.push(() => {
-      hero.removeEventListener("pointermove", onLampMove);
-      hero.removeEventListener("pointerenter", onLampEnter);
-      hero.removeEventListener("pointerleave", onLampLeave);
-      hero.classList.remove("is-lit");
-    });
   }
 
   return () => cleanups.forEach((fn) => fn());

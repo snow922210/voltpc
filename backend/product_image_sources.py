@@ -199,7 +199,6 @@ OVERRIDES = {
     'Ryzen 9 9900X': 'https://m.media-amazon.com/images/I/61dukbEGziL._AC_SL1500_.jpg',
     'Ryzen 9 9950X': 'https://m.media-amazon.com/images/I/31s69s+BcrL._AC_SL1500_.jpg',
     'Ryzen 9 9950X3D': 'https://m.media-amazon.com/images/I/61r7J46WBdL._AC_SL1500_.jpg',
-    'Ryzen Threadripper 7960X': 'https://m.media-amazon.com/images/I/71Gyox1aqRL._AC_SL1500_.jpg',
     'SF1000 SFX Platinum': 'https://m.media-amazon.com/images/I/81hJaFdwQyL._AC_SL1500_.jpg',
     'SF750 SFX Platinum': 'https://m.media-amazon.com/images/I/81gn3wwCOBL._AC_SL1500_.jpg',
     'SO-DIMM Impact 16 Go DDR5-5600': 'https://m.media-amazon.com/images/I/61-80FSV-cL._AC_SL1500_.jpg',

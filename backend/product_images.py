@@ -233,7 +233,6 @@ PRODUCT_IMAGES = {
     'Ryzen 9 9900X3D': '/images/ryzen-9-9900x3d-1.jpg',
     'Ryzen 9 9950X': '/images/ryzen-9-9950x-1.jpg',
     'Ryzen 9 9950X3D': '/images/ryzen-9-9950x3d-1.jpg',
-    'Ryzen Threadripper 7960X': '/images/ryzen-threadripper-7960x-1.jpg',
     'SF1000 SFX Platinum': '/images/sf1000-sfx-platinum-1.jpg',
     'SF750 SFX Platinum': '/images/sf750-sfx-platinum-1.jpg',
     'SO-DIMM Impact 16 Go DDR5-5600': '/images/so-dimm-impact-16-go-ddr5-5600-1.jpg',
