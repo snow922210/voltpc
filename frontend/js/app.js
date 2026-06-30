@@ -3339,6 +3339,19 @@ async function viewBuilder(app) {
   const byCat = {};
   for (const p of products) (byCat[p.category] ??= []).push(p);
 
+  // Restauration d'une config partagée : /configurateur?build=<id>,<id>…
+  // Guardé : un lien invalide ou un produit disparu est simplement ignoré.
+  try {
+    const shared = new URLSearchParams(location.search).get("build");
+    if (shared) {
+      state.build = {};
+      for (const idStr of shared.split(",")) {
+        const prod = products.find((p) => p.id === Number(idStr));
+        if (prod) state.build[prod.category] = prod;
+      }
+    }
+  } catch { /* lien malformé : on ignore */ }
+
   // Remplissage automatique d'une configuration compatible selon un profil.
   const generateBuild = (preset) => {
     const inStock = (cat) => (byCat[cat] || []).filter((p) => p.stock > 0);
@@ -3504,9 +3517,19 @@ async function viewBuilder(app) {
       <br>
       <button class="btn btn-primary btn-block" id="buildToCart" ${hasError ? "disabled" : ""}>
         ${hasError ? "Corrigez les incompatibilités" : "Ajouter la config au panier"}
-      </button>`;
+      </button>
+      ${count ? `<button class="btn btn-ghost btn-block" id="buildShare" style="margin-top:8px">Partager ma config</button>` : ""}`;
     const toCart = $("#buildToCart");
     if (toCart) toCart.onclick = commitBuildToCart;
+    const share = $("#buildShare");
+    if (share) share.onclick = async () => {
+      const ids = Object.values(state.build).map((p) => p.id).join(",");
+      const url = `${location.origin}/configurateur?build=${ids}`;
+      try {
+        if (navigator.share) await navigator.share({ title: "Ma config VoltCore", url });
+        else { await navigator.clipboard.writeText(url); toast("Lien de la config copié ✔"); }
+      } catch { /* partage annulé par l'utilisateur */ }
+    };
   };
 
   const isCompatible = (cat, p) => {
