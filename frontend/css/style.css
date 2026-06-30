@@ -280,7 +280,7 @@ img { max-width: 100%; }
 /* Menu mobile (tiroir latéral gauche) */
 .mobile-menu {
  position: fixed; inset: 0 auto 0 0; width: min(330px, 86vw);
- z-index: 70; background: var(--surface); border-right: 1px solid var(--border);
+ z-index: 350; background: var(--surface); border-right: 1px solid var(--border);
  box-shadow: var(--shadow-lg);
  display: flex; flex-direction: column; overflow-y: auto;
  transform: translateX(-100%); visibility: hidden;
@@ -833,7 +833,7 @@ body.menu-open { overflow: hidden; }
 
 /* ─── Panier latéral ─── */
 .drawer-overlay, .modal-overlay {
- position: fixed; inset: 0; z-index: 90;
+ position: fixed; inset: 0; z-index: 340;
  background: rgba(15, 23, 42, 0.45);
  backdrop-filter: blur(4px);
  animation: fadeIn 0.2s;
@@ -841,7 +841,7 @@ body.menu-open { overflow: hidden; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .cart-drawer {
- position: fixed; top: 0; right: 0; bottom: 0; z-index: 100;
+ position: fixed; top: 0; right: 0; bottom: 0; z-index: 350;
  width: min(430px, 100vw);
  display: flex; flex-direction: column;
  background: var(--bg);
