@@ -3950,3 +3950,62 @@ textarea,
 }
 .void-hero.is-lit .void-grid { opacity: .9; }
 .void-hero.is-lit .void-lamp { opacity: 1; }
+
+/* ════════════════════════════════════════════════════════════════
+   FONDATIONS MOBILE (≤ 760px)
+   Bloc unique en fin de feuille (priorité de cascade) : header compact
+   sur une seule ligne, recherche déplacée dans le tiroir, cibles
+   tactiles ≥ 44px, inputs ≥ 16px (anti-zoom iOS), zones sûres (encoche).
+   La hauteur réelle de l'en-tête est ensuite auto-mesurée par
+   setupViewportMetrics() → --fixed-header-h se recale tout seul.
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 760px) {
+ :root { --fixed-header-h: 58px; }
+
+ /* En-tête compact : hamburger · logo · actions, sur UNE ligne.
+    Libère ~120px de hauteur (avant : recherche en 2ᵉ ligne → 116-196px). */
+ .header {
+  flex-wrap: nowrap;
+  gap: 10px;
+  padding: 8px 14px;
+  min-height: 58px;
+ }
+ .header .logo { font-size: 1.15rem; margin-right: auto; }
+ .header-actions { gap: 4px; margin-left: 0; }
+
+ /* La recherche inline disparaît (y compris sur l'accueil) : elle est
+    reprise dans le tiroir mobile via .mm-search. */
+ .header-search,
+ body.void-home-active .header-search { display: none; }
+
+ /* Cibles tactiles ≥ 44px (Apple HIG / WCAG 2.5.5). */
+ .icon-btn { min-width: 44px; min-height: 44px; justify-content: center; padding: 8px; }
+ .account-tab, .order-subtab, .auth-tab { min-height: 44px; }
+ .filter-option { min-height: 40px; padding: 8px 0; }
+ .nav-menu-link, .mm-link, .mm-cat, .mm-all { min-height: 44px; }
+ .qty-picker button { min-width: 44px; min-height: 44px; }
+ .btn { min-height: 44px; }
+ .btn-sm { min-height: 40px; }
+
+ /* Un input < 16px déclenche un zoom automatique au focus sur iOS. */
+ input, select, textarea, .select { font-size: 16px; }
+
+ /* Zones sûres (encoche / barre gestuelle) pour les éléments ancrés. */
+ .cart-drawer-foot { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+ .mobile-menu { padding-bottom: env(safe-area-inset-bottom); }
+ .compare-bar { bottom: calc(18px + env(safe-area-inset-bottom)); }
+
+ /* Recherche intégrée au tiroir mobile (remplace la barre d'en-tête). */
+ .mm-search {
+  display: flex; align-items: center; gap: 10px;
+  margin: 4px 4px 12px; padding: 12px 14px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text-faint);
+ }
+ .mm-search:focus-within { border-color: var(--accent); }
+ .mm-search input {
+  flex: 1; min-width: 0; background: none; border: none; outline: none;
+  color: var(--text); font-size: 16px;
+ }
+ .mm-search svg { flex: none; }
+}

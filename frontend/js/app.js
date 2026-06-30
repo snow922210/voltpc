@@ -4875,6 +4875,10 @@ function fillMobileMenu() {
   const body = $("#mobileMenuBody");
   if (!body) return;
   body.innerHTML = `
+    <div class="mm-search">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" id="mmSearchInput" placeholder="Rechercher un composant…" autocomplete="off" enterkeyhint="search">
+    </div>
     <a class="mm-link" href="/">Accueil</a>
     <a class="mm-link" href="/catalogue">Catalogue</a>
     <a class="mm-link" href="/configurateur">Configurateur</a>
@@ -4884,6 +4888,14 @@ function fillMobileMenu() {
     </div>`;
   // Clic sur un lien → on laisse le routeur agir puis on referme le menu.
   body.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeMenu));
+  // Recherche depuis le tiroir mobile (la barre d'en-tête est masquée ≤760px).
+  const mmSearch = $("#mmSearchInput", body);
+  if (mmSearch) mmSearch.onkeydown = (e) => {
+    if (e.key !== "Enter") return;
+    const q = e.target.value.trim();
+    closeMenu();
+    go(q ? `/catalogue?q=${encodeURIComponent(q)}` : "/catalogue");
+  };
 }
 
 function openMenu() {
