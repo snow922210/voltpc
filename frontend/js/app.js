@@ -549,6 +549,35 @@ function stockHtml(stock) {
   return `<span class="stock-dot">En stock</span>`;
 }
 
+/* ─── Délai de livraison estimé (concret : stock + jours ouvrés réels) ─── */
+// Commande avant 16h un jour ouvré → expédiée le jour même (livraison J+1 ouvré).
+// Sinon prochain jour ouvré (J+2). Week-ends sautés. En rupture : aucune estimation.
+function nextBusinessDay(from, count) {
+  const d = new Date(from);
+  let added = 0;
+  while (added < count) {
+    d.setDate(d.getDate() + 1);
+    const wd = d.getDay();
+    if (wd !== 0 && wd !== 6) added++;
+  }
+  return d;
+}
+function deliveryEstimate(stock) {
+  if (stock <= 0) return null;
+  const now = new Date();
+  const wd = now.getDay();
+  const beforeCutoff = wd !== 0 && wd !== 6 && now.getHours() < 16;
+  const eta = nextBusinessDay(now, beforeCutoff ? 1 : 2);
+  return eta.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+}
+function deliveryHtml(p) {
+  const eta = deliveryEstimate(p.stock);
+  if (!eta) return "";
+  return `<span class="delivery-line">
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v9H1zM14 8h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.7"/><circle cx="17.5" cy="18" r="1.7"/></svg>
+    Livré <strong>${eta}</strong></span>`;
+}
+
 /* ─── Specs : lecture machine + scoring perf / usage ─────────────────
    Sert au comparateur (« performance estimée », surbrillance), aux filtres
    par specs et au configurateur (score d'usage, détection de déséquilibre). */
@@ -682,6 +711,7 @@ function productCard(p) {
       <h3 class="product-name">${esc(p.name)}</h3>
       <div class="product-rating">${stars(p.rating)} <span>${p.rating.toFixed(1)}${p.rating_count ? ` (${p.rating_count})` : ""}</span></div>
       ${stockHtml(p.stock)}
+      ${deliveryHtml(p)}
       <div class="product-bottom">
         <div class="price">
           ${p.old_price ? `<span class="price-old">${fmt(p.old_price)}</span>` : ""}
@@ -2846,6 +2876,7 @@ async function viewProduct(app, id) {
         ${p.old_price ? `<span class="price-old">${fmt(p.old_price)}</span><span class="discount-chip">-${discount}%</span>` : ""}
       </div>
       ${stockHtml(p.stock)}
+      ${deliveryHtml(p)}
       ${needFans ? `
       <div class="fan-required">
         <p>⚠️ Ce boîtier est livré <strong>sans ventilateur</strong>. Choisissez un pack de ventilateurs (obligatoire) :</p>
