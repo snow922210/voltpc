@@ -197,6 +197,30 @@ async function downloadInvoice(orderId) {
   }
 }
 
+/* ─── Export RGPD : télécharge toutes les données du compte en JSON ─── */
+async function exportMyData() {
+  try {
+    const res = await fetch(API + "/auth/export", { credentials: "include" });
+    if (!res.ok) {
+      let d = {};
+      try { d = await res.json(); } catch { /* corps non-JSON */ }
+      throw new Error(d.detail || "Impossible d'exporter les données");
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "mes-donnees-voltcore.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast("Export téléchargé ✔");
+  } catch (err) {
+    toast(err.message, "error");
+  }
+}
+
 /* ─── Favoris (liste de souhaits) ─── */
 async function loadFavorites() {
   if (!state.user) { state.favorites = new Set(); return; }
@@ -4223,37 +4247,117 @@ async function renderAccountAddresses(panel) {
 
 /* ─── Compte : profil + mot de passe ─── */
 function renderAccountProfile(panel) {
+  const u = state.user;
+  const memberSince = u.created_at
+    ? new Date(u.created_at * 1000).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
+    : "—";
+  const verifiedBadge = u.email_verified
+    ? `<span class="verified-badge">✓ Vérifié</span>`
+    : `<span class="verified-badge" style="color:var(--amber);border-color:rgba(180,83,9,.5)">Non vérifié</span>`;
+
   panel.innerHTML = `
+    <div class="panel" style="margin-bottom:18px">
+      <h2 style="margin-bottom:14px">Aperçu du compte</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card"><span class="kpi-label">Membre depuis</span><strong class="kpi-value" style="font-size:1.1rem">${memberSince}</strong></div>
+        <div class="kpi-card"><span class="kpi-label">E-mail</span><strong class="kpi-value" style="font-size:1.1rem">${verifiedBadge}</strong></div>
+        <div class="kpi-card"><span class="kpi-label">Commandes</span><strong class="kpi-value" data-recap="count">…</strong></div>
+        <div class="kpi-card"><span class="kpi-label">Total dépensé</span><strong class="kpi-value" data-recap="spent">…</strong></div>
+      </div>
+    </div>
+
     <div class="panel" style="margin-bottom:18px">
       <h2 style="margin-bottom:14px">Mes informations</h2>
       <form id="profileForm" class="form-grid">
-        <label class="full">Nom affiché<input name="name" required minlength="2" value="${esc(state.user.name)}"></label>
-        <label class="full">E-mail<input value="${esc(state.user.email)}" disabled style="opacity:.6"></label>
+        <label class="full">Nom affiché<input name="name" required minlength="2" value="${esc(u.name)}"></label>
+        <label class="full">E-mail<input value="${esc(u.email)}" disabled style="opacity:.6"></label>
+        <label class="full">Téléphone<input name="phone" type="tel" autocomplete="tel" placeholder="06 12 34 56 78" value="${esc(u.phone || "")}"></label>
+        <label class="full" style="flex-direction:row;align-items:center;gap:10px">
+          <input type="checkbox" name="newsletter" style="width:auto" ${u.newsletter ? "checked" : ""}>
+          Recevoir les offres et nouveautés par e-mail
+        </label>
         <button class="btn btn-primary" type="submit" style="color:var(--on-primary);align-self:flex-start">Enregistrer</button>
       </form>
     </div>
-    <div class="panel">
+
+    <div class="panel" style="margin-bottom:18px">
       <h2 style="margin-bottom:14px">Changer mon mot de passe</h2>
       <form id="passwordForm" class="form-grid">
         <label class="full">Mot de passe actuel<input name="current_password" type="password" required></label>
         <label class="full">Nouveau mot de passe<input name="new_password" type="password" required minlength="8" placeholder="8 caractères minimum"></label>
         <button class="btn btn-primary" type="submit" style="color:var(--on-primary);align-self:flex-start">Mettre à jour</button>
       </form>
+    </div>
+
+    <div class="panel">
+      <h2 style="margin-bottom:6px">Données &amp; confidentialité</h2>
+      <p style="color:var(--text-dim);font-size:.9rem;margin-bottom:14px">Téléchargez une copie de vos données, ou supprimez définitivement votre compte (RGPD).</p>
+      <button class="btn btn-ghost btn-sm" id="exportDataBtn">Exporter mes données</button>
+      <details style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+        <summary style="cursor:pointer;font-weight:600;color:var(--red)">Supprimer mon compte</summary>
+        <form id="deleteAccountForm" class="form-grid" style="margin-top:14px">
+          <p class="full" style="color:var(--text-dim);font-size:.88rem;margin:0">Action <strong>irréversible</strong> : vos commandes, adresses et favoris seront supprimés. Confirmez avec votre mot de passe.</p>
+          <label class="full">Mot de passe<input name="password" type="password" required autocomplete="current-password"></label>
+          <button class="btn btn-sm full" type="submit" style="background:var(--red);color:#fff;border-color:var(--red)">Supprimer définitivement mon compte</button>
+        </form>
+      </details>
     </div>`;
+
+  // Récap d'activité (commandes + total dépensé) — chargé en différé.
+  (async () => {
+    const setRecap = (count, spent) => {
+      const c = $('[data-recap="count"]', panel);
+      const s = $('[data-recap="spent"]', panel);
+      if (c) c.textContent = count;
+      if (s) s.textContent = spent;
+    };
+    try {
+      const orders = await api("/orders");
+      const kept = orders.filter((o) => o.status !== "annulée");
+      const spent = kept
+        .filter((o) => o.status !== "en attente de paiement")
+        .reduce((sum, o) => sum + o.total, 0);
+      setRecap(String(kept.length), fmt(spent));
+    } catch { setRecap("—", "—"); }
+  })();
 
   $("#profileForm").onsubmit = async (e) => {
     e.preventDefault();
-    const name = new FormData(e.target).get("name").trim();
+    const f = new FormData(e.target);
     const btn = $("button[type=submit]", e.target);
     btn.disabled = true;
     try {
-      const me = await api("/auth/profile", { method: "PATCH", body: JSON.stringify({ name }) });
+      const me = await api("/auth/profile", { method: "PATCH", body: JSON.stringify({
+        name: f.get("name").trim(),
+        phone: (f.get("phone") || "").trim(),
+        newsletter: f.get("newsletter") === "on",
+      }) });
       state.user = { ...state.user, ...me };
       saveAuth();
       toast("Profil mis à jour ✔");
     } catch (err) { toast(err.message, "error"); }
     finally { btn.disabled = false; }
   };
+
+  $("#exportDataBtn").onclick = exportMyData;
+
+  $("#deleteAccountForm").onsubmit = async (e) => {
+    e.preventDefault();
+    if (!confirm("Supprimer définitivement votre compte ? Cette action est irréversible.")) return;
+    const f = new FormData(e.target);
+    const btn = $("button[type=submit]", e.target);
+    btn.disabled = true;
+    try {
+      await api("/auth/account", { method: "DELETE", body: JSON.stringify({ password: f.get("password") }) });
+      // Session effacée côté serveur : on nettoie l'état local comme une déconnexion.
+      state.token = null; state.user = null; state.favorites = new Set();
+      state.cart = []; state.promo = null;
+      savePromo(); saveAuth(); updateCartCount(); refreshCartDrawer();
+      toast("Votre compte a été supprimé");
+      go("/");
+    } catch (err) { toast(err.message, "error"); btn.disabled = false; }
+  };
+
   $("#passwordForm").onsubmit = async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);

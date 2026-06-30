@@ -261,6 +261,11 @@ def init_db() -> None:
             conn.execute("ALTER TABLE users ADD COLUMN login_attempts INTEGER NOT NULL DEFAULT 0")
         if "login_lock_until" not in user_cols:
             conn.execute("ALTER TABLE users ADD COLUMN login_lock_until REAL")
+        # ─ Migration : profil enrichi (téléphone + opt-in newsletter) ─
+        if "phone" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN phone TEXT")
+        if "newsletter" not in user_cols:
+            conn.execute("ALTER TABLE users ADD COLUMN newsletter INTEGER NOT NULL DEFAULT 0")
         # ─ Migration : avis enrichis (auteur lié au compte, achat vérifié) ─
         review_cols = {r["name"] for r in conn.execute("PRAGMA table_info(reviews)")}
         if "user_id" not in review_cols:
@@ -279,6 +284,8 @@ def _init_db_pg() -> None:
             conn.execute(stmt)
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS checkout_return_token TEXT")
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_seq INTEGER")
+        conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT")
+        conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS newsletter INTEGER NOT NULL DEFAULT 0")
         _seed_db(conn)
 
 
@@ -587,6 +594,12 @@ class ResetPasswordIn(BaseModel):
 
 class ProfileUpdateIn(BaseModel):
     name: str = Field(min_length=2, max_length=80)
+    phone: Optional[str] = Field(default=None, max_length=30)
+    newsletter: Optional[bool] = None
+
+
+class DeleteAccountIn(BaseModel):
+    password: str = Field(min_length=1, max_length=128)
 
 
 class ChangePasswordIn(BaseModel):
@@ -1184,10 +1197,21 @@ def resend_code(body: ResendIn, _rl: None = Depends(rl_code)):
     return {"ok": True}
 
 
+def profile_out(user: sqlite3.Row) -> dict:
+    """Profil renvoyé au front (jamais de secret : ni hash, ni sel, ni code)."""
+    return {
+        "id": user["id"], "name": user["name"], "email": user["email"],
+        "is_admin": is_admin_email(user["email"]),
+        "created_at": user["created_at"],
+        "email_verified": bool(user["email_verified"]),
+        "phone": user["phone"] or "",
+        "newsletter": bool(user["newsletter"]),
+    }
+
+
 @app.get("/api/auth/me")
 def me(user: sqlite3.Row = Depends(current_user)):
-    return {"id": user["id"], "name": user["name"], "email": user["email"],
-            "is_admin": is_admin_email(user["email"])}
+    return profile_out(user)
 
 
 @app.post("/api/auth/logout")
@@ -1268,12 +1292,22 @@ def reset_password(body: ResetPasswordIn, response: Response, _rl: None = Depend
 
 @app.patch("/api/auth/profile")
 def update_profile(body: ProfileUpdateIn, user: sqlite3.Row = Depends(current_user)):
-    """Met à jour le nom affiché du compte."""
+    """Met à jour le profil : nom affiché, téléphone et opt-in newsletter.
+    Le téléphone et la newsletter ne sont touchés que s'ils sont fournis."""
     name = body.name.strip()
+    sets = ["name = ?"]
+    params: list = [name]
+    if body.phone is not None:
+        sets.append("phone = ?")
+        params.append(body.phone.strip() or None)
+    if body.newsletter is not None:
+        sets.append("newsletter = ?")
+        params.append(1 if body.newsletter else 0)
+    params.append(user["id"])
     with db() as conn:
-        conn.execute("UPDATE users SET name = ? WHERE id = ?", (name, user["id"]))
-    return {"id": user["id"], "name": name, "email": user["email"],
-            "is_admin": is_admin_email(user["email"])}
+        conn.execute(f"UPDATE users SET {', '.join(sets)} WHERE id = ?", params)
+        fresh = conn.execute("SELECT * FROM users WHERE id = ?", (user["id"],)).fetchone()
+    return profile_out(fresh)
 
 
 @app.post("/api/auth/change-password")
@@ -1289,6 +1323,83 @@ def change_password(body: ChangePasswordIn, user: sqlite3.Row = Depends(current_
             (hash_password(body.new_password, salt), salt.hex(), user["id"]),
         )
     log.info("Mot de passe modifié pour %s", user["email"])
+    return {"ok": True}
+
+
+@app.get("/api/auth/export")
+def export_my_data(user: sqlite3.Row = Depends(current_user)):
+    """RGPD — portabilité : export complet des données du compte en JSON
+    téléchargeable (profil, adresses, favoris, commandes). Aucun secret inclus."""
+    with db() as conn:
+        addresses = conn.execute(
+            "SELECT label, ship_name, ship_address, ship_city, ship_zip,"
+            " is_default, created_at FROM addresses WHERE user_id = ?"
+            " ORDER BY is_default DESC, created_at DESC", (user["id"],),
+        ).fetchall()
+        favorites = conn.execute(
+            "SELECT p.name, p.brand FROM favorites f JOIN products p ON p.id = f.product_id"
+            " WHERE f.user_id = ? ORDER BY f.created_at DESC", (user["id"],),
+        ).fetchall()
+        orders = conn.execute(
+            "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC",
+            (user["id"],),
+        ).fetchall()
+        orders_out = []
+        for o in orders:
+            items = conn.execute(
+                "SELECT product_name, unit_price, quantity FROM order_items"
+                " WHERE order_id = ?", (o["id"],),
+            ).fetchall()
+            orders_out.append({
+                "numero": o["user_seq"] or o["id"], "statut": o["status"],
+                "total": o["total"], "remise": o["discount"],
+                "cree_le": o["created_at"], "articles": [dict(i) for i in items],
+            })
+    payload = {
+        "profil": profile_out(user),
+        "adresses": [dict(a) for a in addresses],
+        "favoris": [dict(f) for f in favorites],
+        "commandes": orders_out,
+        "exporte_le": time.time(),
+    }
+    body = json.dumps(payload, ensure_ascii=False, indent=2)
+    return Response(
+        content=body, media_type="application/json",
+        headers={"Content-Disposition": 'attachment; filename="mes-donnees-voltcore.json"'},
+    )
+
+
+@app.delete("/api/auth/account")
+def delete_my_account(
+    body: DeleteAccountIn,
+    response: Response,
+    user: sqlite3.Row = Depends(current_user),
+):
+    """RGPD — droit à l'effacement : suppression définitive du compte après
+    confirmation par mot de passe. Les données rattachées sont supprimées ;
+    les avis sont anonymisés pour ne pas fausser les notes produits."""
+    expected = hash_password(body.password, bytes.fromhex(user["salt"]))
+    if not hmac.compare_digest(expected, user["password_hash"]):
+        raise HTTPException(403, "Mot de passe incorrect")
+    uid = user["id"]
+    with db() as conn:
+        # Enfants → parents (on ne dépend pas de l'activation des clés étrangères).
+        order_ids = [r["id"] for r in conn.execute(
+            "SELECT id FROM orders WHERE user_id = ?", (uid,)).fetchall()]
+        for oid in order_ids:
+            conn.execute("DELETE FROM order_items WHERE order_id = ?", (oid,))
+        conn.execute("DELETE FROM orders WHERE user_id = ?", (uid,))
+        conn.execute("DELETE FROM favorites WHERE user_id = ?", (uid,))
+        conn.execute("DELETE FROM cart_items WHERE user_id = ?", (uid,))
+        conn.execute("DELETE FROM addresses WHERE user_id = ?", (uid,))
+        # Avis conservés mais anonymisés (les notes produits restent cohérentes).
+        conn.execute(
+            "UPDATE reviews SET user_id = NULL, author = 'Compte supprimé' WHERE user_id = ?",
+            (uid,),
+        )
+        conn.execute("DELETE FROM users WHERE id = ?", (uid,))
+    clear_session_cookie(response)
+    log.info("Compte supprimé : %s (id=%s)", user["email"], uid)
     return {"ok": True}
 
 

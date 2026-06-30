@@ -45,7 +45,9 @@ PG_SCHEMA = [
         verif_attempts INTEGER NOT NULL DEFAULT 0,
         reset_attempts INTEGER NOT NULL DEFAULT 0,
         login_attempts INTEGER NOT NULL DEFAULT 0,
-        login_lock_until DOUBLE PRECISION
+        login_lock_until DOUBLE PRECISION,
+        phone TEXT,
+        newsletter INTEGER NOT NULL DEFAULT 0
     )""",
     """CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
