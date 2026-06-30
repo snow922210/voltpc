@@ -4174,6 +4174,31 @@ function renderPanelError(panel, retry) {
   $("#panelRetry", panel).onclick = () => (reauth ? (go("/"), openAuth()) : retry());
 }
 
+/* ─── Recommander : ré-ajoute au panier les articles d'une commande ─── */
+// Les lignes de commande ne stockent qu'un instantané (prix/nom). On recharge
+// le catalogue courant pour réinjecter prix et stock à jour, et on saute les
+// produits indisponibles.
+async function reorderItems(order, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    const all = await api("/products");
+    const byId = new Map(all.map((p) => [p.id, p]));
+    let added = 0, skipped = 0;
+    for (const it of order.items) {
+      const prod = byId.get(it.product_id);
+      if (prod && prod.stock > 0) { addToCart(prod, Math.min(it.quantity, prod.stock), true); added++; }
+      else skipped++;
+    }
+    if (added) {
+      toast(`${added} article${added > 1 ? "s" : ""} ajouté${added > 1 ? "s" : ""} au panier${skipped ? ` · ${skipped} indisponible${skipped > 1 ? "s" : ""}` : ""}`);
+      openCart();
+    } else {
+      toast("Ces articles ne sont plus disponibles", "error");
+    }
+  } catch { toast("Impossible de recharger les produits", "error"); }
+  finally { if (btn) btn.disabled = false; }
+}
+
 /* ─── Compte : commandes (avec annulation) ─── */
 async function renderAccountOrders(panel, sub = "active") {
   panel.innerHTML = `<div class="skeleton" style="min-height:110px"></div>`;
@@ -4201,6 +4226,7 @@ async function renderAccountOrders(panel, sub = "active") {
         ${orderProgress(o)}
         <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
           ${o.status !== "en attente de paiement" ? `<button class="btn btn-ghost btn-sm" onclick="downloadInvoice(${o.id})">Télécharger la facture</button>` : ""}
+          ${o.items.length ? `<button class="btn btn-ghost btn-sm" data-reorder="${o.id}">Recommander</button>` : ""}
           ${cancellable.has(o.status) ? `<button class="btn btn-ghost btn-sm order-cancel" data-cancel="${o.id}" style="color:var(--red)">Annuler la commande</button>` : ""}
         </div>
       </div>`;
@@ -4220,6 +4246,10 @@ async function renderAccountOrders(panel, sub = "active") {
     : `<div class="empty-state"><p>Aucune commande pour le moment.</p><br><a class="btn btn-primary" href="/catalogue">Découvrir le catalogue</a></div>`;
 
   $$("[data-sub]", panel).forEach((b) => b.onclick = () => renderAccountOrders(panel, b.dataset.sub));
+  $$("[data-reorder]", panel).forEach((btn) => btn.onclick = () => {
+    const o = orders.find((x) => x.id === Number(btn.dataset.reorder));
+    if (o) reorderItems(o, btn);
+  });
   $$("[data-cancel]", panel).forEach((btn) => btn.onclick = async () => {
     if (!confirm("Annuler cette commande ? Le stock sera restitué.")) return;
     btn.disabled = true;
