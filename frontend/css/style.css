@@ -1545,6 +1545,12 @@ a.contact-card:hover { border-color: var(--accent); transform: translateY(-3px);
 
 /* Boutons favori/comparer sur la fiche produit */
 .pp-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.pp-trust { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 11px 18px; margin: 20px 0 2px; padding: 16px 0 0; border-top: 1px solid var(--border); }
+.pp-trust li { display: flex; align-items: center; gap: 9px; font-size: 0.85rem; color: var(--text-dim); }
+.pp-trust li svg { flex: none; color: var(--green); }
+.pp-trust a { color: var(--text-dim); text-decoration: underline; text-underline-offset: 2px; transition: color 0.15s; }
+.pp-trust a:hover { color: var(--accent); }
+@media (max-width: 520px) { .pp-trust { grid-template-columns: 1fr; gap: 12px; } }
 .btn.fav-active { border-color: var(--accent); color: var(--accent-ink); }
 
 /* ─── Barre de comparaison flottante ─── */
