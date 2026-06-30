@@ -4826,7 +4826,49 @@ function setupTheme() {
 }
 
 /* ─── Initialisation ─── */
+/* ─── Échelle / zoom : auto-mesure du bandeau + en-tête fixes ───────────────
+   Tout le layout (padding du <main>, offsets sticky du catalogue / configurateur
+   / galerie, et la hauteur verrouillée au viewport des résultats) dérive de
+   --announce-h et --fixed-header-h. Ces variables sont codées en dur par
+   breakpoint dans le CSS (78/124/132/182/190/196…). Dès qu'on zoome ou que
+   l'échelle d'affichage de l'OS n'est pas pile à un breakpoint, la hauteur
+   réelle de l'en-tête diverge de la valeur devinée : le contenu glisse SOUS
+   l'en-tête fixe (inatteignable) ou un grand vide apparaît — le site devient
+   « impraticable à cause de l'échelle ».
+   On mesure les hauteurs réellement rendues et on les écrit en inline sur :root
+   (prioritaire sur toutes les media-queries) : chaque calc() se recalibre à
+   n'importe quelle échelle. Les valeurs CSS restent le repli sans JS. */
+function setupViewportMetrics() {
+  const root = document.documentElement;
+  const header = document.querySelector(".header");
+  if (!header) return;
+  const announce = document.querySelector(".announce");
+  let raf = 0;
+  const apply = () => {
+    raf = 0;
+    const hh = Math.round(header.getBoundingClientRect().height);
+    const ah = announce ? Math.round(announce.getBoundingClientRect().height) : 0;
+    if (hh && root.style.getPropertyValue("--fixed-header-h") !== `${hh}px`)
+      root.style.setProperty("--fixed-header-h", `${hh}px`);
+    if (announce && ah && root.style.getPropertyValue("--announce-h") !== `${ah}px`)
+      root.style.setProperty("--announce-h", `${ah}px`);
+  };
+  const schedule = () => { if (!raf) raf = requestAnimationFrame(apply); };
+  apply();
+  if (typeof ResizeObserver !== "undefined") {
+    const ro = new ResizeObserver(schedule);
+    ro.observe(header);
+    if (announce) ro.observe(announce);
+  }
+  // Le zoom navigateur / changement d'échelle déclenche un resize ; on couvre
+  // aussi l'orientation mobile et le reflow après chargement des polices.
+  window.addEventListener("resize", schedule, { passive: true });
+  window.addEventListener("orientationchange", schedule, { passive: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+}
+
 function init() {
+  setupViewportMetrics();
   saveAuth();
   setupDelegatedProductClicks();
   updateCartCount();
