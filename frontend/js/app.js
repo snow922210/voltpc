@@ -2923,12 +2923,21 @@ async function viewProduct(app, id) {
       <textarea id="reviewText" placeholder="Partagez votre expérience avec ce produit…"></textarea>
       <button class="btn btn-primary btn-sm" id="reviewSubmit" style="align-self:flex-start">Publier mon avis</button>
     </div>
-  </section>`;
+  </section>
+  ${p.stock > 0 ? `
+  <div class="pp-buybar-spacer"></div>
+  <div class="pp-buybar">
+    <div class="pp-buybar-info">
+      <span class="pp-buybar-name">${esc(p.name)}</span>
+      <span class="pp-buybar-price">${fmt(p.price)}</span>
+    </div>
+    <button class="btn btn-primary" id="buyBarBtn">${needFans ? "Ajouter" : "Ajouter au panier"}</button>
+  </div>` : ""}`;
 
   // En stock : ajoute au panier (avec ventilateurs si le boîtier en exige).
   // En rupture : le bouton principal bascule la liste de souhaits.
   if (p.stock > 0) {
-    $("#buyBtn").onclick = () => {
+    const buy = () => {
       if (needFans) {
         const fan = fanOptions.find((f) => f.id === +$("#fanPick").value) || fanOptions[0];
         addToCart(fan, 1, true);
@@ -2938,6 +2947,9 @@ async function viewProduct(app, id) {
         addToCart(p, 1);
       }
     };
+    $("#buyBtn").onclick = buy;
+    const buyBar = $("#buyBarBtn");
+    if (buyBar) buyBar.onclick = buy;
   } else {
     $("#buyBtn").onclick = async () => {
       await toggleFavorite(p.id);

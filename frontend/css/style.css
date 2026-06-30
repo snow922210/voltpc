@@ -1551,6 +1551,24 @@ a.contact-card:hover { border-color: var(--accent); transform: translateY(-3px);
 .pp-trust a { color: var(--text-dim); text-decoration: underline; text-underline-offset: 2px; transition: color 0.15s; }
 .pp-trust a:hover { color: var(--accent); }
 @media (max-width: 520px) { .pp-trust { grid-template-columns: 1fr; gap: 12px; } }
+
+/* Barre d'achat collante (mobile uniquement) : prix + ajout toujours à portée. */
+.pp-buybar, .pp-buybar-spacer { display: none; }
+@media (max-width: 760px) {
+ .pp-buybar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: var(--header-bg); backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 1px solid var(--border);
+ }
+ .pp-buybar-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+ .pp-buybar-name { font-size: 0.76rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ .pp-buybar-price { font-family: var(--font-display); font-weight: 700; font-size: 1.12rem; }
+ .pp-buybar .btn { flex: none; min-height: 44px; }
+ .pp-buybar-spacer { display: block; height: calc(72px + env(safe-area-inset-bottom)); }
+}
 .btn.fav-active { border-color: var(--accent); color: var(--accent-ink); }
 
 /* ─── Barre de comparaison flottante ─── */
