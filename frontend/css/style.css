@@ -1569,6 +1569,31 @@ a.contact-card:hover { border-color: var(--accent); transform: translateY(-3px);
  .pp-buybar .btn { flex: none; min-height: 44px; }
  .pp-buybar-spacer { display: block; height: calc(72px + env(safe-area-inset-bottom)); }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   CATALOGUE MOBILE (≤ 900px)
+   Fini la colonne de filtres étriquée à gauche : sur mobile/tablette on
+   passe en UNE colonne pleine largeur, et les filtres sont repliés
+   derrière un bouton « Filtres » (panneau dépliable). Couvre aussi la
+   zone 821-900px où la grille 240px+1fr restait tassée.
+   ════════════════════════════════════════════════════════════════ */
+.filters-toggle { display: none; }
+@media (max-width: 900px) {
+ .catalog-layout { display: block; }
+ .catalog-results {
+  position: static; height: auto; overflow: visible;
+  padding: 0; margin: 0; scrollbar-gutter: auto;
+ }
+ .catalog-toolbar { position: static; }
+ .filters {
+  position: static !important;
+  display: none;               /* replié par défaut ; ouvert via le bouton */
+  margin-bottom: 18px;
+ }
+ .catalog-layout.filters-open .filters { display: flex; }
+ .filters-toggle { display: inline-flex; align-items: center; gap: 7px; }
+ .filters-toggle.active { border-color: var(--accent); color: var(--accent-ink); }
+}
 .btn.fav-active { border-color: var(--accent); color: var(--accent-ink); }
 
 /* ─── Barre de comparaison flottante ─── */

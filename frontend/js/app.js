@@ -2561,6 +2561,10 @@ async function viewCatalog(app, params) {
     <div class="catalog-results" id="catalogResults">
       <div class="catalog-toolbar">
         <h1>${pageTitle}<span class="count" id="resultCount"></span></h1>
+        <button class="filters-toggle btn btn-ghost btn-sm" id="filtersToggle" type="button" aria-controls="filtersBox" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+          Filtres
+        </button>
         <div class="sort-control" id="sortControl">
           <button class="sort-trigger" id="sortTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
             <span class="sort-caption">Trier par</span>
@@ -2579,6 +2583,16 @@ async function viewCatalog(app, params) {
       <div id="catalogGrid">${skeletons(8)}</div>
     </div>
   </div>`;
+
+  // Mobile : les filtres sont repliés derrière un bouton « Filtres » (panneau
+  // pleine largeur), pour ne plus avoir une colonne de filtres étriquée.
+  const catLayout = $(".catalog-layout", app);
+  const filtersToggle = $("#filtersToggle", app);
+  if (catLayout && filtersToggle) filtersToggle.onclick = () => {
+    const open = catLayout.classList.toggle("filters-open");
+    filtersToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    filtersToggle.classList.toggle("active", open);
+  };
 
   const allProducts = await api("/products");
   const sortProducts = (list) => list.sort((a, b) => {
