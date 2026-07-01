@@ -105,6 +105,31 @@ def test_order_reserves_stock_and_release_is_idempotent(fresh_db):
     assert stock_after_release == original_stock
 
 
+def test_order_history_groups_items_for_multiple_orders(fresh_db):
+    user = _demo_user()
+    product = _first_product()
+    body = main.OrderIn(
+        items=[main.OrderItemIn(product_id=product["id"], quantity=1)],
+        promo_code=None,
+        ship_name="Client Demo",
+        ship_address="12 rue Test",
+        ship_city="Paris",
+        ship_zip="75001",
+    )
+
+    with main.db() as conn:
+        for _ in range(2):
+            computed = main.compute_order(conn, body.items, body.promo_code)
+            main.create_pending_order(conn, user, body, computed)
+
+    orders = main.list_orders(user)
+
+    assert len(orders) == 2
+    assert all(len(order["items"]) == 1 for order in orders)
+    assert all(order["items"][0]["product_id"] == product["id"] for order in orders)
+    assert all("order_id" not in order["items"][0] for order in orders)
+
+
 def test_paid_order_is_idempotent_and_clears_cart(fresh_db, monkeypatch):
     monkeypatch.setattr(main.threading.Thread, "start", lambda self: None)
     user = _demo_user()

@@ -30,19 +30,38 @@ const state = {
 };
 
 const apiCache = new Map();
+const apiInFlight = new Map();
+let apiCacheVersion = 0;
 const productIndex = new Map();
 const API_CACHE_TTL_MS = 30_000;
+const PRIVATE_API_CACHE_TTL_MS = 15_000;
 let cartDrawerDirty = true;
 let cartPushTimer = null;
 
-function isCacheableApiPath(path) {
-  return path === "/categories" || path.startsWith("/products");
+function apiCacheTtl(path) {
+  if (path === "/categories" || path.startsWith("/products")) return API_CACHE_TTL_MS;
+  if (["/auth/me", "/orders", "/favorites", "/addresses"].includes(path)) {
+    return PRIVATE_API_CACHE_TTL_MS;
+  }
+  return 0;
 }
 
 function clearApiCache(prefix = "") {
+  apiCacheVersion++;
   for (const key of apiCache.keys()) {
     if (!prefix || key.startsWith(prefix)) apiCache.delete(key);
   }
+  for (const key of apiInFlight.keys()) {
+    if (!prefix || key.startsWith(prefix)) apiInFlight.delete(key);
+  }
+}
+
+function invalidateApiAfterMutation(path) {
+  if (path.startsWith("/favorites")) clearApiCache("/favorites");
+  if (path.startsWith("/addresses")) clearApiCache("/addresses");
+  if (path.startsWith("/orders")) clearApiCache("/orders");
+  if (path === "/auth/profile") clearApiCache("/auth/me");
+  if (path === "/auth/logout" || path === "/auth/account") clearApiCache();
 }
 
 function indexProducts(products = []) {
@@ -137,14 +156,31 @@ function saveAuth() {
 /* ─── API ─── */
 async function api(path, options = {}) {
   const method = (options.method || "GET").toUpperCase();
-  if (method === "GET" && isCacheableApiPath(path)) {
+  const cacheTtl = method === "GET" ? apiCacheTtl(path) : 0;
+  if (cacheTtl && !options.__cacheRequest) {
     const cached = apiCache.get(path);
     if (cached && cached.expiresAt > Date.now()) return cached.value;
+    const pending = apiInFlight.get(path);
+    if (pending) return pending;
+    const request = api(path, {
+      ...options,
+      __cacheRequest: true,
+      __cacheVersion: apiCacheVersion,
+    })
+      .finally(() => apiInFlight.delete(path));
+    apiInFlight.set(path, request);
+    return request;
   }
 
+  const {
+    __cacheRequest: _cacheRequest,
+    __cacheVersion: requestCacheVersion,
+    preserveAuthOn401,
+    ...fetchOptions
+  } = options;
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   // credentials: "include" → le cookie de session HttpOnly accompagne la requête.
-  const res = await fetch(API + path, { ...options, headers, credentials: "include" });
+  const res = await fetch(API + path, { ...fetchOptions, headers, credentials: "include" });
   let data = null;
   let raw = "";
   try { raw = await res.text(); } catch { /* réponse vide */ }
@@ -153,20 +189,22 @@ async function api(path, options = {}) {
     catch { data = { detail: raw.trim() }; }
   }
   if (!res.ok) {
-    if (res.status === 401 && state.token && !options.preserveAuthOn401) {
+    if (res.status === 401 && state.token && !preserveAuthOn401) {
       state.token = null;
       state.user = null;
+      clearApiCache();
       saveAuth();
     }
     throw new Error(data?.detail || "Erreur réseau");
   }
 
-  if (method === "GET" && isCacheableApiPath(path)) {
-    apiCache.set(path, { value: data, expiresAt: Date.now() + API_CACHE_TTL_MS });
+  if (cacheTtl && requestCacheVersion === apiCacheVersion) {
+    apiCache.set(path, { value: data, expiresAt: Date.now() + cacheTtl });
   } else if (method !== "GET" && (path.startsWith("/admin/products") || path.includes("/reviews") || path === "/products")) {
     clearApiCache("/products");
     clearApiCache("/categories");
   }
+  if (method !== "GET") invalidateApiAfterMutation(path);
   return data;
 }
 
@@ -1014,14 +1052,14 @@ function showVerifyStep(email) {
 // Connexion réussie : enregistre la session et ferme la modale.
 async function finishLogin(data) {
   // Le backend a posé le cookie de session ; on ne conserve que le drapeau d'état.
+  clearApiCache();
   state.token = true;
   state.user = data.user;
   saveAuth();
   resetAuthView();
   closeAuth();
   toast(`Bienvenue, ${state.user.name}`);
-  await loadFavorites();
-  await syncCartOnLogin();   // charge le panier lié au compte
+  await Promise.all([loadFavorites(), syncCartOnLogin()]);
   if (state.afterLogin) { const fn = state.afterLogin; state.afterLogin = null; fn(); }
   else render();
 }
@@ -1197,6 +1235,7 @@ function logout() {
   // Demande au backend d'effacer le cookie de session HttpOnly (le JS ne peut
   // pas le supprimer lui-même). Non bloquant : on nettoie l'UI quoi qu'il arrive.
   api("/auth/logout", { method: "POST" }).catch(() => {});
+  clearApiCache();
   state.token = null;
   state.user = null;
   state.favorites = new Set();
@@ -4167,14 +4206,6 @@ async function viewAccount(app, params) {
       return;
     }
   }
-  // Rafraîchit le profil (notamment le statut admin) pour les sessions déjà
-  // ouvertes avant l'ajout de cette fonctionnalité.
-  try {
-    const me = await api("/auth/me");
-    state.user = { ...state.user, ...me };
-    saveAuth();
-  } catch { /* token invalide : géré par api() */ }
-
   const adminLink = state.user.is_admin
     ? `<a class="btn btn-primary btn-sm" style="color:var(--on-primary)" href="/admin">️ Espace admin</a>` : "";
 
@@ -4210,6 +4241,13 @@ async function viewAccount(app, params) {
   const startTab = tabs[initial] ? initial : "orders";
   $$(".account-tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === startTab));
   tabs[startTab]();
+
+  // Précharge les autres panneaux sans bloquer l'onglet demandé. Le cache
+  // privé court rend ensuite les changements d'onglet immédiats, tandis que
+  // apiInFlight évite les doublons avec l'hydratation globale de session.
+  Promise.allSettled(
+    ["/orders", "/favorites", "/addresses"].map((path) => api(path)),
+  );
 }
 
 /* ─── Compte : message d'erreur d'un panneau (évite le squelette figé) ─── */
@@ -5196,21 +5234,25 @@ function init() {
   const { path } = parsePath();
   const needsAuth = routeNeedsAuth(path);
 
-  // Les pages publiques s'affichent tout de suite, puis on hydrate la session
-  // en arrière-plan pour éviter un premier chargement visiblement bloquant.
-  if (!needsAuth) render();
+  // Une session locale connue permet d'afficher immédiatement le squelette et
+  // l'onglet Compte demandé. La validation serveur se poursuit en parallèle.
+  const renderedImmediately = !needsAuth || Boolean(state.user);
+  if (renderedImmediately) render();
 
   (async () => {
     if (state.token || needsAuth) {
       try {
-        await restoreSessionAndCart();
-        if (state.user) {
-          await loadFavorites();
-          refreshFavoriteButtons();
+        const restored = await restoreSessionAndCart({ syncCart: false });
+        if (restored && state.user) {
+          if (needsAuth && !renderedImmediately) render();
+          Promise.allSettled([syncCartOnLogin(), loadFavorites()]).then(() => {
+            refreshFavoriteButtons();
+          });
+          return;
         }
       } catch { /* non bloquant */ }
     }
-    if (needsAuth) render();
+    if (needsAuth && !renderedImmediately) render();
   })();
 }
 

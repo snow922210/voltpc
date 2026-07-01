@@ -1781,16 +1781,31 @@ def list_orders(user: sqlite3.Row = Depends(current_user)):
             "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC",
             (user["id"],),
         ).fetchall()
+        if not orders:
+            return []
+
+        # Une seule lecture des lignes de commande au lieu d'une requête par
+        # commande. Le gain devient sensible dès que l'historique s'allonge,
+        # surtout avec une base PostgreSQL distante en production.
+        order_ids = [o["id"] for o in orders]
+        placeholders = ",".join("?" * len(order_ids))
+        items = conn.execute(
+            "SELECT order_id, product_id, product_name, unit_price, quantity"
+            f" FROM order_items WHERE order_id IN ({placeholders})"
+            " ORDER BY order_id, id",
+            order_ids,
+        ).fetchall()
+        items_by_order: dict[int, list[dict]] = {order_id: [] for order_id in order_ids}
+        for item in items:
+            payload = dict(item)
+            order_id = payload.pop("order_id")
+            items_by_order[order_id].append(payload)
+
         result = []
-        for o in orders:
-            items = conn.execute(
-                "SELECT product_id, product_name, unit_price, quantity"
-                " FROM order_items WHERE order_id = ?",
-                (o["id"],),
-            ).fetchall()
-            d = dict(o)
-            d["items"] = [dict(i) for i in items]
-            result.append(d)
+        for order in orders:
+            payload = dict(order)
+            payload["items"] = items_by_order[order["id"]]
+            result.append(payload)
     return result
 
 

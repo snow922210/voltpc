@@ -425,3 +425,48 @@ marquées « Terminées » sans :
 
 Déployer la version auditée, vérifier que `https://voltcore.fr/` répond en 200,
 puis reprendre la priorité 0 de ce fichier avant de connecter Search Console.
+
+### 1er juillet 2026 — Performance de l’espace Compte
+
+**Problème constaté**
+
+Les pages Commandes, Liste de souhaits, Adresses et Profil semblaient lentes.
+Le chargement direct de `/compte` attendait plusieurs appels privés en série
+avant d'afficher l'interface. La feuille Google Fonts distante bloquait en plus
+l'exécution de `app.js` lorsque le service répondait lentement.
+
+**Corrections réalisées**
+
+1. Affichage immédiat de l'espace Compte lorsqu'un profil local est connu.
+2. Validation de session, panier et favoris déplacés hors du chemin bloquant.
+3. Chargement parallèle du panier et des favoris.
+4. Préchargement non bloquant des commandes, favoris et adresses.
+5. Déduplication des requêtes GET privées déjà en cours.
+6. Cache privé de 15 secondes, invalidé après chaque modification et à chaque
+   changement de session.
+7. Google Fonts chargées de façon non bloquante, avec repli typographique
+   immédiat.
+8. Historique des commandes regroupé en deux requêtes SQL fixes au lieu d'une
+   requête supplémentaire pour chaque commande.
+
+**Mesure contrôlée**
+
+Le scénario ajoute artificiellement 150 ms de latence à chaque API privée :
+
+- cadre Compte visible en **368 ms** ;
+- premier panneau chargé en **529 ms** ;
+- changement vers Favoris en **45 ms** ;
+- changement vers Adresses en **46 ms** ;
+- changement vers Profil en **89 ms** ;
+- une seule requête observée pour chaque ressource privée.
+
+Avant le chargement asynchrone des polices, le même navigateur d'audit attendait
+environ **6,5 secondes** avant l'apparition du cadre Compte lorsque Google Fonts
+était inaccessible.
+
+**Validation**
+
+- 10 tests automatisés réussis ;
+- syntaxe JavaScript valide ;
+- compte de mesure supprimé après le scénario ;
+- aucun outil ou fichier temporaire conservé.

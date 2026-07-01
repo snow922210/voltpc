@@ -33,3 +33,14 @@ def test_private_route_can_stay_noindex_in_production(monkeypatch):
     rendered = main._render(TEMPLATE, robots="noindex, follow")
 
     assert 'content="noindex, follow"' in rendered
+
+
+def test_external_fonts_do_not_block_account_javascript():
+    google_fonts = next(
+        line for line in TEMPLATE.splitlines()
+        if "fonts.googleapis.com/css2" in line and "<noscript>" not in line
+    )
+
+    assert 'media="print"' in google_fonts
+    assert "onload=\"this.media='all'\"" in google_fonts
+    assert '<script src="/js/app.js' in TEMPLATE
