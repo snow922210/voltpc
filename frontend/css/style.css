@@ -27,7 +27,7 @@
 
  --text: #0a0a0b;     /* espresso chaud */
  --text-dim: #5b5b60;
- --text-faint: #9a9aa0;
+ --text-faint: #68686f;
 
  --accent: #111114;      /* orange coucher de soleil (primaire) */
  --accent-soft: #2c2c31;
@@ -830,7 +830,7 @@ body.menu-open { overflow: hidden; }
 }
 .review-form textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(120, 120, 128, 0.12); }
 .star-picker { display: flex; gap: 4px; font-size: 1.5rem; }
-.star-picker button { background: none; border: none; color: var(--text-faint); transition: color 0.12s, transform 0.12s; }
+.star-picker button { width: 44px; height: 44px; display: inline-grid; place-items: center; background: none; border: none; color: var(--text-faint); transition: color 0.12s, transform 0.12s; }
 .star-picker button.on { color: var(--amber); }
 .star-picker button:hover { transform: scale(1.2); }
 

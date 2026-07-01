@@ -27,6 +27,7 @@ PRODUCT_IMAGES = {
     'Apex Pro TKL Gen 3': '/images/apex-pro-tkl-gen-3-1.jpg',
     'Arc B570 10 Go': '/images/arc-b570-10-go-1.jpg',
     'Arc B580 12 Go': '/images/arc-b580-12-go-1.jpg',
+    'Arc B580 12 Go Limited Edition': '/images/arc-b580-12-go-1.jpg',
     'Arctis Nova Pro Wireless': '/images/arctis-nova-pro-wireless-1.jpg',
     'Assassin X 120 R SE': '/images/assassin-x-120-r-se-1.jpg',
     'Athlon 3000G': '/images/athlon-3000g-1.jpg',

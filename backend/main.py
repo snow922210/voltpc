@@ -2108,6 +2108,28 @@ CAT_LABELS = {
     "chair": "Chaises gaming",
 }
 
+CAT_INTROS = {
+    "gpu": "Choisissez une carte graphique selon la définition visée, la mémoire vidéo, la consommation et l'espace disponible dans le boîtier. Comparez les modèles pour construire une configuration cohérente en 1080p, 1440p ou 4K.",
+    "cpu": "Le processeur détermine la plateforme, les performances applicatives et une partie des performances en jeu. Vérifiez le socket, la génération de mémoire, la consommation et le refroidissement avant de choisir.",
+    "ram": "La mémoire doit correspondre au type accepté par la carte mère. Capacité, fréquence, latence, nombre de barrettes et profils EXPO ou XMP influencent la compatibilité et le niveau de performances.",
+    "storage": "Comparez les SSD selon la capacité, l'interface, le format et les débits. Un SSD système rapide améliore le démarrage et les chargements, tandis qu'une grande capacité accueille davantage de jeux et de projets.",
+    "motherboard": "La carte mère relie tous les composants. Contrôlez le socket du processeur, le type de RAM, le format du boîtier, les emplacements M.2, la connectique et les fonctions réseau.",
+    "psu": "Une alimentation adaptée doit fournir assez de puissance et les bons connecteurs sans être inutilement surdimensionnée. Tenez compte du GPU, du processeur, du rendement, de la norme ATX et de la modularité.",
+    "case": "Le boîtier doit accueillir la carte mère, la carte graphique et le refroidissement tout en conservant une circulation d'air efficace. Comparez les formats, dégagements, ventilateurs et possibilités de stockage.",
+    "cooling": "Le refroidissement maintient le processeur dans une plage de température stable. Vérifiez les sockets compatibles, la capacité de dissipation, la hauteur du ventirad ou la taille du radiateur AIO.",
+    "monitor": "Choisissez un écran selon la définition, la taille, la fréquence, le type de dalle et les connecteurs. La carte graphique doit être suffisamment performante pour exploiter la définition et le taux de rafraîchissement visés.",
+    "keyboard": "Comparez les claviers selon le format, le type de touches, la connexion, le rétroéclairage et l'usage. Un modèle compact libère de la place, tandis qu'un pavé numérique reste pratique en bureautique.",
+    "mouse": "Poids, forme, capteur, nombre de boutons et connexion déterminent le confort d'une souris. Le meilleur choix dépend de la taille de la main, de la prise et des usages jeu ou bureautique.",
+    "headset": "Un casque doit combiner confort, restitution sonore, microphone et connexion adaptée. Comparez l'autonomie des modèles sans fil, la compatibilité et les commandes disponibles.",
+    "fan": "Les ventilateurs améliorent le flux d'air du boîtier. Vérifiez leur diamètre, leur connecteur, leur plage de vitesse, leur niveau sonore et le nombre d'emplacements disponibles.",
+    "thermal": "La pâte thermique assure le transfert de chaleur entre le processeur et son refroidissement. Une application correcte et une quantité adaptée comptent davantage qu'une couche trop épaisse.",
+    "webcam": "Définition, fréquence d'image, autofocus, angle de vue et microphone intégré différencient les webcams. Choisissez selon la visioconférence, le streaming et les conditions d'éclairage.",
+    "microphone": "Pour la voix, comparez la directivité, la connexion, les commandes et les accessoires fournis. Le placement et l'environnement acoustique influencent autant le résultat que le microphone.",
+    "speaker": "Les enceintes de bureau se choisissent selon l'espace disponible, la puissance, la connectique et la présence d'un caisson. Vérifiez les entrées nécessaires pour le PC et les autres appareils.",
+    "mousepad": "La taille, la surface et l'épaisseur d'un tapis influencent la glisse et le confort. Un grand format peut accueillir clavier et souris tout en protégeant le bureau.",
+    "chair": "Une chaise gaming doit surtout offrir des réglages adaptés à la morphologie et à la durée d'utilisation. Vérifiez le soutien lombaire, les accoudoirs, le revêtement et la charge maximale.",
+}
+
 # Slugs FR lisibles pour les URLs de catégorie (/categorie/<slug>), plus propres
 # et meilleurs pour le SEO que /catalogue?cat=gpu. Miroir côté frontend (app.js).
 CAT_SLUGS = {
@@ -2182,14 +2204,12 @@ def sitemap_xml():
     with db() as conn:
         for r in conn.execute("SELECT id FROM products ORDER BY id").fetchall():
             urls.append((f"{SITE_URL}/produit/{r['id']}", "0.8"))
-    today = time.strftime("%Y-%m-%d")
     out = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    for loc, prio in urls:
-        out.append(
-            f"  <url><loc>{html.escape(loc)}</loc><lastmod>{today}</lastmod>"
-            f"<priority>{prio}</priority></url>"
-        )
+    # Pas de lastmod artificiel : toutes les URL avec la date du jour enverraient
+    # un faux signal de fraîcheur. priority/changefreq sont ignorés par Google.
+    for loc, _prio in urls:
+        out.append(f"  <url><loc>{html.escape(loc)}</loc></url>")
     out.append("</urlset>")
     return Response(content="\n".join(out), media_type="application/xml")
 
@@ -2212,6 +2232,21 @@ def _money(v) -> str:
 def _clip(text: str, n: int = 155) -> str:
     text = " ".join((text or "").split())
     return text if len(text) <= n else text[: n - 1].rstrip() + "…"
+
+
+def _product_title(product) -> str:
+    """Titre descriptif de 30–60 caractères quand les données le permettent."""
+    name = str(product["name"]).strip()
+    brand = str(product["brand"]).strip()
+    label = CAT_LABELS.get(product["category"], "Composant PC")
+    branded = name if brand.lower() in name.lower() else f"{brand} {name}"
+    candidate = f"{branded} — {label} | VoltCore"
+    if len(candidate) <= 60:
+        return candidate
+    candidate = f"{branded} | VoltCore"
+    if len(candidate) <= 60:
+        return candidate
+    return f"{branded[:49].rstrip()}… | VoltCore"
 
 
 def _jsonld(obj: dict) -> str:
@@ -2238,6 +2273,14 @@ def _seo_block(title, desc, canonical, og_title, og_desc) -> str:
 def _render(tpl, *, title=None, desc=None, canonical=None, og_title=None,
             og_desc=None, image=None, jsonld="", main="", robots=None) -> str:
     out = tpl
+    # Le bandeau de démonstration reste utile en local, mais ne doit jamais
+    # apparaître sur une boutique ouverte à l'indexation.
+    if os.environ.get("SITE_INDEXABLE"):
+        start = out.find("<!-- DEV-ANNOUNCE:START -->")
+        end_marker = "<!-- DEV-ANNOUNCE:END -->"
+        end = out.find(end_marker)
+        if start != -1 and end != -1:
+            out = out[:start] + out[end + len(end_marker):]
     if title is not None:
         block = _seo_block(title, desc, canonical, og_title or title,
                            og_desc or desc)
@@ -2412,9 +2455,17 @@ def _catalog_render(tpl, params) -> Response:
     else:
         heading, canonical = "Catalogue", f"{SITE_URL}/catalogue"
 
-    title = f"{heading} — VoltCore"
-    desc = _clip(f"{heading} : {len(rows)} produits PC haute performance au meilleur "
-                 "prix chez VoltCore. Livraison 24 h, paiement sécurisé.")
+    if cat:
+        title = f"{heading} PC : prix et compatibilité | VoltCore"
+    elif heading == "Catalogue":
+        title = "Composants PC : catalogue et prix | VoltCore"
+    else:
+        title = f"{heading} composants PC | VoltCore"
+    desc = _clip(
+        f"{heading} : comparez {len(rows)} produits et leurs caractéristiques "
+        "chez VoltCore. Compatibilité, disponibilité, paiement sécurisé et "
+        "livraison suivie pour votre configuration PC."
+    )
     items = "".join(
         f'<li><a href="/produit/{r["id"]}">{_E(r["name"])}</a> — '
         f'{_E(r["brand"])} — {_money(r["price"])}</li>' for r in rows
@@ -2422,6 +2473,7 @@ def _catalog_render(tpl, params) -> Response:
     main = (
         '<section><nav class="breadcrumb"><a href="/">Accueil</a> / '
         f'{_E(heading)}</nav><h1>{_E(heading)}</h1>'
+        f'<p class="category-intro">{_E(CAT_INTROS.get(cat, ""))}</p>'
         f'<p>{len(rows)} produits disponibles.</p>'
         f'<ul class="ssr-list">{items}</ul></section>'
     )
@@ -2481,6 +2533,12 @@ STATIC_PAGES = {
         "Retours VoltCore : droit de rétractation 14 jours, retour commercial 30 jours, SAV et remboursement.",
         "Retours et remboursement",
         "Le consommateur dispose d'un droit légal de rétractation de 14 jours. Une politique commerciale de retour jusqu'à 30 jours peut s'appliquer aux produits complets et en bon état.",
+    ),
+    "contact": (
+        "Contacter VoltCore — Conseil PC et suivi de commande",
+        "Contactez VoltCore pour une question sur un composant PC, une compatibilité, une commande, une livraison ou le service après-vente.",
+        "Contacter VoltCore",
+        "L'équipe VoltCore répond aux questions sur les composants, la compatibilité d'une configuration, les commandes, le suivi de livraison et le service après-vente.",
     ),
 }
 
@@ -2560,7 +2618,7 @@ def spa_fallback(full_path: str, request: Request):
                 p = conn.execute("SELECT * FROM products WHERE id = ?", (pid,)).fetchone()
             if p:
                 return _html(_render(
-                    tpl, title=f'{p["name"]} — VoltCore',
+                    tpl, title=_product_title(p),
                     desc=_clip(p["description"]),
                     canonical=f"{SITE_URL}/produit/{pid}",
                     og_title=p["name"], og_desc=_clip(p["description"]),
@@ -2584,10 +2642,70 @@ def spa_fallback(full_path: str, request: Request):
     if seg == "":
         return _html(_render(tpl, main=_home_ssr()))
 
-    # Autres routes applicatives. Le configurateur reste indexable (page
-    # fonctionnelle, présente au sitemap) ; les routes privées ou
-    # transactionnelles passent en noindex (aucune valeur SEO, données perso).
-    _NOINDEX_ROUTES = {"compte", "admin", "panier", "checkout", "commande",
-                       "paiement", "connexion", "inscription"}
-    robots = "noindex, follow" if seg.split("/")[0] in _NOINDEX_ROUTES else None
-    return _html(_render(tpl, robots=robots))
+    # Configurateur : page publique et indexable, donc contenu SEO complet dans
+    # le HTML initial (le JavaScript hydrate ensuite l'outil interactif).
+    if seg == "configurateur":
+        title = "Configurateur PC compatible sur mesure — VoltCore"
+        desc = (
+            "Créez votre PC sur mesure avec le configurateur VoltCore : "
+            "compatibilité CPU, carte mère, RAM, GPU, boîtier, refroidissement "
+            "et alimentation vérifiée."
+        )
+        main = (
+            '<section class="content-page">'
+            '<nav class="breadcrumb"><a href="/">Accueil</a> / Configurateur PC</nav>'
+            '<h1>Configurateur PC compatible sur mesure</h1>'
+            '<p>Sélectionnez les composants de votre ordinateur étape par étape. '
+            'VoltCore contrôle la compatibilité du processeur, de la carte mère, '
+            'de la mémoire, de la carte graphique, du boîtier, du refroidissement '
+            'et de l&apos;alimentation avant l&apos;ajout au panier.</p>'
+            '</section>'
+        )
+        return _html(_render(
+            tpl, title=title, desc=desc,
+            canonical=f"{SITE_URL}/configurateur",
+            og_title=title, og_desc=desc, main=main,
+        ))
+
+    # Routes applicatives réelles mais sans valeur d'indexation : contenu lié
+    # au compte, à une transaction ou à une sélection temporaire.
+    _APP_NOINDEX = {
+        "compte": "Espace client",
+        "admin": "Administration",
+        "panier": "Panier",
+        "checkout": "Paiement",
+        "commande": "Commande",
+        "paiement": "Paiement",
+        "connexion": "Connexion",
+        "inscription": "Inscription",
+        "comparer": "Comparateur de produits",
+    }
+    route_root = seg.split("/")[0]
+    if route_root in _APP_NOINDEX or route_root == "prebuilt":
+        heading = (
+            "Configuration PC"
+            if route_root == "prebuilt"
+            else _APP_NOINDEX.get(route_root, "Espace VoltCore")
+        )
+        title = f"{heading} — VoltCore"
+        return _html(_render(
+            tpl, title=title,
+            desc=f"{heading} sur VoltCore.",
+            canonical=f"{SITE_URL}/{seg}",
+            og_title=title, og_desc=f"{heading} sur VoltCore.",
+            robots="noindex, follow",
+            main=f'<section class="content-page"><h1>{_E(heading)}</h1></section>',
+        ))
+
+    # Une route inconnue doit renvoyer une vraie 404. Un fallback SPA en 200
+    # créerait des soft-404 indexables avec les métadonnées de l'accueil.
+    return _html(_render(
+        tpl, title="Page introuvable — VoltCore",
+        desc="Cette page n'existe pas ou a été déplacée.",
+        canonical=f"{SITE_URL}/{seg}",
+        og_title="Page introuvable — VoltCore",
+        og_desc="Cette page n'existe pas ou a été déplacée.",
+        robots="noindex, follow",
+        main='<section class="empty-state"><h1>Page introuvable</h1>'
+             '<p><a href="/">Retour à l&apos;accueil</a></p></section>',
+    ), status=404)

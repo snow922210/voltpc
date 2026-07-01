@@ -1,0 +1,422 @@
+{
+  "base": "http://127.0.0.1:8050",
+  "summary": {
+    "pagesTested": 14,
+    "non200": 2,
+    "horizontalOverflow": 0,
+    "pagesWithConsoleErrors": 14,
+    "pagesWithUnnamedControls": 2,
+    "pagesWithSmallTargets": 14
+  },
+  "tunnel": {
+    "registrationStatus": 201,
+    "verificationCodeExposedInAuditMode": true,
+    "verificationStatus": 200,
+    "sessionCookieInstalled": true,
+    "unexpectedAuthOnAdd": false,
+    "productAdded": true,
+    "checkoutButtonVisible": true,
+    "checkoutReached": true,
+    "authenticationRequired": false,
+    "cartCount": "1",
+    "auditAccountCleanupStatus": 200
+  },
+  "results": [
+    {
+      "device": "desktop",
+      "route": "/",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/",
+      "screenshot": "docs/seo-data/visual/screenshots/desktop-accueil.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "VoltCore — Composants PC haute performance",
+      "h1": [
+        "Construis dans le noir."
+      ],
+      "bodyTextWords": 731,
+      "horizontalOverflow": false,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "interactiveElements": 92,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 29,
+      "imageCount": 8,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "desktop",
+      "route": "/catalogue",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/catalogue",
+      "screenshot": "docs/seo-data/visual/screenshots/desktop-catalogue.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Catalogue — VoltCore",
+      "h1": [
+        "Catalogue288 produits"
+      ],
+      "bodyTextWords": 612,
+      "horizontalOverflow": false,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "interactiveElements": 174,
+      "unnamedInteractiveElements": 73,
+      "smallTouchTargets": 105,
+      "imageCount": 24,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "desktop",
+      "route": "/categorie/cartes-graphiques",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/categorie/cartes-graphiques",
+      "screenshot": "docs/seo-data/visual/screenshots/desktop-categorie-gpu.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Cartes graphiques — VoltCore",
+      "h1": [
+        "Cartes graphiques39 produits"
+      ],
+      "bodyTextWords": 683,
+      "horizontalOverflow": false,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "interactiveElements": 146,
+      "unnamedInteractiveElements": 44,
+      "smallTouchTargets": 74,
+      "imageCount": 26,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "desktop",
+      "route": "/produit/1",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/produit/1",
+      "screenshot": "docs/seo-data/visual/screenshots/desktop-produit.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "GeForce RTX 5090 SUPRIM Liquid 32G — VoltCore",
+      "h1": [
+        "GeForce RTX 5090 SUPRIM Liquid 32G"
+      ],
+      "bodyTextWords": 505,
+      "horizontalOverflow": false,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "interactiveElements": 78,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 31,
+      "imageCount": 14,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "desktop",
+      "route": "/configurateur",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/configurateur",
+      "screenshot": "docs/seo-data/visual/screenshots/desktop-configurateur.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Configurateur PC compatible sur mesure — VoltCore",
+      "h1": [
+        "Configurateur PC"
+      ],
+      "bodyTextWords": 417,
+      "horizontalOverflow": false,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "interactiveElements": 60,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 27,
+      "imageCount": 0,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "desktop",
+      "route": "/contact",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/contact",
+      "screenshot": "docs/seo-data/visual/screenshots/desktop-contact.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Contacter VoltCore — Conseil PC et suivi de commande",
+      "h1": [
+        "Une question ? Nous sommes là pour vous aider."
+      ],
+      "bodyTextWords": 195,
+      "horizontalOverflow": false,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "interactiveElements": 35,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 27,
+      "imageCount": 0,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "desktop",
+      "route": "/__audit_page_absente__",
+      "status": 404,
+      "url": "http://127.0.0.1:8050/__audit_page_absente__",
+      "screenshot": "docs/seo-data/visual/screenshots/desktop-404.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Page introuvable — VoltCore",
+      "h1": [
+        "Page introuvable"
+      ],
+      "bodyTextWords": 110,
+      "horizontalOverflow": false,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "interactiveElements": 32,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 26,
+      "imageCount": 0,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "mobile",
+      "route": "/",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/",
+      "screenshot": "docs/seo-data/visual/screenshots/mobile-accueil.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "VoltCore — Composants PC haute performance",
+      "h1": [
+        "Construis dans le noir."
+      ],
+      "bodyTextWords": 759,
+      "horizontalOverflow": false,
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "interactiveElements": 90,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 33,
+      "imageCount": 8,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "mobile",
+      "route": "/catalogue",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/catalogue",
+      "screenshot": "docs/seo-data/visual/screenshots/mobile-catalogue.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Catalogue — VoltCore",
+      "h1": [
+        "Catalogue288 produits"
+      ],
+      "bodyTextWords": 501,
+      "horizontalOverflow": false,
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "interactiveElements": 95,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 27,
+      "imageCount": 24,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "mobile",
+      "route": "/categorie/cartes-graphiques",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/categorie/cartes-graphiques",
+      "screenshot": "docs/seo-data/visual/screenshots/mobile-categorie-gpu.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Cartes graphiques — VoltCore",
+      "h1": [
+        "Cartes graphiques39 produits"
+      ],
+      "bodyTextWords": 586,
+      "horizontalOverflow": false,
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "interactiveElements": 96,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 25,
+      "imageCount": 26,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "mobile",
+      "route": "/produit/1",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/produit/1",
+      "screenshot": "docs/seo-data/visual/screenshots/mobile-produit.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "GeForce RTX 5090 SUPRIM Liquid 32G — VoltCore",
+      "h1": [
+        "GeForce RTX 5090 SUPRIM Liquid 32G"
+      ],
+      "bodyTextWords": 511,
+      "horizontalOverflow": false,
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "interactiveElements": 75,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 29,
+      "imageCount": 14,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "mobile",
+      "route": "/configurateur",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/configurateur",
+      "screenshot": "docs/seo-data/visual/screenshots/mobile-configurateur.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Configurateur PC compatible sur mesure — VoltCore",
+      "h1": [
+        "Configurateur PC"
+      ],
+      "bodyTextWords": 414,
+      "horizontalOverflow": false,
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "interactiveElements": 57,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 31,
+      "imageCount": 0,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "mobile",
+      "route": "/contact",
+      "status": 200,
+      "url": "http://127.0.0.1:8050/contact",
+      "screenshot": "docs/seo-data/visual/screenshots/mobile-contact.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Contacter VoltCore — Conseil PC et suivi de commande",
+      "h1": [
+        "Une question ? Nous sommes là pour vous aider."
+      ],
+      "bodyTextWords": 189,
+      "horizontalOverflow": false,
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "interactiveElements": 31,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 23,
+      "imageCount": 0,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    },
+    {
+      "device": "mobile",
+      "route": "/__audit_page_absente__",
+      "status": 404,
+      "url": "http://127.0.0.1:8050/__audit_page_absente__",
+      "screenshot": "docs/seo-data/visual/screenshots/mobile-404.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "failedRequests": [
+        "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap — net::ERR_NETWORK_ACCESS_DENIED"
+      ],
+      "title": "Page introuvable — VoltCore",
+      "h1": [
+        "Page introuvable"
+      ],
+      "bodyTextWords": 104,
+      "horizontalOverflow": false,
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "interactiveElements": 28,
+      "unnamedInteractiveElements": 0,
+      "smallTouchTargets": 22,
+      "imageCount": 0,
+      "imagesMissingAlt": 0,
+      "imagesMissingDimensions": 0,
+      "mainVisible": true
+    }
+  ]
+}

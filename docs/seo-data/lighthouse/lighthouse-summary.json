@@ -1,0 +1,440 @@
+{
+  "reports": [
+    {
+      "name": "catalogue-mobile",
+      "url": "http://127.0.0.1:8050/catalogue",
+      "fetch_time": "2026-07-01T18:54:15.710Z",
+      "scores": {
+        "performance": 69.0,
+        "accessibility": 94.0,
+        "best_practices": 100.0,
+        "seo": 100.0
+      },
+      "metrics": {
+        "fcp_ms": 4509.0,
+        "lcp_ms": 4734.0,
+        "cls": 0.0,
+        "tbt_ms": 0.0,
+        "speed_index_ms": 6448.0,
+        "tti_ms": 4757.0
+      },
+      "warnings": [],
+      "failed_audits": [
+        {
+          "id": "first-contentful-paint",
+          "title": "First Contentful Paint",
+          "score": 0.15,
+          "display": "4.5 s"
+        },
+        {
+          "id": "largest-contentful-paint",
+          "title": "Largest Contentful Paint",
+          "score": 0.32,
+          "display": "4.7 s"
+        },
+        {
+          "id": "speed-index",
+          "title": "Speed Index",
+          "score": 0.4,
+          "display": "6.4 s"
+        },
+        {
+          "id": "interactive",
+          "title": "Time to Interactive",
+          "score": 0.79,
+          "display": "4.8 s"
+        },
+        {
+          "id": "color-contrast",
+          "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "heading-order",
+          "title": "Heading elements are not in a sequentially-descending order",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "unminified-css",
+          "title": "Minify CSS",
+          "score": 0.5,
+          "display": "Est savings of 7 KiB"
+        },
+        {
+          "id": "unminified-javascript",
+          "title": "Minify JavaScript",
+          "score": 0.5,
+          "display": "Est savings of 15 KiB"
+        },
+        {
+          "id": "unused-css-rules",
+          "title": "Reduce unused CSS",
+          "score": 0.5,
+          "display": "Est savings of 26 KiB"
+        },
+        {
+          "id": "unused-javascript",
+          "title": "Reduce unused JavaScript",
+          "score": 0.5,
+          "display": "Est savings of 55 KiB"
+        },
+        {
+          "id": "forced-reflow-insight",
+          "title": "Forced reflow",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "image-delivery-insight",
+          "title": "Improve image delivery",
+          "score": 0.5,
+          "display": "Est savings of 272 KiB"
+        },
+        {
+          "id": "lcp-breakdown-insight",
+          "title": "LCP breakdown",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "title": "Network dependency tree",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "render-blocking-insight",
+          "title": "Render-blocking requests",
+          "score": 0,
+          "display": "Est savings of 3,830 ms"
+        }
+      ]
+    },
+    {
+      "name": "home-desktop",
+      "url": "http://127.0.0.1:8050/",
+      "fetch_time": "2026-07-01T18:55:48.434Z",
+      "scores": {
+        "performance": 66.0,
+        "accessibility": 93.0,
+        "best_practices": 100.0,
+        "seo": 100.0
+      },
+      "metrics": {
+        "fcp_ms": 3070.0,
+        "lcp_ms": 3070.0,
+        "cls": 0.0,
+        "tbt_ms": 0.0,
+        "speed_index_ms": 3268.0,
+        "tti_ms": 3070.0
+      },
+      "warnings": [],
+      "failed_audits": [
+        {
+          "id": "first-contentful-paint",
+          "title": "First Contentful Paint",
+          "score": 0.06,
+          "display": "3.1 s"
+        },
+        {
+          "id": "largest-contentful-paint",
+          "title": "Largest Contentful Paint",
+          "score": 0.32,
+          "display": "3.1 s"
+        },
+        {
+          "id": "speed-index",
+          "title": "Speed Index",
+          "score": 0.21,
+          "display": "3.3 s"
+        },
+        {
+          "id": "interactive",
+          "title": "Time to Interactive",
+          "score": 0.79,
+          "display": "3.1 s"
+        },
+        {
+          "id": "mainthread-work-breakdown",
+          "title": "Minimize main-thread work",
+          "score": 0.5,
+          "display": "2.5 s"
+        },
+        {
+          "id": "valid-source-maps",
+          "title": "Missing source maps for large first-party JavaScript",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "aria-prohibited-attr",
+          "title": "Elements use prohibited ARIA attributes",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "color-contrast",
+          "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "unminified-css",
+          "title": "Minify CSS",
+          "score": 0.5,
+          "display": "Est savings of 7 KiB"
+        },
+        {
+          "id": "unminified-javascript",
+          "title": "Minify JavaScript",
+          "score": 0.5,
+          "display": "Est savings of 15 KiB"
+        },
+        {
+          "id": "unused-css-rules",
+          "title": "Reduce unused CSS",
+          "score": 0.5,
+          "display": "Est savings of 26 KiB"
+        },
+        {
+          "id": "unused-javascript",
+          "title": "Reduce unused JavaScript",
+          "score": 0.5,
+          "display": "Est savings of 135 KiB"
+        },
+        {
+          "id": "forced-reflow-insight",
+          "title": "Forced reflow",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "image-delivery-insight",
+          "title": "Improve image delivery",
+          "score": 0.5,
+          "display": "Est savings of 355 KiB"
+        },
+        {
+          "id": "lcp-breakdown-insight",
+          "title": "LCP breakdown",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "title": "Network dependency tree",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "render-blocking-insight",
+          "title": "Render-blocking requests",
+          "score": 0,
+          "display": "Est savings of 2,870 ms"
+        }
+      ]
+    },
+    {
+      "name": "home-mobile",
+      "url": "http://127.0.0.1:8050/",
+      "fetch_time": "2026-07-01T18:53:53.516Z",
+      "scores": {
+        "performance": 71.0,
+        "accessibility": 96.0,
+        "best_practices": 100.0,
+        "seo": 100.0
+      },
+      "metrics": {
+        "fcp_ms": 4330.0,
+        "lcp_ms": 4330.0,
+        "cls": 0.0,
+        "tbt_ms": 0.0,
+        "speed_index_ms": 6211.0,
+        "tti_ms": 4330.0
+      },
+      "warnings": [],
+      "failed_audits": [
+        {
+          "id": "first-contentful-paint",
+          "title": "First Contentful Paint",
+          "score": 0.17,
+          "display": "4.3 s"
+        },
+        {
+          "id": "largest-contentful-paint",
+          "title": "Largest Contentful Paint",
+          "score": 0.41,
+          "display": "4.3 s"
+        },
+        {
+          "id": "speed-index",
+          "title": "Speed Index",
+          "score": 0.43,
+          "display": "6.2 s"
+        },
+        {
+          "id": "interactive",
+          "title": "Time to Interactive",
+          "score": 0.84,
+          "display": "4.3 s"
+        },
+        {
+          "id": "mainthread-work-breakdown",
+          "title": "Minimize main-thread work",
+          "score": 0.5,
+          "display": "2.9 s"
+        },
+        {
+          "id": "color-contrast",
+          "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "unminified-css",
+          "title": "Minify CSS",
+          "score": 0.5,
+          "display": "Est savings of 7 KiB"
+        },
+        {
+          "id": "unminified-javascript",
+          "title": "Minify JavaScript",
+          "score": 0.5,
+          "display": "Est savings of 15 KiB"
+        },
+        {
+          "id": "unused-css-rules",
+          "title": "Reduce unused CSS",
+          "score": 0.5,
+          "display": "Est savings of 24 KiB"
+        },
+        {
+          "id": "unused-javascript",
+          "title": "Reduce unused JavaScript",
+          "score": 0.5,
+          "display": "Est savings of 52 KiB"
+        },
+        {
+          "id": "forced-reflow-insight",
+          "title": "Forced reflow",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "lcp-breakdown-insight",
+          "title": "LCP breakdown",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "title": "Network dependency tree",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "render-blocking-insight",
+          "title": "Render-blocking requests",
+          "score": 0,
+          "display": "Est savings of 3,640 ms"
+        }
+      ]
+    },
+    {
+      "name": "product-mobile",
+      "url": "http://127.0.0.1:8050/produit/1",
+      "fetch_time": "2026-07-01T19:02:03.395Z",
+      "scores": {
+        "performance": 80.0,
+        "accessibility": 100.0,
+        "best_practices": 96.0,
+        "seo": 100.0
+      },
+      "metrics": {
+        "fcp_ms": 2949.0,
+        "lcp_ms": 4309.0,
+        "cls": 0.0,
+        "tbt_ms": 24.0,
+        "speed_index_ms": 3096.0,
+        "tti_ms": 4347.0
+      },
+      "warnings": [],
+      "failed_audits": [
+        {
+          "id": "first-contentful-paint",
+          "title": "First Contentful Paint",
+          "score": 0.51,
+          "display": "2.9 s"
+        },
+        {
+          "id": "largest-contentful-paint",
+          "title": "Largest Contentful Paint",
+          "score": 0.41,
+          "display": "4.3 s"
+        },
+        {
+          "id": "errors-in-console",
+          "title": "Browser errors were logged to the console",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "interactive",
+          "title": "Time to Interactive",
+          "score": 0.84,
+          "display": "4.3 s"
+        },
+        {
+          "id": "unminified-css",
+          "title": "Minify CSS",
+          "score": 0.5,
+          "display": "Est savings of 7 KiB"
+        },
+        {
+          "id": "unminified-javascript",
+          "title": "Minify JavaScript",
+          "score": 0,
+          "display": "Est savings of 15 KiB"
+        },
+        {
+          "id": "unused-css-rules",
+          "title": "Reduce unused CSS",
+          "score": 0,
+          "display": "Est savings of 25 KiB"
+        },
+        {
+          "id": "unused-javascript",
+          "title": "Reduce unused JavaScript",
+          "score": 0,
+          "display": "Est savings of 54 KiB"
+        },
+        {
+          "id": "forced-reflow-insight",
+          "title": "Forced reflow",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "image-delivery-insight",
+          "title": "Improve image delivery",
+          "score": 0,
+          "display": "Est savings of 289 KiB"
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "title": "Network dependency tree",
+          "score": 0,
+          "display": null
+        },
+        {
+          "id": "render-blocking-insight",
+          "title": "Render-blocking requests",
+          "score": 0,
+          "display": "Est savings of 2,100 ms"
+        }
+      ]
+    }
+  ]
+}

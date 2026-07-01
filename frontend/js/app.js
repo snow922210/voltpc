@@ -1307,7 +1307,7 @@ async function render() {
     else if (path === "admin/produits") await viewAdminProducts(app, renderToken);
     else if (path === "admin/stats") await viewAdminStats(app, renderToken);
     else if (path === "admin") await viewAdmin(app, params, renderToken);
-    else app.innerHTML = `<div class="empty-state"><h2>Page introuvable</h2><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
+    else app.innerHTML = `<div class="empty-state"><h1>Page introuvable</h1><br><a class="btn btn-primary" href="/">Retour à l'accueil</a></div>`;
   } catch (e) {
     if (isStaleRender(renderToken, app)) return;
     app.innerHTML = `<div class="empty-state"><h2>Oups, une erreur</h2><p>${esc(e.message)}</p><br>
@@ -1602,7 +1602,12 @@ function budgetCpuTier(p) {
 
 function budgetRoleScore(role, p, chosen) {
   if (role === "Carte mère") {
-    return (p.rating || 0) * 10 + specNum(partSpec(p, "M.2")) * 3 + (/wifi/i.test(p.name) ? 2 : 0);
+    // Une carte mère n'ajoute presque pas de performances en jeu : privilégier
+    // l'équipement utile par euro et conserver le budget pour le CPU/GPU.
+    const usefulFeatures = (p.rating || 0) * 10
+      + specNum(partSpec(p, "M.2")) * 3
+      + (/wifi/i.test(`${p.name} ${partSpec(p, "Réseau") || ""}`) ? 2 : 0);
+    return usefulFeatures - p.price / 18;
   }
   if (role === "Refroidissement") {
     const cpuTdp = partTdp(chosen["Processeur"]?.product);
@@ -2885,7 +2890,7 @@ async function viewProduct(app, id) {
       </div>
       <div class="pp-thumbs" id="ppThumbs">
         ${[1,2,3,4,5].map((n) => `
-          <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="/images/${slugify(p.name)}-${n}.jpg?v=2">
+          <button class="pp-thumb${n === 1 ? " active" : ""}" data-src="/images/${slugify(p.name)}-${n}.jpg?v=2" aria-label="Voir l'image ${n} de ${esc(p.name)}">
             <img src="/images/${slugify(p.name)}-${n}.jpg?v=2" alt="" width="800" height="800" loading="lazy" decoding="async" onerror="this.closest('.pp-thumb').remove(); cleanupProductThumbs()">
           </button>`).join("")}
       </div>
@@ -2943,7 +2948,7 @@ async function viewProduct(app, id) {
     <div id="reviewList"><div class="skeleton" style="min-height:90px"></div></div>
     <div class="review-form" id="reviewForm">
       <h3 id="reviewFormTitle">Donner mon avis</h3>
-      <div class="star-picker" id="starPicker">${[1,2,3,4,5].map((n) => `<button data-star="${n}">★</button>`).join("")}</div>
+      <div class="star-picker" id="starPicker">${[1,2,3,4,5].map((n) => `<button data-star="${n}" aria-label="Noter ${n} étoile${n > 1 ? "s" : ""}">★</button>`).join("")}</div>
       <textarea id="reviewText" placeholder="Partagez votre expérience avec ce produit…"></textarea>
       <button class="btn btn-primary btn-sm" id="reviewSubmit" style="align-self:flex-start">Publier mon avis</button>
     </div>
@@ -3746,12 +3751,12 @@ async function viewBuilder(app) {
           <div class="picker-preview-gallery">
             <div class="picker-preview-visual">
               ${art(p.category, hueOf(p))}
-              <img class="pimg" src="${esc(imgSrc)}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.remove()">
+              <img class="pimg" src="${esc(imgSrc)}" alt="${esc(p.name)}" width="800" height="800" loading="lazy" decoding="async" onerror="this.remove()">
               ${hasGallery ? `<button class="picker-gallery-arrow prev" data-gallery-step="-1" type="button" title="Image précédente" aria-label="Image précédente">‹</button>
               <button class="picker-gallery-arrow next" data-gallery-step="1" type="button" title="Image suivante" aria-label="Image suivante">›</button>` : ""}
             </div>
             ${hasGallery ? `<div class="picker-preview-thumbs">
-              ${imgs.map((src, i) => `<button class="picker-preview-thumb ${i === imgI ? "active" : ""}" data-gallery-index="${i}" type="button"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join("")}
+              ${imgs.map((src, i) => `<button class="picker-preview-thumb ${i === imgI ? "active" : ""}" data-gallery-index="${i}" type="button" aria-label="Voir l'image ${i + 1} de ${esc(p.name)}"><img src="${esc(src)}" alt="" width="800" height="800" loading="lazy" decoding="async"></button>`).join("")}
             </div>` : ""}
           </div>
           <div class="picker-preview-content">

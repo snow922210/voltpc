@@ -27,6 +27,7 @@ OVERRIDES = {
     'Apex Pro TKL Gen 3': 'https://m.media-amazon.com/images/I/719h65mTOEL._AC_SL1500_.jpg',
     'Arc B570 10 Go': 'https://m.media-amazon.com/images/I/61AqKwSmJlL._AC_SL1500_.jpg',
     'Arc B580 12 Go': 'https://m.media-amazon.com/images/I/51X-T81iJiL._AC_SL1500_.jpg',
+    'Arc B580 12 Go Limited Edition': 'https://m.media-amazon.com/images/I/51X-T81iJiL._AC_SL1500_.jpg',
     'Arctis Nova Pro Wireless': 'https://m.media-amazon.com/images/I/61duLP1OEVL._AC_SL1500_.jpg',
     'Assassin X 120 R SE': 'https://m.media-amazon.com/images/I/71j6VKsz-fL._AC_SL1500_.jpg',
     'Athlon 3000G': 'https://m.media-amazon.com/images/I/61THc9DLMCL._AC_SL1500_.jpg',
