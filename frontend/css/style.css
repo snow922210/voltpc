@@ -4036,6 +4036,14 @@ textarea,
  .header-search,
  body.void-home-active .header-search { display: none; }
 
+ /* Accueil : la scène « void » (3D + grille révélée au curseur) est vide et
+    inutilisable sans souris → on la masque sur mobile et on ne garde que la
+    copie, lisible immédiatement. Supprime aussi ~600px de blanc. */
+ .void-stage, .void-field, .void-grid, .void-lamp, .void-depth, .void-scroll { display: none !important; }
+ .void-hero { min-height: 0; padding-bottom: 20px; }
+ .void-copy { max-width: none; }
+ .void-copy.gsap-pending > * { opacity: 1 !important; }
+
  /* Cibles tactiles ≥ 44px (Apple HIG / WCAG 2.5.5). */
  .icon-btn { min-width: 44px; min-height: 44px; justify-content: center; padding: 8px; }
  .account-tab, .order-subtab, .auth-tab { min-height: 44px; }

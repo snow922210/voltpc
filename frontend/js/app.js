@@ -1410,7 +1410,13 @@ async function viewHome(app) {
   bindProductCards(app, featured);
 
   renderPrebuilts();
-  initHome3D();
+
+  // Sur écran tactile / mobile, le héros « void » cinématique n'a pas de sens :
+  // sa scène 3D et sa révélation se pilotent au CURSEUR (lampe qui suit la
+  // souris) — absent sur mobile, le contenu restait donc invisible (héros vide).
+  // On révèle la copie tout de suite et on saute la 3D (accessibilité + perf).
+  const heroTouch = window.matchMedia("(hover: none), (max-width: 760px)").matches;
+  if (!heroTouch) initHome3D();
   homeMotionCleanup = initHomeMotion();
 
   // Hero GSAP (lazy, accueil uniquement). Progressive enhancement : si GSAP
@@ -1419,15 +1425,19 @@ async function viewHome(app) {
   const heroEl = $(".void-hero");
   const copyEl = $(".void-copy");
   const revealCopy = () => copyEl && copyEl.classList.remove("gsap-pending");
-  const gsapFallback = setTimeout(revealCopy, 2500);
-  ensureGsap().then((ok) => {
-    clearTimeout(gsapFallback);
-    if (ok && heroEl && heroEl.isConnected && window.initVoltHeroGSAP) {
-      heroGsapCleanup = window.initVoltHeroGSAP(heroEl);
-    } else {
-      revealCopy();
-    }
-  });
+  if (heroTouch) {
+    revealCopy();
+  } else {
+    const gsapFallback = setTimeout(revealCopy, 2500);
+    ensureGsap().then((ok) => {
+      clearTimeout(gsapFallback);
+      if (ok && heroEl && heroEl.isConnected && window.initVoltHeroGSAP) {
+        heroGsapCleanup = window.initVoltHeroGSAP(heroEl);
+      } else {
+        revealCopy();
+      }
+    });
+  }
 }
 
 /* ─── PC prémontés (configs curées, compatibilité vérifiée) ─── */
